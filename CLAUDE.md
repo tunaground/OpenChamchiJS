@@ -2,6 +2,11 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Project Info
+
+- **License**: MIT (open source)
+- **Repository**: https://github.com/tunaground/OpenChamchiJS
+
 ## Build & Development Commands
 
 ```bash
@@ -52,6 +57,7 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - First-time setup at `/setup` creates initial admin
 
 ### Styling
+- **styled-components** - Use for component styling in Client Components (requires `'use client'`)
 - Global styles in `app/globals.css` with CSS custom properties for theming
 - Dark mode support via `prefers-color-scheme: dark`
 - Color variables: `--background`, `--foreground`
