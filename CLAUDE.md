@@ -34,7 +34,9 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - `app/api/auth/` - NextAuth API route
 - `app/admin/` - Admin pages (requires `admin:read` permission)
 - `app/setup/` - Initial admin setup flow
-- `lib/` - Shared utilities (Prisma client, auth config, permissions)
+- `lib/` - Shared utilities (Prisma client, auth config, permissions, i18n)
+- `lib/i18n/` - Internationalization config (next-intl)
+- `lib/i18n/messages/` - Translation files (ko.json, en.json)
 - `prisma/` - Prisma schema and migrations
 - `types/` - TypeScript type declarations
 - `public/` - Static assets
@@ -55,6 +57,13 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - RBAC with User → UserRole → Role → RolePermission → Permission
 - `all:all` permission grants access to everything
 - First-time setup at `/setup` creates initial admin
+
+### Internationalization (i18n)
+- **next-intl** with browser language detection (no URL prefix)
+- Supported locales: `ko` (default), `en`
+- Locale detected from: cookie (`NEXT_LOCALE`) → `Accept-Language` header → default
+- Server: `import { getTranslations } from 'next-intl/server'`
+- Client: `import { useTranslations } from 'next-intl'`
 
 ### Styling
 - **styled-components** - Use for component styling in Client Components (requires `'use client'`)

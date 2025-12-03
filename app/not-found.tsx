@@ -1,14 +1,17 @@
 import Link from "next/link";
+import { getTranslations } from "next-intl/server";
 import styles from "./not-found.module.css";
 
-export default function NotFound() {
+export default async function NotFound() {
+  const t = await getTranslations("notFound");
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h1 className={styles.code}>404</h1>
-        <p className={styles.message}>페이지를 찾을 수 없습니다.</p>
+        <h1 className={styles.code}>{t("code")}</h1>
+        <p className={styles.message}>{t("message")}</p>
         <Link href="/" className={styles.link}>
-          홈으로 돌아가기
+          {t("backHome")}
         </Link>
       </div>
     </div>

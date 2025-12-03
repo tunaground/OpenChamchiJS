@@ -1,8 +1,11 @@
 "use client";
 
 import { signIn } from "next-auth/react";
+import { useTranslations } from "next-intl";
 
 export function SetupForm() {
+  const t = useTranslations("setup");
+
   return (
     <button
       onClick={() => signIn("google", { callbackUrl: "/setup/complete" })}
@@ -16,7 +19,7 @@ export function SetupForm() {
         cursor: "pointer",
       }}
     >
-      Google로 관리자 계정 설정
+      {t("googleButton")}
     </button>
   );
 }

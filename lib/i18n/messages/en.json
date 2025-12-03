@@ -1,0 +1,33 @@
+{
+  "common": {
+    "login": "Login",
+    "logout": "Logout",
+    "home": "Home"
+  },
+  "login": {
+    "title": "Login",
+    "googleButton": "Login with Google"
+  },
+  "setup": {
+    "title": "Initial Setup",
+    "description": "Set up an admin account. The Google account you log in with will become the administrator.",
+    "googleButton": "Set up admin with Google"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "welcome": "Welcome, {name}!",
+    "protectedMessage": "This page is only accessible to logged-in users."
+  },
+  "admin": {
+    "title": "Admin Page",
+    "users": "Users",
+    "roles": "Roles",
+    "permissions": "Permissions",
+    "myPermissions": "My Permissions"
+  },
+  "notFound": {
+    "code": "404",
+    "message": "Page not found.",
+    "backHome": "Back to Home"
+  }
+}

@@ -1,5 +1,6 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
 import styles from "./page.module.css";
 import { SignOutButton } from "./sign-out-button";
@@ -11,15 +12,17 @@ export default async function DashboardPage() {
     redirect("/login");
   }
 
+  const t = await getTranslations("dashboard");
+
   return (
     <div className={styles.container}>
       <div className={styles.card}>
-        <h1 className={styles.title}>대시보드</h1>
+        <h1 className={styles.title}>{t("title")}</h1>
         <p className={styles.welcome}>
-          환영합니다, <strong>{session.user?.name || session.user?.email}</strong>님!
+          {t("welcome", { name: session.user?.name || session.user?.email })}
         </p>
         <div className={styles.info}>
-          <p>이 페이지는 로그인한 사용자만 접근할 수 있습니다.</p>
+          <p>{t("protectedMessage")}</p>
         </div>
         <SignOutButton />
       </div>
