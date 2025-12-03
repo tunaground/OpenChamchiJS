@@ -1,23 +1,23 @@
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 
 export default async function SetupCompletePage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session?.user?.id) {
-    redirect("/setup");
-  }
-
-  // Check if admin already exists
+  // Check if admin already exists - disable page entirely
   const adminRole = await prisma.role.findUnique({
     where: { name: "ADMIN" },
     include: { users: true },
   });
 
   if (adminRole && adminRole.users.length > 0) {
-    redirect("/dashboard");
+    notFound();
+  }
+
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user?.id) {
+    redirect("/setup");
   }
 
   // Ensure ADMIN role exists
