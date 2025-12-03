@@ -57,6 +57,8 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - RBAC with User → UserRole → Role → RolePermission → Permission
 - `all:all` permission grants access to everything
 - First-time setup at `/setup` creates initial admin
+- Protected routes (`/dashboard`, `/admin`) redirect to `/login?callbackUrl=...` if not authenticated
+- Login page shows logout button when already authenticated
 
 ### Internationalization (i18n)
 - **next-intl** with browser language detection (no URL prefix)
