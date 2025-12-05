@@ -40,6 +40,7 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - `prisma/` - Prisma schema and migrations
 - `types/` - TypeScript type declarations
 - `public/` - Static assets
+- `proxy.ts` - Next.js 16 proxy (handles setup check, auth redirects)
 
 ### Conventions
 - **Server Components by default** - Add `'use client'` directive only when needed

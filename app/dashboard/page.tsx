@@ -19,7 +19,7 @@ export default async function DashboardPage() {
       <div className={styles.card}>
         <h1 className={styles.title}>{t("title")}</h1>
         <p className={styles.welcome}>
-          {t("welcome", { name: session.user?.name || session.user?.email })}
+          {t("welcome", { name: session.user?.name || session.user?.email || "" })}
         </p>
         <div className={styles.info}>
           <p>{t("protectedMessage")}</p>
