@@ -25,6 +25,15 @@ async function main() {
     },
   });
 
+  const foreignWritePermission = await prisma.permission.upsert({
+    where: { name: "foreign:write" },
+    update: {},
+    create: {
+      name: "foreign:write",
+      description: "외국인 쓰기 권한",
+    },
+  });
+
   // Create ADMIN role
   const adminRole = await prisma.role.upsert({
     where: { name: "ADMIN" },
@@ -50,9 +59,34 @@ async function main() {
     },
   });
 
+  // Create FOREIGNER role
+  const foreignerRole = await prisma.role.upsert({
+    where: { name: "FOREIGNER" },
+    update: {},
+    create: {
+      name: "FOREIGNER",
+      description: "외국인",
+    },
+  });
+
+  // Assign foreign:write permission to FOREIGNER role
+  await prisma.rolePermission.upsert({
+    where: {
+      roleId_permissionId: {
+        roleId: foreignerRole.id,
+        permissionId: foreignWritePermission.id,
+      },
+    },
+    update: {},
+    create: {
+      roleId: foreignerRole.id,
+      permissionId: foreignWritePermission.id,
+    },
+  });
+
   console.log("Seed completed:");
-  console.log("- Permissions: all:all, admin:read");
-  console.log("- Role: ADMIN (with all:all)");
+  console.log("- Permissions: all:all, admin:read, foreign:write");
+  console.log("- Role: ADMIN (with all:all), FOREIGNER (with foreign:write)");
 }
 
 main()
