@@ -14,9 +14,6 @@ describe("ThreadService", () => {
     mockedBcrypt.hash.mockImplementation((password: string) =>
       Promise.resolve(`hashed_${password}`)
     );
-    mockedBcrypt.compare.mockImplementation((password: string, hash: string) =>
-      Promise.resolve(hash === `hashed_${password}`)
-    );
   });
 
   const mockBoard: BoardData = {
@@ -193,7 +190,7 @@ describe("ThreadService", () => {
       username: "newuser",
     };
 
-    it("should create thread when board exists", async () => {
+    it("should create thread with hashed password when board exists", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
       const mockPermission = createMockPermission();
@@ -306,27 +303,7 @@ describe("ThreadService", () => {
       expect(result.title).toBe("Updated Title");
     });
 
-    it("should update thread with correct password", async () => {
-      const mockThreadRepo = createMockThreadRepo();
-      const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
-
-      mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockResolvedValue(false);
-      mockThreadRepo.update.mockResolvedValue({ ...mockThread, ...updateInput });
-
-      const service = createThreadService({
-        threadRepository: mockThreadRepo,
-        boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
-      });
-
-      const result = await service.update(null, 1, updateInput, "test-password");
-
-      expect(result.title).toBe("Updated Title");
-    });
-
-    it("should throw FORBIDDEN when user has no permission and wrong password", async () => {
+    it("should throw FORBIDDEN when user has no permission", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
       const mockPermission = createMockPermission();
@@ -340,7 +317,7 @@ describe("ThreadService", () => {
         permissionService: mockPermission,
       });
 
-      await expect(service.update(null, 1, updateInput, "wrong-password")).rejects.toMatchObject({
+      await expect(service.update("user-1", 1, updateInput)).rejects.toMatchObject({
         code: "FORBIDDEN",
       });
       expect(mockThreadRepo.update).not.toHaveBeenCalled();
@@ -411,27 +388,7 @@ describe("ThreadService", () => {
       expect(result.deleted).toBe(true);
     });
 
-    it("should delete thread with correct password", async () => {
-      const mockThreadRepo = createMockThreadRepo();
-      const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
-
-      mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockResolvedValue(false);
-      mockThreadRepo.delete.mockResolvedValue({ ...mockThread, deleted: true });
-
-      const service = createThreadService({
-        threadRepository: mockThreadRepo,
-        boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
-      });
-
-      const result = await service.delete(null, 1, "test-password");
-
-      expect(result.deleted).toBe(true);
-    });
-
-    it("should throw FORBIDDEN when user has no permission and wrong password", async () => {
+    it("should throw FORBIDDEN when user has no permission", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
       const mockPermission = createMockPermission();
@@ -445,7 +402,7 @@ describe("ThreadService", () => {
         permissionService: mockPermission,
       });
 
-      await expect(service.delete(null, 1, "wrong-password")).rejects.toMatchObject({
+      await expect(service.delete("user-1", 1)).rejects.toMatchObject({
         code: "FORBIDDEN",
       });
       expect(mockThreadRepo.delete).not.toHaveBeenCalled();

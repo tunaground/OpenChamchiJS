@@ -8,7 +8,6 @@ const updateResponseSchema = z.object({
   content: z.string().min(1).optional(),
   attachment: z.string().optional(),
   visible: z.boolean().optional(),
-  password: z.string().optional(),
 });
 
 const deleteResponseSchema = z.object({
@@ -46,7 +45,7 @@ export async function GET(
   }
 }
 
-// PUT /api/boards/[boardId]/threads/[threadId]/responses/[responseId] - 응답 수정
+// PUT /api/boards/[boardId]/threads/[threadId]/responses/[responseId] - 응답 수정 (권한 필요)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string; threadId: string; responseId: string }> }
@@ -54,7 +53,9 @@ export async function PUT(
   const { responseId } = await params;
 
   const session = await getServerSession(authOptions);
-  const userId = session?.user?.id ?? null;
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await request.json();
   const parsed = updateResponseSchema.safeParse(body);
@@ -63,10 +64,8 @@ export async function PUT(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { password, ...updateData } = parsed.data;
-
   try {
-    const response = await responseService.update(userId, responseId, updateData, password);
+    const response = await responseService.update(session.user.id, responseId, parsed.data);
     return NextResponse.json(response);
   } catch (error) {
     if (error instanceof ResponseServiceError) {
@@ -76,7 +75,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/boards/[boardId]/threads/[threadId]/responses/[responseId] - 응답 삭제
+// DELETE /api/boards/[boardId]/threads/[threadId]/responses/[responseId] - 응답 삭제 (권한 또는 비밀번호)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string; threadId: string; responseId: string }> }

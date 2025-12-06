@@ -8,11 +8,6 @@ const updateThreadSchema = z.object({
   title: z.string().min(1).max(200).optional(),
   ended: z.boolean().optional(),
   top: z.boolean().optional(),
-  password: z.string().optional(),
-});
-
-const deleteThreadSchema = z.object({
-  password: z.string().optional(),
 });
 
 function handleServiceError(error: ThreadServiceError) {
@@ -51,7 +46,7 @@ export async function GET(
   }
 }
 
-// PUT /api/boards/[boardId]/threads/[threadId] - 스레드 수정
+// PUT /api/boards/[boardId]/threads/[threadId] - 스레드 수정 (권한 필요)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string; threadId: string }> }
@@ -64,7 +59,9 @@ export async function PUT(
   }
 
   const session = await getServerSession(authOptions);
-  const userId = session?.user?.id ?? null;
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const body = await request.json();
   const parsed = updateThreadSchema.safeParse(body);
@@ -73,10 +70,8 @@ export async function PUT(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
-  const { password, ...updateData } = parsed.data;
-
   try {
-    const thread = await threadService.update(userId, id, updateData, password);
+    const thread = await threadService.update(session.user.id, id, parsed.data);
     return NextResponse.json(thread);
   } catch (error) {
     if (error instanceof ThreadServiceError) {
@@ -86,7 +81,7 @@ export async function PUT(
   }
 }
 
-// DELETE /api/boards/[boardId]/threads/[threadId] - 스레드 삭제
+// DELETE /api/boards/[boardId]/threads/[threadId] - 스레드 삭제 (권한 필요)
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string; threadId: string }> }
@@ -99,21 +94,12 @@ export async function DELETE(
   }
 
   const session = await getServerSession(authOptions);
-  const userId = session?.user?.id ?? null;
-
-  let password: string | undefined;
-  try {
-    const body = await request.json();
-    const parsed = deleteThreadSchema.safeParse(body);
-    if (parsed.success) {
-      password = parsed.data.password;
-    }
-  } catch {
-    // body가 없는 경우 무시
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   try {
-    const thread = await threadService.delete(userId, id, password);
+    const thread = await threadService.delete(session.user.id, id);
     return NextResponse.json(thread);
   } catch (error) {
     if (error instanceof ThreadServiceError) {

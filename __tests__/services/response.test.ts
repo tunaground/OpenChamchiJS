@@ -303,28 +303,7 @@ describe("ResponseService", () => {
       expect(result.content).toBe("Updated content");
     });
 
-    it("should update response with correct thread password", async () => {
-      const mockResponseRepo = createMockResponseRepo();
-      const mockThreadRepo = createMockThreadRepo();
-      const mockPermission = createMockPermission();
-
-      mockResponseRepo.findById.mockResolvedValue(mockResponse);
-      mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockResolvedValue(false);
-      mockResponseRepo.update.mockResolvedValue({ ...mockResponse, ...updateInput });
-
-      const service = createResponseService({
-        responseRepository: mockResponseRepo,
-        threadRepository: mockThreadRepo,
-        permissionService: mockPermission,
-      });
-
-      const result = await service.update(null, "response-1", updateInput, "thread-password");
-
-      expect(result.content).toBe("Updated content");
-    });
-
-    it("should throw FORBIDDEN when user has no permission and wrong password", async () => {
+    it("should throw FORBIDDEN when user has no permission", async () => {
       const mockResponseRepo = createMockResponseRepo();
       const mockThreadRepo = createMockThreadRepo();
       const mockPermission = createMockPermission();
@@ -339,9 +318,7 @@ describe("ResponseService", () => {
         permissionService: mockPermission,
       });
 
-      await expect(
-        service.update(null, "response-1", updateInput, "wrong-password")
-      ).rejects.toMatchObject({
+      await expect(service.update("user-1", "response-1", updateInput)).rejects.toMatchObject({
         code: "FORBIDDEN",
       });
       expect(mockResponseRepo.update).not.toHaveBeenCalled();
@@ -360,9 +337,7 @@ describe("ResponseService", () => {
         permissionService: mockPermission,
       });
 
-      await expect(
-        service.update("user-1", "non-existent", updateInput)
-      ).rejects.toMatchObject({
+      await expect(service.update("user-1", "non-existent", updateInput)).rejects.toMatchObject({
         code: "NOT_FOUND",
       });
     });

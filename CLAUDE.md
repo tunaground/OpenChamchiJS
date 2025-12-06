@@ -80,7 +80,7 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 
 ### Board System
 - **Board** - 게시판 설정 (threadsPerPage, responsesPerPage, blockForeignIp 등)
-- **Thread** - 글타래, `password`로 수정/삭제 인증 (애플리케이션에서 해시 처리)
+- **Thread** - 글타래, `password`는 Response 삭제용 (bcryptjs로 해시 저장)
 - **Response** - 스레드 응답, `seq` 0번이 스레드 본문 (작성자)
 - `authorId` - IP+날짜 기반 익명 식별자 (같은 사람 구분용)
 - `userId` - 로그인 사용자만 저장 (optional)
@@ -91,13 +91,21 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - `GET/POST /api/boards` - 보드 목록/생성
 - `GET/PUT/PATCH /api/boards/[id]` - 보드 상세/수정/설정
 - `GET/POST /api/boards/[boardId]/threads` - 스레드 목록/생성
-- `GET/PUT/DELETE /api/boards/[boardId]/threads/[threadId]` - 스레드 상세/수정/삭제
+- `GET/PUT/DELETE /api/boards/[boardId]/threads/[threadId]` - 스레드 상세/수정/삭제 (권한 필요)
+- `GET/POST .../threads/[threadId]/responses` - 응답 목록/생성
+- `GET/PUT/DELETE .../responses/[responseId]` - 응답 상세/수정/삭제
 
 ### Permissions
 - `all:all` - 모든 권한
 - `board:all`, `board:write`, `board:edit`, `board:config` - 보드 관리
-- `thread:all`, `thread:edit`, `thread:delete` - 전역 스레드 권한
-- `thread:{boardId}:all`, `thread:{boardId}:edit`, `thread:{boardId}:delete` - 보드별 스레드 권한 (보드 생성 시 자동 생성)
+- `thread:all`, `thread:edit`, `thread:delete` - 전역 스레드/응답 권한
+- `thread:{boardId}:all`, `thread:{boardId}:edit`, `thread:{boardId}:delete` - 보드별 권한 (보드 생성 시 자동 생성)
+
+### Authorization Rules
+| 대상 | 수정 | 삭제 |
+|------|------|------|
+| Thread | 권한만 | 권한만 |
+| Response | 권한만 | 권한 또는 비밀번호 |
 
 ### Testing
 ```bash

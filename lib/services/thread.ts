@@ -31,12 +31,11 @@ export interface ThreadService {
   findById(id: number): Promise<ThreadData>;
   create(data: CreateThreadInput): Promise<ThreadData>;
   update(
-    userId: string | null,
+    userId: string,
     id: number,
-    data: UpdateThreadInput,
-    password?: string
+    data: UpdateThreadInput
   ): Promise<ThreadData>;
-  delete(userId: string | null, id: number, password?: string): Promise<ThreadData>;
+  delete(userId: string, id: number): Promise<ThreadData>;
 }
 
 interface ThreadServiceDeps {
@@ -68,14 +67,6 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
       }
     }
     return false;
-  }
-
-  async function verifyPassword(
-    thread: ThreadData,
-    password?: string
-  ): Promise<boolean> {
-    if (!password) return false;
-    return bcrypt.compare(password, thread.password);
   }
 
   return {
@@ -113,48 +104,31 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
     },
 
     async update(
-      userId: string | null,
+      userId: string,
       id: number,
-      data: UpdateThreadInput,
-      password?: string
+      data: UpdateThreadInput
     ): Promise<ThreadData> {
       const thread = await threadRepository.findById(id);
       if (!thread || thread.deleted) {
         throw new ThreadServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkThreadPermission(
-        userId,
-        thread.boardId,
-        "edit"
-      );
-      const passwordValid = await verifyPassword(thread, password);
-
-      if (!hasPermission && !passwordValid) {
+      const hasPermission = await checkThreadPermission(userId, thread.boardId, "edit");
+      if (!hasPermission) {
         throw new ThreadServiceError("Permission denied", "FORBIDDEN");
       }
 
       return threadRepository.update(id, data);
     },
 
-    async delete(
-      userId: string | null,
-      id: number,
-      password?: string
-    ): Promise<ThreadData> {
+    async delete(userId: string, id: number): Promise<ThreadData> {
       const thread = await threadRepository.findById(id);
       if (!thread || thread.deleted) {
         throw new ThreadServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkThreadPermission(
-        userId,
-        thread.boardId,
-        "delete"
-      );
-      const passwordValid = await verifyPassword(thread, password);
-
-      if (!hasPermission && !passwordValid) {
+      const hasPermission = await checkThreadPermission(userId, thread.boardId, "delete");
+      if (!hasPermission) {
         throw new ThreadServiceError("Permission denied", "FORBIDDEN");
       }
 

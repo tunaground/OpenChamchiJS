@@ -31,10 +31,9 @@ export interface ResponseService {
   findById(id: string): Promise<ResponseData>;
   create(data: CreateResponseInput): Promise<ResponseData>;
   update(
-    userId: string | null,
+    userId: string,
     id: string,
-    data: UpdateResponseInput,
-    password?: string
+    data: UpdateResponseInput
   ): Promise<ResponseData>;
   delete(
     userId: string | null,
@@ -124,10 +123,9 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
     },
 
     async update(
-      userId: string | null,
+      userId: string,
       id: string,
-      data: UpdateResponseInput,
-      password?: string
+      data: UpdateResponseInput
     ): Promise<ResponseData> {
       const response = await responseRepository.findById(id);
       if (!response || response.deleted) {
@@ -139,14 +137,8 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkThreadPermission(
-        userId,
-        thread.boardId,
-        "edit"
-      );
-      const passwordValid = await verifyThreadPassword(response.threadId, password);
-
-      if (!hasPermission && !passwordValid) {
+      const hasPermission = await checkThreadPermission(userId, thread.boardId, "edit");
+      if (!hasPermission) {
         throw new ResponseServiceError("Permission denied", "FORBIDDEN");
       }
 
