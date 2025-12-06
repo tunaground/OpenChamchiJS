@@ -274,7 +274,7 @@ const FormTextarea = styled.textarea`
 
 const SubmitButton = styled.button`
   width: 100%;
-  padding: 1.2rem 2.4rem;
+  height: 3.5rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
@@ -360,7 +360,8 @@ const ModalActions = styled.div`
 `;
 
 const ModalButton = styled.button`
-  padding: 0.8rem 1.6rem;
+  height: 3.5rem;
+  padding: 0 1.6rem;
   border-radius: 4px;
   font-size: 1.4rem;
   font-weight: 500;

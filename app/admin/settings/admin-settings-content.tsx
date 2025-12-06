@@ -61,7 +61,8 @@ const Description = styled.p`
 `;
 
 const Button = styled.button`
-  padding: 0.8rem 1.6rem;
+  height: 3.5rem;
+  padding: 0 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;

@@ -61,7 +61,8 @@ const SearchInput = styled.input`
 `;
 
 const SearchButton = styled.button`
-  padding: 1.2rem 1.6rem;
+  height: 3.5rem;
+  padding: 0 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;

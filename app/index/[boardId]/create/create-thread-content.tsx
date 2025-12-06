@@ -106,7 +106,8 @@ const Actions = styled.div`
 `;
 
 const Button = styled.button`
-  padding: 1.2rem 2.4rem;
+  height: 3.5rem;
+  padding: 0 2.4rem;
   border-radius: 4px;
   font-size: 1.4rem;
   font-weight: 500;

@@ -5,7 +5,8 @@ import { useTranslations } from "next-intl";
 import styled from "styled-components";
 
 const Button = styled.button`
-  padding: 1.2rem 2.4rem;
+  height: 3.5rem;
+  padding: 0 2.4rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;

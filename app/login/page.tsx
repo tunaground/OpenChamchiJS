@@ -31,7 +31,7 @@ const Title = styled.h1`
 `;
 
 const Button = styled.button`
-  padding: 1.2rem;
+  height: 3.5rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
