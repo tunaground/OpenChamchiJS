@@ -19,7 +19,7 @@ const Main = styled.main<{ $sidebarOpen: boolean; $compactOnMobile?: boolean }>`
     props.$compactOnMobile &&
     css`
       @media (max-width: ${props.theme.breakpoint}) {
-        margin-left: ${props.$sidebarOpen ? "5.6rem" : "0"};
+        margin-left: 5.6rem;
       }
     `}
 `;
@@ -55,6 +55,9 @@ export function PageLayout({
     setSidebarOpen(false);
   };
 
+  // Use default value until hydration is complete to prevent mismatch
+  const effectiveSidebarOpen = mounted ? sidebarOpen : true;
+
   return (
     <>
       <TopBar
@@ -62,9 +65,9 @@ export function PageLayout({
         onMenuClick={toggleSidebar}
         rightContent={rightContent}
       />
-      {mounted && sidebar && (
+      {sidebar && (
         <Sidebar
-          open={sidebarOpen}
+          open={effectiveSidebarOpen}
           onClose={closeSidebar}
           compactOnMobile={compactSidebarOnMobile}
         >
@@ -72,7 +75,7 @@ export function PageLayout({
         </Sidebar>
       )}
       <Main
-        $sidebarOpen={mounted && sidebar ? sidebarOpen : false}
+        $sidebarOpen={sidebar ? effectiveSidebarOpen : false}
         $compactOnMobile={sidebar ? compactSidebarOnMobile : false}
       >
         <Content>{children}</Content>
