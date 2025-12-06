@@ -54,6 +54,7 @@ export default async function CreateThreadPage({ params }: Props) {
           cancel: t("cancel"),
           creating: t("creating"),
         }}
+        boardsTitle={tCommon("boards")}
       />
     );
   } catch (error) {

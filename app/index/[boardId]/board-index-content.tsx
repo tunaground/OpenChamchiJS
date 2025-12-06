@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/components/layout";
+import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
@@ -294,6 +294,7 @@ interface BoardIndexContentProps {
   search: string;
   notices: NoticeData[];
   labels: Labels;
+  boardsTitle: string;
 }
 
 export function BoardIndexContent({
@@ -308,6 +309,7 @@ export function BoardIndexContent({
   search: initialSearch,
   notices,
   labels,
+  boardsTitle,
 }: BoardIndexContentProps) {
   const router = useRouter();
   const [search, setSearch] = useState(initialSearch);
@@ -348,9 +350,10 @@ export function BoardIndexContent({
     return `${month}-${day}`;
   };
 
-  const sidebar = <BoardListSidebar boards={boards} title="Boards" />;
+  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
   const rightContent = (
     <>
+      <HomeButton />
       <ThemeToggleButton />
       {canAccessAdmin && <AdminButton />}
       <AuthButton

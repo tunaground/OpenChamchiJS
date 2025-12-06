@@ -2,7 +2,8 @@
   "common": {
     "login": "Login",
     "logout": "Logout",
-    "home": "Home"
+    "home": "Home",
+    "boards": "Boards"
   },
   "login": {
     "title": "Login",

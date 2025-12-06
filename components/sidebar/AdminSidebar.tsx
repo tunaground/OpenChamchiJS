@@ -4,6 +4,22 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styled from "styled-components";
 
+const BackLink = styled(Link)`
+  display: block;
+  padding: 1rem 1.2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 1.4rem;
+  color: ${(props) => props.theme.textSecondary};
+  transition: background 0.15s, color 0.15s;
+  margin-bottom: 1.2rem;
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+    color: ${(props) => props.theme.textPrimary};
+  }
+`;
+
 const SidebarTitle = styled.h2`
   font-size: 1.2rem;
   font-weight: 600;
@@ -58,11 +74,9 @@ export function AdminSidebar({ labels }: AdminSidebarProps) {
 
   return (
     <div>
+      <BackLink href="/">{labels.backToHome}</BackLink>
       <SidebarTitle>{labels.admin}</SidebarTitle>
       <NavList>
-        <NavItem>
-          <NavLink href="/">{labels.backToHome}</NavLink>
-        </NavItem>
         <NavItem>
           <NavLink
             href="/admin/boards"

@@ -2,7 +2,8 @@
   "common": {
     "login": "로그인",
     "logout": "로그아웃",
-    "home": "홈"
+    "home": "홈",
+    "boards": "게시판"
   },
   "login": {
     "title": "로그인",
@@ -185,10 +186,10 @@
     "viewRecent": "최신 보기",
     "prev": "이전",
     "next": "다음",
-    "boards": "게시판 목록"
+    "boards": "게시판"
   },
   "adminSidebar": {
-    "admin": "Admin",
+    "admin": "관리",
     "backToHome": "게시판으로",
     "boards": "게시판 관리",
     "users": "사용자 관리",

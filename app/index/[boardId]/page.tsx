@@ -79,6 +79,7 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
           searchPlaceholder: t("searchPlaceholder"),
           searchButton: t("searchButton"),
         }}
+        boardsTitle={tCommon("boards")}
       />
     );
   } catch (error) {

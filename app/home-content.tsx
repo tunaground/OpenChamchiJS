@@ -1,7 +1,7 @@
 "use client";
 
 import styled from "styled-components";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/components/layout";
+import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
@@ -25,6 +25,8 @@ interface HomeContentProps {
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: AuthLabels;
+  boardsTitle: string;
+  siteName: string;
 }
 
 export function HomeContent({
@@ -32,10 +34,13 @@ export function HomeContent({
   isLoggedIn,
   canAccessAdmin,
   authLabels,
+  boardsTitle,
+  siteName,
 }: HomeContentProps) {
-  const sidebar = <BoardListSidebar boards={boards} title="Boards" />;
+  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
   const rightContent = (
     <>
+      <HomeButton />
       <ThemeToggleButton />
       {canAccessAdmin && <AdminButton />}
       <AuthButton
@@ -47,7 +52,7 @@ export function HomeContent({
   );
 
   return (
-    <PageLayout title="Home" sidebar={sidebar} rightContent={rightContent}>
+    <PageLayout title={siteName} sidebar={sidebar} rightContent={rightContent}>
       <Container />
     </PageLayout>
   );

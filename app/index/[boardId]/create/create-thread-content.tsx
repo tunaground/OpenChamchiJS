@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/components/layout";
+import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
@@ -181,6 +181,7 @@ interface CreateThreadContentProps {
   canAccessAdmin: boolean;
   authLabels: AuthLabels;
   labels: Labels;
+  boardsTitle: string;
 }
 
 export function CreateThreadContent({
@@ -192,6 +193,7 @@ export function CreateThreadContent({
   canAccessAdmin,
   authLabels,
   labels,
+  boardsTitle,
 }: CreateThreadContentProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -204,9 +206,10 @@ export function CreateThreadContent({
     content: "",
   });
 
-  const sidebar = <BoardListSidebar boards={boards} title="Boards" />;
+  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
   const rightContent = (
     <>
+      <HomeButton />
       <ThemeToggleButton />
       {canAccessAdmin && <AdminButton />}
       <AuthButton

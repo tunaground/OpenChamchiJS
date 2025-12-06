@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/components/layout";
+import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
 import { useTranslations } from "next-intl";
 import { parse, prerender, render, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
@@ -880,6 +880,7 @@ export function ThreadDetailContent({
   );
   const rightContent = (
     <>
+      <HomeButton />
       <ThemeToggleButton />
       {canAccessAdmin && <AdminButton />}
       <AuthButton

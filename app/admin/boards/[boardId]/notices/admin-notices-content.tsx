@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/components/layout";
+import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
 import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
 
 const Container = styled.div`
@@ -504,6 +504,7 @@ export function AdminNoticesContent({
   );
   const rightContent = (
     <>
+      <HomeButton />
       <ThemeToggleButton />
       <AdminButton />
       <AuthButton
