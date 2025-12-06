@@ -120,7 +120,9 @@
     "attachmentPlaceholder": "파일 선택",
     "submit": "작성",
     "cancel": "취소",
-    "creating": "작성 중..."
+    "creating": "작성 중...",
+    "foreignIpBlocked": "해외 IP에서는 작성할 수 없습니다.",
+    "unknownError": "오류가 발생했습니다."
   },
   "boardIndex": {
     "notices": "공지사항",
@@ -176,7 +178,9 @@
     "hide": "숨기기",
     "noHiddenResponses": "관리할 답글이 없습니다.",
     "close": "닫기",
-    "unlock": "잠금해제"
+    "unlock": "잠금해제",
+    "foreignIpBlocked": "해외 IP에서는 작성할 수 없습니다.",
+    "unknownError": "오류가 발생했습니다."
   },
   "traceSidebar": {
     "navigation": "네비게이션",

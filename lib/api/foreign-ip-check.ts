@@ -50,7 +50,7 @@ export async function checkForeignIpBlocked(
 
   // Block foreign IP
   return NextResponse.json(
-    { error: "Foreign IP addresses are not allowed to write on this board" },
+    { error: "FOREIGN_IP_BLOCKED" },
     { status: 403 }
   );
 }

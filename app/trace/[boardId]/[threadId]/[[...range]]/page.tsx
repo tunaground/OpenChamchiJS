@@ -124,6 +124,8 @@ export default async function ThreadDetailPage({ params }: Props) {
           noHiddenResponses: t("noHiddenResponses"),
           close: t("close"),
           unlock: t("unlock"),
+          foreignIpBlocked: t("foreignIpBlocked"),
+          unknownError: t("unknownError"),
         }}
         sidebarLabels={{
           navigation: tSidebar("navigation"),

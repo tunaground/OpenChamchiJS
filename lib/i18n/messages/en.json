@@ -120,7 +120,9 @@
     "attachmentPlaceholder": "Select file",
     "submit": "Submit",
     "cancel": "Cancel",
-    "creating": "Creating..."
+    "creating": "Creating...",
+    "foreignIpBlocked": "Writing from foreign IP addresses is not allowed.",
+    "unknownError": "An error occurred."
   },
   "boardIndex": {
     "notices": "Notices",
@@ -176,7 +178,9 @@
     "hide": "Hide",
     "noHiddenResponses": "No responses to manage.",
     "close": "Close",
-    "unlock": "Unlock"
+    "unlock": "Unlock",
+    "foreignIpBlocked": "Writing from foreign IP addresses is not allowed.",
+    "unknownError": "An error occurred."
   },
   "traceSidebar": {
     "navigation": "Navigation",

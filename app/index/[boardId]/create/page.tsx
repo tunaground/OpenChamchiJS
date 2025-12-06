@@ -53,6 +53,8 @@ export default async function CreateThreadPage({ params }: Props) {
           submit: t("submit"),
           cancel: t("cancel"),
           creating: t("creating"),
+          foreignIpBlocked: t("foreignIpBlocked"),
+          unknownError: t("unknownError"),
         }}
         boardsTitle={tCommon("boards")}
       />

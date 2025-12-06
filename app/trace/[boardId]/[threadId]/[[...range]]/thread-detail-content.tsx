@@ -522,6 +522,8 @@ interface Labels {
   noHiddenResponses: string;
   close: string;
   unlock: string;
+  foreignIpBlocked: string;
+  unknownError: string;
 }
 
 interface AuthLabels {
@@ -680,6 +682,16 @@ export function ThreadDetailContent({
 
   const t = useTranslations();
 
+  const getErrorMessage = (data: { error: string | object }): string => {
+    if (typeof data.error === "string") {
+      if (data.error === "FOREIGN_IP_BLOCKED") {
+        return labels.foreignIpBlocked;
+      }
+      return data.error;
+    }
+    return labels.unknownError;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
@@ -699,11 +711,11 @@ export function ThreadDetailContent({
         setContent("");
         router.refresh();
       } else {
-        let errorMessage = "Failed to create response";
+        let errorMessage = labels.unknownError;
         try {
           const data = await res.json();
           console.error("Failed to create response:", data);
-          errorMessage = typeof data.error === "string" ? data.error : data.error?.message || errorMessage;
+          errorMessage = getErrorMessage(data);
         } catch {
           console.error("Failed to parse error response");
         }

@@ -160,6 +160,8 @@ interface Labels {
   submit: string;
   cancel: string;
   creating: string;
+  foreignIpBlocked: string;
+  unknownError: string;
 }
 
 interface BoardData {
@@ -227,9 +229,12 @@ export function CreateThreadContent({
 
     const getErrorMessage = (data: { error: string | object }): string => {
       if (typeof data.error === "string") {
+        if (data.error === "FOREIGN_IP_BLOCKED") {
+          return labels.foreignIpBlocked;
+        }
         return data.error;
       }
-      return "Validation failed";
+      return labels.unknownError;
     };
 
     try {
