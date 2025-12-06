@@ -290,7 +290,7 @@ function renderNode(node: PrerenderedNode, key: number, ctx: RenderContext): Rea
 
     return (
       <Calc key={key} $exp={exp} onClick={handleClick}>
-        {dice.result}
+        {isNaN(dice.result) ? "NaN" : dice.result}
       </Calc>
     );
   }
@@ -310,7 +310,7 @@ function renderNode(node: PrerenderedNode, key: number, ctx: RenderContext): Rea
 
     return (
       <Calc key={key} $exp={calc.expression} onClick={handleClick}>
-        {calc.result}
+        {isNaN(calc.result) ? "NaN" : calc.result}
       </Calc>
     );
   }
