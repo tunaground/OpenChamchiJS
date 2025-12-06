@@ -127,11 +127,13 @@ export interface AnchorInfo {
   threadId: number;
   start: number;
   end?: number;
+  sourceResponseId?: string;
 }
 
 export interface RenderContext {
   boardId: string;
   threadId: number;
+  responseId?: string;
   setAnchorInfo: (a: AnchorInfo) => void;
   t: ReturnType<typeof useTranslations<never>>;
   // TODO: Add toast notification for clipboard copy
@@ -166,8 +168,8 @@ function applyAnchor(
         const href = isNaN(anchorStart)
           ? `/trace/${anchorBoardId}/${anchorThreadId}/recent`
           : isNaN(anchorEnd)
-            ? `/trace/${anchorBoardId}/${anchorThreadId}/${anchorStart}/${anchorStart}`
-            : `/trace/${anchorBoardId}/${anchorThreadId}/${anchorStart}/${anchorEnd}`;
+            ? `/trace/${anchorBoardId}/${anchorThreadId}/${anchorStart}`
+            : `/trace/${anchorBoardId}/${anchorThreadId}/${anchorStart}-${anchorEnd}`;
 
         if (isNaN(anchorStart)) {
           result.push(
@@ -187,6 +189,7 @@ function applyAnchor(
                     threadId: anchorThreadId,
                     start: anchorStart,
                     end: isNaN(anchorEnd) ? undefined : anchorEnd,
+                    sourceResponseId: ctx.responseId,
                   });
                 }}
               >

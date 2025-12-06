@@ -270,7 +270,7 @@ export function CreateThreadContent({
       }
 
       // Redirect to thread page (recent view)
-      router.push(`/trace/${thread.id}/recent`);
+      router.push(`/trace/${boardId}/${thread.id}/recent`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
       setLoading(false);

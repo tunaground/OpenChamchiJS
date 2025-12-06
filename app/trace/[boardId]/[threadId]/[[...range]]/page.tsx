@@ -11,11 +11,11 @@ import { parseRangeParam } from "@/lib/types/response-range";
 import { ThreadDetailContent } from "./thread-detail-content";
 
 interface Props {
-  params: Promise<{ threadId: string; range?: string[] }>;
+  params: Promise<{ boardId: string; threadId: string; range?: string[] }>;
 }
 
 export default async function ThreadDetailPage({ params }: Props) {
-  const { threadId, range: rangeParam } = await params;
+  const { boardId, threadId, range: rangeParam } = await params;
   const threadIdNum = parseInt(threadId, 10);
 
   if (isNaN(threadIdNum)) {
@@ -28,6 +28,11 @@ export default async function ThreadDetailPage({ params }: Props) {
       boardService.findAll(),
       getServerSession(authOptions),
     ]);
+
+    // Verify boardId matches
+    if (thread.boardId !== boardId) {
+      notFound();
+    }
 
     const board = await boardService.findById(thread.boardId);
 

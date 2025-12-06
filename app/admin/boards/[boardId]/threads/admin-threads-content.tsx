@@ -778,7 +778,7 @@ export function AdminThreadsContent({
                 <tr key={thread.id} style={{ opacity: thread.deleted ? 0.5 : 1 }}>
                   <Td>{thread.id}</Td>
                   <Td>
-                    <TitleLink href={`/trace/${thread.id}`}>
+                    <TitleLink href={`/trace/${boardId}/${thread.id}`}>
                       {thread.title}
                     </TitleLink>
                   </Td>

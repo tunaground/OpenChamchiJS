@@ -49,6 +49,8 @@ export async function GET(
   const includeDeleted = searchParams.get("includeDeleted") === "true";
   const includeHidden = searchParams.get("includeHidden") === "true";
   const password = request.headers.get("X-Thread-Password");
+  const startSeqParam = searchParams.get("startSeq");
+  const endSeqParam = searchParams.get("endSeq");
 
   try {
     // Check if user has admin permission
@@ -85,12 +87,33 @@ export async function GET(
       return NextResponse.json({ error: "Invalid password" }, { status: 403 });
     }
 
-    const responses = await responseService.findByThreadId(id, {
-      limit,
-      offset,
-      includeDeleted: includeDeleted && isAdmin,
-      includeHidden: includeHidden && canSeeHidden,
-    });
+    // If startSeq and endSeq are provided, use range query
+    let responses;
+    if (startSeqParam !== null && endSeqParam !== null) {
+      const startSeq = parseInt(startSeqParam, 10);
+      const endSeq = parseInt(endSeqParam, 10);
+      if (!isNaN(startSeq) && !isNaN(endSeq)) {
+        responses = await responseService.findByRange(id, {
+          type: "range",
+          startSeq,
+          endSeq,
+        });
+      } else {
+        responses = await responseService.findByThreadId(id, {
+          limit,
+          offset,
+          includeDeleted: includeDeleted && isAdmin,
+          includeHidden: includeHidden && canSeeHidden,
+        });
+      }
+    } else {
+      responses = await responseService.findByThreadId(id, {
+        limit,
+        offset,
+        includeDeleted: includeDeleted && isAdmin,
+        includeHidden: includeHidden && canSeeHidden,
+      });
+    }
 
     // Strip IP from responses if user doesn't have permission
     const sanitizedResponses = responses.map((response) => {

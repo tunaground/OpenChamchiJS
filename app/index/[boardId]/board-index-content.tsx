@@ -423,7 +423,7 @@ export function BoardIndexContent({
                       {thread.ended && (
                         <Badge $variant="ended">{labels.ended}</Badge>
                       )}
-                      <Link href={`/trace/${thread.id}/recent`}>
+                      <Link href={`/trace/${boardId}/${thread.id}/recent`}>
                         {thread.title}
                       </Link>
                       <span> ({Math.max(0, thread.responseCount - 1)})</span>
@@ -439,7 +439,7 @@ export function BoardIndexContent({
                       {thread.ended && (
                         <Badge $variant="ended">{labels.ended}</Badge>
                       )}
-                      <Link href={`/trace/${thread.id}/recent`}>
+                      <Link href={`/trace/${boardId}/${thread.id}/recent`}>
                         {thread.title}
                       </Link>
                       <span> ({Math.max(0, thread.responseCount - 1)})</span>

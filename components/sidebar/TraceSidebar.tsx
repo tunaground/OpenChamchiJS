@@ -202,7 +202,7 @@ export function TraceSidebar({
       <NavList>
         <NavItem>
           <NavLink
-            href={`/trace/${threadId}`}
+            href={`/trace/${boardId}/${threadId}`}
             $active={currentView === "all"}
           >
             {labels.viewAll}
@@ -210,7 +210,7 @@ export function TraceSidebar({
         </NavItem>
         <NavItem>
           <NavLink
-            href={`/trace/${threadId}/recent`}
+            href={`/trace/${boardId}/${threadId}/recent`}
             $active={currentView === "recent"}
           >
             {labels.viewRecent}
@@ -223,14 +223,14 @@ export function TraceSidebar({
       <NavList>
         <NavItem>
           <NavLink
-            href={isPrevDisabled ? "#" : `/trace/${threadId}/${prevRange}`}
+            href={isPrevDisabled ? "#" : `/trace/${boardId}/${threadId}/${prevRange}`}
             $disabled={isPrevDisabled}
           >
             {labels.prev}
           </NavLink>
         </NavItem>
         <NavItem>
-          <NavLink href={`/trace/${threadId}/${nextRange}`}>
+          <NavLink href={`/trace/${boardId}/${threadId}/${nextRange}`}>
             {labels.next}
           </NavLink>
         </NavItem>
