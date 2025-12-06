@@ -1,6 +1,7 @@
 import { createBoardService, BoardServiceError } from "@/lib/services/board";
 import { PermissionService } from "@/lib/services/permission";
 import { BoardRepository, BoardData } from "@/lib/repositories/interfaces/board";
+import { PermissionRepository } from "@/lib/repositories/interfaces/permission";
 
 describe("BoardService", () => {
   const mockBoard: BoardData = {
@@ -30,6 +31,12 @@ describe("BoardService", () => {
     checkUserPermission: jest.fn(),
   });
 
+  const createMockPermissionRepo = (): jest.Mocked<PermissionRepository> => ({
+    findByName: jest.fn(),
+    create: jest.fn(),
+    createMany: jest.fn(),
+  });
+
   describe("findAll", () => {
     it("should return all boards", async () => {
       const mockRepo = createMockRepo();
@@ -39,6 +46,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       const result = await service.findAll();
@@ -57,6 +65,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       const result = await service.findById("test-board");
@@ -73,6 +82,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       await expect(service.findById("non-existent")).rejects.toThrow(
@@ -91,6 +101,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       await expect(service.findById("test-board")).rejects.toMatchObject({
@@ -114,6 +125,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       const result = await service.create("user-1", createInput);
@@ -134,6 +146,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       const result = await service.create("user-1", createInput);
@@ -149,6 +162,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       await expect(service.create("user-1", createInput)).rejects.toMatchObject(
@@ -166,6 +180,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       await expect(
@@ -189,6 +204,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       const result = await service.update("user-1", "test-board", updateInput);
@@ -205,6 +221,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       await expect(
@@ -221,6 +238,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       await expect(
@@ -247,6 +265,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       const result = await service.updateConfig(
@@ -277,6 +296,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       const result = await service.updateConfig(
@@ -296,6 +316,7 @@ describe("BoardService", () => {
       const service = createBoardService({
         boardRepository: mockRepo,
         permissionService: mockPermission,
+        permissionRepository: createMockPermissionRepo(),
       });
 
       await expect(

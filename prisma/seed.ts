@@ -71,6 +71,34 @@ async function main() {
     },
   });
 
+  // Thread permissions (global)
+  await prisma.permission.upsert({
+    where: { name: "thread:all" },
+    update: {},
+    create: {
+      name: "thread:all",
+      description: "모든 보드의 스레드 전체 권한",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "thread:edit" },
+    update: {},
+    create: {
+      name: "thread:edit",
+      description: "모든 보드의 스레드 수정",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "thread:delete" },
+    update: {},
+    create: {
+      name: "thread:delete",
+      description: "모든 보드의 스레드 삭제",
+    },
+  });
+
   // Create ADMIN role
   const adminRole = await prisma.role.upsert({
     where: { name: "ADMIN" },
@@ -122,7 +150,9 @@ async function main() {
   });
 
   console.log("Seed completed:");
-  console.log("- Permissions: all:all, admin:read, foreign:write, board:all, board:write, board:edit, board:config");
+  console.log("- Permissions: all:all, admin:read, foreign:write");
+  console.log("- Board permissions: board:all, board:write, board:edit, board:config");
+  console.log("- Thread permissions: thread:all, thread:edit, thread:delete");
   console.log("- Role: ADMIN (with all:all), FOREIGNER (with foreign:write)");
 }
 

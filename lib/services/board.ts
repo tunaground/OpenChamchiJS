@@ -3,6 +3,7 @@ import {
   PermissionService,
 } from "@/lib/services/permission";
 import { boardRepository as defaultBoardRepository } from "@/lib/repositories/prisma/board";
+import { permissionRepository as defaultPermissionRepository } from "@/lib/repositories/prisma/permission";
 import {
   BoardRepository,
   BoardData,
@@ -10,6 +11,7 @@ import {
   UpdateBoardInput,
   ConfigBoardInput,
 } from "@/lib/repositories/interfaces/board";
+import { PermissionRepository } from "@/lib/repositories/interfaces/permission";
 
 export class BoardServiceError extends Error {
   constructor(
@@ -32,10 +34,11 @@ export interface BoardService {
 interface BoardServiceDeps {
   boardRepository: BoardRepository;
   permissionService: PermissionService;
+  permissionRepository: PermissionRepository;
 }
 
 export function createBoardService(deps: BoardServiceDeps): BoardService {
-  const { boardRepository, permissionService } = deps;
+  const { boardRepository, permissionService, permissionRepository } = deps;
 
   async function checkPermissions(
     userId: string,
@@ -47,6 +50,23 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
       }
     }
     return false;
+  }
+
+  async function createBoardPermissions(boardId: string): Promise<void> {
+    await permissionRepository.createMany([
+      {
+        name: `thread:${boardId}:all`,
+        description: `${boardId} 보드의 스레드 전체 권한`,
+      },
+      {
+        name: `thread:${boardId}:edit`,
+        description: `${boardId} 보드의 스레드 수정`,
+      },
+      {
+        name: `thread:${boardId}:delete`,
+        description: `${boardId} 보드의 스레드 삭제`,
+      },
+    ]);
   }
 
   return {
@@ -76,7 +96,10 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
         throw new BoardServiceError("Board already exists", "CONFLICT");
       }
 
-      return boardRepository.create(data);
+      const board = await boardRepository.create(data);
+      await createBoardPermissions(board.id);
+
+      return board;
     },
 
     async update(
@@ -127,4 +150,5 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
 export const boardService = createBoardService({
   boardRepository: defaultBoardRepository,
   permissionService: defaultPermissionService,
+  permissionRepository: defaultPermissionRepository,
 });

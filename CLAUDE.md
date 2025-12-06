@@ -35,8 +35,10 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - `app/admin/` - Admin pages (requires `admin:read` permission)
 - `app/setup/` - Initial admin setup flow
 - `lib/` - Shared utilities (Prisma client, auth config, i18n)
-- `lib/services/` - Business logic (board, permission)
+- `lib/services/` - Business logic (board, thread, permission)
+- `lib/repositories/interfaces/` - Repository interfaces
 - `lib/repositories/prisma/` - Prisma data access
+- `__tests__/` - Jest unit tests
 - `lib/i18n/` - Internationalization config (next-intl)
 - `lib/i18n/messages/` - Translation files (ko.json, en.json)
 - `prisma/` - Prisma schema and migrations
@@ -84,3 +86,20 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - `userId` - 로그인 사용자만 저장 (optional)
 - `Thread.updatedAt` - 새 Response 추가 시 수동 갱신 (범프)
 - `blockForeignIp` - 외국 IP 차단, `foreign:write` 권한 있으면 허용
+
+### API Endpoints
+- `GET/POST /api/boards` - 보드 목록/생성
+- `GET/PUT/PATCH /api/boards/[id]` - 보드 상세/수정/설정
+- `GET/POST /api/boards/[boardId]/threads` - 스레드 목록/생성
+- `GET/PUT/DELETE /api/boards/[boardId]/threads/[threadId]` - 스레드 상세/수정/삭제
+
+### Permissions
+- `all:all` - 모든 권한
+- `board:all`, `board:write`, `board:edit`, `board:config` - 보드 관리
+- `thread:all`, `thread:edit`, `thread:delete` - 전역 스레드 권한
+- `thread:{boardId}:all`, `thread:{boardId}:edit`, `thread:{boardId}:delete` - 보드별 스레드 권한 (보드 생성 시 자동 생성)
+
+### Testing
+```bash
+npm test         # Run Jest unit tests
+```
