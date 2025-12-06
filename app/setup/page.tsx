@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { prisma } from "@/lib/prisma";
 import { SetupForm } from "./setup-form";
-import styles from "./page.module.css";
+import { SetupContent } from "./setup-content";
 
 export default async function SetupPage() {
   // Check if admin already exists - disable page entirely
@@ -18,12 +18,8 @@ export default async function SetupPage() {
   const t = await getTranslations("setup");
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>{t("title")}</h1>
-        <p className={styles.description}>{t("description")}</p>
-        <SetupForm />
-      </div>
-    </div>
+    <SetupContent title={t("title")} description={t("description")}>
+      <SetupForm />
+    </SetupContent>
   );
 }

@@ -39,8 +39,13 @@ export interface ConfigBoardInput {
   threadsPerPage?: number;
 }
 
+export interface BoardWithThreadCount extends BoardData {
+  threadCount: number;
+}
+
 export interface BoardRepository {
   findAll(): Promise<BoardData[]>;
+  findAllWithThreadCount(): Promise<BoardWithThreadCount[]>;
   findById(id: string): Promise<BoardData | null>;
   create(data: CreateBoardInput): Promise<BoardData>;
   update(id: string, data: UpdateBoardInput): Promise<BoardData>;

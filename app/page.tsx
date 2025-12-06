@@ -1,66 +1,162 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+"use client";
+
+import Link from "next/link";
+import styled from "styled-components";
+
+const Page = styled.div`
+  min-height: 100vh;
+  padding: 2rem;
+  background-color: ${(props) => props.theme.background};
+`;
+
+const Container = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+`;
+
+const Title = styled.h1`
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: ${(props) => props.theme.textPrimary};
+`;
+
+const Section = styled.section`
+  margin-bottom: 2rem;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 1rem;
+  font-weight: 500;
+  color: ${(props) => props.theme.textSecondary};
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+`;
+
+const NavList = styled.ul`
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+`;
+
+const NavItem = styled.li`
+  a {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background: ${(props) => props.theme.surface};
+    border: 1px solid ${(props) => props.theme.surfaceBorder};
+    border-radius: 8px;
+    color: ${(props) => props.theme.textPrimary};
+    text-decoration: none;
+    transition: background 0.2s;
+
+    &:hover {
+      background: ${(props) => props.theme.surfaceHover};
+    }
+  }
+`;
+
+const NavPath = styled.code`
+  font-size: 0.875rem;
+  color: ${(props) => props.theme.textSecondary};
+  background: ${(props) => props.theme.surfaceHover};
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  min-width: 160px;
+`;
+
+const NavLabel = styled.span`
+  font-weight: 500;
+`;
 
 export default function Home() {
+  const mainPages = [
+    { path: "/login", label: "Login" },
+    { path: "/dashboard", label: "Dashboard" },
+  ];
+
+  const adminPages = [
+    { path: "/admin", label: "Admin Overview" },
+    { path: "/admin/boards", label: "Board Management" },
+  ];
+
+  const setupPages = [
+    { path: "/setup", label: "Initial Setup" },
+    { path: "/setup/complete", label: "Setup Complete" },
+  ];
+
+  const testPages = [
+    { path: "/test/theme", label: "Theme Demo" },
+    { path: "/test/tom", label: "TOM Parser Demo" },
+  ];
+
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>To get started, edit the page.tsx file.</h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+    <Page>
+      <Container>
+        <Title>ChamchiJS</Title>
+
+        <Section>
+          <SectionTitle>Main</SectionTitle>
+          <NavList>
+            {mainPages.map(({ path, label }) => (
+              <NavItem key={path}>
+                <Link href={path}>
+                  <NavPath>{path}</NavPath>
+                  <NavLabel>{label}</NavLabel>
+                </Link>
+              </NavItem>
+            ))}
+          </NavList>
+        </Section>
+
+        <Section>
+          <SectionTitle>Admin</SectionTitle>
+          <NavList>
+            {adminPages.map(({ path, label }) => (
+              <NavItem key={path}>
+                <Link href={path}>
+                  <NavPath>{path}</NavPath>
+                  <NavLabel>{label}</NavLabel>
+                </Link>
+              </NavItem>
+            ))}
+          </NavList>
+        </Section>
+
+        <Section>
+          <SectionTitle>Setup</SectionTitle>
+          <NavList>
+            {setupPages.map(({ path, label }) => (
+              <NavItem key={path}>
+                <Link href={path}>
+                  <NavPath>{path}</NavPath>
+                  <NavLabel>{label}</NavLabel>
+                </Link>
+              </NavItem>
+            ))}
+          </NavList>
+        </Section>
+
+        <Section>
+          <SectionTitle>Test</SectionTitle>
+          <NavList>
+            {testPages.map(({ path, label }) => (
+              <NavItem key={path}>
+                <Link href={path}>
+                  <NavPath>{path}</NavPath>
+                  <NavLabel>{label}</NavLabel>
+                </Link>
+              </NavItem>
+            ))}
+          </NavList>
+        </Section>
+      </Container>
+    </Page>
   );
 }

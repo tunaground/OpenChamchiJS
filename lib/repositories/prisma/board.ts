@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import {
   BoardRepository,
   BoardData,
+  BoardWithThreadCount,
   CreateBoardInput,
   UpdateBoardInput,
   ConfigBoardInput,
@@ -13,6 +14,21 @@ export const boardRepository: BoardRepository = {
       where: { deleted: false },
       orderBy: { createdAt: "asc" },
     });
+  },
+
+  async findAllWithThreadCount(): Promise<BoardWithThreadCount[]> {
+    const boards = await prisma.board.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: {
+          select: { threads: true },
+        },
+      },
+    });
+    return boards.map((board) => ({
+      ...board,
+      threadCount: board._count.threads,
+    }));
   },
 
   async findById(id: string): Promise<BoardData | null> {

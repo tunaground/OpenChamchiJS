@@ -2,24 +2,28 @@
 
 import { signIn } from "next-auth/react";
 import { useTranslations } from "next-intl";
+import styled from "styled-components";
+
+const Button = styled.button`
+  padding: 0.75rem 1.5rem;
+  background: ${(props) => props.theme.textPrimary};
+  color: ${(props) => props.theme.background};
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.9;
+  }
+`;
 
 export function SetupForm() {
   const t = useTranslations("setup");
 
   return (
-    <button
-      onClick={() => signIn("google", { callbackUrl: "/setup/complete" })}
-      style={{
-        padding: "0.75rem 1.5rem",
-        background: "var(--foreground)",
-        color: "var(--background)",
-        border: "none",
-        borderRadius: "4px",
-        fontSize: "1rem",
-        cursor: "pointer",
-      }}
-    >
+    <Button onClick={() => signIn("google", { callbackUrl: "/setup/complete" })}>
       {t("googleButton")}
-    </button>
+    </Button>
   );
 }

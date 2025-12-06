@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { prisma } from "@/lib/prisma";
-import styles from "./page.module.css";
+import { AdminContent } from "./admin-content";
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
@@ -16,36 +16,16 @@ export default async function AdminPage() {
   const t = await getTranslations("admin");
 
   return (
-    <div className={styles.container}>
-      <div className={styles.card}>
-        <h1 className={styles.title}>{t("title")}</h1>
-
-        <div className={styles.stats}>
-          <div className={styles.stat}>
-            <span className={styles.statValue}>{userCount}</span>
-            <span className={styles.statLabel}>{t("users")}</span>
-          </div>
-          <div className={styles.stat}>
-            <span className={styles.statValue}>{roleCount}</span>
-            <span className={styles.statLabel}>{t("roles")}</span>
-          </div>
-          <div className={styles.stat}>
-            <span className={styles.statValue}>{permissionCount}</span>
-            <span className={styles.statLabel}>{t("permissions")}</span>
-          </div>
-        </div>
-
-        <div className={styles.section}>
-          <h2 className={styles.sectionTitle}>{t("myPermissions")}</h2>
-          <div className={styles.permissions}>
-            {permissions.map((permission) => (
-              <span key={permission} className={styles.permission}>
-                {permission}
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-    </div>
+    <AdminContent
+      title={t("title")}
+      userCount={userCount}
+      roleCount={roleCount}
+      permissionCount={permissionCount}
+      usersLabel={t("users")}
+      rolesLabel={t("roles")}
+      permissionsLabel={t("permissions")}
+      myPermissionsLabel={t("myPermissions")}
+      permissions={permissions}
+    />
   );
 }

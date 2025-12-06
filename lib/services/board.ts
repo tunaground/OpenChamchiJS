@@ -7,6 +7,7 @@ import { permissionRepository as defaultPermissionRepository } from "@/lib/repos
 import {
   BoardRepository,
   BoardData,
+  BoardWithThreadCount,
   CreateBoardInput,
   UpdateBoardInput,
   ConfigBoardInput,
@@ -25,6 +26,7 @@ export class BoardServiceError extends Error {
 
 export interface BoardService {
   findAll(): Promise<BoardData[]>;
+  findAllWithThreadCount(userId: string): Promise<BoardWithThreadCount[]>;
   findById(id: string): Promise<BoardData>;
   create(userId: string, data: CreateBoardInput): Promise<BoardData>;
   update(userId: string, id: string, data: UpdateBoardInput): Promise<BoardData>;
@@ -72,6 +74,17 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
   return {
     async findAll(): Promise<BoardData[]> {
       return boardRepository.findAll();
+    },
+
+    async findAllWithThreadCount(userId: string): Promise<BoardWithThreadCount[]> {
+      const hasPermission = await checkPermissions(userId, [
+        "board:all",
+        "board:edit",
+      ]);
+      if (!hasPermission) {
+        throw new BoardServiceError("Permission denied", "FORBIDDEN");
+      }
+      return boardRepository.findAllWithThreadCount();
     },
 
     async findById(id: string): Promise<BoardData> {
