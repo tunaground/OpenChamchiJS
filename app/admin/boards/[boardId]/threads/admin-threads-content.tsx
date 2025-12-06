@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
 import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
+import { formatDateTime } from "@/lib/utils/date-formatter";
 
 const Container = styled.div`
   padding: 3.2rem;
@@ -547,7 +548,7 @@ export function AdminThreadsContent({
     }
   };
 
-  const openDeleteResponseModal = (response: ResponseData) => {
+  const _openDeleteResponseModal = (response: ResponseData) => {
     setSelectedResponse(response);
     setModalType("deleteResponse");
   };
@@ -703,16 +704,6 @@ export function AdminThreadsContent({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
 
   const sidebar = (
     <AdminBoardSidebar
@@ -798,8 +789,8 @@ export function AdminThreadsContent({
                       </>
                     )}
                   </Td>
-                  <Td>{formatDate(thread.updatedAt)}</Td>
-                  <Td>{formatDate(thread.createdAt)}</Td>
+                  <Td>{formatDateTime(thread.updatedAt)}</Td>
+                  <Td>{formatDateTime(thread.createdAt)}</Td>
                   <Td>
                     <ActionButtons>
                       {!thread.deleted && (
@@ -1034,7 +1025,7 @@ export function AdminThreadsContent({
                           {response.content.substring(0, 80)}
                           {response.content.length > 80 && "..."}
                         </Td>
-                        <Td>{formatDate(response.createdAt)}</Td>
+                        <Td>{formatDateTime(response.createdAt)}</Td>
                         <Td>
                           <ActionButtons>
                             {canEdit && !response.deleted && (

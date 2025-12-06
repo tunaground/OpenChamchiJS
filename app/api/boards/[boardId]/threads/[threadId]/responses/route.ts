@@ -1,34 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
-import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { responseService, ResponseServiceError } from "@/lib/services/response";
 import { boardService, BoardServiceError } from "@/lib/services/board";
-import { threadService } from "@/lib/services/thread";
 import { permissionService } from "@/lib/services/permission";
 import { checkForeignIpBlocked, getClientIp } from "@/lib/api/foreign-ip-check";
+import { handleServiceError } from "@/lib/api/error-handler";
 import { parse, preprocess, stringifyPreprocessed } from "@/lib/tom";
 import { threadRepository } from "@/lib/repositories/prisma/thread";
-
-const createResponseSchema = z.object({
-  username: z.string().max(50).optional(),
-  content: z.string().min(1),
-  attachment: z.string().optional(),
-});
-
-function handleServiceError(error: ResponseServiceError) {
-  const statusMap = {
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-    BAD_REQUEST: 400,
-  };
-  return NextResponse.json(
-    { error: error.message },
-    { status: statusMap[error.code] }
-  );
-}
+import { createResponseSchema } from "@/lib/schemas";
 
 // GET /api/boards/[boardId]/threads/[threadId]/responses - 응답 목록 조회
 export async function GET(

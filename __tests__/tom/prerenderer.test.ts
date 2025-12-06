@@ -9,7 +9,7 @@ import {
 } from "@/lib/tom/prerenderer";
 
 // Fixed random for deterministic tests
-const fixedRandom = (min: number, max: number) => min;
+const fixedRandom = (min: number, _max: number) => min;
 
 describe("TOM Prerenderer", () => {
   describe("dice", () => {

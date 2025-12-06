@@ -14,13 +14,14 @@ import {
 } from "@/lib/repositories/interfaces/response";
 import { ThreadRepository } from "@/lib/repositories/interfaces/thread";
 import { BoardRepository } from "@/lib/repositories/interfaces/board";
+import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
 
-export class ResponseServiceError extends Error {
+export class ResponseServiceError extends ServiceError {
   constructor(
     message: string,
-    public code: "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "BAD_REQUEST"
+    code: ServiceErrorCode
   ) {
-    super(message);
+    super(message, code);
     this.name = "ResponseServiceError";
   }
 }
@@ -76,17 +77,10 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
   ): Promise<boolean> {
     if (!userId) return false;
 
-    const permissions = [
+    return permissionService.checkUserPermissions(userId, [
       `response:${action}`,
       `response:${boardId}:${action}`,
-    ];
-
-    for (const permission of permissions) {
-      if (await permissionService.checkUserPermission(userId, permission)) {
-        return true;
-      }
-    }
-    return false;
+    ]);
   }
 
   async function verifyThreadPassword(

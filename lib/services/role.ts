@@ -5,13 +5,14 @@ import {
   RoleWithPermissions,
   PermissionData,
 } from "@/lib/repositories/interfaces/role";
+import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
 
-export class RoleServiceError extends Error {
+export class RoleServiceError extends ServiceError {
   constructor(
     message: string,
-    public code: "FORBIDDEN" | "NOT_FOUND" | "BAD_REQUEST"
+    code: ServiceErrorCode
   ) {
-    super(message);
+    super(message, code);
     this.name = "RoleServiceError";
   }
 }

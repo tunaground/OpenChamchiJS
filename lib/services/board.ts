@@ -13,13 +13,14 @@ import {
   ConfigBoardInput,
 } from "@/lib/repositories/interfaces/board";
 import { PermissionRepository } from "@/lib/repositories/interfaces/permission";
+import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
 
-export class BoardServiceError extends Error {
+export class BoardServiceError extends ServiceError {
   constructor(
     message: string,
-    public code: "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "CONFLICT"
+    code: ServiceErrorCode
   ) {
-    super(message);
+    super(message, code);
     this.name = "BoardServiceError";
   }
 }
@@ -46,12 +47,7 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
     userId: string,
     permissions: string[]
   ): Promise<boolean> {
-    for (const permission of permissions) {
-      if (await permissionService.checkUserPermission(userId, permission)) {
-        return true;
-      }
-    }
-    return false;
+    return permissionService.checkUserPermissions(userId, permissions);
   }
 
   async function createBoardPermissions(boardId: string): Promise<void> {

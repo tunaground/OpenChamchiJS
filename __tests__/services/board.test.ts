@@ -28,7 +28,9 @@ describe("BoardService", () => {
   const createMockPermission = (): jest.Mocked<PermissionService> => ({
     getUserPermissions: jest.fn(),
     hasPermission: jest.fn(),
+    hasAnyPermission: jest.fn(),
     checkUserPermission: jest.fn(),
+    checkUserPermissions: jest.fn(),
   });
 
   const createMockPermissionRepo = (): jest.Mocked<PermissionRepository> => ({
@@ -116,9 +118,7 @@ describe("BoardService", () => {
     it("should create board when user has board:write permission", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "board:write"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockRepo.findById.mockResolvedValue(null);
       mockRepo.create.mockResolvedValue({ ...mockBoard, ...createInput });
 
@@ -137,9 +137,7 @@ describe("BoardService", () => {
     it("should create board when user has board:all permission", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "board:all"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockRepo.findById.mockResolvedValue(null);
       mockRepo.create.mockResolvedValue({ ...mockBoard, ...createInput });
 
@@ -157,7 +155,7 @@ describe("BoardService", () => {
     it("should throw FORBIDDEN when user has no permission", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockResolvedValue(false);
+      mockPermission.checkUserPermissions.mockResolvedValue(false);
 
       const service = createBoardService({
         boardRepository: mockRepo,
@@ -174,7 +172,7 @@ describe("BoardService", () => {
     it("should throw CONFLICT when board already exists", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockResolvedValue(true);
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockRepo.findById.mockResolvedValue(mockBoard);
 
       const service = createBoardService({
@@ -195,9 +193,7 @@ describe("BoardService", () => {
     it("should update board when user has board:edit permission", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "board:edit"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockRepo.findById.mockResolvedValue(mockBoard);
       mockRepo.update.mockResolvedValue({ ...mockBoard, ...updateInput });
 
@@ -216,7 +212,8 @@ describe("BoardService", () => {
     it("should throw FORBIDDEN when user has no permission", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockResolvedValue(false);
+      mockPermission.checkUserPermissions.mockResolvedValue(false);
+      mockRepo.findById.mockResolvedValue(mockBoard);
 
       const service = createBoardService({
         boardRepository: mockRepo,
@@ -232,7 +229,7 @@ describe("BoardService", () => {
     it("should throw NOT_FOUND when board does not exist", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockResolvedValue(true);
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockRepo.findById.mockResolvedValue(null);
 
       const service = createBoardService({
@@ -253,9 +250,7 @@ describe("BoardService", () => {
     it("should update config when user has board:config permission", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "board:config"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockRepo.findById.mockResolvedValue(mockBoard);
       mockRepo.updateConfig.mockResolvedValue({
         ...mockBoard,
@@ -284,9 +279,7 @@ describe("BoardService", () => {
     it("should update config when user has board:edit permission", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "board:edit"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockRepo.findById.mockResolvedValue(mockBoard);
       mockRepo.updateConfig.mockResolvedValue({
         ...mockBoard,
@@ -311,7 +304,8 @@ describe("BoardService", () => {
     it("should throw FORBIDDEN when user has no permission", async () => {
       const mockRepo = createMockRepo();
       const mockPermission = createMockPermission();
-      mockPermission.checkUserPermission.mockResolvedValue(false);
+      mockPermission.checkUserPermissions.mockResolvedValue(false);
+      mockRepo.findById.mockResolvedValue(mockBoard);
 
       const service = createBoardService({
         boardRepository: mockRepo,

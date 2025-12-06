@@ -1,33 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { responseService, ResponseServiceError } from "@/lib/services/response";
-
-const updateResponseSchema = z.object({
-  content: z.string().min(1).optional(),
-  attachment: z.string().optional(),
-  visible: z.boolean().optional(),
-  deleted: z.boolean().optional(),
-  password: z.string().optional(),
-});
-
-const deleteResponseSchema = z.object({
-  password: z.string().optional(),
-});
-
-function handleServiceError(error: ResponseServiceError) {
-  const statusMap = {
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-    BAD_REQUEST: 400,
-  };
-  return NextResponse.json(
-    { error: error.message },
-    { status: statusMap[error.code] }
-  );
-}
+import { handleServiceError } from "@/lib/api/error-handler";
+import { updateResponseSchema, deleteResponseSchema } from "@/lib/schemas";
 
 // GET /api/boards/[boardId]/threads/[threadId]/responses/[responseId] - 응답 상세 조회
 export async function GET(

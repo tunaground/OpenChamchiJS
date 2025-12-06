@@ -1,26 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { noticeService, NoticeServiceError } from "@/lib/services/notice";
-
-const createNoticeSchema = z.object({
-  title: z.string().min(1).max(200),
-  content: z.string().min(1),
-  pinned: z.boolean().optional(),
-});
-
-function handleServiceError(error: NoticeServiceError) {
-  const statusMap = {
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-  };
-  return NextResponse.json(
-    { error: error.message },
-    { status: statusMap[error.code] }
-  );
-}
+import { handleServiceError } from "@/lib/api/error-handler";
+import { parsePaginationQuery } from "@/lib/types/pagination";
+import { createNoticeSchema } from "@/lib/schemas";
 
 // GET /api/boards/[boardId]/notices - 공지사항 목록 조회
 export async function GET(
@@ -29,9 +13,7 @@ export async function GET(
 ) {
   const { boardId } = await params;
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get("page") ?? "1", 10);
-  const limit = parseInt(searchParams.get("limit") ?? "20", 10);
-  const search = searchParams.get("search") ?? undefined;
+  const { page, limit, search } = parsePaginationQuery(searchParams, { limit: 20 });
 
   try {
     const result = await noticeService.findByBoardId(boardId, { page, limit, search });

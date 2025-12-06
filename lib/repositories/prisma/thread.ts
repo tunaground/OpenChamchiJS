@@ -7,13 +7,14 @@ import {
   UpdateThreadInput,
   FindThreadOptions,
 } from "@/lib/repositories/interfaces/thread";
+import { DEFAULT_LIMIT } from "@/lib/types/pagination";
 
 export const threadRepository: ThreadRepository = {
   async findByBoardId(
     boardId: string,
     options?: FindThreadOptions
   ): Promise<ThreadData[]> {
-    const { limit = 20, offset = 0, includeDeleted = false, search } = options ?? {};
+    const { limit = DEFAULT_LIMIT, offset = 0, includeDeleted = false, search } = options ?? {};
 
     return prisma.thread.findMany({
       where: {
@@ -38,7 +39,7 @@ export const threadRepository: ThreadRepository = {
     boardId: string,
     options?: FindThreadOptions
   ): Promise<ThreadWithResponseCount[]> {
-    const { limit = 20, offset = 0, includeDeleted = false, search } = options ?? {};
+    const { limit = DEFAULT_LIMIT, offset = 0, includeDeleted = false, search } = options ?? {};
 
     const threads = await prisma.thread.findMany({
       where: {

@@ -189,7 +189,7 @@ interface CreateThreadContentProps {
 export function CreateThreadContent({
   boardId,
   boardName,
-  defaultUsername,
+  defaultUsername: _defaultUsername,
   boards,
   isLoggedIn,
   canAccessAdmin,

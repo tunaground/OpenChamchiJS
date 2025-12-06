@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { roleService, RoleServiceError } from "@/lib/services/role";
+import { handleServiceError } from "@/lib/api/error-handler";
 
 export async function GET() {
   try {
@@ -15,20 +16,8 @@ export async function GET() {
     return NextResponse.json(permissions);
   } catch (error) {
     if (error instanceof RoleServiceError) {
-      const statusMap = {
-        FORBIDDEN: 403,
-        NOT_FOUND: 404,
-        BAD_REQUEST: 400,
-      };
-      return NextResponse.json(
-        { error: error.message },
-        { status: statusMap[error.code] }
-      );
+      return handleServiceError(error);
     }
-    console.error("Error fetching permissions:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    throw error;
   }
 }

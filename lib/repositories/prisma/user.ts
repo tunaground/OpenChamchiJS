@@ -3,6 +3,7 @@ import {
   UserRepository,
   UserWithRoles,
 } from "@/lib/repositories/interfaces/user";
+import { DEFAULT_USER_LIMIT } from "@/lib/types/pagination";
 
 export const userRepository: UserRepository = {
   async findAll(options?: {
@@ -10,7 +11,7 @@ export const userRepository: UserRepository = {
     offset?: number;
     search?: string;
   }): Promise<UserWithRoles[]> {
-    const { limit = 20, offset = 0, search } = options || {};
+    const { limit = DEFAULT_USER_LIMIT, offset = 0, search } = options || {};
 
     const users = await prisma.user.findMany({
       where: search

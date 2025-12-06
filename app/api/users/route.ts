@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { userService, UserServiceError } from "@/lib/services/user";
+import { handleServiceError } from "@/lib/api/error-handler";
+import { parsePaginationQuery } from "@/lib/types/pagination";
 
 export async function GET(request: NextRequest) {
   try {
@@ -11,29 +13,15 @@ export async function GET(request: NextRequest) {
     }
 
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") ?? "1", 10);
-    const search = searchParams.get("search") ?? undefined;
+    const { page, search } = parsePaginationQuery(searchParams);
 
     const result = await userService.findAll(session.user.id, { page, search });
 
     return NextResponse.json(result);
   } catch (error) {
     if (error instanceof UserServiceError) {
-      const statusMap = {
-        UNAUTHORIZED: 401,
-        FORBIDDEN: 403,
-        NOT_FOUND: 404,
-        BAD_REQUEST: 400,
-      };
-      return NextResponse.json(
-        { error: error.message },
-        { status: statusMap[error.code] }
-      );
+      return handleServiceError(error);
     }
-    console.error("Error fetching users:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    throw error;
   }
 }

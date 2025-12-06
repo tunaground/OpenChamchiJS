@@ -1,29 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { permissionService } from "@/lib/services/permission";
-
-const updateThreadSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
-  ended: z.boolean().optional(),
-  top: z.boolean().optional(),
-  deleted: z.boolean().optional(),
-});
-
-function handleServiceError(error: ThreadServiceError) {
-  const statusMap = {
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-    BAD_REQUEST: 400,
-  };
-  return NextResponse.json(
-    { error: error.message },
-    { status: statusMap[error.code] }
-  );
-}
+import { handleServiceError } from "@/lib/api/error-handler";
+import { updateThreadSchema } from "@/lib/schemas";
 
 // GET /api/boards/[boardId]/threads/[threadId] - 스레드 상세 조회
 export async function GET(

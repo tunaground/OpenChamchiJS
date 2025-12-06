@@ -17,13 +17,14 @@ import {
   normalizePaginationParams,
   createPaginatedResult,
 } from "@/lib/types/pagination";
+import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
 
-export class NoticeServiceError extends Error {
+export class NoticeServiceError extends ServiceError {
   constructor(
     message: string,
-    public code: "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND"
+    code: ServiceErrorCode
   ) {
-    super(message);
+    super(message, code);
     this.name = "NoticeServiceError";
   }
 }
@@ -57,12 +58,7 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
     userId: string,
     permissions: string[]
   ): Promise<boolean> {
-    for (const permission of permissions) {
-      if (await permissionService.checkUserPermission(userId, permission)) {
-        return true;
-      }
-    }
-    return false;
+    return permissionService.checkUserPermissions(userId, permissions);
   }
 
   return {

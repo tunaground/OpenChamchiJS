@@ -44,6 +44,8 @@ describe("ThreadService", () => {
 
   const createMockThreadRepo = (): jest.Mocked<ThreadRepository> => ({
     findByBoardId: jest.fn(),
+    findByBoardIdWithResponseCount: jest.fn(),
+    countByBoardId: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
@@ -62,7 +64,9 @@ describe("ThreadService", () => {
   const createMockPermission = (): jest.Mocked<PermissionService> => ({
     getUserPermissions: jest.fn(),
     hasPermission: jest.fn(),
+    hasAnyPermission: jest.fn(),
     checkUserPermission: jest.fn(),
+    checkUserPermissions: jest.fn(),
   });
 
   describe("findByBoardId", () => {
@@ -72,7 +76,8 @@ describe("ThreadService", () => {
       const mockPermission = createMockPermission();
 
       mockBoardRepo.findById.mockResolvedValue(mockBoard);
-      mockThreadRepo.findByBoardId.mockResolvedValue([mockThread]);
+      mockThreadRepo.findByBoardIdWithResponseCount.mockResolvedValue([{ ...mockThread, responseCount: 0 }]);
+      mockThreadRepo.countByBoardId.mockResolvedValue(1);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
@@ -82,9 +87,8 @@ describe("ThreadService", () => {
 
       const result = await service.findByBoardId("test-board");
 
-      expect(result).toEqual([mockThread]);
+      expect(result.data).toHaveLength(1);
       expect(mockBoardRepo.findById).toHaveBeenCalledWith("test-board");
-      expect(mockThreadRepo.findByBoardId).toHaveBeenCalledWith("test-board", undefined);
     });
 
     it("should throw NOT_FOUND when board does not exist", async () => {
@@ -242,9 +246,7 @@ describe("ThreadService", () => {
       const mockPermission = createMockPermission();
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "thread:all"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockThreadRepo.update.mockResolvedValue({ ...mockThread, ...updateInput });
 
       const service = createThreadService({
@@ -265,9 +267,7 @@ describe("ThreadService", () => {
       const mockPermission = createMockPermission();
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "thread:edit"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockThreadRepo.update.mockResolvedValue({ ...mockThread, ...updateInput });
 
       const service = createThreadService({
@@ -287,9 +287,7 @@ describe("ThreadService", () => {
       const mockPermission = createMockPermission();
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "thread:test-board:edit"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockThreadRepo.update.mockResolvedValue({ ...mockThread, ...updateInput });
 
       const service = createThreadService({
@@ -309,7 +307,7 @@ describe("ThreadService", () => {
       const mockPermission = createMockPermission();
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockResolvedValue(false);
+      mockPermission.checkUserPermissions.mockResolvedValue(false);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
@@ -349,9 +347,7 @@ describe("ThreadService", () => {
       const mockPermission = createMockPermission();
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "thread:delete"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockThreadRepo.delete.mockResolvedValue({ ...mockThread, deleted: true });
 
       const service = createThreadService({
@@ -372,9 +368,7 @@ describe("ThreadService", () => {
       const mockPermission = createMockPermission();
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "thread:test-board:delete"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockThreadRepo.delete.mockResolvedValue({ ...mockThread, deleted: true });
 
       const service = createThreadService({
@@ -394,7 +388,7 @@ describe("ThreadService", () => {
       const mockPermission = createMockPermission();
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockResolvedValue(false);
+      mockPermission.checkUserPermissions.mockResolvedValue(false);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,

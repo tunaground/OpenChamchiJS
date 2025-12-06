@@ -1,30 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { permissionService } from "@/lib/services/permission";
 import { checkForeignIpBlocked } from "@/lib/api/foreign-ip-check";
-
-const createThreadSchema = z.object({
-  title: z.string().min(1).max(200),
-  password: z.string().min(1).max(100),
-  username: z.string().max(50).optional(),
-});
-
-function handleServiceError(error: ThreadServiceError) {
-  const statusMap = {
-    UNAUTHORIZED: 401,
-    FORBIDDEN: 403,
-    NOT_FOUND: 404,
-    BAD_REQUEST: 400,
-  };
-  return NextResponse.json(
-    { error: error.message },
-    { status: statusMap[error.code] }
-  );
-}
+import { handleServiceError } from "@/lib/api/error-handler";
+import { parsePaginationQuery } from "@/lib/types/pagination";
+import { createThreadSchema } from "@/lib/schemas";
 
 // GET /api/boards/[boardId]/threads - 스레드 목록 조회
 export async function GET(
@@ -33,9 +16,7 @@ export async function GET(
 ) {
   const { boardId } = await params;
   const { searchParams } = new URL(request.url);
-  const page = parseInt(searchParams.get("page") || "1", 10);
-  const limit = parseInt(searchParams.get("limit") || "20", 10);
-  const search = searchParams.get("search") || undefined;
+  const { page, limit, search } = parsePaginationQuery(searchParams, { limit: 20 });
   const includeDeleted = searchParams.get("includeDeleted") === "true";
 
   try {

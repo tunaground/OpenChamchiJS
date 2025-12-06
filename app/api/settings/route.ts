@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
-import { z } from "zod";
 import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { globalSettingsService } from "@/lib/services/global-settings";
-
-const updateSettingsSchema = z.object({
-  countryCode: z.string().length(2).toUpperCase().optional(),
-});
+import { updateSettingsSchema } from "@/lib/schemas";
 
 // GET /api/settings - Get global settings
 export async function GET() {

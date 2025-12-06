@@ -75,7 +75,6 @@ describe("TOM Renderer", () => {
 
     it("renders colored text", () => {
       const { container } = renderTom("[clr red]colored[/clr]");
-      const span = container.querySelector("span[color]") || container.querySelector("span");
       expect(container.textContent).toContain("colored");
     });
 

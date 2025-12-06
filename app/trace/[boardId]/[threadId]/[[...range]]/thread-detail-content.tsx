@@ -7,6 +7,7 @@ import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } fr
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
 import { useTranslations } from "next-intl";
 import { parse, prerender, render, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
+import { formatDateTime } from "@/lib/utils/date-formatter";
 
 const Container = styled.div`
   padding: 3.2rem;
@@ -726,16 +727,6 @@ export function ThreadDetailContent({
     }
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
 
   // Render anchor stack recursively for a given source key
   // sourceKey format: "main:{responseId}" for main responses, "anchor:{parentSourceKey}:{responseId}" for nested
@@ -777,7 +768,7 @@ export function ThreadDetailContent({
                       <ResponseAuthorId>({anchorResponse.authorId})</ResponseAuthorId>
                     </ResponseInfo>
                     <ResponseInfo>
-                      <ResponseDate>{formatDate(anchorResponse.createdAt)}</ResponseDate>
+                      <ResponseDate>{formatDateTime(anchorResponse.createdAt)}</ResponseDate>
                     </ResponseInfo>
                   </ResponseHeader>
                   <ResponseContent>
@@ -925,11 +916,11 @@ export function ThreadDetailContent({
             </MetaItem>
             <MetaItem>
               <MetaLabel>{labels.updatedAt}:</MetaLabel>
-              <MetaValue>{formatDate(thread.updatedAt)}</MetaValue>
+              <MetaValue>{formatDateTime(thread.updatedAt)}</MetaValue>
             </MetaItem>
             <MetaItem>
               <MetaLabel>{labels.createdAt}:</MetaLabel>
-              <MetaValue>{formatDate(thread.createdAt)}</MetaValue>
+              <MetaValue>{formatDateTime(thread.createdAt)}</MetaValue>
             </MetaItem>
           </ThreadMeta>
         </ThreadHeader>
@@ -953,7 +944,7 @@ export function ThreadDetailContent({
                     <ResponseAuthorId>({response.authorId})</ResponseAuthorId>
                   </ResponseInfo>
                   <ResponseInfo>
-                    <ResponseDate>{formatDate(response.createdAt)}</ResponseDate>
+                    <ResponseDate>{formatDateTime(response.createdAt)}</ResponseDate>
                   </ResponseInfo>
                 </ResponseHeader>
                 <ResponseContent>

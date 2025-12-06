@@ -1,8 +1,9 @@
 import bcrypt from "bcryptjs";
-import { createResponseService, ResponseServiceError } from "@/lib/services/response";
+import { createResponseService } from "@/lib/services/response";
 import { PermissionService } from "@/lib/services/permission";
 import { ResponseRepository, ResponseData } from "@/lib/repositories/interfaces/response";
 import { ThreadRepository, ThreadData } from "@/lib/repositories/interfaces/thread";
+import { BoardRepository, BoardData } from "@/lib/repositories/interfaces/board";
 
 jest.mock("bcryptjs");
 
@@ -15,6 +16,20 @@ describe("ResponseService", () => {
       Promise.resolve(hash === `hashed_${password}`)
     );
   });
+
+  const mockBoard: BoardData = {
+    id: "test-board",
+    name: "Test Board",
+    description: null,
+    threadsPerPage: 20,
+    responsesPerPage: 50,
+    maxResponsesPerThread: 1000,
+    blockForeignIp: false,
+    deleted: false,
+    defaultUsername: null,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
 
   const mockThread: ThreadData = {
     id: 1,
@@ -66,7 +81,17 @@ describe("ResponseService", () => {
   const createMockPermission = (): jest.Mocked<PermissionService> => ({
     getUserPermissions: jest.fn(),
     hasPermission: jest.fn(),
+    hasAnyPermission: jest.fn(),
     checkUserPermission: jest.fn(),
+    checkUserPermissions: jest.fn(),
+  });
+
+  const createMockBoardRepo = (): jest.Mocked<BoardRepository> => ({
+    findAll: jest.fn(),
+    findById: jest.fn(),
+    create: jest.fn(),
+    update: jest.fn(),
+    updateConfig: jest.fn(),
   });
 
   describe("findByThreadId", () => {
@@ -197,14 +222,18 @@ describe("ResponseService", () => {
       const mockResponseRepo = createMockResponseRepo();
       const mockThreadRepo = createMockThreadRepo();
       const mockPermission = createMockPermission();
+      const mockBoardRepo = createMockBoardRepo();
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
+      mockBoardRepo.findById.mockResolvedValue(mockBoard);
+      mockResponseRepo.countByThreadId.mockResolvedValue(0);
       mockResponseRepo.create.mockResolvedValue({ ...mockResponse, ...createInput, seq: 1 });
       mockThreadRepo.updateBumpTime.mockResolvedValue(mockThread);
 
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: mockBoardRepo,
         permissionService: mockPermission,
       });
 
@@ -264,9 +293,7 @@ describe("ResponseService", () => {
 
       mockResponseRepo.findById.mockResolvedValue(mockResponse);
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "thread:edit"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockResponseRepo.update.mockResolvedValue({ ...mockResponse, ...updateInput });
 
       const service = createResponseService({
@@ -287,9 +314,7 @@ describe("ResponseService", () => {
 
       mockResponseRepo.findById.mockResolvedValue(mockResponse);
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "thread:test-board:edit"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockResponseRepo.update.mockResolvedValue({ ...mockResponse, ...updateInput });
 
       const service = createResponseService({
@@ -310,7 +335,7 @@ describe("ResponseService", () => {
 
       mockResponseRepo.findById.mockResolvedValue(mockResponse);
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockResolvedValue(false);
+      mockPermission.checkUserPermissions.mockResolvedValue(false);
 
       const service = createResponseService({
         responseRepository: mockResponseRepo,
@@ -351,9 +376,7 @@ describe("ResponseService", () => {
 
       mockResponseRepo.findById.mockResolvedValue(mockResponse);
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockImplementation(
-        async (_, permission) => permission === "thread:delete"
-      );
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockResponseRepo.delete.mockResolvedValue({ ...mockResponse, deleted: true });
 
       const service = createResponseService({
@@ -374,7 +397,7 @@ describe("ResponseService", () => {
 
       mockResponseRepo.findById.mockResolvedValue(mockResponse);
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockResolvedValue(false);
+      mockPermission.checkUserPermissions.mockResolvedValue(false);
       mockResponseRepo.delete.mockResolvedValue({ ...mockResponse, deleted: true });
 
       const service = createResponseService({
@@ -395,7 +418,7 @@ describe("ResponseService", () => {
 
       mockResponseRepo.findById.mockResolvedValue(mockResponse);
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermission.mockResolvedValue(false);
+      mockPermission.checkUserPermissions.mockResolvedValue(false);
 
       const service = createResponseService({
         responseRepository: mockResponseRepo,

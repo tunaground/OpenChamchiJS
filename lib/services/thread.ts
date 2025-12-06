@@ -19,13 +19,14 @@ import {
   normalizePaginationParams,
   createPaginatedResult,
 } from "@/lib/types/pagination";
+import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
 
-export class ThreadServiceError extends Error {
+export class ThreadServiceError extends ServiceError {
   constructor(
     message: string,
-    public code: "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "BAD_REQUEST"
+    code: ServiceErrorCode
   ) {
-    super(message);
+    super(message, code);
     this.name = "ThreadServiceError";
   }
 }
@@ -70,17 +71,10 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
   ): Promise<boolean> {
     if (!userId) return false;
 
-    const permissions = [
+    return permissionService.checkUserPermissions(userId, [
       `thread:${action}`,
       `thread:${boardId}:${action}`,
-    ];
-
-    for (const permission of permissions) {
-      if (await permissionService.checkUserPermission(userId, permission)) {
-        return true;
-      }
-    }
-    return false;
+    ]);
   }
 
   return {

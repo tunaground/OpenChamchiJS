@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { userService, UserServiceError } from "@/lib/services/user";
+import { handleServiceError } from "@/lib/api/error-handler";
 
 interface Props {
   params: Promise<{ userId: string }>;
@@ -20,22 +21,9 @@ export async function GET(request: NextRequest, { params }: Props) {
     return NextResponse.json(user);
   } catch (error) {
     if (error instanceof UserServiceError) {
-      const statusMap = {
-        UNAUTHORIZED: 401,
-        FORBIDDEN: 403,
-        NOT_FOUND: 404,
-        BAD_REQUEST: 400,
-      };
-      return NextResponse.json(
-        { error: error.message },
-        { status: statusMap[error.code] }
-      );
+      return handleServiceError(error);
     }
-    console.error("Error fetching user:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    throw error;
   }
 }
 
@@ -52,21 +40,8 @@ export async function DELETE(request: NextRequest, { params }: Props) {
     return NextResponse.json({ success: true });
   } catch (error) {
     if (error instanceof UserServiceError) {
-      const statusMap = {
-        UNAUTHORIZED: 401,
-        FORBIDDEN: 403,
-        NOT_FOUND: 404,
-        BAD_REQUEST: 400,
-      };
-      return NextResponse.json(
-        { error: error.message },
-        { status: statusMap[error.code] }
-      );
+      return handleServiceError(error);
     }
-    console.error("Error deleting user:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    throw error;
   }
 }

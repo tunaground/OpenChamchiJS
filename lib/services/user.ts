@@ -6,13 +6,15 @@ import { userRepository as defaultUserRepository } from "@/lib/repositories/pris
 import { roleRepository as defaultRoleRepository } from "@/lib/repositories/prisma/role";
 import { UserRepository, UserWithRoles } from "@/lib/repositories/interfaces/user";
 import { RoleRepository, RoleData } from "@/lib/repositories/interfaces/role";
+import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
+import { DEFAULT_USER_LIMIT } from "@/lib/types/pagination";
 
-export class UserServiceError extends Error {
+export class UserServiceError extends ServiceError {
   constructor(
     message: string,
-    public code: "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "BAD_REQUEST"
+    code: ServiceErrorCode
   ) {
-    super(message);
+    super(message, code);
     this.name = "UserServiceError";
   }
 }
@@ -66,7 +68,7 @@ export function createUserService(deps: UserServiceDeps): UserService {
     ) {
       await checkPermission(requesterId, "user:read");
 
-      const { page = 1, search, limit = 20 } = options || {};
+      const { page = 1, search, limit = DEFAULT_USER_LIMIT } = options || {};
       const offset = (page - 1) * limit;
 
       const [users, total] = await Promise.all([
