@@ -51,18 +51,16 @@ interface ResponseServiceDeps {
 export function createResponseService(deps: ResponseServiceDeps): ResponseService {
   const { responseRepository, threadRepository, permissionService } = deps;
 
-  async function checkThreadPermission(
+  async function checkResponsePermission(
     userId: string | null,
     boardId: string,
-    action: "edit" | "delete"
+    action: "update" | "delete"
   ): Promise<boolean> {
     if (!userId) return false;
 
     const permissions = [
-      "thread:all",
-      `thread:${action}`,
-      `thread:${boardId}:all`,
-      `thread:${boardId}:${action}`,
+      `response:${action}`,
+      `response:${boardId}:${action}`,
     ];
 
     for (const permission of permissions) {
@@ -137,7 +135,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkThreadPermission(userId, thread.boardId, "edit");
+      const hasPermission = await checkResponsePermission(userId, thread.boardId, "update");
       if (!hasPermission) {
         throw new ResponseServiceError("Permission denied", "FORBIDDEN");
       }
@@ -160,7 +158,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkThreadPermission(
+      const hasPermission = await checkResponsePermission(
         userId,
         thread.boardId,
         "delete"

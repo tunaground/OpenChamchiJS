@@ -50,14 +50,12 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
   async function checkThreadPermission(
     userId: string | null,
     boardId: string,
-    action: "edit" | "delete"
+    action: "update" | "delete"
   ): Promise<boolean> {
     if (!userId) return false;
 
     const permissions = [
-      "thread:all",
       `thread:${action}`,
-      `thread:${boardId}:all`,
       `thread:${boardId}:${action}`,
     ];
 
@@ -113,7 +111,7 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
         throw new ThreadServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkThreadPermission(userId, thread.boardId, "edit");
+      const hasPermission = await checkThreadPermission(userId, thread.boardId, "update");
       if (!hasPermission) {
         throw new ThreadServiceError("Permission denied", "FORBIDDEN");
       }

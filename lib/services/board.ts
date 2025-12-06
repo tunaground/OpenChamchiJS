@@ -56,17 +56,45 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
 
   async function createBoardPermissions(boardId: string): Promise<void> {
     await permissionRepository.createMany([
+      // 보드 권한
       {
-        name: `thread:${boardId}:all`,
-        description: `${boardId} 보드의 스레드 전체 권한`,
+        name: `board:${boardId}:update`,
+        description: `${boardId} 보드 수정`,
       },
       {
-        name: `thread:${boardId}:edit`,
-        description: `${boardId} 보드의 스레드 수정`,
+        name: `board:${boardId}:delete`,
+        description: `${boardId} 보드 삭제`,
+      },
+      // 공지 권한
+      {
+        name: `notice:${boardId}:create`,
+        description: `${boardId} 보드 공지 생성`,
+      },
+      {
+        name: `notice:${boardId}:update`,
+        description: `${boardId} 보드 공지 수정`,
+      },
+      {
+        name: `notice:${boardId}:delete`,
+        description: `${boardId} 보드 공지 삭제`,
+      },
+      // 스레드 권한
+      {
+        name: `thread:${boardId}:update`,
+        description: `${boardId} 보드 스레드 수정`,
       },
       {
         name: `thread:${boardId}:delete`,
-        description: `${boardId} 보드의 스레드 삭제`,
+        description: `${boardId} 보드 스레드 삭제`,
+      },
+      // 응답 권한
+      {
+        name: `response:${boardId}:update`,
+        description: `${boardId} 보드 응답 수정`,
+      },
+      {
+        name: `response:${boardId}:delete`,
+        description: `${boardId} 보드 응답 삭제`,
       },
     ]);
   }
@@ -77,10 +105,7 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
     },
 
     async findAllWithThreadCount(userId: string): Promise<BoardWithThreadCount[]> {
-      const hasPermission = await checkPermissions(userId, [
-        "board:all",
-        "board:edit",
-      ]);
+      const hasPermission = await checkPermissions(userId, ["board:read"]);
       if (!hasPermission) {
         throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
@@ -96,10 +121,7 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
     },
 
     async create(userId: string, data: CreateBoardInput): Promise<BoardData> {
-      const hasPermission = await checkPermissions(userId, [
-        "board:all",
-        "board:write",
-      ]);
+      const hasPermission = await checkPermissions(userId, ["board:create"]);
       if (!hasPermission) {
         throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
@@ -120,17 +142,17 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
       id: string,
       data: UpdateBoardInput
     ): Promise<BoardData> {
-      const hasPermission = await checkPermissions(userId, [
-        "board:all",
-        "board:edit",
-      ]);
-      if (!hasPermission) {
-        throw new BoardServiceError("Permission denied", "FORBIDDEN");
-      }
-
       const board = await boardRepository.findById(id);
       if (!board) {
         throw new BoardServiceError("Board not found", "NOT_FOUND");
+      }
+
+      const hasPermission = await checkPermissions(userId, [
+        "board:update",
+        `board:${id}:update`,
+      ]);
+      if (!hasPermission) {
+        throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
 
       return boardRepository.update(id, data);
@@ -141,18 +163,17 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
       id: string,
       data: ConfigBoardInput
     ): Promise<BoardData> {
-      const hasPermission = await checkPermissions(userId, [
-        "board:all",
-        "board:edit",
-        "board:config",
-      ]);
-      if (!hasPermission) {
-        throw new BoardServiceError("Permission denied", "FORBIDDEN");
-      }
-
       const board = await boardRepository.findById(id);
       if (!board) {
         throw new BoardServiceError("Board not found", "NOT_FOUND");
+      }
+
+      const hasPermission = await checkPermissions(userId, [
+        "board:update",
+        `board:${id}:update`,
+      ]);
+      if (!hasPermission) {
+        throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
 
       return boardRepository.updateConfig(id, data);

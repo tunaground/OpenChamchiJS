@@ -114,6 +114,21 @@ model Board {
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   threads               Thread[]
+  notices               Notice[]
+}
+
+model Notice {
+  id        Int      @id @default(autoincrement())
+  boardId   String
+  title     String
+  content   String
+  pinned    Boolean  @default(false)
+  deleted   Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  board     Board    @relation(fields: [boardId], references: [id])
+
+  @@index([boardId])
 }
 
 model Thread {

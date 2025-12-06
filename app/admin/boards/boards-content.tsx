@@ -251,8 +251,8 @@ interface Labels {
 
 interface BoardsContentProps {
   boards: BoardData[];
-  canWrite: boolean;
-  canEdit: boolean;
+  canCreate: boolean;
+  canUpdate: boolean;
   labels: Labels;
 }
 
@@ -278,7 +278,7 @@ const defaultFormData: FormData = {
   showUserCount: false,
 };
 
-export function BoardsContent({ boards: initialBoards, canWrite, canEdit, labels }: BoardsContentProps) {
+export function BoardsContent({ boards: initialBoards, canCreate, canUpdate, labels }: BoardsContentProps) {
   const [boards, setBoards] = useState(initialBoards);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedBoard, setSelectedBoard] = useState<BoardData | null>(null);
@@ -423,7 +423,7 @@ export function BoardsContent({ boards: initialBoards, canWrite, canEdit, labels
     <Container>
       <Header>
         <Title>{labels.title}</Title>
-        {canWrite && (
+        {canCreate && (
           <Button onClick={openCreateModal}>{labels.createBoard}</Button>
         )}
       </Header>
@@ -456,17 +456,17 @@ export function BoardsContent({ boards: initialBoards, canWrite, canEdit, labels
                 </Td>
                 <Td>
                   <ActionButtons>
-                    {canEdit && (
+                    {canUpdate && (
                       <SmallButton onClick={() => openEditModal(board)}>
                         {labels.edit}
                       </SmallButton>
                     )}
-                    {canEdit && !board.deleted && (
+                    {canUpdate && !board.deleted && (
                       <SmallButton onClick={() => openDeleteModal(board)}>
                         {labels.delete}
                       </SmallButton>
                     )}
-                    {canEdit && board.deleted && (
+                    {canUpdate && board.deleted && (
                       <SmallButton onClick={() => openRestoreModal(board)}>
                         {labels.restore}
                       </SmallButton>

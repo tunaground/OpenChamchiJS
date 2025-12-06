@@ -9,8 +9,8 @@ export default async function AdminBoardsPage() {
   const session = (await getServerSession(authOptions))!;
   const userId = session.user.id;
 
-  const canWrite = await permissionService.checkUserPermission(userId, "board:write");
-  const canEdit = await permissionService.checkUserPermission(userId, "board:edit");
+  const canCreate = await permissionService.checkUserPermission(userId, "board:create");
+  const canUpdate = await permissionService.checkUserPermission(userId, "board:update");
 
   const boards = await boardService.findAllWithThreadCount(userId);
 
@@ -30,8 +30,8 @@ export default async function AdminBoardsPage() {
         showUserCount: board.showUserCount,
         createdAt: board.createdAt.toISOString(),
       }))}
-      canWrite={canWrite}
-      canEdit={canEdit}
+      canCreate={canCreate}
+      canUpdate={canUpdate}
       labels={{
         title: t("title"),
         createBoard: t("createBoard"),
