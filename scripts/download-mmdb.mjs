@@ -50,6 +50,7 @@ async function downloadMmdb() {
       https.get(downloadUrl, (response) => {
         // Handle redirects
         if (response.statusCode === 301 || response.statusCode === 302) {
+          response.resume(); // Consume response to free up memory
           const redirectUrl = response.headers.location;
           if (!redirectUrl) {
             reject(new Error("Redirect without location header"));
