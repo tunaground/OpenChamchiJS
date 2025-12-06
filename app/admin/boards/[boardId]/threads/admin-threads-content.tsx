@@ -582,7 +582,8 @@ export function AdminThreadsContent({
       const res = await fetch(`/api/boards/${boardId}/threads/${thread.id}/responses?limit=1000&includeIp=true&includeDeleted=true`);
       if (res.ok) {
         const data = await res.json();
-        setResponses(data);
+        // Filter out seq 0 (thread body) - it cannot be modified via this modal
+        setResponses(data.filter((r: ResponseData) => r.seq !== 0));
       }
     } finally {
       setLoadingResponses(false);

@@ -215,8 +215,18 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
       data: UpdateResponseInput
     ): Promise<ResponseData> {
       const response = await responseRepository.findById(id);
-      if (!response || response.deleted) {
+      if (!response) {
         throw new ResponseServiceError("Response not found", "NOT_FOUND");
+      }
+
+      // If response is deleted, only allow restoring (setting deleted to false)
+      if (response.deleted && data.deleted !== false) {
+        throw new ResponseServiceError("Response not found", "NOT_FOUND");
+      }
+
+      // seq 0 (thread body) cannot be modified via response API
+      if (response.seq === 0 && (data.visible !== undefined || data.deleted !== undefined)) {
+        throw new ResponseServiceError("Cannot modify thread body response", "BAD_REQUEST");
       }
 
       const thread = await threadRepository.findById(response.threadId);
@@ -242,6 +252,11 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Response not found", "NOT_FOUND");
       }
 
+      // seq 0 (thread body) cannot be modified via response API
+      if (response.seq === 0) {
+        throw new ResponseServiceError("Cannot modify thread body response", "BAD_REQUEST");
+      }
+
       // Password holders can restore hidden responses, so we don't check response.deleted here
       // But they cannot restore deleted responses (deleted can only be managed by admins)
       if (response.deleted) {
@@ -264,6 +279,11 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
       const response = await responseRepository.findById(id);
       if (!response || response.deleted) {
         throw new ResponseServiceError("Response not found", "NOT_FOUND");
+      }
+
+      // seq 0 (thread body) cannot be deleted via response API
+      if (response.seq === 0) {
+        throw new ResponseServiceError("Cannot delete thread body response", "BAD_REQUEST");
       }
 
       const thread = await threadRepository.findById(response.threadId);

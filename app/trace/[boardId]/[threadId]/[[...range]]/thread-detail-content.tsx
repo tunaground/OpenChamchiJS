@@ -400,43 +400,65 @@ const ErrorMessage = styled.p`
 `;
 
 const ManageModalContent = styled(ModalContent)`
-  max-width: 70rem;
+  max-width: 50rem;
+  max-height: 90vh;
+  overflow-y: auto;
 `;
 
-const ResponseTable = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 1.6rem;
-  font-size: 1.4rem;
+const ManageResponseCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 60vh;
+  overflow-y: auto;
 `;
 
-const Th = styled.th`
-  text-align: left;
-  padding: 1rem;
-  background: ${(props) => props.theme.surfaceHover};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-  font-weight: 500;
+const ManageResponseCard = styled.div`
+  background: ${(props) => props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+  padding: 1.2rem;
 `;
 
-const Td = styled.td`
-  padding: 1rem;
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-  vertical-align: middle;
+const ManageResponseCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+`;
+
+const ManageResponseCardContent = styled.div`
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textPrimary};
+  margin-bottom: 0.8rem;
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-height: 8rem;
+  overflow: hidden;
+`;
+
+const ManageResponseCardActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
 `;
 
 const StatusBadge = styled.span<{ $visible: boolean }>`
   display: inline-block;
-  padding: 0.3rem 0.6rem;
+  padding: 0.2rem 0.8rem;
   border-radius: 4px;
   font-size: 1.2rem;
-  background: ${(props) => props.$visible ? props.theme.success + "20" : props.theme.error + "20"};
-  color: ${(props) => props.$visible ? props.theme.success : props.theme.error};
+  font-weight: 500;
+  background: ${(props) => props.$visible ? "#22c55e" : "#f59e0b"};
+  color: white;
 `;
 
 const ActionButton = styled.button`
   padding: 0.4rem 0.8rem;
   background: transparent;
-  color: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.textPrimary};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   font-size: 1.2rem;
@@ -450,14 +472,6 @@ const ActionButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
-`;
-
-const ContentPreview = styled.span`
-  display: inline-block;
-  max-width: 20rem;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 `;
 
 const UnlockSection = styled.div`
@@ -620,6 +634,9 @@ export function ThreadDetailContent({
   const [allResponses, setAllResponses] = useState<(ResponseData & { visible: boolean })[]>([]);
   const [loadingResponses, setLoadingResponses] = useState(false);
   const [togglingId, setTogglingId] = useState<string | null>(null);
+  const [selectedResponseIds, setSelectedResponseIds] = useState<Set<string>>(new Set());
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   useEffect(() => {
     setResponses(initialResponses);
@@ -813,6 +830,8 @@ export function ThreadDetailContent({
     setManageUnlocked(false);
     setManageError("");
     setAllResponses([]);
+    setSelectedResponseIds(new Set());
+    setLastSelectedIndex(null);
   };
 
   const unlockManage = async () => {
@@ -833,7 +852,8 @@ export function ThreadDetailContent({
 
       if (res.ok) {
         const data = await res.json();
-        setAllResponses(data);
+        // Filter out seq 0 (thread body) - it cannot be modified via this modal
+        setAllResponses(data.filter((r: ResponseData & { visible: boolean }) => r.seq !== 0));
         setManageUnlocked(true);
       } else {
         setManageError(labels.invalidPassword);
@@ -873,6 +893,71 @@ export function ThreadDetailContent({
       }
     } finally {
       setTogglingId(null);
+    }
+  };
+
+  const handleResponseCheckboxClick = (index: number, e: React.MouseEvent<HTMLInputElement>) => {
+    const id = allResponses[index].id;
+    const newSet = new Set(selectedResponseIds);
+
+    if (e.shiftKey && lastSelectedIndex !== null) {
+      // Shift+click: select range
+      const start = Math.min(lastSelectedIndex, index);
+      const end = Math.max(lastSelectedIndex, index);
+      for (let i = start; i <= end; i++) {
+        newSet.add(allResponses[i].id);
+      }
+    } else {
+      // Normal click: toggle single item
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      setLastSelectedIndex(index);
+    }
+
+    setSelectedResponseIds(newSet);
+  };
+
+  const toggleAllResponses = () => {
+    if (selectedResponseIds.size === allResponses.length) {
+      setSelectedResponseIds(new Set());
+    } else {
+      setSelectedResponseIds(new Set(allResponses.map((r) => r.id)));
+    }
+    setLastSelectedIndex(null);
+  };
+
+  const handleBulkHide = async () => {
+    if (selectedResponseIds.size === 0) return;
+    setBulkDeleting(true);
+    try {
+      const hidePromises = Array.from(selectedResponseIds).map((id) =>
+        fetch(
+          `/api/boards/${thread.boardId}/threads/${thread.id}/responses/${id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              password: managePassword,
+              visible: false,
+            }),
+          }
+        )
+      );
+      await Promise.all(hidePromises);
+
+      // Update local state
+      setAllResponses((prev) =>
+        prev.map((r) =>
+          selectedResponseIds.has(r.id) ? { ...r, visible: false } : r
+        )
+      );
+      setSelectedResponseIds(new Set());
+      router.refresh();
+    } finally {
+      setBulkDeleting(false);
     }
   };
 
@@ -1047,39 +1132,57 @@ export function ThreadDetailContent({
                 {allResponses.length === 0 ? (
                   <ModalDescription>{labels.noHiddenResponses}</ModalDescription>
                 ) : (
-                  <ResponseTable>
-                    <thead>
-                      <tr>
-                        <Th style={{ width: "10%" }}>{labels.seq}</Th>
-                        <Th style={{ width: "45%" }}>{labels.content}</Th>
-                        <Th style={{ width: "20%" }}>{labels.status}</Th>
-                        <Th style={{ width: "25%" }}>{labels.actions}</Th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {allResponses.map((response) => (
-                        <tr key={response.id}>
-                          <Td>#{response.seq}</Td>
-                          <Td>
-                            <ContentPreview>{response.content}</ContentPreview>
-                          </Td>
-                          <Td>
+                  <>
+                    <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.6rem" }}>
+                      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                        <input
+                          type="checkbox"
+                          checked={selectedResponseIds.size === allResponses.length && allResponses.length > 0}
+                          onChange={toggleAllResponses}
+                          style={{ width: "1.6rem", height: "1.6rem" }}
+                        />
+                        <span style={{ fontSize: "1.2rem" }}>전체 선택</span>
+                      </label>
+                      {selectedResponseIds.size > 0 && (
+                        <ConfirmButton onClick={handleBulkHide} disabled={bulkDeleting}>
+                          {labels.hide} ({selectedResponseIds.size})
+                        </ConfirmButton>
+                      )}
+                    </div>
+                    <ManageResponseCards>
+                      {allResponses.map((response, index) => (
+                        <ManageResponseCard key={response.id}>
+                          <ManageResponseCardHeader>
+                            <input
+                              type="checkbox"
+                              checked={selectedResponseIds.has(response.id)}
+                              onClick={(e) => handleResponseCheckboxClick(index, e)}
+                              readOnly
+                              style={{ width: "1.6rem", height: "1.6rem", cursor: "pointer" }}
+                            />
+                            <span style={{ fontWeight: 500 }}>#{response.seq}</span>
+                            <span>{response.username}</span>
+                            <span style={{ fontSize: "1.1rem", color: "gray" }}>({response.authorId})</span>
                             <StatusBadge $visible={response.visible}>
                               {response.visible ? labels.visible : labels.hidden}
                             </StatusBadge>
-                          </Td>
-                          <Td>
+                          </ManageResponseCardHeader>
+                          <ManageResponseCardContent>
+                            {response.content.substring(0, 200)}
+                            {response.content.length > 200 && "..."}
+                          </ManageResponseCardContent>
+                          <ManageResponseCardActions>
                             <ActionButton
                               onClick={() => toggleVisibility(response.id, response.visible)}
                               disabled={togglingId === response.id}
                             >
                               {response.visible ? labels.hide : labels.restore}
                             </ActionButton>
-                          </Td>
-                        </tr>
+                          </ManageResponseCardActions>
+                        </ManageResponseCard>
                       ))}
-                    </tbody>
-                  </ResponseTable>
+                    </ManageResponseCards>
+                  </>
                 )}
               </>
             )}
