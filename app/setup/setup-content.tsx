@@ -17,7 +17,7 @@ const Card = styled.div`
   border-radius: 8px;
   padding: 3.2rem;
   width: 100%;
-  max-width: 500px;
+  max-width: 50rem;
   text-align: center;
 `;
 

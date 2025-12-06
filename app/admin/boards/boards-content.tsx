@@ -8,7 +8,7 @@ import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
   padding: 3.2rem;
-  max-width: 1200px;
+  max-width: 120rem;
   margin: 0 auto;
 `;
 
@@ -143,7 +143,7 @@ const ModalContent = styled.div`
   border-radius: 8px;
   padding: 2.4rem;
   width: 100%;
-  max-width: 500px;
+  max-width: 50rem;
   max-height: 90vh;
   overflow-y: auto;
 `;

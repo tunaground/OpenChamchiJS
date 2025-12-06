@@ -10,7 +10,7 @@ import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
 
 const Container = styled.div`
   padding: 3.2rem;
-  max-width: 1200px;
+  max-width: 120rem;
   margin: 0 auto;
 `;
 
@@ -154,7 +154,7 @@ const SearchForm = styled.form`
 
 const SearchInput = styled.input`
   width: 100%;
-  max-width: 300px;
+  max-width: 30rem;
   padding: 0.8rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
@@ -205,7 +205,7 @@ const ModalContent = styled.div`
   border-radius: 8px;
   padding: 2.4rem;
   width: 100%;
-  max-width: 600px;
+  max-width: 60rem;
   max-height: 90vh;
   overflow-y: auto;
 `;
@@ -252,7 +252,7 @@ const Textarea = styled.textarea`
   font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
-  min-height: 150px;
+  min-height: 15rem;
   resize: vertical;
   font-family: inherit;
 

@@ -7,9 +7,9 @@ const Button = styled(Link)`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
+  width: 4rem;
+  height: 4rem;
+  border-radius: 0.8rem;
   color: ${(props) => props.theme.textSecondary};
   transition: background 0.15s, color 0.15s;
 
@@ -19,8 +19,8 @@ const Button = styled(Link)`
   }
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: 2rem;
+    height: 2rem;
   }
 `;
 

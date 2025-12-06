@@ -7,7 +7,7 @@ const Bar = styled.header`
   top: 0;
   left: 0;
   right: 0;
-  height: 56px;
+  height: 5.6rem;
   background: ${(props) => props.theme.surface};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
   display: flex;
@@ -20,11 +20,11 @@ const MenuButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 4rem;
+  height: 4rem;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 0.8rem;
   cursor: pointer;
   color: ${(props) => props.theme.textPrimary};
 
@@ -33,8 +33,8 @@ const MenuButton = styled.button`
   }
 
   svg {
-    width: 24px;
-    height: 24px;
+    width: 2.4rem;
+    height: 2.4rem;
   }
 `;
 

@@ -8,11 +8,11 @@ const Button = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  width: 4rem;
+  height: 4rem;
   border: none;
   background: transparent;
-  border-radius: 8px;
+  border-radius: 0.8rem;
   cursor: pointer;
   color: ${(props) => props.theme.textPrimary};
 
@@ -21,8 +21,8 @@ const Button = styled.button`
   }
 
   svg {
-    width: 20px;
-    height: 20px;
+    width: 2rem;
+    height: 2rem;
   }
 `;
 

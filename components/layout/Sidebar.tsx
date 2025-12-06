@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 const Overlay = styled.div<{ $open: boolean }>`
   position: fixed;
-  top: 56px;
+  top: 5.6rem;
   left: 0;
   right: 0;
   bottom: 0;
@@ -14,17 +14,17 @@ const Overlay = styled.div<{ $open: boolean }>`
   transition: opacity 0.2s, visibility 0.2s;
   z-index: 90;
 
-  @media (min-width: 768px) {
+  @media (min-width: ${(props) => props.theme.breakpoint}) {
     display: none;
   }
 `;
 
 const SidebarContainer = styled.aside<{ $open: boolean }>`
   position: fixed;
-  top: 56px;
+  top: 5.6rem;
   left: 0;
   bottom: 0;
-  width: 280px;
+  width: 16.8rem;
   background: ${(props) => props.theme.surface};
   border-right: 1px solid ${(props) => props.theme.surfaceBorder};
   transform: translateX(${(props) => (props.$open ? "0" : "-100%")});
@@ -32,7 +32,7 @@ const SidebarContainer = styled.aside<{ $open: boolean }>`
   z-index: 95;
   overflow-y: auto;
 
-  @media (min-width: 768px) {
+  @media (min-width: ${(props) => props.theme.breakpoint}) {
     transform: translateX(${(props) => (props.$open ? "0" : "-100%")});
   }
 `;

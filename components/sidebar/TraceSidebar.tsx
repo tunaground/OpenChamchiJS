@@ -26,7 +26,7 @@ const NavItem = styled.li`
 const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
   display: block;
   padding: 1rem 1.2rem;
-  border-radius: 6px;
+  border-radius: 0.6rem;
   text-decoration: none;
   font-size: 1.4rem;
   color: ${(props) =>
@@ -86,7 +86,7 @@ const NavButton = styled.button<{ $active?: boolean }>`
   display: block;
   width: 100%;
   padding: 1rem 1.2rem;
-  border-radius: 6px;
+  border-radius: 0.6rem;
   text-decoration: none;
   font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};

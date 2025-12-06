@@ -20,7 +20,7 @@ const PageLink = styled(Link)<{ $active?: boolean }>`
   padding: 0 0.8rem;
   font-size: 1.4rem;
   text-decoration: none;
-  border-radius: 4px;
+  border-radius: 0.4rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   background: ${(props) =>
     props.$active ? props.theme.buttonPrimary : props.theme.surface};
@@ -52,7 +52,7 @@ const DisabledLink = styled.span`
   height: 3.2rem;
   padding: 0 0.8rem;
   font-size: 1.4rem;
-  border-radius: 4px;
+  border-radius: 0.4rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   background: ${(props) => props.theme.surface};
   color: ${(props) => props.theme.textSecondary};

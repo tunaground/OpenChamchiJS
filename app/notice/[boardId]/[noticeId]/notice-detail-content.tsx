@@ -6,7 +6,7 @@ import styled from "styled-components";
 const Container = styled.div`
   min-height: 100vh;
   padding: 3.2rem;
-  max-width: 800px;
+  max-width: 80rem;
   margin: 0 auto;
 `;
 
@@ -27,7 +27,7 @@ const BackLink = styled(Link)`
 const Article = styled.article`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
+  border-radius: 0.8rem;
   overflow: hidden;
 `;
 
@@ -55,7 +55,7 @@ const PinnedBadge = styled.span`
   padding: 0.4rem 0.8rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
-  border-radius: 4px;
+  border-radius: 0.4rem;
   font-size: 1.2rem;
   font-weight: 500;
 `;

@@ -8,7 +8,7 @@ import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
   padding: 3.2rem;
-  max-width: 800px;
+  max-width: 80rem;
   margin: 0 auto;
 `;
 
@@ -71,7 +71,7 @@ const Textarea = styled.textarea`
   font-size: 1.6rem;
   background: ${(props) => props.theme.surface};
   color: ${(props) => props.theme.textPrimary};
-  min-height: 200px;
+  min-height: 20rem;
   resize: vertical;
   font-family: inherit;
 
@@ -90,7 +90,7 @@ const Row = styled.div`
   grid-template-columns: 1fr 1fr;
   gap: 1.6rem;
 
-  @media (max-width: 600px) {
+  @media (max-width: 60rem) {
     grid-template-columns: 1fr;
   }
 `;

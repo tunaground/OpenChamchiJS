@@ -245,7 +245,7 @@ const FormInput = styled.input`
 
 const FormTextarea = styled.textarea`
   width: 100%;
-  min-height: 120px;
+  min-height: 12rem;
   padding: 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
@@ -314,7 +314,7 @@ const ModalContent = styled.div`
   background: ${(props) => props.theme.surface};
   border-radius: 8px;
   padding: 2.4rem;
-  max-width: 400px;
+  max-width: 40rem;
   width: 90%;
 `;
 
@@ -393,7 +393,7 @@ const ErrorMessage = styled.p`
 `;
 
 const ManageModalContent = styled(ModalContent)`
-  max-width: 700px;
+  max-width: 70rem;
 `;
 
 const ResponseTable = styled.table`
@@ -447,7 +447,7 @@ const ActionButton = styled.button`
 
 const ContentPreview = styled.span`
   display: inline-block;
-  max-width: 200px;
+  max-width: 20rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;

@@ -10,7 +10,7 @@ import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
   padding: 3.2rem;
-  max-width: 1200px;
+  max-width: 120rem;
   margin: 0 auto;
 `;
 
@@ -40,7 +40,7 @@ const SearchInput = styled.input`
   font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
-  width: 300px;
+  width: 30rem;
 
   &:focus {
     outline: none;
@@ -96,8 +96,8 @@ const UserCell = styled.div`
 `;
 
 const Avatar = styled.div`
-  width: 32px;
-  height: 32px;
+  width: 3.2rem;
+  height: 3.2rem;
   border-radius: 50%;
   overflow: hidden;
   background: ${(props) => props.theme.surfaceHover};
@@ -186,7 +186,7 @@ const ModalContent = styled.div`
   border-radius: 8px;
   padding: 2.4rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 40rem;
 `;
 
 const ModalTitle = styled.h2`

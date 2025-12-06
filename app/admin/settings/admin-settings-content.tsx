@@ -7,7 +7,7 @@ import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
   padding: 3.2rem;
-  max-width: 600px;
+  max-width: 60rem;
   margin: 0 auto;
 `;
 
@@ -32,7 +32,7 @@ const Label = styled.label`
 
 const Input = styled.input`
   width: 100%;
-  max-width: 120px;
+  max-width: 12rem;
   padding: 0.8rem 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;

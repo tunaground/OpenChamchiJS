@@ -6,12 +6,12 @@ import { TopBar } from "./TopBar";
 import { Sidebar } from "./Sidebar";
 
 const Main = styled.main<{ $sidebarOpen: boolean }>`
-  padding-top: 56px;
+  padding-top: 5.6rem;
   min-height: 100vh;
   transition: margin-left 0.2s ease-in-out;
 
-  @media (min-width: 768px) {
-    margin-left: ${(props) => (props.$sidebarOpen ? "280px" : "0")};
+  @media (min-width: ${(props) => props.theme.breakpoint}) {
+    margin-left: ${(props) => (props.$sidebarOpen ? "16.8rem" : "0")};
   }
 `;
 

@@ -9,7 +9,7 @@ const Button = styled.button`
   gap: 0.8rem;
   padding: 0.8rem 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 6px;
+  border-radius: 0.6rem;
   background: transparent;
   color: ${(props) => props.theme.textPrimary};
   font-size: 1.4rem;
@@ -21,8 +21,19 @@ const Button = styled.button`
   }
 
   svg {
-    width: 18px;
-    height: 18px;
+    width: 1.8rem;
+    height: 1.8rem;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 0.8rem;
+    gap: 0;
+  }
+`;
+
+const ButtonLabel = styled.span`
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
   }
 `;
 
@@ -49,7 +60,7 @@ export function AuthButton({ isLoggedIn, loginLabel, logoutLabel }: AuthButtonPr
             d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
           />
         </svg>
-        {logoutLabel}
+        <ButtonLabel>{logoutLabel}</ButtonLabel>
       </Button>
     );
   }
@@ -69,7 +80,7 @@ export function AuthButton({ isLoggedIn, loginLabel, logoutLabel }: AuthButtonPr
           d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"
         />
       </svg>
-      {loginLabel}
+      <ButtonLabel>{loginLabel}</ButtonLabel>
     </Button>
   );
 }

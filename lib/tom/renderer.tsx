@@ -91,7 +91,7 @@ const AnchorA = styled.a`
 const YoutubeWrapper = styled.div`
   position: relative;
   width: 100%;
-  max-width: 640px;
+  max-width: 64rem;
   aspect-ratio: 16 / 9;
 
   iframe {

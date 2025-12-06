@@ -26,7 +26,7 @@ const NavItem = styled.li`
 const NavLink = styled(Link)<{ $active: boolean }>`
   display: block;
   padding: 1rem 1.2rem;
-  border-radius: 6px;
+  border-radius: 0.6rem;
   text-decoration: none;
   font-size: 1.4rem;
   color: ${(props) =>

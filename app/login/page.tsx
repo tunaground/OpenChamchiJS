@@ -16,10 +16,10 @@ const Container = styled.div`
 const Card = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
+  border-radius: 0.8rem;
   padding: 3.2rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 40rem;
 `;
 
 const Title = styled.h1`
@@ -35,7 +35,7 @@ const Button = styled.button`
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
-  border-radius: 4px;
+  border-radius: 0.4rem;
   font-size: 1.6rem;
   font-weight: 500;
   cursor: pointer;

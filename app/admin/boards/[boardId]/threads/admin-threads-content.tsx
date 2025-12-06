@@ -11,7 +11,7 @@ import { formatDateTime } from "@/lib/utils/date-formatter";
 
 const Container = styled.div`
   padding: 3.2rem;
-  max-width: 1200px;
+  max-width: 120rem;
   margin: 0 auto;
 `;
 
@@ -184,7 +184,7 @@ const SearchForm = styled.form`
 
 const SearchInput = styled.input`
   width: 100%;
-  max-width: 300px;
+  max-width: 30rem;
   padding: 0.8rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
@@ -235,7 +235,7 @@ const ModalContent = styled.div`
   border-radius: 8px;
   padding: 2.4rem;
   width: 100%;
-  max-width: 500px;
+  max-width: 50rem;
   max-height: 90vh;
   overflow-y: auto;
 `;
