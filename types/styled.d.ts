@@ -1,9 +1,7 @@
 import "styled-components";
+import { AppTheme } from "@/lib/theme/themes";
 
 declare module "styled-components" {
-  export interface DefaultTheme {
-    calcExpColor: string;
-    breakpoint: string;
-    anchorALinkColor: string;
-  }
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  export interface DefaultTheme extends AppTheme {}
 }

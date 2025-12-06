@@ -4,7 +4,6 @@ import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages } from "next-intl/server";
 import { Providers } from "./providers";
 import StyledComponentsRegistry from "@/lib/registry";
-import "./globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

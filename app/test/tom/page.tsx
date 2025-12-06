@@ -1,14 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styled, { ThemeProvider } from "styled-components";
+import styled from "styled-components";
 import { parse, prerender, render, RenderContext } from "@/lib/tom";
-
-const theme = {
-  calcExpColor: "#888",
-  breakpoint: "768px",
-  anchorALinkColor: "#0066cc",
-};
+import { useThemeStore } from "@/lib/store/theme";
 
 const Container = styled.div`
   max-width: 1200px;
@@ -19,6 +14,9 @@ const Container = styled.div`
   gap: 20px;
   height: 100vh;
   box-sizing: border-box;
+  background: ${(props) => props.theme.background};
+  color: ${(props) => props.theme.textPrimary};
+  transition: background 0.3s, color 0.3s;
 `;
 
 const Title = styled.h1`
@@ -48,7 +46,7 @@ const Panel = styled.div`
 const PanelTitle = styled.h2`
   font-size: 1rem;
   margin: 0;
-  color: #666;
+  color: ${(props) => props.theme.textSecondary};
 `;
 
 const TextArea = styled.textarea`
@@ -58,14 +56,16 @@ const TextArea = styled.textarea`
   padding: 12px;
   font-family: monospace;
   font-size: 14px;
-  border: 1px solid #ccc;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   resize: none;
   box-sizing: border-box;
+  background: ${(props) => props.theme.surface};
+  color: ${(props) => props.theme.textPrimary};
 
   &:focus {
     outline: none;
-    border-color: #0066cc;
+    border-color: ${(props) => props.theme.primary};
   }
 `;
 
@@ -73,11 +73,31 @@ const Preview = styled.div`
   flex: 1;
   min-height: 300px;
   padding: 12px;
-  border: 1px solid #ccc;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  background: #fafafa;
+  background: ${(props) => props.theme.surface};
   overflow-wrap: break-word;
   overflow-y: auto;
+`;
+
+const Header = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const ThemeToggle = styled.button`
+  padding: 8px 16px;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  background: ${(props) => props.theme.surface};
+  color: ${(props) => props.theme.textPrimary};
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+  }
 `;
 
 const TagList = styled.div`
@@ -85,21 +105,21 @@ const TagList = styled.div`
   flex-wrap: wrap;
   gap: 8px;
   padding: 12px;
-  background: #f0f0f0;
+  background: ${(props) => props.theme.surfaceHover};
   border-radius: 4px;
 `;
 
 const Tag = styled.code`
   padding: 4px 8px;
-  background: #fff;
-  border: 1px solid #ddd;
+  background: ${(props) => props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   font-size: 12px;
   cursor: pointer;
 
   &:hover {
-    background: #e8f4ff;
-    border-color: #0066cc;
+    background: ${(props) => props.theme.primary}22;
+    border-color: ${(props) => props.theme.primary};
   }
 `;
 
@@ -143,9 +163,10 @@ const defaultText = `[bld]TOM 마크업 테스트[/bld]
 　 しーＪ　　　°。+ *´¨)
 [/aa]`;
 
-export default function TomTestPage() {
+function TomDemo() {
   const [text, setText] = useState(defaultText);
   const [mounted, setMounted] = useState(false);
+  const { mode, toggleMode } = useThemeStore();
 
   useEffect(() => {
     setMounted(true);
@@ -179,34 +200,41 @@ export default function TomTestPage() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container>
+    <Container>
+      <Header>
         <Title>TOM (Tunaground Object Markup) 테스트</Title>
+        <ThemeToggle onClick={toggleMode}>
+          {mode === "light" ? "🌙 Dark" : "☀️ Light"}
+        </ThemeToggle>
+      </Header>
 
-        <TagList>
-          {Object.entries(examples).map(([label, example]) => (
-            <Tag key={label} onClick={() => insertExample(example)}>
-              {label}
-            </Tag>
-          ))}
-        </TagList>
+      <TagList>
+        {Object.entries(examples).map(([label, example]) => (
+          <Tag key={label} onClick={() => insertExample(example)}>
+            {label}
+          </Tag>
+        ))}
+      </TagList>
 
-        <EditorContainer>
-          <Panel>
-            <PanelTitle>입력</PanelTitle>
-            <TextArea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              placeholder="TOM 마크업을 입력하세요..."
-            />
-          </Panel>
+      <EditorContainer>
+        <Panel>
+          <PanelTitle>입력</PanelTitle>
+          <TextArea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            placeholder="TOM 마크업을 입력하세요..."
+          />
+        </Panel>
 
-          <Panel>
-            <PanelTitle>미리보기</PanelTitle>
-            <Preview>{rendered}</Preview>
-          </Panel>
-        </EditorContainer>
-      </Container>
-    </ThemeProvider>
+        <Panel>
+          <PanelTitle>미리보기</PanelTitle>
+          <Preview>{rendered}</Preview>
+        </Panel>
+      </EditorContainer>
+    </Container>
   );
+}
+
+export default function TomTestPage() {
+  return <TomDemo />;
 }
