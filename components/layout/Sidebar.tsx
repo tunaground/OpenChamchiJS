@@ -47,7 +47,7 @@ const SidebarContainer = styled.aside<{ $open: boolean; $compact?: boolean }>`
     css`
       @media (max-width: ${props.theme.breakpoint}) {
         width: 5.6rem;
-        transform: translateX(0);
+        transform: translateX(${props.$open ? "0" : "-100%"});
       }
     `}
 `;

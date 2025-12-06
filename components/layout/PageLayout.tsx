@@ -1,25 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styled, { css } from "styled-components";
+import styled, { css, useTheme } from "styled-components";
 import { TopBar } from "./TopBar";
 import { Sidebar } from "./Sidebar";
 import { useSidebarStore } from "@/lib/store/sidebar";
 
-const Main = styled.main<{ $sidebarOpen: boolean; $compactOnMobile?: boolean }>`
+const Main = styled.main<{ $desktopOpen: boolean; $mobileOpen: boolean; $compactOnMobile?: boolean }>`
   padding-top: 5.6rem;
   min-height: 100vh;
   transition: margin-left 0.2s ease-in-out;
 
   @media (min-width: ${(props) => props.theme.breakpoint}) {
-    margin-left: ${(props) => (props.$sidebarOpen ? "16.8rem" : "0")};
+    margin-left: ${(props) => (props.$desktopOpen ? "16.8rem" : "0")};
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    margin-left: 0;
   }
 
   ${(props) =>
     props.$compactOnMobile &&
     css`
       @media (max-width: ${props.theme.breakpoint}) {
-        margin-left: 5.6rem;
+        margin-left: ${props.$mobileOpen ? "5.6rem" : "0"};
       }
     `}
 `;
@@ -44,30 +48,55 @@ export function PageLayout({
   children,
   compactSidebarOnMobile,
 }: PageLayoutProps) {
-  const { open: sidebarOpen, toggle: toggleSidebar, setOpen: setSidebarOpen } = useSidebarStore();
+  const {
+    desktopOpen,
+    mobileOpen,
+    toggleDesktop,
+    toggleMobile,
+    setMobileOpen,
+  } = useSidebarStore();
   const [mounted, setMounted] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const theme = useTheme();
 
   useEffect(() => {
     setMounted(true);
-  }, []);
 
-  const closeSidebar = () => {
-    setSidebarOpen(false);
+    const breakpoint = parseInt(theme.breakpoint, 10);
+    const checkMobile = () => setIsMobile(window.innerWidth <= breakpoint);
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [theme.breakpoint]);
+
+  const handleMenuClick = () => {
+    if (isMobile) {
+      toggleMobile();
+    } else {
+      toggleDesktop();
+    }
   };
 
-  // Use default value until hydration is complete to prevent mismatch
-  const effectiveSidebarOpen = mounted ? sidebarOpen : true;
+  const closeSidebar = () => {
+    setMobileOpen(false);
+  };
+
+  // Determine effective open state based on screen size
+  const effectiveDesktopOpen = mounted ? desktopOpen : true;
+  const effectiveMobileOpen = mounted ? mobileOpen : false;
+  const sidebarOpen = isMobile ? effectiveMobileOpen : effectiveDesktopOpen;
 
   return (
     <>
       <TopBar
         title={title}
-        onMenuClick={toggleSidebar}
+        onMenuClick={handleMenuClick}
         rightContent={rightContent}
       />
-      {sidebar && (
+      {mounted && sidebar && (
         <Sidebar
-          open={effectiveSidebarOpen}
+          open={sidebarOpen}
           onClose={closeSidebar}
           compactOnMobile={compactSidebarOnMobile}
         >
@@ -75,7 +104,8 @@ export function PageLayout({
         </Sidebar>
       )}
       <Main
-        $sidebarOpen={sidebar ? effectiveSidebarOpen : false}
+        $desktopOpen={sidebar ? (mounted ? desktopOpen : true) : false}
+        $mobileOpen={mounted && sidebar ? mobileOpen : false}
         $compactOnMobile={sidebar ? compactSidebarOnMobile : false}
       >
         <Content>{children}</Content>
