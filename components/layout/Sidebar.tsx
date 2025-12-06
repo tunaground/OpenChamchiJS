@@ -21,7 +21,9 @@ const Overlay = styled.div<{ $open: boolean; $compact?: boolean }>`
   ${(props) =>
     props.$compact &&
     css`
-      display: none;
+      @media (max-width: ${props.theme.breakpoint}) {
+        display: none;
+      }
     `}
 `;
 
@@ -46,8 +48,9 @@ const SidebarContainer = styled.aside<{ $open: boolean; $compact?: boolean }>`
     props.$compact &&
     css`
       @media (max-width: ${props.theme.breakpoint}) {
-        width: 5.6rem;
+        width: ${props.$open ? "5.6rem" : "0"};
         transform: translateX(0);
+        overflow: hidden;
       }
     `}
 `;
