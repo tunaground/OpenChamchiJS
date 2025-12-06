@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
+import { useTranslations } from "next-intl";
+import { parse, prerender, render, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
 
 const Container = styled.div`
   padding: 2rem;
@@ -125,8 +127,14 @@ const ResponseContent = styled.div`
   font-size: 0.9375rem;
   line-height: 1.6;
   color: ${(props) => props.theme.textPrimary};
-  white-space: pre-wrap;
   word-break: break-word;
+
+  /* TOM styles */
+  hr {
+    border: none;
+    border-top: 1px solid ${(props) => props.theme.surfaceBorder};
+    margin: 1rem 0;
+  }
 `;
 
 const ResponseAttachment = styled.div`
@@ -336,6 +344,20 @@ export function ThreadDetailContent({
     setResponses(initialResponses);
   }, [initialResponses]);
 
+  // Prerender TOM content for all responses
+  const prerenderedContents = useMemo(() => {
+    const map = new Map<string, PrerenderedRoot>();
+    for (const response of responses) {
+      const parsed = parse(response.content);
+      const prerendered = prerender(parsed);
+      map.set(response.id, prerendered);
+    }
+    return map;
+  }, [responses]);
+
+  const t = useTranslations();
+  const [, setAnchorInfo] = useState<AnchorInfo | null>(null);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!content.trim()) return;
@@ -449,7 +471,16 @@ export function ThreadDetailContent({
                 </ResponseInfo>
                 <ResponseDate>{formatDate(response.createdAt)}</ResponseDate>
               </ResponseHeader>
-              <ResponseContent>{response.content}</ResponseContent>
+              <ResponseContent>
+                {prerenderedContents.has(response.id)
+                  ? render(prerenderedContents.get(response.id)!, {
+                      boardId: thread.boardId,
+                      threadId: thread.id,
+                      setAnchorInfo,
+                      t,
+                    })
+                  : response.content}
+              </ResponseContent>
               {response.attachment && (
                 <ResponseAttachment>
                   <AttachmentLink
