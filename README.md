@@ -134,7 +134,6 @@ npm test         # Jest 테스트
 npx prisma generate    # Prisma Client 생성
 npx prisma migrate dev # 마이그레이션 생성 및 적용
 npx prisma studio      # Prisma Studio GUI
-npx prisma db seed     # 시드 데이터 생성
 ```
 
 ## 권한 시스템

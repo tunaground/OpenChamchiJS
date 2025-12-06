@@ -13,9 +13,6 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
-  "prisma": {
-    "seed": "npx tsx prisma/seed.ts"
-  },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
     "@fortawesome/fontawesome-svg-core": "^7.1.0",

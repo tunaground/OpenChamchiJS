@@ -6,6 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **License**: MIT (open source)
 - **Repository**: https://github.com/tunaground/OpenChamchiJS
+- Next.js 16 익명 게시판 시스템 (App Router, React 19, TypeScript)
 
 ## Build & Development Commands
 
@@ -27,24 +28,21 @@ npx prisma studio      # Open Prisma Studio GUI
 
 ## Architecture
 
-This is a Next.js 16 project using the App Router with React 19 and TypeScript.
-
 ### Key Directories
 - `app/` - App Router pages and layouts
-- `app/api/auth/` - NextAuth API route
+- `app/api/` - API routes
 - `app/admin/` - Admin pages (requires `admin:read` permission)
-- `app/setup/` - Initial admin setup flow
-- `lib/` - Shared utilities (Prisma client, auth config, i18n)
-- `lib/services/` - Business logic (board, thread, permission)
-- `lib/repositories/interfaces/` - Repository interfaces
-- `lib/repositories/prisma/` - Prisma data access
-- `__tests__/` - Jest unit tests
-- `lib/i18n/` - Internationalization config (next-intl)
+- `app/index/[boardId]/` - Board index page (thread list)
+- `app/trace/[boardId]/[threadId]/` - Thread detail page
+- `app/notice/[boardId]/` - Notice list/detail pages
+- `lib/services/` - Business logic (board, thread, response, permission, notice)
+- `lib/repositories/` - Data access layer (Repository Pattern)
+- `lib/tom/` - TOM (Tunaground Object Markup) parser/renderer
+- `lib/theme/` - Zustand theme store and theme definitions
 - `lib/i18n/messages/` - Translation files (ko.json, en.json)
-- `prisma/` - Prisma schema and migrations
-- `types/` - TypeScript type declarations
-- `public/` - Static assets
-- `proxy.ts` - Next.js 16 proxy (handles setup check, auth redirects)
+- `components/layout/` - PageLayout, TopBar, Sidebar, buttons
+- `components/sidebar/` - AdminSidebar, BoardListSidebar, TraceSidebar
+- `proxy.ts` - Next.js 16 middleware (setup check, auth redirects)
 
 ### Conventions
 - **Server Components by default** - Add `'use client'` directive only when needed
@@ -78,6 +76,8 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - Theme colors defined in `lib/theme/themes.ts` - use `props.theme.textPrimary`, `props.theme.buttonPrimary`, etc.
 - Global styles in `app/globals.css`
 - `ThemeToggleButton` component for user theme switching
+- Button height standard: `height: 3.5rem` (35px)
+- Responsive breakpoint: `props.theme.breakpoint` (768px)
 
 ### Board System
 - **Board** - 게시판 설정 (threadsPerPage, responsesPerPage, blockForeignIp 등)
@@ -127,9 +127,24 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 
 라이센스 키 없이 빌드해도 정상 작동하며, IP 차단 기능만 비활성화됩니다.
 
+### TOM (Tunaground Object Markup)
+- Custom markup language for response content (`lib/tom/`)
+- `parse()` - Parse TOM string to AST
+- `prerender()` - Process dice rolls, calculations before rendering
+- `render()` - Convert AST to React elements
+- Tags: `>>N` (anchor), `[dice:NdM]`, `[calc:expr]`, `[color:hex]`, `[s]` (spoiler), etc.
+
+### Page Layout Pattern
+- Use `PageLayout` component with `sidebar` and `rightContent` props
+- Admin pages: `AdminSidebar` or `AdminBoardSidebar`
+- Index pages: `BoardListSidebar`
+- Thread pages: `TraceSidebar`
+- Right content: `HomeButton`, `ThemeToggleButton`, `AdminButton`, `AuthButton`
+
 ### Testing
 ```bash
 npm test                           # Run all Jest unit tests
 npm test -- --testPathPattern=tom  # Run tests matching pattern
 npm run test:watch                 # Watch mode
+npm run test:coverage              # With coverage report
 ```

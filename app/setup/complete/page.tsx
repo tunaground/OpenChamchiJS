@@ -2,15 +2,16 @@ import { redirect, notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { seedDefaultData } from "@/lib/services/seed";
 
 export default async function SetupCompletePage() {
   // Check if admin already exists - disable page entirely
-  const adminRole = await prisma.role.findUnique({
+  const existingAdminRole = await prisma.role.findUnique({
     where: { name: "ADMIN" },
     include: { users: true },
   });
 
-  if (adminRole && adminRole.users.length > 0) {
+  if (existingAdminRole && existingAdminRole.users.length > 0) {
     notFound();
   }
 
@@ -20,52 +21,21 @@ export default async function SetupCompletePage() {
     redirect("/setup");
   }
 
-  // Ensure ADMIN role exists
-  const role = await prisma.role.upsert({
-    where: { name: "ADMIN" },
-    update: {},
-    create: {
-      name: "ADMIN",
-      description: "관리자",
-    },
-  });
-
-  // Ensure all:all permission exists and is assigned to ADMIN
-  const permission = await prisma.permission.upsert({
-    where: { name: "all:all" },
-    update: {},
-    create: {
-      name: "all:all",
-      description: "모든 권한",
-    },
-  });
-
-  await prisma.rolePermission.upsert({
-    where: {
-      roleId_permissionId: {
-        roleId: role.id,
-        permissionId: permission.id,
-      },
-    },
-    update: {},
-    create: {
-      roleId: role.id,
-      permissionId: permission.id,
-    },
-  });
+  // Create all default permissions and roles
+  const { adminRole } = await seedDefaultData();
 
   // Assign ADMIN role to current user
   await prisma.userRole.upsert({
     where: {
       userId_roleId: {
         userId: session.user.id,
-        roleId: role.id,
+        roleId: adminRole.id,
       },
     },
     update: {},
     create: {
       userId: session.user.id,
-      roleId: role.id,
+      roleId: adminRole.id,
     },
   });
 

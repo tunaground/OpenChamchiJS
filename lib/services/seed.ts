@@ -1,11 +1,10 @@
-import "dotenv/config";
-import { PrismaClient } from "@prisma/client";
-import { PrismaPg } from "@prisma/adapter-pg";
+import { prisma } from "@/lib/prisma";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
-const prisma = new PrismaClient({ adapter });
-
-async function main() {
+/**
+ * Creates default permissions and roles.
+ * Safe to call multiple times (uses upsert).
+ */
+export async function seedDefaultData() {
   // Global permissions
   const allPermission = await prisma.permission.upsert({
     where: { name: "all:all" },
@@ -243,22 +242,5 @@ async function main() {
     },
   });
 
-  console.log("Seed completed:");
-  console.log("- Global: all:all, admin:read, foreign:write");
-  console.log("- Board: board:read, board:create, board:update");
-  console.log("- Thread: thread:update, thread:delete");
-  console.log("- Response: response:update, response:delete");
-  console.log("- Notice: notice:create, notice:update, notice:delete");
-  console.log("- User: user:read, user:update, user:delete");
-  console.log("- Role: role:read, role:create, role:update, role:delete");
-  console.log("- Roles: ADMIN (with all:all), FOREIGNER (with foreign:write)");
+  return { adminRole, foreignerRole, allPermission };
 }
-
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
