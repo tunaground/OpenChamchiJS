@@ -45,17 +45,30 @@ async function downloadMmdb() {
   }
 
   // Download and extract
-  await new Promise((resolve, reject) => {
-    https.get(url, (response) => {
-      if (response.statusCode === 401) {
-        reject(new Error("Invalid MaxMind license key"));
-        return;
-      }
+  const download = (downloadUrl) => {
+    return new Promise((resolve, reject) => {
+      https.get(downloadUrl, (response) => {
+        // Handle redirects
+        if (response.statusCode === 301 || response.statusCode === 302) {
+          const redirectUrl = response.headers.location;
+          if (!redirectUrl) {
+            reject(new Error("Redirect without location header"));
+            return;
+          }
+          console.log("Following redirect...");
+          download(redirectUrl).then(resolve).catch(reject);
+          return;
+        }
 
-      if (response.statusCode !== 200) {
-        reject(new Error(`Failed to download: HTTP ${response.statusCode}`));
-        return;
-      }
+        if (response.statusCode === 401) {
+          reject(new Error("Invalid MaxMind license key"));
+          return;
+        }
+
+        if (response.statusCode !== 200) {
+          reject(new Error(`Failed to download: HTTP ${response.statusCode}`));
+          return;
+        }
 
       const tempDir = path.join(process.cwd(), ".mmdb-temp");
 
@@ -102,6 +115,9 @@ async function downloadMmdb() {
       writeStream.on("error", reject);
     }).on("error", reject);
   });
+  };
+
+  await download(url);
 }
 
 downloadMmdb().catch((err) => {
