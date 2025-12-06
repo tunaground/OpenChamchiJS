@@ -5,12 +5,17 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
+import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
+import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
-  min-height: 100vh;
   padding: 3.2rem;
   max-width: 1000px;
   margin: 0 auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 const Header = styled.div`
@@ -63,6 +68,8 @@ const SearchButton = styled.button`
   border-radius: 4px;
   font-size: 1.4rem;
   cursor: pointer;
+  flex-shrink: 0;
+  white-space: nowrap;
 
   &:hover {
     opacity: 0.9;
@@ -148,22 +155,42 @@ interface PaginationData {
   totalPages: number;
 }
 
+interface BoardData {
+  id: string;
+  name: string;
+}
+
+interface AuthLabels {
+  login: string;
+  logout: string;
+}
+
 interface NoticeListContentProps {
   boardId: string;
   boardName: string;
+  boards: BoardData[];
+  isLoggedIn: boolean;
+  canAccessAdmin: boolean;
+  authLabels: AuthLabels;
   notices: NoticeData[];
   pagination: PaginationData;
   search: string;
   labels: Labels;
+  boardsTitle: string;
 }
 
 export function NoticeListContent({
   boardId,
   boardName,
+  boards,
+  isLoggedIn,
+  canAccessAdmin,
+  authLabels,
   notices,
   pagination,
   search: initialSearch,
   labels,
+  boardsTitle,
 }: NoticeListContentProps) {
   const router = useRouter();
   const [search, setSearch] = useState(initialSearch);
@@ -197,50 +224,66 @@ export function NoticeListContent({
     return `/notice/${boardId}${queryString ? `?${queryString}` : ""}`;
   };
 
+  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
+  const rightContent = (
+    <>
+      <HomeButton />
+      <ThemeToggleButton />
+      {canAccessAdmin && <AdminButton />}
+      <AuthButton
+        isLoggedIn={isLoggedIn}
+        loginLabel={authLabels.login}
+        logoutLabel={authLabels.logout}
+      />
+    </>
+  );
+
   return (
-    <Container>
-      <Header>
-        <Title>{labels.title}</Title>
-        <BoardName>{boardName}</BoardName>
-      </Header>
+    <PageLayout title={labels.title} sidebar={sidebar} rightContent={rightContent}>
+      <Container>
+        <Header>
+          <Title>{labels.title}</Title>
+          <BoardName>{boardName}</BoardName>
+        </Header>
 
-      <SearchForm onSubmit={handleSearch}>
-        <SearchInput
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={labels.searchPlaceholder}
-        />
-        <SearchButton type="submit">{labels.searchButton}</SearchButton>
-      </SearchForm>
-
-      {notices.length === 0 ? (
-        <EmptyState>
-          {initialSearch ? labels.noResults : labels.noNotices}
-        </EmptyState>
-      ) : (
-        <>
-          <NoticeCards>
-            {notices.map((notice) => (
-              <NoticeCard key={notice.id} $pinned={notice.pinned}>
-                <CardTitle>
-                  {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
-                  <Link href={`/notice/${boardId}/${notice.id}`}>
-                    {notice.title}
-                  </Link>
-                </CardTitle>
-                <CardMeta>{formatDate(notice.createdAt)}</CardMeta>
-              </NoticeCard>
-            ))}
-          </NoticeCards>
-
-          <Pagination
-            currentPage={pagination.page}
-            totalPages={pagination.totalPages}
-            baseUrl={getBaseUrl()}
+        <SearchForm onSubmit={handleSearch}>
+          <SearchInput
+            type="text"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={labels.searchPlaceholder}
           />
-        </>
-      )}
-    </Container>
+          <SearchButton type="submit">{labels.searchButton}</SearchButton>
+        </SearchForm>
+
+        {notices.length === 0 ? (
+          <EmptyState>
+            {initialSearch ? labels.noResults : labels.noNotices}
+          </EmptyState>
+        ) : (
+          <>
+            <NoticeCards>
+              {notices.map((notice) => (
+                <NoticeCard key={notice.id} $pinned={notice.pinned}>
+                  <CardTitle>
+                    {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
+                    <Link href={`/notice/${boardId}/${notice.id}`}>
+                      {notice.title}
+                    </Link>
+                  </CardTitle>
+                  <CardMeta>{formatDate(notice.createdAt)}</CardMeta>
+                </NoticeCard>
+              ))}
+            </NoticeCards>
+
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              baseUrl={getBaseUrl()}
+            />
+          </>
+        )}
+      </Container>
+    </PageLayout>
   );
 }

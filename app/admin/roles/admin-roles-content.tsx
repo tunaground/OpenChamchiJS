@@ -16,16 +16,22 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3.2rem;
+  margin-bottom: 2.4rem;
 `;
 
 const Title = styled.h1`
   font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
+`;
+
+const ActionsBar = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.6rem;
+  margin-bottom: 2.4rem;
+  flex-wrap: wrap;
 `;
 
 const RoleCards = styled.div`
@@ -107,20 +113,6 @@ const DangerSmallButton = styled(SmallButton)`
   }
 `;
 
-const CreateButton = styled.button`
-  padding: 0.8rem 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
 const EmptyState = styled.div`
   text-align: center;
   padding: 4.8rem;
@@ -166,7 +158,8 @@ const ModalActions = styled.div`
 `;
 
 const Button = styled.button`
-  padding: 0.8rem 1.6rem;
+  height: 3.5rem;
+  padding: 0 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
@@ -540,12 +533,15 @@ export function AdminRolesContent({
       <Container>
         <Header>
           <Title>{labels.title}</Title>
-          {canCreate && (
-            <CreateButton onClick={openCreateModal}>
-              {labels.createRole}
-            </CreateButton>
-          )}
         </Header>
+
+        <ActionsBar>
+          {canCreate && (
+            <Button type="button" onClick={openCreateModal}>
+              {labels.createRole}
+            </Button>
+          )}
+        </ActionsBar>
 
         {roles.length === 0 ? (
           <EmptyState>{labels.noRoles}</EmptyState>

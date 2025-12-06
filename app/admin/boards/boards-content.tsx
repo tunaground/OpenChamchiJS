@@ -17,10 +17,7 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3.2rem;
+  margin-bottom: 2.4rem;
 `;
 
 const Title = styled.h1`
@@ -29,8 +26,18 @@ const Title = styled.h1`
   color: ${(props) => props.theme.textPrimary};
 `;
 
+const ActionsBar = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.6rem;
+  margin-bottom: 2.4rem;
+  flex-wrap: wrap;
+`;
+
 const Button = styled.button`
-  padding: 0.8rem 1.6rem;
+  height: 3.5rem;
+  padding: 0 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
@@ -252,6 +259,8 @@ interface Labels {
   defaultUsername: string;
   defaultUsernamePlaceholder: string;
   threads: string;
+  manageThreads: string;
+  manageNotices: string;
   status: string;
   actions: string;
   active: string;
@@ -499,10 +508,13 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
       <Container>
         <Header>
           <Title>{labels.title}</Title>
+        </Header>
+
+        <ActionsBar>
           {canCreate && (
             <Button onClick={openCreateModal}>{labels.createBoard}</Button>
           )}
-        </Header>
+        </ActionsBar>
 
       {boards.length === 0 ? (
         <EmptyState>{labels.noBoards}</EmptyState>
@@ -511,21 +523,22 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
           {boards.map((board) => (
             <BoardCard key={board.id}>
               <CardHeader>
-                <CardTitle>{board.name}</CardTitle>
+                <CardTitle>
+                  <BoardId>{board.id}</BoardId> {board.name}
+                </CardTitle>
                 <StatusBadge $active={!board.deleted}>
                   {board.deleted ? labels.deleted : labels.active}
                 </StatusBadge>
               </CardHeader>
               <CardMeta>
-                <span><BoardId>{board.id}</BoardId></span>
                 <span>{labels.threads}: {board.threadCount}</span>
               </CardMeta>
               <CardActions>
                 <Link href={`/admin/boards/${board.id}/threads`}>
-                  <SmallButton>{labels.threads}</SmallButton>
+                  <SmallButton>{labels.manageThreads}</SmallButton>
                 </Link>
                 <Link href={`/admin/boards/${board.id}/notices`}>
-                  <SmallButton>{labels.notices}</SmallButton>
+                  <SmallButton>{labels.manageNotices}</SmallButton>
                 </Link>
                 {canUpdate && (
                   <SmallButton onClick={() => openEditModal(board)}>

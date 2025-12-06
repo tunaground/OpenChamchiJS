@@ -332,11 +332,14 @@ export function BoardIndexContent({
     return `/index/${boardId}${queryString ? `?${queryString}` : ""}`;
   };
 
-  const formatShortDate = (dateString: string) => {
+  const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
+    const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const day = String(date.getDate()).padStart(2, "0");
-    return `${month}-${day}`;
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    return `${year}-${month}-${day} ${hours}:${minutes}`;
   };
 
   const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
@@ -369,7 +372,7 @@ export function BoardIndexContent({
                 <Link href={`/notice/${boardId}/${notice.id}`}>
                   {notice.title}
                 </Link>
-                <NoticeDate>{formatShortDate(notice.createdAt)}</NoticeDate>
+                <NoticeDate>{formatDateTime(notice.createdAt)}</NoticeDate>
               </NoticeItem>
             ))}
           </NoticeList>
@@ -401,15 +404,17 @@ export function BoardIndexContent({
                 <CardTitle>
                   {thread.top && <Badge $variant="top">{labels.top}</Badge>}
                   {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
+                  <span>&gt;{thread.id}&gt; </span>
                   <Link href={`/trace/${boardId}/${thread.id}/recent`}>
                     {thread.title}
                   </Link>
                   <span> ({Math.max(0, thread.responseCount - 1)})</span>
                 </CardTitle>
                 <CardMeta>
-                  <CardMetaItem>#{thread.id}</CardMetaItem>
                   <CardMetaItem>{thread.username}</CardMetaItem>
-                  <CardMetaItem>{formatShortDate(thread.updatedAt)}</CardMetaItem>
+                </CardMeta>
+                <CardMeta>
+                  <CardMetaItem>{formatDateTime(thread.createdAt)} - {formatDateTime(thread.updatedAt)}</CardMetaItem>
                 </CardMeta>
               </ThreadCard>
             ))}

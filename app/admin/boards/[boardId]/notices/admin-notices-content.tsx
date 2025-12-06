@@ -19,13 +19,8 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 3.2rem;
+  margin-bottom: 2.4rem;
 `;
-
-const TitleSection = styled.div``;
 
 const Title = styled.h1`
   font-size: 2.4rem;
@@ -48,8 +43,18 @@ const Breadcrumb = styled.div`
   }
 `;
 
+const ActionsBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.6rem;
+  margin-bottom: 2.4rem;
+  flex-wrap: wrap;
+`;
+
 const Button = styled.button`
-  padding: 0.8rem 1.6rem;
+  height: 3.5rem;
+  padding: 0 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
@@ -162,7 +167,6 @@ const EmptyState = styled.div`
 const SearchForm = styled.form`
   display: flex;
   gap: 0.8rem;
-  margin-bottom: 2.4rem;
 `;
 
 const SearchInput = styled.input`
@@ -185,18 +189,9 @@ const SearchInput = styled.input`
   }
 `;
 
-const SearchButton = styled.button`
-  padding: 0.8rem 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
+const SearchButton = styled(Button)`
+  flex-shrink: 0;
+  white-space: nowrap;
 `;
 
 const Modal = styled.div`
@@ -341,6 +336,7 @@ interface AuthLabels {
 interface SidebarLabels {
   backToHome: string;
   admin: string;
+  boards: string;
   threads: string;
   notices: string;
 }
@@ -532,26 +528,26 @@ export function AdminNoticesContent({
     <PageLayout title={labels.title} sidebar={sidebar} rightContent={rightContent}>
       <Container>
         <Header>
-          <TitleSection>
-            <Title>{labels.title}</Title>
-            <Breadcrumb>
-              <Link href="/admin/boards">Boards</Link> / {boardName}
-            </Breadcrumb>
-          </TitleSection>
-          {canCreate && (
-            <Button onClick={openCreateModal}>{labels.createNotice}</Button>
-          )}
+          <Title>{labels.title}</Title>
+          <Breadcrumb>
+            <Link href="/admin/boards">Boards</Link> / {boardName}
+          </Breadcrumb>
         </Header>
 
-      <SearchForm onSubmit={handleSearch}>
-        <SearchInput
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={labels.searchPlaceholder}
-        />
-        <SearchButton type="submit">{labels.searchButton}</SearchButton>
-      </SearchForm>
+        <ActionsBar>
+          {canCreate && (
+            <Button type="button" onClick={openCreateModal}>{labels.createNotice}</Button>
+          )}
+          <SearchForm onSubmit={handleSearch}>
+            <SearchInput
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={labels.searchPlaceholder}
+            />
+            <SearchButton type="submit">{labels.searchButton}</SearchButton>
+          </SearchForm>
+        </ActionsBar>
 
       {notices.length === 0 ? (
         <EmptyState>

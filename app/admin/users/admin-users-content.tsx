@@ -19,10 +19,7 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 3.2rem;
+  margin-bottom: 2.4rem;
 `;
 
 const Title = styled.h1`
@@ -31,20 +28,37 @@ const Title = styled.h1`
   color: ${(props) => props.theme.textPrimary};
 `;
 
+const ActionsBar = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.6rem;
+  margin-bottom: 2.4rem;
+  flex-wrap: wrap;
+`;
+
 const SearchForm = styled.form`
   display: flex;
   gap: 0.8rem;
-  margin-bottom: 2.4rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    width: 100%;
+  }
 `;
 
 const SearchInput = styled.input`
+  flex: 1;
+  max-width: 30rem;
   padding: 0.8rem 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
-  width: 30rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    max-width: none;
+  }
 
   &:focus {
     outline: none;
@@ -52,8 +66,9 @@ const SearchInput = styled.input`
   }
 `;
 
-const SearchButton = styled.button`
-  padding: 0.8rem 1.6rem;
+const Button = styled.button`
+  height: 3.5rem;
+  padding: 0 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
@@ -64,6 +79,16 @@ const SearchButton = styled.button`
   &:hover {
     opacity: 0.9;
   }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const SearchButton = styled(Button)`
+  flex-shrink: 0;
+  white-space: nowrap;
 `;
 
 const UserCards = styled.div`
@@ -208,25 +233,6 @@ const ModalActions = styled.div`
   justify-content: flex-end;
   gap: 0.8rem;
   margin-top: 2.4rem;
-`;
-
-const Button = styled.button`
-  padding: 0.8rem 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 const SecondaryButton = styled(Button)`
@@ -486,15 +492,17 @@ export function AdminUsersContent({
           <Title>{labels.title}</Title>
         </Header>
 
-        <SearchForm onSubmit={handleSearch}>
-          <SearchInput
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder={labels.searchPlaceholder}
-          />
-          <SearchButton type="submit">{labels.searchButton}</SearchButton>
-        </SearchForm>
+        <ActionsBar>
+          <SearchForm onSubmit={handleSearch}>
+            <SearchInput
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={labels.searchPlaceholder}
+            />
+            <SearchButton type="submit">{labels.searchButton}</SearchButton>
+          </SearchForm>
+        </ActionsBar>
 
         {users.length === 0 ? (
           <EmptyState>

@@ -20,13 +20,17 @@ const Container = styled.div`
 `;
 
 const Header = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 3.2rem;
+  margin-bottom: 2.4rem;
 `;
 
-const TitleSection = styled.div``;
+const ActionsBar = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 1.6rem;
+  margin-bottom: 2.4rem;
+  flex-wrap: wrap;
+`;
 
 const Title = styled.h1`
   font-size: 2.4rem;
@@ -50,7 +54,8 @@ const Breadcrumb = styled.div`
 `;
 
 const Button = styled.button`
-  padding: 0.8rem 1.6rem;
+  height: 3.5rem;
+  padding: 0 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
@@ -93,30 +98,54 @@ const ThreadCards = styled.div`
   gap: 1.2rem;
 `;
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
+const ResponseCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: 60vh;
+  overflow-y: auto;
+`;
+
+const ResponseCard = styled.div<{ $deleted?: boolean }>`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
+  padding: 1.2rem;
+  opacity: ${(props) => props.$deleted ? 0.5 : 1};
+`;
+
+const ResponseCardHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+`;
+
+const ResponseCardContent = styled.div`
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textPrimary};
+  margin-bottom: 0.8rem;
+  word-break: break-word;
+  white-space: pre-wrap;
+  max-height: 8rem;
   overflow: hidden;
 `;
 
-const Th = styled.th`
-  text-align: left;
-  padding: 1rem;
-  background: ${(props) => props.theme.surfaceHover};
-  font-weight: 500;
+const ResponseCardMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
   font-size: 1.2rem;
   color: ${(props) => props.theme.textSecondary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
+  margin-bottom: 0.8rem;
 `;
 
-const Td = styled.td`
-  padding: 1rem;
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textPrimary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
+const ResponseCardActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  align-items: center;
 `;
 
 const ThreadCard = styled.div<{ $deleted?: boolean }>`
@@ -128,6 +157,9 @@ const ThreadCard = styled.div<{ $deleted?: boolean }>`
 `;
 
 const CardTitle = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
   font-size: 1.4rem;
   font-weight: 500;
   margin-bottom: 0.8rem;
@@ -140,6 +172,12 @@ const CardTitle = styled.div`
       text-decoration: underline;
     }
   }
+`;
+
+const CardBadges = styled.div`
+  display: flex;
+  gap: 0.4rem;
+  margin-left: auto;
 `;
 
 const CardMeta = styled.div`
@@ -163,7 +201,6 @@ const Badge = styled.span<{ $variant?: "top" | "ended" | "active" }>`
   border-radius: 4px;
   font-size: 1.2rem;
   font-weight: 500;
-  margin-right: 0.4rem;
   background: ${(props) => {
     switch (props.$variant) {
       case "top":
@@ -227,11 +264,14 @@ const EmptyState = styled.div`
 const SearchForm = styled.form`
   display: flex;
   gap: 0.8rem;
-  margin-bottom: 2.4rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    width: 100%;
+  }
 `;
 
 const SearchInput = styled.input`
-  width: 100%;
+  flex: 1;
   max-width: 30rem;
   padding: 0.8rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
@@ -239,6 +279,10 @@ const SearchInput = styled.input`
   font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    max-width: none;
+  }
 
   &:focus {
     outline: none;
@@ -250,18 +294,9 @@ const SearchInput = styled.input`
   }
 `;
 
-const SearchButton = styled.button`
-  padding: 0.8rem 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
+const SearchButton = styled(Button)`
+  flex-shrink: 0;
+  white-space: nowrap;
 `;
 
 const Modal = styled.div`
@@ -419,6 +454,7 @@ interface AuthLabels {
 interface SidebarLabels {
   backToHome: string;
   admin: string;
+  boards: string;
   threads: string;
   notices: string;
 }
@@ -777,23 +813,23 @@ export function AdminThreadsContent({
     <PageLayout title={labels.title} sidebar={sidebar} rightContent={rightContent}>
       <Container>
         <Header>
-          <TitleSection>
-            <Title>{labels.title}</Title>
-            <Breadcrumb>
-              <Link href="/admin/boards">Boards</Link> / {boardName}
-            </Breadcrumb>
-          </TitleSection>
+          <Title>{labels.title}</Title>
+          <Breadcrumb>
+            <Link href="/admin/boards">Boards</Link> / {boardName}
+          </Breadcrumb>
         </Header>
 
-      <SearchForm onSubmit={handleSearch}>
-        <SearchInput
-          type="text"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder={labels.searchPlaceholder}
-        />
-        <SearchButton type="submit">{labels.searchButton}</SearchButton>
-      </SearchForm>
+        <ActionsBar>
+          <SearchForm onSubmit={handleSearch}>
+            <SearchInput
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={labels.searchPlaceholder}
+            />
+            <SearchButton type="submit">{labels.searchButton}</SearchButton>
+          </SearchForm>
+        </ActionsBar>
 
       {threads.length === 0 ? (
         <EmptyState>
@@ -805,22 +841,26 @@ export function AdminThreadsContent({
             {threads.map((thread) => (
               <ThreadCard key={thread.id} $deleted={thread.deleted}>
                 <CardTitle>
-                  {thread.deleted ? (
-                    <Badge $variant="ended">{labels.deleted}</Badge>
-                  ) : (
-                    <>
-                      {thread.top && <Badge $variant="top">{labels.top}</Badge>}
-                      {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
-                    </>
-                  )}
+                  <span>&gt;{thread.id}&gt; </span>
                   <TitleLink href={`/trace/${boardId}/${thread.id}`}>
                     {thread.title}
                   </TitleLink>
+                  <CardBadges>
+                    {thread.deleted ? (
+                      <Badge $variant="ended">{labels.deleted}</Badge>
+                    ) : (
+                      <>
+                        {thread.top && <Badge $variant="top">{labels.top}</Badge>}
+                        {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
+                      </>
+                    )}
+                  </CardBadges>
                 </CardTitle>
                 <CardMeta>
-                  <span>#{thread.id}</span>
                   <span>{thread.username}</span>
-                  <span>{formatDateTime(thread.updatedAt)}</span>
+                </CardMeta>
+                <CardMeta>
+                  <span>{formatDateTime(thread.createdAt)} - {formatDateTime(thread.updatedAt)}</span>
                 </CardMeta>
                 <CardActions>
                   {!thread.deleted && (
@@ -983,102 +1023,81 @@ export function AdminThreadsContent({
               <EmptyState>{labels.noResponses}</EmptyState>
             ) : (
               <>
-                {canDelete && selectedResponseIds.size > 0 && (
-                  <div style={{ marginBottom: "1.6rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.6rem" }}>
+                  {canDelete && (
+                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedResponseIds.size === responses.length && responses.length > 0}
+                        onChange={toggleAllResponses}
+                        style={{ width: "1.6rem", height: "1.6rem" }}
+                      />
+                      <span style={{ fontSize: "1.2rem" }}>전체 선택</span>
+                    </label>
+                  )}
+                  {canDelete && selectedResponseIds.size > 0 && (
                     <DangerButton onClick={handleBulkDeleteResponses} disabled={loading}>
                       {labels.delete} ({selectedResponseIds.size})
                     </DangerButton>
-                  </div>
-                )}
-                <Table>
-                  <thead>
-                    <tr>
-                      {canDelete && (
-                        <Th style={{ width: "4%" }}>
+                  )}
+                </div>
+                <ResponseCards>
+                  {responses.map((response, index) => (
+                    <ResponseCard key={response.id} $deleted={response.deleted}>
+                      <ResponseCardHeader>
+                        {canDelete && (
                           <input
                             type="checkbox"
-                            checked={selectedResponseIds.size === responses.length && responses.length > 0}
-                            onChange={toggleAllResponses}
-                            style={{ width: "1.6rem", height: "1.6rem" }}
+                            checked={selectedResponseIds.has(response.id)}
+                            onClick={(e) => handleResponseCheckboxClick(index, e)}
+                            readOnly
+                            style={{ width: "1.6rem", height: "1.6rem", cursor: "pointer" }}
                           />
-                        </Th>
-                      )}
-                      <Th style={{ width: "5%" }}>{labels.seq}</Th>
-                      <Th style={{ width: "8%" }}>{labels.status}</Th>
-                      <Th style={{ width: "18%" }}>{labels.author}</Th>
-                      <Th style={{ width: "28%" }}>{labels.content}</Th>
-                      <Th style={{ width: "14%" }}>{labels.createdAt}</Th>
-                      <Th style={{ width: "23%" }}>{labels.actions}</Th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {responses.map((response, index) => (
-                      <tr key={response.id} style={{ opacity: response.deleted ? 0.5 : 1 }}>
-                        {canDelete && (
-                          <Td>
-                            <input
-                              type="checkbox"
-                              checked={selectedResponseIds.has(response.id)}
-                              onClick={(e) => handleResponseCheckboxClick(index, e)}
-                              readOnly
-                              style={{ width: "1.6rem", height: "1.6rem", cursor: "pointer" }}
-                            />
-                          </Td>
                         )}
-                        <Td>#{response.seq}</Td>
-                        <Td>
-                          {response.deleted ? (
-                            <Badge $variant="ended">{labels.deleted}</Badge>
-                          ) : !response.visible ? (
-                            <Badge style={{ background: "#f59e0b", color: "white" }}>{labels.hidden}</Badge>
-                          ) : (
-                            <Badge $variant="active">{labels.visible}</Badge>
-                          )}
-                        </Td>
-                        <Td>
-                          {response.username}
-                          <br />
-                          <span style={{ fontSize: "1.1rem", color: "gray" }}>
-                            ({response.authorId})
-                          </span>
-                          {response.ip && (
-                            <>
-                              <br />
-                              <span style={{ fontSize: "1.1rem", color: "#888", fontFamily: "monospace" }}>
-                                {response.ip}
-                              </span>
-                            </>
-                          )}
-                        </Td>
-                        <Td style={{ maxWidth: "250px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {response.content.substring(0, 80)}
-                          {response.content.length > 80 && "..."}
-                        </Td>
-                        <Td>{formatDateTime(response.createdAt)}</Td>
-                        <Td>
-                          <ActionButtons>
-                            {canEdit && !response.deleted && (
-                              <SmallButton
-                                onClick={() => handleToggleVisible(response)}
-                                disabled={loading}
-                              >
-                                {response.visible ? labels.hide : labels.show}
-                              </SmallButton>
-                            )}
-                            {canDelete && (
-                              <SmallButton
-                                onClick={() => handleToggleDeleted(response)}
-                                disabled={loading}
-                              >
-                                {response.deleted ? labels.restore : labels.delete}
-                              </SmallButton>
-                            )}
-                          </ActionButtons>
-                        </Td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </Table>
+                        <span style={{ fontWeight: 500 }}>#{response.seq}</span>
+                        <span>{response.username}</span>
+                        <span style={{ fontSize: "1.1rem", color: "gray" }}>({response.authorId})</span>
+                        {response.deleted ? (
+                          <Badge $variant="ended">{labels.deleted}</Badge>
+                        ) : !response.visible ? (
+                          <Badge style={{ background: "#f59e0b", color: "white" }}>{labels.hidden}</Badge>
+                        ) : (
+                          <Badge $variant="active">{labels.visible}</Badge>
+                        )}
+                      </ResponseCardHeader>
+                      {response.ip && (
+                        <ResponseCardMeta>
+                          <span style={{ fontFamily: "monospace" }}>{response.ip}</span>
+                        </ResponseCardMeta>
+                      )}
+                      <ResponseCardMeta>
+                        <span>{formatDateTime(response.createdAt)}</span>
+                      </ResponseCardMeta>
+                      <ResponseCardContent>
+                        {response.content.substring(0, 200)}
+                        {response.content.length > 200 && "..."}
+                      </ResponseCardContent>
+                      <ResponseCardActions>
+                        {canEdit && !response.deleted && (
+                          <SmallButton
+                            onClick={() => handleToggleVisible(response)}
+                            disabled={loading}
+                          >
+                            {response.visible ? labels.hide : labels.show}
+                          </SmallButton>
+                        )}
+                        {canDelete && (
+                          <SmallButton
+                            onClick={() => handleToggleDeleted(response)}
+                            disabled={loading}
+                          >
+                            {response.deleted ? labels.restore : labels.delete}
+                          </SmallButton>
+                        )}
+                      </ResponseCardActions>
+                    </ResponseCard>
+                  ))}
+                </ResponseCards>
               </>
             )}
 

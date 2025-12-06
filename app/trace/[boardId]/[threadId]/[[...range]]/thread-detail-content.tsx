@@ -135,9 +135,6 @@ const ResponseCard = styled.div`
 `;
 
 const ResponseHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   padding: 1.2rem 1.6rem;
   background: ${(props) => props.theme.surfaceHover};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
@@ -148,6 +145,9 @@ const ResponseInfo = styled.div`
   align-items: center;
   gap: 1.2rem;
   font-size: 1.4rem;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 `;
 
 const ResponseSeq = styled.span`
@@ -158,6 +158,7 @@ const ResponseSeq = styled.span`
 const ResponseUsername = styled.span`
   color: ${(props) => props.theme.textPrimary};
   font-weight: 500;
+  word-break: break-all;
 `;
 
 const ResponseAuthorId = styled.span`
@@ -168,6 +169,7 @@ const ResponseAuthorId = styled.span`
 const ResponseDate = styled.span`
   color: ${(props) => props.theme.textSecondary};
   font-size: 1.2rem;
+  margin-left: auto;
 `;
 
 const ResponseContent = styled.div`
@@ -219,7 +221,7 @@ const ResponseForm = styled.form`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  padding: 2.4rem;
+  padding: 1.6rem;
   margin-top: 2.4rem;
 `;
 
@@ -770,8 +772,6 @@ export function ThreadDetailContent({
                       <ResponseSeq>#{anchorResponse.seq}</ResponseSeq>
                       <ResponseUsername>{anchorResponse.username}</ResponseUsername>
                       <ResponseAuthorId>({anchorResponse.authorId})</ResponseAuthorId>
-                    </ResponseInfo>
-                    <ResponseInfo>
                       <ResponseDate>{formatDateTime(anchorResponse.createdAt)}</ResponseDate>
                     </ResponseInfo>
                   </ResponseHeader>
@@ -946,8 +946,6 @@ export function ThreadDetailContent({
                     <ResponseSeq>#{response.seq}</ResponseSeq>
                     <ResponseUsername>{response.username}</ResponseUsername>
                     <ResponseAuthorId>({response.authorId})</ResponseAuthorId>
-                  </ResponseInfo>
-                  <ResponseInfo>
                     <ResponseDate>{formatDateTime(response.createdAt)}</ResponseDate>
                   </ResponseInfo>
                 </ResponseHeader>

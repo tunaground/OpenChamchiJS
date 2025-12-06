@@ -54,6 +54,8 @@ export default async function AdminBoardsPage() {
         defaultUsername: t("defaultUsername"),
         defaultUsernamePlaceholder: t("defaultUsernamePlaceholder"),
         threads: t("threads"),
+        manageThreads: t("manageThreads"),
+        manageNotices: t("manageNotices"),
         status: t("status"),
         actions: t("actions"),
         active: t("active"),

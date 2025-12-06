@@ -7,7 +7,7 @@ import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
   padding: 3.2rem;
-  max-width: 60rem;
+  max-width: 120rem;
   margin: 0 auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
@@ -15,11 +15,14 @@ const Container = styled.div`
   }
 `;
 
+const Header = styled.div`
+  margin-bottom: 2.4rem;
+`;
+
 const Title = styled.h1`
   font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 3.2rem;
 `;
 
 const FormGroup = styled.div`
@@ -197,7 +200,9 @@ export function AdminSettingsContent({
       rightContent={rightContent}
     >
       <Container>
-        <Title>{labels.title}</Title>
+        <Header>
+          <Title>{labels.title}</Title>
+        </Header>
 
         <StatusBox $available={geoIpAvailable}>
           <StatusTitle $available={geoIpAvailable}>

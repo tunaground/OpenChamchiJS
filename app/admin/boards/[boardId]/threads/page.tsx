@@ -44,6 +44,7 @@ export default async function AdminThreadsPage({ params, searchParams }: Props) 
         sidebarLabels={{
           backToHome: tSidebar("backToHome"),
           admin: tSidebar("admin"),
+          boards: tSidebar("boards"),
           threads: tSidebar("threads"),
           notices: tSidebar("notices"),
         }}

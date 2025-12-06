@@ -68,6 +68,7 @@ interface AdminBoardSidebarProps {
   labels: {
     backToHome: string;
     admin: string;
+    boards: string;
     threads: string;
     notices: string;
   };
@@ -96,7 +97,7 @@ export function AdminBoardSidebar({
         </NavItem>
         <NavItem>
           <NavLink href="/admin/boards" $active={pathname === "/admin/boards"}>
-            {labels.admin}
+            {labels.boards}
           </NavLink>
         </NavItem>
       </NavList>
