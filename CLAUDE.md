@@ -73,3 +73,12 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - Global styles in `app/globals.css` with CSS custom properties for theming
 - Dark mode support via `prefers-color-scheme: dark`
 - Color variables: `--background`, `--foreground`
+
+### Board System
+- **Board** - 게시판 설정 (threadsPerPage, responsesPerPage, blockForeignIp 등)
+- **Thread** - 글타래, `password`로 수정/삭제 인증 (애플리케이션에서 해시 처리)
+- **Response** - 스레드 응답, `seq` 0번이 스레드 본문 (작성자)
+- `authorId` - IP+날짜 기반 익명 식별자 (같은 사람 구분용)
+- `userId` - 로그인 사용자만 저장 (optional)
+- `Thread.updatedAt` - 새 Response 추가 시 수동 갱신 (범프)
+- `blockForeignIp` - 외국 IP 차단, `foreign:write` 권한 있으면 허용
