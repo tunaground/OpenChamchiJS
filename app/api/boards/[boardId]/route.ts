@@ -6,6 +6,7 @@ import { boardService, BoardServiceError } from "@/lib/services/board";
 
 const updateBoardSchema = z.object({
   name: z.string().min(1).max(100).optional(),
+  defaultUsername: z.string().min(1).max(50).optional(),
   deleted: z.boolean().optional(),
   maxResponsesPerThread: z.number().int().positive().optional(),
   blockForeignIp: z.boolean().optional(),
@@ -15,6 +16,7 @@ const updateBoardSchema = z.object({
 });
 
 const configBoardSchema = z.object({
+  defaultUsername: z.string().min(1).max(50).optional(),
   maxResponsesPerThread: z.number().int().positive().optional(),
   blockForeignIp: z.boolean().optional(),
   responsesPerPage: z.number().int().positive().optional(),

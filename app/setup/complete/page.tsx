@@ -69,5 +69,5 @@ export default async function SetupCompletePage() {
     },
   });
 
-  redirect("/dashboard");
+  redirect("/");
 }

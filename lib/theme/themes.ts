@@ -20,6 +20,10 @@ export const lightTheme = {
   textSecondary: "#666666",
   textMuted: "#999999",
 
+  // Button colors
+  buttonPrimary: "#171717",
+  buttonPrimaryText: "#ffffff",
+
   // Status colors
   success: "#28a745",
   warning: "#ffc107",
@@ -54,6 +58,10 @@ export const darkTheme = {
   textPrimary: "#ededed",
   textSecondary: "#a0a0a0",
   textMuted: "#666666",
+
+  // Button colors
+  buttonPrimary: "#3a3a3a",
+  buttonPrimaryText: "#ededed",
 
   // Status colors
   success: "#34c759",

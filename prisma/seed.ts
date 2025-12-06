@@ -6,7 +6,7 @@ const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  // Create permissions
+  // Global permissions
   const allPermission = await prisma.permission.upsert({
     where: { name: "all:all" },
     update: {},
@@ -36,56 +36,38 @@ async function main() {
 
   // Board permissions
   await prisma.permission.upsert({
-    where: { name: "board:all" },
+    where: { name: "board:read" },
     update: {},
     create: {
-      name: "board:all",
-      description: "보드 모든 권한",
+      name: "board:read",
+      description: "보드 목록 조회",
     },
   });
 
   await prisma.permission.upsert({
-    where: { name: "board:write" },
+    where: { name: "board:create" },
     update: {},
     create: {
-      name: "board:write",
+      name: "board:create",
       description: "보드 생성",
     },
   });
 
   await prisma.permission.upsert({
-    where: { name: "board:edit" },
+    where: { name: "board:update" },
     update: {},
     create: {
-      name: "board:edit",
-      description: "보드 모든 필드 수정",
-    },
-  });
-
-  await prisma.permission.upsert({
-    where: { name: "board:config" },
-    update: {},
-    create: {
-      name: "board:config",
-      description: "보드 설정값만 수정",
+      name: "board:update",
+      description: "보드 수정",
     },
   });
 
   // Thread permissions (global)
   await prisma.permission.upsert({
-    where: { name: "thread:all" },
+    where: { name: "thread:update" },
     update: {},
     create: {
-      name: "thread:all",
-      description: "모든 보드의 스레드 전체 권한",
-    },
-  });
-
-  await prisma.permission.upsert({
-    where: { name: "thread:edit" },
-    update: {},
-    create: {
-      name: "thread:edit",
+      name: "thread:update",
       description: "모든 보드의 스레드 수정",
     },
   });
@@ -96,6 +78,118 @@ async function main() {
     create: {
       name: "thread:delete",
       description: "모든 보드의 스레드 삭제",
+    },
+  });
+
+  // Response permissions (global)
+  await prisma.permission.upsert({
+    where: { name: "response:update" },
+    update: {},
+    create: {
+      name: "response:update",
+      description: "모든 보드의 응답 수정",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "response:delete" },
+    update: {},
+    create: {
+      name: "response:delete",
+      description: "모든 보드의 응답 삭제",
+    },
+  });
+
+  // Notice permissions
+  await prisma.permission.upsert({
+    where: { name: "notice:create" },
+    update: {},
+    create: {
+      name: "notice:create",
+      description: "공지사항 생성",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "notice:update" },
+    update: {},
+    create: {
+      name: "notice:update",
+      description: "공지사항 수정",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "notice:delete" },
+    update: {},
+    create: {
+      name: "notice:delete",
+      description: "공지사항 삭제",
+    },
+  });
+
+  // User permissions
+  await prisma.permission.upsert({
+    where: { name: "user:read" },
+    update: {},
+    create: {
+      name: "user:read",
+      description: "사용자 목록 조회",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "user:update" },
+    update: {},
+    create: {
+      name: "user:update",
+      description: "사용자 정보 수정",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "user:delete" },
+    update: {},
+    create: {
+      name: "user:delete",
+      description: "사용자 삭제",
+    },
+  });
+
+  // Role permissions
+  await prisma.permission.upsert({
+    where: { name: "role:read" },
+    update: {},
+    create: {
+      name: "role:read",
+      description: "역할 목록 조회",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "role:create" },
+    update: {},
+    create: {
+      name: "role:create",
+      description: "역할 생성",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "role:update" },
+    update: {},
+    create: {
+      name: "role:update",
+      description: "역할 수정 및 권한 바인딩",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "role:delete" },
+    update: {},
+    create: {
+      name: "role:delete",
+      description: "역할 삭제",
     },
   });
 
@@ -150,10 +244,14 @@ async function main() {
   });
 
   console.log("Seed completed:");
-  console.log("- Permissions: all:all, admin:read, foreign:write");
-  console.log("- Board permissions: board:all, board:write, board:edit, board:config");
-  console.log("- Thread permissions: thread:all, thread:edit, thread:delete");
-  console.log("- Role: ADMIN (with all:all), FOREIGNER (with foreign:write)");
+  console.log("- Global: all:all, admin:read, foreign:write");
+  console.log("- Board: board:read, board:create, board:update");
+  console.log("- Thread: thread:update, thread:delete");
+  console.log("- Response: response:update, response:delete");
+  console.log("- Notice: notice:create, notice:update, notice:delete");
+  console.log("- User: user:read, user:update, user:delete");
+  console.log("- Role: role:read, role:create, role:update, role:delete");
+  console.log("- Roles: ADMIN (with all:all), FOREIGNER (with foreign:write)");
 }
 
 main()

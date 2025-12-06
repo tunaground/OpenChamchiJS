@@ -1,0 +1,119 @@
+import { notFound } from "next/navigation";
+import { getServerSession } from "next-auth";
+import { getTranslations } from "next-intl/server";
+import { authOptions } from "@/lib/auth";
+import { permissionService } from "@/lib/services/permission";
+import { boardService } from "@/lib/services/board";
+import { threadService, ThreadServiceError } from "@/lib/services/thread";
+import { responseService } from "@/lib/services/response";
+import { responseRepository } from "@/lib/repositories/prisma/response";
+import { parseRangeParam } from "@/lib/types/response-range";
+import { ThreadDetailContent } from "./thread-detail-content";
+
+interface Props {
+  params: Promise<{ threadId: string; range?: string[] }>;
+}
+
+export default async function ThreadDetailPage({ params }: Props) {
+  const { threadId, range: rangeParam } = await params;
+  const threadIdNum = parseInt(threadId, 10);
+
+  if (isNaN(threadIdNum)) {
+    notFound();
+  }
+
+  try {
+    const [thread, allBoards, session] = await Promise.all([
+      threadService.findById(threadIdNum),
+      boardService.findAll(),
+      getServerSession(authOptions),
+    ]);
+
+    const board = await boardService.findById(thread.boardId);
+
+    // Parse range parameter
+    const parsedRange = parseRangeParam(rangeParam, board.responsesPerPage);
+    if (!parsedRange.valid) {
+      notFound();
+    }
+
+    const [responses, responseCount] = await Promise.all([
+      responseService.findByRange(threadIdNum, parsedRange.range),
+      responseRepository.countByThreadId(threadIdNum),
+    ]);
+
+    // lastSeq is count - 1 (since seq starts from 0)
+    const lastSeq = Math.max(0, responseCount - 1);
+
+    const t = await getTranslations("threadDetail");
+    const tCommon = await getTranslations("common");
+    const tSidebar = await getTranslations("traceSidebar");
+
+    const canAccessAdmin = session
+      ? await permissionService.checkUserPermission(session.user.id, "admin:read")
+      : false;
+
+    // Determine current view type for navigation
+    const currentView = rangeParam?.[0] || "all";
+
+    return (
+      <ThreadDetailContent
+        thread={{
+          id: thread.id,
+          boardId: thread.boardId,
+          title: thread.title,
+          username: thread.username,
+          ended: thread.ended,
+          top: thread.top,
+          createdAt: thread.createdAt.toISOString(),
+          updatedAt: thread.updatedAt.toISOString(),
+        }}
+        boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
+        defaultUsername={board.defaultUsername}
+        isLoggedIn={!!session}
+        canAccessAdmin={canAccessAdmin}
+        authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
+        responses={responses.map((response) => ({
+          id: response.id,
+          seq: response.seq,
+          username: response.username,
+          authorId: response.authorId,
+          content: response.content,
+          attachment: response.attachment,
+          createdAt: response.createdAt.toISOString(),
+        }))}
+        currentView={currentView}
+        lastSeq={lastSeq}
+        responsesPerPage={board.responsesPerPage}
+        labels={{
+          backToList: t("backToList"),
+          author: t("author"),
+          createdAt: t("createdAt"),
+          updatedAt: t("updatedAt"),
+          ended: t("ended"),
+          top: t("top"),
+          noResponses: t("noResponses"),
+          usernamePlaceholder: t("usernamePlaceholder"),
+          contentPlaceholder: t("contentPlaceholder"),
+          submit: t("submit"),
+          submitting: t("submitting"),
+          threadEnded: t("threadEnded"),
+        }}
+        sidebarLabels={{
+          navigation: tSidebar("navigation"),
+          backToBoard: tSidebar("backToBoard"),
+          viewAll: tSidebar("viewAll"),
+          viewRecent: tSidebar("viewRecent"),
+          prev: tSidebar("prev"),
+          next: tSidebar("next"),
+          boards: tSidebar("boards"),
+        }}
+      />
+    );
+  } catch (error) {
+    if (error instanceof ThreadServiceError && error.code === "NOT_FOUND") {
+      notFound();
+    }
+    throw error;
+  }
+}

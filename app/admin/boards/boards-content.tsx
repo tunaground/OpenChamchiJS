@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import styled from "styled-components";
+import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/components/layout";
+import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
-  min-height: 100vh;
   padding: 2rem;
   max-width: 1200px;
   margin: 0 auto;
@@ -25,8 +27,8 @@ const Title = styled.h1`
 
 const Button = styled.button`
   padding: 0.5rem 1rem;
-  background: ${(props) => props.theme.textPrimary};
-  color: ${(props) => props.theme.background};
+  background: ${(props) => props.theme.buttonPrimary};
+  color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
   font-size: 0.875rem;
@@ -165,10 +167,10 @@ const Label = styled.label`
   color: ${(props) => props.theme.textPrimary};
 `;
 
-const Input = styled.input`
+const Input = styled.input<{ $error?: boolean }>`
   width: 100%;
   padding: 0.5rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border: 1px solid ${(props) => props.$error ? "#dc2626" : props.theme.surfaceBorder};
   border-radius: 4px;
   font-size: 0.875rem;
   background: ${(props) => props.theme.background};
@@ -176,8 +178,15 @@ const Input = styled.input`
 
   &:focus {
     outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
+    border-color: ${(props) => props.$error ? "#dc2626" : props.theme.textSecondary};
   }
+`;
+
+const ErrorText = styled.span`
+  color: #dc2626;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
 `;
 
 const Checkbox = styled.div`
@@ -208,6 +217,7 @@ const BoardId = styled.code`
 interface BoardData {
   id: string;
   name: string;
+  defaultUsername: string;
   deleted: boolean;
   threadCount: number;
   threadsPerPage: number;
@@ -222,7 +232,11 @@ interface Labels {
   title: string;
   createBoard: string;
   id: string;
+  idPlaceholder: string;
   name: string;
+  namePlaceholder: string;
+  defaultUsername: string;
+  defaultUsernamePlaceholder: string;
   threads: string;
   status: string;
   actions: string;
@@ -231,6 +245,7 @@ interface Labels {
   edit: string;
   delete: string;
   restore: string;
+  notices: string;
   noBoards: string;
   confirmDelete: string;
   confirmRestore: string;
@@ -247,10 +262,27 @@ interface Labels {
   editTitle: string;
   yes: string;
   no: string;
+  required: string;
+}
+
+interface AuthLabels {
+  login: string;
+  logout: string;
+}
+
+interface SidebarLabels {
+  admin: string;
+  backToHome: string;
+  boards: string;
+  users: string;
+  roles?: string;
+  settings?: string;
 }
 
 interface BoardsContentProps {
   boards: BoardData[];
+  authLabels: AuthLabels;
+  sidebarLabels: SidebarLabels;
   canCreate: boolean;
   canUpdate: boolean;
   labels: Labels;
@@ -261,6 +293,7 @@ type ModalType = "create" | "edit" | "delete" | "restore" | null;
 interface FormData {
   id: string;
   name: string;
+  defaultUsername: string;
   threadsPerPage: number;
   responsesPerPage: number;
   maxResponsesPerThread: number;
@@ -271,6 +304,7 @@ interface FormData {
 const defaultFormData: FormData = {
   id: "",
   name: "",
+  defaultUsername: "",
   threadsPerPage: 20,
   responsesPerPage: 50,
   maxResponsesPerThread: 1000,
@@ -278,15 +312,17 @@ const defaultFormData: FormData = {
   showUserCount: false,
 };
 
-export function BoardsContent({ boards: initialBoards, canCreate, canUpdate, labels }: BoardsContentProps) {
+export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels, canCreate, canUpdate, labels }: BoardsContentProps) {
   const [boards, setBoards] = useState(initialBoards);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedBoard, setSelectedBoard] = useState<BoardData | null>(null);
   const [formData, setFormData] = useState<FormData>(defaultFormData);
+  const [formErrors, setFormErrors] = useState<Record<string, boolean>>({});
   const [loading, setLoading] = useState(false);
 
   const openCreateModal = () => {
     setFormData(defaultFormData);
+    setFormErrors({});
     setSelectedBoard(null);
     setModalType("create");
   };
@@ -295,6 +331,7 @@ export function BoardsContent({ boards: initialBoards, canCreate, canUpdate, lab
     setFormData({
       id: board.id,
       name: board.name,
+      defaultUsername: board.defaultUsername,
       threadsPerPage: board.threadsPerPage,
       responsesPerPage: board.responsesPerPage,
       maxResponsesPerThread: board.maxResponsesPerThread,
@@ -321,7 +358,17 @@ export function BoardsContent({ boards: initialBoards, canCreate, canUpdate, lab
     setFormData(defaultFormData);
   };
 
+  const validateForm = () => {
+    const errors: Record<string, boolean> = {};
+    if (!formData.id.trim()) errors.id = true;
+    if (!formData.name.trim()) errors.name = true;
+    if (!formData.defaultUsername.trim()) errors.defaultUsername = true;
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleCreate = async () => {
+    if (!validateForm()) return;
     setLoading(true);
     try {
       const res = await fetch("/api/boards", {
@@ -419,14 +466,28 @@ export function BoardsContent({ boards: initialBoards, canCreate, canUpdate, lab
     }
   };
 
+  const sidebar = <AdminSidebar labels={sidebarLabels} />;
+  const rightContent = (
+    <>
+      <ThemeToggleButton />
+      <AdminButton />
+      <AuthButton
+        isLoggedIn={true}
+        loginLabel={authLabels.login}
+        logoutLabel={authLabels.logout}
+      />
+    </>
+  );
+
   return (
-    <Container>
-      <Header>
-        <Title>{labels.title}</Title>
-        {canCreate && (
-          <Button onClick={openCreateModal}>{labels.createBoard}</Button>
-        )}
-      </Header>
+    <PageLayout title={labels.title} sidebar={sidebar} rightContent={rightContent}>
+      <Container>
+        <Header>
+          <Title>{labels.title}</Title>
+          {canCreate && (
+            <Button onClick={openCreateModal}>{labels.createBoard}</Button>
+          )}
+        </Header>
 
       {boards.length === 0 ? (
         <EmptyState>{labels.noBoards}</EmptyState>
@@ -456,6 +517,12 @@ export function BoardsContent({ boards: initialBoards, canCreate, canUpdate, lab
                 </Td>
                 <Td>
                   <ActionButtons>
+                    <Link href={`/admin/boards/${board.id}/threads`}>
+                      <SmallButton>{labels.threads}</SmallButton>
+                    </Link>
+                    <Link href={`/admin/boards/${board.id}/notices`}>
+                      <SmallButton>{labels.notices}</SmallButton>
+                    </Link>
                     {canUpdate && (
                       <SmallButton onClick={() => openEditModal(board)}>
                         {labels.edit}
@@ -491,23 +558,43 @@ export function BoardsContent({ boards: initialBoards, canCreate, canUpdate, lab
               <Label>{labels.id}</Label>
               <Input
                 value={formData.id}
-                onChange={(e) =>
-                  setFormData({ ...formData, id: e.target.value })
-                }
+                onChange={(e) => {
+                  setFormData({ ...formData, id: e.target.value });
+                  if (formErrors.id) setFormErrors({ ...formErrors, id: false });
+                }}
                 disabled={modalType === "edit"}
-                placeholder="board-id"
+                placeholder={labels.idPlaceholder}
+                $error={formErrors.id}
               />
+              {formErrors.id && <ErrorText>{labels.required}</ErrorText>}
             </FormGroup>
 
             <FormGroup>
               <Label>{labels.name}</Label>
               <Input
                 value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                placeholder="Board Name"
+                onChange={(e) => {
+                  setFormData({ ...formData, name: e.target.value });
+                  if (formErrors.name) setFormErrors({ ...formErrors, name: false });
+                }}
+                placeholder={labels.namePlaceholder}
+                $error={formErrors.name}
               />
+              {formErrors.name && <ErrorText>{labels.required}</ErrorText>}
+            </FormGroup>
+
+            <FormGroup>
+              <Label>{labels.defaultUsername}</Label>
+              <Input
+                value={formData.defaultUsername}
+                onChange={(e) => {
+                  setFormData({ ...formData, defaultUsername: e.target.value });
+                  if (formErrors.defaultUsername) setFormErrors({ ...formErrors, defaultUsername: false });
+                }}
+                placeholder={labels.defaultUsernamePlaceholder}
+                $error={formErrors.defaultUsername}
+              />
+              {formErrors.defaultUsername && <ErrorText>{labels.required}</ErrorText>}
             </FormGroup>
 
             <FormGroup>
@@ -644,6 +731,7 @@ export function BoardsContent({ boards: initialBoards, canCreate, canUpdate, lab
           </ModalContent>
         </Modal>
       )}
-    </Container>
+      </Container>
+    </PageLayout>
   );
 }

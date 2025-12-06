@@ -48,7 +48,7 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 
 ### Conventions
 - **Server Components by default** - Add `'use client'` directive only when needed
-- **CSS Modules** - Use `.module.css` files for component-scoped styles
+- **Repository Pattern** - Services (`lib/services/`) use repositories (`lib/repositories/`) for data access
 - **Path alias** - Use `@/*` for imports from root directory
 - **Image optimization** - Use `next/image` component with `priority` for above-the-fold images
 - **Fonts** - Geist Sans and Geist Mono loaded via `next/font/google`, available as CSS variables
@@ -62,7 +62,7 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - RBAC with User → UserRole → Role → RolePermission → Permission
 - `all:all` permission grants access to everything
 - First-time setup at `/setup` creates initial admin
-- Protected routes (`/dashboard`, `/admin`) redirect to `/login?callbackUrl=...` if not authenticated
+- Protected routes (`/admin`) redirect to `/login?callbackUrl=...` if not authenticated
 - Login page shows logout button when already authenticated
 
 ### Internationalization (i18n)
@@ -72,11 +72,12 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - Server: `import { getTranslations } from 'next-intl/server'`
 - Client: `import { useTranslations } from 'next-intl'`
 
-### Styling
-- **styled-components** - Use for component styling in Client Components (requires `'use client'`)
-- Global styles in `app/globals.css` with CSS custom properties for theming
-- Dark mode support via `prefers-color-scheme: dark`
-- Color variables: `--background`, `--foreground`
+### Styling & Theming
+- **styled-components** - Primary styling method for Client Components (requires `'use client'`)
+- Theme system via Zustand store (`lib/theme/store.ts`) with light/dark mode toggle
+- Theme colors defined in `lib/theme/themes.ts` - use `props.theme.textPrimary`, `props.theme.buttonPrimary`, etc.
+- Global styles in `app/globals.css`
+- `ThemeToggleButton` component for user theme switching
 
 ### Board System
 - **Board** - 게시판 설정 (threadsPerPage, responsesPerPage, blockForeignIp 등)
@@ -94,6 +95,9 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - `GET/PUT/DELETE /api/boards/[boardId]/threads/[threadId]` - 스레드 상세/수정/삭제 (권한 필요)
 - `GET/POST .../threads/[threadId]/responses` - 응답 목록/생성
 - `GET/PUT/DELETE .../responses/[responseId]` - 응답 상세/수정/삭제
+- `GET/POST /api/boards/[boardId]/notices` - 공지사항 목록/생성
+- `GET/PUT/DELETE .../notices/[noticeId]` - 공지사항 상세/수정/삭제
+- `GET/PUT /api/settings` - 전역 설정 조회/수정
 
 ### Permissions
 - `all:all` - 모든 권한
@@ -107,7 +111,25 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 | Thread | 권한만 | 권한만 |
 | Response | 권한만 | 권한 또는 비밀번호 |
 
+### Foreign IP Blocking
+- `blockForeignIp` 보드 설정 활성화 시 외국 IP 차단
+- `GlobalSettings.countryCode` (ISO 3166-1 alpha-2) 기준으로 판단
+- `foreign:write` 권한 있으면 차단 우회
+- GeoLite2-Country.mmdb 파일로 IP 국가 조회
+
+#### GeoIP Setup (Optional)
+외국 IP 차단 기능을 사용하려면 MaxMind GeoLite2 데이터베이스가 필요합니다:
+
+1. MaxMind 무료 계정 생성: https://www.maxmind.com/en/geolite2/signup
+2. 라이센스 키 발급
+3. 환경 변수 설정: `MAXMIND_LICENSE_KEY=your_license_key`
+4. 빌드 시 자동으로 mmdb 파일 다운로드됨
+
+라이센스 키 없이 빌드해도 정상 작동하며, IP 차단 기능만 비활성화됩니다.
+
 ### Testing
 ```bash
-npm test         # Run Jest unit tests
+npm test                           # Run all Jest unit tests
+npm test -- --testPathPattern=tom  # Run tests matching pattern
+npm run test:watch                 # Watch mode
 ```

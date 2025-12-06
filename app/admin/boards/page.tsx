@@ -15,12 +15,15 @@ export default async function AdminBoardsPage() {
   const boards = await boardService.findAllWithThreadCount(userId);
 
   const t = await getTranslations("adminBoards");
+  const tCommon = await getTranslations("common");
+  const tSidebar = await getTranslations("adminSidebar");
 
   return (
     <BoardsContent
       boards={boards.map((board) => ({
         id: board.id,
         name: board.name,
+        defaultUsername: board.defaultUsername,
         deleted: board.deleted,
         threadCount: board.threadCount,
         threadsPerPage: board.threadsPerPage,
@@ -30,13 +33,26 @@ export default async function AdminBoardsPage() {
         showUserCount: board.showUserCount,
         createdAt: board.createdAt.toISOString(),
       }))}
+      authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
+      sidebarLabels={{
+        admin: tSidebar("admin"),
+        backToHome: tSidebar("backToHome"),
+        boards: tSidebar("boards"),
+        users: tSidebar("users"),
+        roles: tSidebar("roles"),
+        settings: tSidebar("settings"),
+      }}
       canCreate={canCreate}
       canUpdate={canUpdate}
       labels={{
         title: t("title"),
         createBoard: t("createBoard"),
         id: t("id"),
+        idPlaceholder: t("idPlaceholder"),
         name: t("name"),
+        namePlaceholder: t("namePlaceholder"),
+        defaultUsername: t("defaultUsername"),
+        defaultUsernamePlaceholder: t("defaultUsernamePlaceholder"),
         threads: t("threads"),
         status: t("status"),
         actions: t("actions"),
@@ -45,6 +61,7 @@ export default async function AdminBoardsPage() {
         edit: t("edit"),
         delete: t("delete"),
         restore: t("restore"),
+        notices: t("notices"),
         noBoards: t("noBoards"),
         confirmDelete: t("confirmDelete"),
         confirmRestore: t("confirmRestore"),
@@ -61,6 +78,7 @@ export default async function AdminBoardsPage() {
         editTitle: t("editTitle"),
         yes: t("yes"),
         no: t("no"),
+        required: t("required"),
       }}
     />
   );

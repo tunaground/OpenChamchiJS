@@ -4,6 +4,8 @@ import {
   ResponseData,
   CreateResponseInput,
   UpdateResponseInput,
+  FindBySeqRangeOptions,
+  FindRecentOptions,
 } from "@/lib/repositories/interfaces/response";
 
 export const responseRepository: ResponseRepository = {
@@ -35,6 +37,61 @@ export const responseRepository: ResponseRepository = {
     return prisma.response.findUnique({
       where: { threadId_seq: { threadId, seq } },
     });
+  },
+
+  async findByThreadIdAndSeqRange(
+    threadId: number,
+    options: FindBySeqRangeOptions
+  ): Promise<ResponseData[]> {
+    const { startSeq, endSeq, includeDeleted = false } = options;
+
+    return prisma.response.findMany({
+      where: {
+        threadId,
+        seq: {
+          gte: startSeq,
+          lte: endSeq,
+        },
+        ...(includeDeleted ? {} : { deleted: false }),
+      },
+      orderBy: { seq: "asc" },
+    });
+  },
+
+  async findRecentByThreadId(
+    threadId: number,
+    options: FindRecentOptions
+  ): Promise<ResponseData[]> {
+    const { limit, includeDeleted = false } = options;
+
+    // Get seq 0 (thread body) and latest responses
+    const [firstResponse, recentResponses] = await Promise.all([
+      prisma.response.findFirst({
+        where: {
+          threadId,
+          seq: 0,
+          ...(includeDeleted ? {} : { deleted: false }),
+        },
+      }),
+      prisma.response.findMany({
+        where: {
+          threadId,
+          seq: { gt: 0 },
+          ...(includeDeleted ? {} : { deleted: false }),
+        },
+        orderBy: { seq: "desc" },
+        take: limit,
+      }),
+    ]);
+
+    const responses: ResponseData[] = [];
+    if (firstResponse) {
+      responses.push(firstResponse);
+    }
+    // Reverse to get ascending order
+    responses.push(...recentResponses.reverse());
+
+    return responses;
   },
 
   async create(data: CreateResponseInput): Promise<ResponseData> {

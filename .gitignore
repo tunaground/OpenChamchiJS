@@ -51,3 +51,7 @@ yarn-error.log*
 next-env.d.ts
 
 /app/generated/prisma
+
+# GeoIP database (downloaded at build time)
+lib/GeoLite2-Country.mmdb
+.mmdb-temp/

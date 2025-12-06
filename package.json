@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "prebuild": "node scripts/download-mmdb.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
@@ -19,6 +20,7 @@
     "@fortawesome/fontawesome-svg-core": "^7.1.0",
     "@fortawesome/free-solid-svg-icons": "^7.1.0",
     "@fortawesome/react-fontawesome": "^3.1.1",
+    "@maxmind/geoip2-node": "^6.3.4",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
     "bcryptjs": "^3.0.3",

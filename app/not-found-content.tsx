@@ -32,8 +32,8 @@ const Message = styled.p`
 const StyledLink = styled(Link)`
   display: inline-block;
   padding: 0.75rem 1.5rem;
-  background: ${(props) => props.theme.textPrimary};
-  color: ${(props) => props.theme.background};
+  background: ${(props) => props.theme.buttonPrimary};
+  color: ${(props) => props.theme.buttonPrimaryText};
   border-radius: 4px;
   text-decoration: none;
   font-size: 0.875rem;

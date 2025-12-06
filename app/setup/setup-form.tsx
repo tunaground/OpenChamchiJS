@@ -6,8 +6,8 @@ import styled from "styled-components";
 
 const Button = styled.button`
   padding: 0.75rem 1.5rem;
-  background: ${(props) => props.theme.textPrimary};
-  color: ${(props) => props.theme.background};
+  background: ${(props) => props.theme.buttonPrimary};
+  color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
   font-size: 1rem;

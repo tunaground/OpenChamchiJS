@@ -102,9 +102,17 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
+model GlobalSettings {
+  id           String   @id @default("default")
+  countryCode  String   @default("KR") // ISO 3166-1 alpha-2 country code
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
 model Board {
   id                    String   @id
   name                  String
+  defaultUsername       String
   deleted               Boolean  @default(false)
   maxResponsesPerThread Int      @default(1000)
   blockForeignIp        Boolean  @default(false)

@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
+import { boardService, BoardServiceError } from "@/lib/services/board";
+import { checkForeignIpBlocked } from "@/lib/api/foreign-ip-check";
 
 const createThreadSchema = z.object({
   title: z.string().min(1).max(200),
   password: z.string().min(1).max(100),
-  username: z.string().min(1).max(50),
+  username: z.string().max(50).optional(),
 });
 
 function handleServiceError(error: ThreadServiceError) {
@@ -28,11 +30,11 @@ export async function GET(
 ) {
   const { boardId } = await params;
   const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "20", 10);
-  const offset = parseInt(searchParams.get("offset") || "0", 10);
 
   try {
-    const threads = await threadService.findByBoardId(boardId, { limit, offset });
+    const threads = await threadService.findByBoardId(boardId, { page, limit });
     return NextResponse.json(threads);
   } catch (error) {
     if (error instanceof ThreadServiceError) {
@@ -57,14 +59,29 @@ export async function POST(
   }
 
   try {
+    const board = await boardService.findById(boardId);
+
+    // Check foreign IP block
+    const foreignIpBlocked = await checkForeignIpBlocked(request, board);
+    if (foreignIpBlocked) {
+      return foreignIpBlocked;
+    }
+
+    const username = parsed.data.username?.trim() || board.defaultUsername;
+
     const thread = await threadService.create({
       boardId,
-      ...parsed.data,
+      title: parsed.data.title,
+      password: parsed.data.password,
+      username,
     });
     return NextResponse.json(thread, { status: 201 });
   } catch (error) {
     if (error instanceof ThreadServiceError) {
       return handleServiceError(error);
+    }
+    if (error instanceof BoardServiceError) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
     }
     throw error;
   }

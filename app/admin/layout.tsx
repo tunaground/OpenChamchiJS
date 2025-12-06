@@ -17,7 +17,7 @@ export default async function AdminLayout({
   const hasAccess = await permissionService.checkUserPermission(session.user.id, "admin:read");
 
   if (!hasAccess) {
-    redirect("/dashboard?error=forbidden");
+    redirect("/?error=forbidden");
   }
 
   return <>{children}</>;

@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { responseService, ResponseServiceError } from "@/lib/services/response";
+import { boardService, BoardServiceError } from "@/lib/services/board";
+import { checkForeignIpBlocked, getClientIp } from "@/lib/api/foreign-ip-check";
 
 const createResponseSchema = z.object({
-  username: z.string().min(1).max(50),
-  authorId: z.string().min(1),
-  userId: z.string().optional(),
-  ip: z.string().min(1),
+  username: z.string().max(50).optional(),
   content: z.string().min(1),
   attachment: z.string().optional(),
 });
@@ -51,12 +50,18 @@ export async function GET(
   }
 }
 
+function generateAuthorId(ip: string): string {
+  const today = new Date().toISOString().split("T")[0];
+  const hash = Buffer.from(`${ip}:${today}`).toString("base64").slice(0, 8);
+  return hash;
+}
+
 // POST /api/boards/[boardId]/threads/[threadId]/responses - 응답 생성 (누구나 가능)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string; threadId: string }> }
 ) {
-  const { threadId } = await params;
+  const { boardId, threadId } = await params;
   const id = parseInt(threadId, 10);
 
   if (isNaN(id)) {
@@ -70,15 +75,35 @@ export async function POST(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const ip = getClientIp(request);
+  const authorId = generateAuthorId(ip);
+
   try {
+    const board = await boardService.findById(boardId);
+
+    // Check foreign IP block
+    const foreignIpBlocked = await checkForeignIpBlocked(request, board);
+    if (foreignIpBlocked) {
+      return foreignIpBlocked;
+    }
+
+    const username = parsed.data.username?.trim() || board.defaultUsername;
+
     const response = await responseService.create({
       threadId: id,
-      ...parsed.data,
+      content: parsed.data.content,
+      attachment: parsed.data.attachment,
+      username,
+      ip,
+      authorId,
     });
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     if (error instanceof ResponseServiceError) {
       return handleServiceError(error);
+    }
+    if (error instanceof BoardServiceError) {
+      return NextResponse.json({ error: error.message }, { status: 404 });
     }
     throw error;
   }

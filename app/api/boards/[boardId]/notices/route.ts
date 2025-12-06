@@ -28,10 +28,14 @@ export async function GET(
   { params }: { params: Promise<{ boardId: string }> }
 ) {
   const { boardId } = await params;
+  const { searchParams } = new URL(request.url);
+  const page = parseInt(searchParams.get("page") ?? "1", 10);
+  const limit = parseInt(searchParams.get("limit") ?? "20", 10);
+  const search = searchParams.get("search") ?? undefined;
 
   try {
-    const notices = await noticeService.findByBoardId(boardId);
-    return NextResponse.json(notices);
+    const result = await noticeService.findByBoardId(boardId, { page, limit, search });
+    return NextResponse.json(result);
   } catch (error) {
     if (error instanceof NoticeServiceError) {
       return handleServiceError(error);

@@ -1,3 +1,5 @@
+import { PaginationParams } from "@/lib/types/pagination";
+
 export interface NoticeData {
   id: number;
   boardId: string;
@@ -23,8 +25,14 @@ export interface UpdateNoticeInput {
   deleted?: boolean;
 }
 
+export interface FindNoticeOptions extends PaginationParams {
+  includeDeleted?: boolean;
+  search?: string;
+}
+
 export interface NoticeRepository {
-  findByBoardId(boardId: string): Promise<NoticeData[]>;
+  findByBoardId(boardId: string, options?: FindNoticeOptions): Promise<NoticeData[]>;
+  countByBoardId(boardId: string, options?: { includeDeleted?: boolean; search?: string }): Promise<number>;
   findById(id: number): Promise<NoticeData | null>;
   create(data: CreateNoticeInput): Promise<NoticeData>;
   update(id: number, data: UpdateNoticeInput): Promise<NoticeData>;

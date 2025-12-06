@@ -11,6 +11,12 @@ import {
   UpdateNoticeInput,
 } from "@/lib/repositories/interfaces/notice";
 import { BoardRepository } from "@/lib/repositories/interfaces/board";
+import {
+  PaginatedResult,
+  PaginationParams,
+  normalizePaginationParams,
+  createPaginatedResult,
+} from "@/lib/types/pagination";
 
 export class NoticeServiceError extends Error {
   constructor(
@@ -22,8 +28,16 @@ export class NoticeServiceError extends Error {
   }
 }
 
+export interface FindNoticeParams extends PaginationParams {
+  search?: string;
+}
+
 export interface NoticeService {
-  findByBoardId(boardId: string): Promise<NoticeData[]>;
+  findByBoardId(
+    boardId: string,
+    options?: FindNoticeParams
+  ): Promise<PaginatedResult<NoticeData>>;
+  findPinnedAndRecent(boardId: string, recentCount?: number): Promise<NoticeData[]>;
   findById(id: number): Promise<NoticeData>;
   create(userId: string, data: CreateNoticeInput): Promise<NoticeData>;
   update(userId: string, id: number, data: UpdateNoticeInput): Promise<NoticeData>;
@@ -52,12 +66,43 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
   }
 
   return {
-    async findByBoardId(boardId: string): Promise<NoticeData[]> {
+    async findByBoardId(
+      boardId: string,
+      options?: FindNoticeParams
+    ): Promise<PaginatedResult<NoticeData>> {
       const board = await boardRepository.findById(boardId);
       if (!board || board.deleted) {
         throw new NoticeServiceError("Board not found", "NOT_FOUND");
       }
-      return noticeRepository.findByBoardId(boardId);
+
+      const { page, limit } = normalizePaginationParams(options ?? {});
+      const search = options?.search;
+      const [data, total] = await Promise.all([
+        noticeRepository.findByBoardId(boardId, { page, limit, search }),
+        noticeRepository.countByBoardId(boardId, { search }),
+      ]);
+
+      return createPaginatedResult(data, total, page, limit);
+    },
+
+    async findPinnedAndRecent(
+      boardId: string,
+      recentCount: number = 3
+    ): Promise<NoticeData[]> {
+      const board = await boardRepository.findById(boardId);
+      if (!board || board.deleted) {
+        throw new NoticeServiceError("Board not found", "NOT_FOUND");
+      }
+
+      // Get all notices (limited), already ordered by pinned desc, createdAt desc
+      const notices = await noticeRepository.findByBoardId(boardId, { limit: 100 });
+
+      // Separate pinned and non-pinned
+      const pinned = notices.filter((n) => n.pinned);
+      const nonPinned = notices.filter((n) => !n.pinned).slice(0, recentCount);
+
+      // Combine: all pinned + recent non-pinned (up to recentCount)
+      return [...pinned, ...nonPinned];
     },
 
     async findById(id: number): Promise<NoticeData> {

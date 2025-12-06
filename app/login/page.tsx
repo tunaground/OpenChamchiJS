@@ -32,8 +32,8 @@ const Title = styled.h1`
 
 const Button = styled.button`
   padding: 0.75rem;
-  background: ${(props) => props.theme.textPrimary};
-  color: ${(props) => props.theme.background};
+  background: ${(props) => props.theme.buttonPrimary};
+  color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -57,7 +57,7 @@ export default function LoginPage() {
   const tCommon = useTranslations("common");
   const { data: session, status } = useSession();
   const searchParams = useSearchParams();
-  const callbackUrl = searchParams.get("callbackUrl") || "/dashboard";
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
 
   if (status === "loading") {
     return (

@@ -8,10 +8,17 @@ import { boardRepository as defaultBoardRepository } from "@/lib/repositories/pr
 import {
   ThreadRepository,
   ThreadData,
+  ThreadWithResponseCount,
   CreateThreadInput,
   UpdateThreadInput,
 } from "@/lib/repositories/interfaces/thread";
 import { BoardRepository } from "@/lib/repositories/interfaces/board";
+import {
+  PaginatedResult,
+  PaginationParams,
+  normalizePaginationParams,
+  createPaginatedResult,
+} from "@/lib/types/pagination";
 
 export class ThreadServiceError extends Error {
   constructor(
@@ -23,11 +30,15 @@ export class ThreadServiceError extends Error {
   }
 }
 
+export interface FindThreadParams extends PaginationParams {
+  search?: string;
+}
+
 export interface ThreadService {
   findByBoardId(
     boardId: string,
-    options?: { limit?: number; offset?: number }
-  ): Promise<ThreadData[]>;
+    options?: FindThreadParams
+  ): Promise<PaginatedResult<ThreadWithResponseCount>>;
   findById(id: number): Promise<ThreadData>;
   create(data: CreateThreadInput): Promise<ThreadData>;
   update(
@@ -70,14 +81,21 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
   return {
     async findByBoardId(
       boardId: string,
-      options?: { limit?: number; offset?: number }
-    ): Promise<ThreadData[]> {
+      options?: FindThreadParams
+    ): Promise<PaginatedResult<ThreadWithResponseCount>> {
       const board = await boardRepository.findById(boardId);
       if (!board || board.deleted) {
         throw new ThreadServiceError("Board not found", "NOT_FOUND");
       }
 
-      return threadRepository.findByBoardId(boardId, options);
+      const { page, limit, offset } = normalizePaginationParams(options ?? {});
+      const search = options?.search;
+      const [data, total] = await Promise.all([
+        threadRepository.findByBoardIdWithResponseCount(boardId, { limit, offset, search }),
+        threadRepository.countByBoardId(boardId, { search }),
+      ]);
+
+      return createPaginatedResult(data, total, page, limit);
     },
 
     async findById(id: number): Promise<ThreadData> {
