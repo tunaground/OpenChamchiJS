@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { handleServiceError } from "@/lib/api/error-handler";
 import { updateBoardSchema, configBoardSchema } from "@/lib/schemas";
+import { validateOrigin } from "@/lib/api/csrf";
 
 // GET /api/boards/[boardId] - 보드 상세 조회
 export async function GET(
@@ -28,6 +29,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string }> }
 ) {
+  const csrfError = validateOrigin(request);
+  if (csrfError) return csrfError;
+
   const { boardId } = await params;
   const session = await getServerSession(authOptions);
 
@@ -58,6 +62,9 @@ export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string }> }
 ) {
+  const csrfError = validateOrigin(request);
+  if (csrfError) return csrfError;
+
   const { boardId } = await params;
   const session = await getServerSession(authOptions);
 

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { updateSettingsSchema } from "@/lib/schemas";
+import { validateOrigin } from "@/lib/api/csrf";
 
 // GET /api/settings - Get global settings
 export async function GET() {
@@ -28,6 +29,9 @@ export async function GET() {
 
 // PUT /api/settings - Update global settings
 export async function PUT(request: NextRequest) {
+  const csrfError = validateOrigin(request);
+  if (csrfError) return csrfError;
+
   const session = await getServerSession(authOptions);
 
   if (!session) {

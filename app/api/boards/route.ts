@@ -3,6 +3,7 @@ import { boardService, BoardServiceError } from "@/lib/services/board";
 import { handleServiceError } from "@/lib/api/error-handler";
 import { requireAuth } from "@/lib/api/auth";
 import { createBoardSchema } from "@/lib/schemas";
+import { validateOrigin } from "@/lib/api/csrf";
 
 // GET /api/boards - 보드 목록 조회
 export async function GET() {
@@ -12,6 +13,9 @@ export async function GET() {
 
 // POST /api/boards - 보드 생성
 export async function POST(request: NextRequest) {
+  const csrfError = validateOrigin(request);
+  if (csrfError) return csrfError;
+
   const auth = await requireAuth();
   if (!auth.authenticated) {
     return auth.response;

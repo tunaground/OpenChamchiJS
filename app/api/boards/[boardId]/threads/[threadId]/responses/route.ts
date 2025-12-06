@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { authOptions } from "@/lib/auth";
 import { responseService, ResponseServiceError } from "@/lib/services/response";
 import { boardService, BoardServiceError } from "@/lib/services/board";
@@ -117,7 +118,11 @@ export async function GET(
 
 function generateAuthorId(ip: string): string {
   const today = new Date().toISOString().split("T")[0];
-  const hash = Buffer.from(`${ip}:${today}`).toString("base64").slice(0, 8);
+  const hash = crypto
+    .createHash("sha256")
+    .update(`${ip}:${today}`)
+    .digest("hex")
+    .slice(0, 8);
   return hash;
 }
 

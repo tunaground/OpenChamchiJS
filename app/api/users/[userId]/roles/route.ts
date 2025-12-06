@@ -3,12 +3,16 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { userService, UserServiceError } from "@/lib/services/user";
 import { handleServiceError } from "@/lib/api/error-handler";
+import { validateOrigin } from "@/lib/api/csrf";
 
 interface Props {
   params: Promise<{ userId: string }>;
 }
 
 export async function POST(request: NextRequest, { params }: Props) {
+  const csrfError = validateOrigin(request);
+  if (csrfError) return csrfError;
+
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
@@ -38,6 +42,9 @@ export async function POST(request: NextRequest, { params }: Props) {
 }
 
 export async function DELETE(request: NextRequest, { params }: Props) {
+  const csrfError = validateOrigin(request);
+  if (csrfError) return csrfError;
+
   try {
     const session = await getServerSession(authOptions);
     if (!session) {

@@ -1,10 +1,53 @@
 import { z } from "zod";
 
+// Utility functions for input sanitization
+export function removeControlCharacters(input: string): string {
+  return input.replace(/[\u202E\u202D\u202C\u200E\u200F\u200B\u200C\u200D]/g, "");
+}
+
+// Custom Zod transformers
+const sanitizedString = z.string().transform(removeControlCharacters);
+
+const trimmedString = z.string().transform((s) => s.trim());
+
+const sanitizedTrimmedString = z
+  .string()
+  .transform((s) => removeControlCharacters(s).trim());
+
+// Board ID: alphanumeric and hyphens only
+const boardIdSchema = z
+  .string()
+  .min(1)
+  .max(50)
+  .regex(/^[a-zA-Z0-9-]+$/, "Board ID must contain only letters, numbers, and hyphens")
+  .transform(removeControlCharacters);
+
+// Username: max 60 chars, trim whitespace, remove control chars
+const usernameSchema = z
+  .string()
+  .max(60)
+  .transform((s) => removeControlCharacters(s).trim())
+  .optional();
+
+// Content: max 20000 chars, remove control chars
+const contentSchema = z
+  .string()
+  .min(1)
+  .max(20000)
+  .transform(removeControlCharacters);
+
+// Attachment: URL format validation
+const attachmentSchema = z
+  .string()
+  .url("Invalid attachment URL")
+  .transform(removeControlCharacters)
+  .optional();
+
 // Board schemas
 export const createBoardSchema = z.object({
-  id: z.string().min(1).max(50),
-  name: z.string().min(1).max(100),
-  defaultUsername: z.string().min(1).max(50).default("noname"),
+  id: boardIdSchema,
+  name: sanitizedTrimmedString.pipe(z.string().min(1).max(100)),
+  defaultUsername: sanitizedTrimmedString.pipe(z.string().min(1).max(60)).default("noname"),
   maxResponsesPerThread: z.number().int().positive().optional(),
   blockForeignIp: z.boolean().optional(),
   responsesPerPage: z.number().int().positive().optional(),
@@ -13,8 +56,8 @@ export const createBoardSchema = z.object({
 });
 
 export const updateBoardSchema = z.object({
-  name: z.string().min(1).max(100).optional(),
-  defaultUsername: z.string().min(1).max(50).optional(),
+  name: sanitizedTrimmedString.pipe(z.string().min(1).max(100)).optional(),
+  defaultUsername: sanitizedTrimmedString.pipe(z.string().min(1).max(60)).optional(),
   deleted: z.boolean().optional(),
   maxResponsesPerThread: z.number().int().positive().optional(),
   blockForeignIp: z.boolean().optional(),
@@ -24,7 +67,7 @@ export const updateBoardSchema = z.object({
 });
 
 export const configBoardSchema = z.object({
-  defaultUsername: z.string().min(1).max(50).optional(),
+  defaultUsername: sanitizedTrimmedString.pipe(z.string().min(1).max(60)).optional(),
   maxResponsesPerThread: z.number().int().positive().optional(),
   blockForeignIp: z.boolean().optional(),
   responsesPerPage: z.number().int().positive().optional(),
@@ -34,13 +77,13 @@ export const configBoardSchema = z.object({
 
 // Thread schemas
 export const createThreadSchema = z.object({
-  title: z.string().min(1).max(200),
-  password: z.string().min(1).max(100),
-  username: z.string().max(50).optional(),
+  title: sanitizedTrimmedString.pipe(z.string().min(1).max(50)),
+  password: z.string().min(1).max(256),
+  username: usernameSchema,
 });
 
 export const updateThreadSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
+  title: sanitizedTrimmedString.pipe(z.string().min(1).max(50)).optional(),
   ended: z.boolean().optional(),
   top: z.boolean().optional(),
   deleted: z.boolean().optional(),
@@ -48,33 +91,33 @@ export const updateThreadSchema = z.object({
 
 // Response schemas
 export const createResponseSchema = z.object({
-  username: z.string().max(50).optional(),
-  content: z.string().min(1),
-  attachment: z.string().optional(),
+  username: usernameSchema,
+  content: contentSchema,
+  attachment: attachmentSchema,
 });
 
 export const updateResponseSchema = z.object({
-  content: z.string().min(1).optional(),
-  attachment: z.string().optional(),
+  content: contentSchema.optional(),
+  attachment: attachmentSchema,
   visible: z.boolean().optional(),
   deleted: z.boolean().optional(),
-  password: z.string().optional(),
+  password: z.string().max(256).optional(),
 });
 
 export const deleteResponseSchema = z.object({
-  password: z.string().optional(),
+  password: z.string().max(256).optional(),
 });
 
 // Notice schemas
 export const createNoticeSchema = z.object({
-  title: z.string().min(1).max(200),
-  content: z.string().min(1),
+  title: sanitizedTrimmedString.pipe(z.string().min(1).max(200)),
+  content: contentSchema,
   pinned: z.boolean().optional(),
 });
 
 export const updateNoticeSchema = z.object({
-  title: z.string().min(1).max(200).optional(),
-  content: z.string().min(1).optional(),
+  title: sanitizedTrimmedString.pipe(z.string().min(1).max(200)).optional(),
+  content: contentSchema.optional(),
   pinned: z.boolean().optional(),
   deleted: z.boolean().optional(),
 });

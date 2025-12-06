@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { roleService, RoleServiceError } from "@/lib/services/role";
 import { handleServiceError } from "@/lib/api/error-handler";
+import { validateOrigin } from "@/lib/api/csrf";
 
 export async function GET() {
   try {
@@ -23,6 +24,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  const csrfError = validateOrigin(request);
+  if (csrfError) return csrfError;
+
   try {
     const session = await getServerSession(authOptions);
     if (!session) {
