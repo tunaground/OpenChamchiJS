@@ -1,13 +1,13 @@
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { getUserPermissions } from "@/lib/permissions";
+import { permissionService } from "@/lib/services/permission";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
 
 export default async function AdminPage() {
   const session = await getServerSession(authOptions);
-  const permissions = await getUserPermissions(session!.user.id);
+  const permissions = await permissionService.getUserPermissions(session!.user.id);
 
   const userCount = await prisma.user.count();
   const roleCount = await prisma.role.count();

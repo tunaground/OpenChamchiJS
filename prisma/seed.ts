@@ -34,6 +34,43 @@ async function main() {
     },
   });
 
+  // Board permissions
+  await prisma.permission.upsert({
+    where: { name: "board:all" },
+    update: {},
+    create: {
+      name: "board:all",
+      description: "보드 모든 권한",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "board:write" },
+    update: {},
+    create: {
+      name: "board:write",
+      description: "보드 생성",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "board:edit" },
+    update: {},
+    create: {
+      name: "board:edit",
+      description: "보드 모든 필드 수정",
+    },
+  });
+
+  await prisma.permission.upsert({
+    where: { name: "board:config" },
+    update: {},
+    create: {
+      name: "board:config",
+      description: "보드 설정값만 수정",
+    },
+  });
+
   // Create ADMIN role
   const adminRole = await prisma.role.upsert({
     where: { name: "ADMIN" },
@@ -85,7 +122,7 @@ async function main() {
   });
 
   console.log("Seed completed:");
-  console.log("- Permissions: all:all, admin:read, foreign:write");
+  console.log("- Permissions: all:all, admin:read, foreign:write, board:all, board:write, board:edit, board:config");
   console.log("- Role: ADMIN (with all:all), FOREIGNER (with foreign:write)");
 }
 

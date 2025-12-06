@@ -34,7 +34,9 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - `app/api/auth/` - NextAuth API route
 - `app/admin/` - Admin pages (requires `admin:read` permission)
 - `app/setup/` - Initial admin setup flow
-- `lib/` - Shared utilities (Prisma client, auth config, permissions, i18n)
+- `lib/` - Shared utilities (Prisma client, auth config, i18n)
+- `lib/services/` - Business logic (board, permission)
+- `lib/repositories/prisma/` - Prisma data access
 - `lib/i18n/` - Internationalization config (next-intl)
 - `lib/i18n/messages/` - Translation files (ko.json, en.json)
 - `prisma/` - Prisma schema and migrations
@@ -50,7 +52,7 @@ This is a Next.js 16 project using the App Router with React 19 and TypeScript.
 - **Fonts** - Geist Sans and Geist Mono loaded via `next/font/google`, available as CSS variables
 - **Prisma Client** - Import from `@/lib/prisma` (singleton pattern with adapter for Prisma 7)
 - **Auth config** - Import `authOptions` from `@/lib/auth`
-- **Permission check** - Use `checkUserPermission(userId, "permission:name")` from `@/lib/permissions`
+- **Permission check** - Use `permissionService.checkUserPermission(userId, "permission:name")` from `@/lib/services/permission`
 
 ### Authentication & Authorization
 - NextAuth 4 with Google OAuth provider
