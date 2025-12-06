@@ -350,7 +350,9 @@ export function parse(input: string): TomRoot {
     appendText(current().nodes, "[");
   }
 
-  // Unwind stack for unclosed tags, converting them back to text
+  // Unwind stack for unclosed tags
+  // For children context: keep the element (implicit closing at end of input)
+  // For attribute/nested context: convert back to text (incomplete tag)
   while (stack.length > 1) {
     const frame = stack.pop()!;
     const parentFrame = stack[stack.length - 1];
@@ -365,8 +367,8 @@ export function parse(input: string): TomRoot {
       }
       appendText(parentFrame.nodes, nestedText);
     } else if (frame.context === "attribute") {
-      // Unclosed attribute means unclosed tag
-      // The element was already pushed to parent, we need to remove it and convert to text
+      // Unclosed attribute means tag was not fully formed (no closing ])
+      // Convert to text
       const childFrame = stack.pop()!; // pop the children frame too
       const elementParent = stack[stack.length - 1];
 
@@ -383,24 +385,10 @@ export function parse(input: string): TomRoot {
         appendText(elementParent.nodes, text);
       }
     } else if (frame.context === "children") {
-      // Unclosed children context (tag opened but not closed)
-      const elementParent = stack[stack.length - 1];
-
-      // Find and remove the element from parent
-      const lastElement = elementParent.nodes[elementParent.nodes.length - 1];
-      if (isTomElement(lastElement) && lastElement.name === frame.tagName) {
-        const element = lastElement;
-        elementParent.nodes.pop();
-        // Convert to text: [tagname attrs]children...
-        let text = "[" + element.name;
-        const attrText = stringifyNodes(element.attributes);
-        if (attrText) {
-          text += " " + attrText;
-        }
-        text += "]";
-        text += stringifyNodes(frame.nodes);
-        appendText(elementParent.nodes, text);
-      }
+      // Unclosed children context: tag was opened but not closed
+      // This is valid - implicitly close at end of input (keep the element as-is)
+      // Children are already in frame.nodes, element is in parent
+      // No action needed - element remains valid
     }
   }
 
