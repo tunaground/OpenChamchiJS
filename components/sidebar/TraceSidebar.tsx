@@ -115,12 +115,13 @@ export function TraceSidebar({
 }: TraceSidebarProps) {
   const pathname = usePathname();
   // Parse current range from currentView
+  // currentView can be "all", "recent", "5" (single), or "5/10" (range)
   const parseCurrentRange = (): { start: number; end: number } | null => {
     if (currentView === "all" || currentView === "recent") {
       return null;
     }
-    if (currentView.includes("-")) {
-      const [start, end] = currentView.split("-").map(Number);
+    if (currentView.includes("/")) {
+      const [start, end] = currentView.split("/").map(Number);
       return { start, end };
     }
     const seq = Number(currentView);
@@ -132,11 +133,11 @@ export function TraceSidebar({
 
   const currentRange = parseCurrentRange();
 
-  // Calculate prev/next ranges
+  // Calculate prev/next ranges (format: start/end)
   const getPrevRange = (): string | null => {
     if (!currentRange) {
       // If viewing all or recent, prev goes to first page
-      return `1-${responsesPerPage}`;
+      return `1/${responsesPerPage}`;
     }
 
     const newStart = Math.max(1, currentRange.start - responsesPerPage);
@@ -147,14 +148,14 @@ export function TraceSidebar({
       return null;
     }
 
-    return `${newStart}-${newEnd}`;
+    return `${newStart}/${newEnd}`;
   };
 
   const getNextRange = (): string => {
     if (!currentRange) {
       // If viewing all or recent, next goes to last page
       const newStart = Math.max(1, lastSeq - responsesPerPage + 1);
-      return `${newStart}-${lastSeq}`;
+      return `${newStart}/${lastSeq}`;
     }
 
     const newStart = currentRange.end + 1;
@@ -163,15 +164,15 @@ export function TraceSidebar({
     // If we're already at or past lastSeq, show the latest page
     if (currentRange.end >= lastSeq) {
       const latestStart = Math.max(1, lastSeq - responsesPerPage + 1);
-      return `${latestStart}-${lastSeq}`;
+      return `${latestStart}/${lastSeq}`;
     }
 
     // If newEnd exceeds lastSeq, cap it
     if (newEnd > lastSeq) {
-      return `${newStart}-${lastSeq}`;
+      return `${newStart}/${lastSeq}`;
     }
 
-    return `${newStart}-${newEnd}`;
+    return `${newStart}/${newEnd}`;
   };
 
   const prevRange = getPrevRange();

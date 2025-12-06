@@ -9,7 +9,7 @@ export type ParsedRange =
  * - undefined or [] → all responses
  * - ["recent"] → recent responses (limit by responsesPerPage)
  * - ["5"] → single response seq 5
- * - ["5-10"] → range from seq 5 to 10
+ * - ["5", "10"] → range from seq 5 to 10 (URL: /trace/board/thread/5/10)
  */
 export function parseRangeParam(
   rangeParam: string[] | undefined,
@@ -20,22 +20,17 @@ export function parseRangeParam(
     return { valid: true, range: { type: "all" } };
   }
 
-  const [rangeStr] = rangeParam;
+  const [first, second] = rangeParam;
 
   // "recent" → latest responses
-  if (rangeStr === "recent") {
+  if (first === "recent") {
     return { valid: true, range: { type: "recent", limit: responsesPerPage } };
   }
 
-  // Check for range format "start-end"
-  if (rangeStr.includes("-")) {
-    const parts = rangeStr.split("-");
-    if (parts.length !== 2) {
-      return { valid: false };
-    }
-
-    const startSeq = parseInt(parts[0], 10);
-    const endSeq = parseInt(parts[1], 10);
+  // Check for range format with two path segments: ["start", "end"]
+  if (second !== undefined) {
+    const startSeq = parseInt(first, 10);
+    const endSeq = parseInt(second, 10);
 
     if (isNaN(startSeq) || isNaN(endSeq) || startSeq < 0 || endSeq < startSeq) {
       return { valid: false };
@@ -45,7 +40,7 @@ export function parseRangeParam(
   }
 
   // Single seq number
-  const seq = parseInt(rangeStr, 10);
+  const seq = parseInt(first, 10);
   if (isNaN(seq) || seq < 0) {
     return { valid: false };
   }

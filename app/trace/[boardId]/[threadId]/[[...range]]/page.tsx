@@ -59,7 +59,12 @@ export default async function ThreadDetailPage({ params }: Props) {
       : false;
 
     // Determine current view type for navigation
-    const currentView = rangeParam?.[0] || "all";
+    // Format: "all", "recent", "5" (single), or "5/10" (range)
+    const currentView = !rangeParam || rangeParam.length === 0
+      ? "all"
+      : rangeParam.length === 1
+        ? rangeParam[0]
+        : `${rangeParam[0]}/${rangeParam[1]}`;
 
     return (
       <ThreadDetailContent

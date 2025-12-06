@@ -169,7 +169,7 @@ function applyAnchor(
           ? `/trace/${anchorBoardId}/${anchorThreadId}/recent`
           : isNaN(anchorEnd)
             ? `/trace/${anchorBoardId}/${anchorThreadId}/${anchorStart}`
-            : `/trace/${anchorBoardId}/${anchorThreadId}/${anchorStart}-${anchorEnd}`;
+            : `/trace/${anchorBoardId}/${anchorThreadId}/${anchorStart}/${anchorEnd}`;
 
         if (isNaN(anchorStart)) {
           result.push(
