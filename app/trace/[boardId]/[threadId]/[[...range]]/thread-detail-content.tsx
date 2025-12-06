@@ -11,6 +11,10 @@ import { formatDateTime } from "@/lib/utils/date-formatter";
 
 const Container = styled.div`
   padding: 3.2rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 

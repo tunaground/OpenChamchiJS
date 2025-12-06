@@ -69,47 +69,6 @@ const SearchButton = styled.button`
   }
 `;
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  overflow: hidden;
-`;
-
-const Th = styled.th`
-  text-align: left;
-  padding: 1.2rem 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  font-weight: 500;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const Td = styled.td`
-  padding: 1.2rem 1.6rem;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textPrimary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const TitleCell = styled(Td)`
-  a {
-    color: ${(props) => props.theme.textPrimary};
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const PinnedRow = styled.tr`
-  background: ${(props) => props.theme.surfaceHover};
-`;
-
 const PinnedBadge = styled.span`
   display: inline-block;
   padding: 0.2rem 0.8rem;
@@ -121,6 +80,39 @@ const PinnedBadge = styled.span`
   margin-right: 0.8rem;
 `;
 
+const NoticeCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+`;
+
+const NoticeCard = styled.div<{ $pinned?: boolean }>`
+  background: ${(props) => props.$pinned ? props.theme.surfaceHover : props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+  padding: 1.2rem;
+`;
+
+const CardTitle = styled.div`
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin-bottom: 0.6rem;
+
+  a {
+    color: ${(props) => props.theme.textPrimary};
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+const CardMeta = styled.div`
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.textSecondary};
+`;
+
 const EmptyState = styled.div`
   text-align: center;
   padding: 4.8rem;
@@ -128,11 +120,6 @@ const EmptyState = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-`;
-
-const DateCell = styled(Td)`
-  white-space: nowrap;
-  color: ${(props) => props.theme.textSecondary};
 `;
 
 interface NoticeData {
@@ -233,38 +220,20 @@ export function NoticeListContent({
         </EmptyState>
       ) : (
         <>
-          <Table>
-            <thead>
-              <tr>
-                <Th style={{ width: "70%" }}>{labels.noticeTitle}</Th>
-                <Th style={{ width: "30%" }}>{labels.createdAt}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {notices.map((notice) =>
-                notice.pinned ? (
-                  <PinnedRow key={notice.id}>
-                    <TitleCell>
-                      <PinnedBadge>{labels.pinned}</PinnedBadge>
-                      <Link href={`/notice/${boardId}/${notice.id}`}>
-                        {notice.title}
-                      </Link>
-                    </TitleCell>
-                    <DateCell>{formatDate(notice.createdAt)}</DateCell>
-                  </PinnedRow>
-                ) : (
-                  <tr key={notice.id}>
-                    <TitleCell>
-                      <Link href={`/notice/${boardId}/${notice.id}`}>
-                        {notice.title}
-                      </Link>
-                    </TitleCell>
-                    <DateCell>{formatDate(notice.createdAt)}</DateCell>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </Table>
+          <NoticeCards>
+            {notices.map((notice) => (
+              <NoticeCard key={notice.id} $pinned={notice.pinned}>
+                <CardTitle>
+                  {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
+                  <Link href={`/notice/${boardId}/${notice.id}`}>
+                    {notice.title}
+                  </Link>
+                </CardTitle>
+                <CardMeta>{formatDate(notice.createdAt)}</CardMeta>
+              </NoticeCard>
+            ))}
+          </NoticeCards>
+
           <Pagination
             currentPage={pagination.page}
             totalPages={pagination.totalPages}

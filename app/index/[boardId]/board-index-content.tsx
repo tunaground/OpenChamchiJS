@@ -10,6 +10,10 @@ import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
   padding: 3.2rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 const NoticesSection = styled.section`
@@ -118,47 +122,6 @@ const CreateButton = styled(Link)`
   }
 `;
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  overflow: hidden;
-`;
-
-const Th = styled.th`
-  text-align: left;
-  padding: 1.2rem 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  font-weight: 500;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const Td = styled.td`
-  padding: 1.2rem 1.6rem;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textPrimary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const TitleCell = styled(Td)`
-  a {
-    color: ${(props) => props.theme.textPrimary};
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const TopRow = styled.tr`
-  background: ${(props) => props.theme.surfaceHover};
-`;
-
 const Badge = styled.span<{ $variant?: "top" | "ended" }>`
   display: inline-block;
   padding: 0.2rem 0.6rem;
@@ -176,9 +139,46 @@ const Badge = styled.span<{ $variant?: "top" | "ended" }>`
       : props.theme.background};
 `;
 
-const DateCell = styled(Td)`
-  white-space: nowrap;
+const ThreadCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+`;
+
+const ThreadCard = styled.div<{ $isTop?: boolean }>`
+  background: ${(props) => props.$isTop ? props.theme.surfaceHover : props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+  padding: 1.2rem;
+`;
+
+const CardTitle = styled.div`
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+
+  a {
+    color: ${(props) => props.theme.textPrimary};
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+const CardMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  font-size: 1.2rem;
   color: ${(props) => props.theme.textSecondary};
+`;
+
+const CardMetaItem = styled.span`
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 `;
 
 const EmptyState = styled.div`
@@ -332,17 +332,6 @@ export function BoardIndexContent({
     return `/index/${boardId}${queryString ? `?${queryString}` : ""}`;
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
-
   const formatShortDate = (dateString: string) => {
     const date = new Date(dateString);
     const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -406,55 +395,26 @@ export function BoardIndexContent({
         <EmptyState>{initialSearch ? labels.noResults : labels.noThreads}</EmptyState>
       ) : (
         <>
-          <Table>
-            <thead>
-              <tr>
-                <Th style={{ width: "8%" }}>{labels.id}</Th>
-                <Th style={{ width: "37%" }}>{labels.threadTitle}</Th>
-                <Th style={{ width: "12%" }}>{labels.author}</Th>
-                <Th style={{ width: "20%" }}>{labels.createdAt}</Th>
-                <Th style={{ width: "20%" }}>{labels.updatedAt}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {threads.map((thread) =>
-                thread.top ? (
-                  <TopRow key={thread.id}>
-                    <Td>{thread.id}</Td>
-                    <TitleCell>
-                      <Badge $variant="top">{labels.top}</Badge>
-                      {thread.ended && (
-                        <Badge $variant="ended">{labels.ended}</Badge>
-                      )}
-                      <Link href={`/trace/${boardId}/${thread.id}/recent`}>
-                        {thread.title}
-                      </Link>
-                      <span> ({Math.max(0, thread.responseCount - 1)})</span>
-                    </TitleCell>
-                    <Td>{thread.username}</Td>
-                    <DateCell>{formatDate(thread.createdAt)}</DateCell>
-                    <DateCell>{formatDate(thread.updatedAt)}</DateCell>
-                  </TopRow>
-                ) : (
-                  <tr key={thread.id}>
-                    <Td>{thread.id}</Td>
-                    <TitleCell>
-                      {thread.ended && (
-                        <Badge $variant="ended">{labels.ended}</Badge>
-                      )}
-                      <Link href={`/trace/${boardId}/${thread.id}/recent`}>
-                        {thread.title}
-                      </Link>
-                      <span> ({Math.max(0, thread.responseCount - 1)})</span>
-                    </TitleCell>
-                    <Td>{thread.username}</Td>
-                    <DateCell>{formatDate(thread.createdAt)}</DateCell>
-                    <DateCell>{formatDate(thread.updatedAt)}</DateCell>
-                  </tr>
-                )
-              )}
-            </tbody>
-          </Table>
+          <ThreadCards>
+            {threads.map((thread) => (
+              <ThreadCard key={thread.id} $isTop={thread.top}>
+                <CardTitle>
+                  {thread.top && <Badge $variant="top">{labels.top}</Badge>}
+                  {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
+                  <Link href={`/trace/${boardId}/${thread.id}/recent`}>
+                    {thread.title}
+                  </Link>
+                  <span> ({Math.max(0, thread.responseCount - 1)})</span>
+                </CardTitle>
+                <CardMeta>
+                  <CardMetaItem>#{thread.id}</CardMetaItem>
+                  <CardMetaItem>{thread.username}</CardMetaItem>
+                  <CardMetaItem>{formatShortDate(thread.updatedAt)}</CardMetaItem>
+                </CardMeta>
+              </ThreadCard>
+            ))}
+          </ThreadCards>
+
           <Pagination
             currentPage={pagination.page}
             totalPages={pagination.totalPages}

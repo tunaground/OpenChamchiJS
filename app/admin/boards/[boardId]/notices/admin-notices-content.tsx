@@ -12,6 +12,10 @@ const Container = styled.div`
   padding: 3.2rem;
   max-width: 120rem;
   margin: 0 auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 const Header = styled.div`
@@ -82,32 +86,6 @@ const DangerButton = styled(Button)`
   }
 `;
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  overflow: hidden;
-`;
-
-const Th = styled.th`
-  text-align: left;
-  padding: 1.2rem 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  font-weight: 500;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const Td = styled.td`
-  padding: 1.2rem 1.6rem;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textPrimary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
 const PinnedBadge = styled.span`
   display: inline-block;
   padding: 0.2rem 0.8rem;
@@ -118,8 +96,43 @@ const PinnedBadge = styled.span`
   font-weight: 500;
 `;
 
-const ActionButtons = styled.div`
+const NoticeCards = styled.div`
   display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+`;
+
+const NoticeCard = styled.div`
+  background: ${(props) => props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+  padding: 1.2rem;
+`;
+
+const CardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.8rem;
+  margin-bottom: 0.8rem;
+`;
+
+const CardTitle = styled.div`
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: ${(props) => props.theme.textPrimary};
+  flex: 1;
+`;
+
+const CardMeta = styled.div`
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.textSecondary};
+  margin-bottom: 1rem;
+`;
+
+const CardActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.8rem;
 `;
 
@@ -546,41 +559,30 @@ export function AdminNoticesContent({
         </EmptyState>
       ) : (
         <>
-          <Table>
-            <thead>
-              <tr>
-                <Th style={{ width: "50%" }}>{labels.noticeTitle}</Th>
-                <Th style={{ width: "15%" }}>{labels.pinned}</Th>
-                <Th style={{ width: "15%" }}>{labels.createdAt}</Th>
-                <Th style={{ width: "20%" }}>{labels.actions}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {notices.map((notice) => (
-                <tr key={notice.id}>
-                  <Td>{notice.title}</Td>
-                  <Td>
-                    {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
-                  </Td>
-                  <Td>{formatDate(notice.createdAt)}</Td>
-                  <Td>
-                    <ActionButtons>
-                      {canUpdate && (
-                        <SmallButton onClick={() => openEditModal(notice)}>
-                          {labels.edit}
-                        </SmallButton>
-                      )}
-                      {canDelete && (
-                        <SmallButton onClick={() => openDeleteModal(notice)}>
-                          {labels.delete}
-                        </SmallButton>
-                      )}
-                    </ActionButtons>
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <NoticeCards>
+            {notices.map((notice) => (
+              <NoticeCard key={notice.id}>
+                <CardHeader>
+                  <CardTitle>{notice.title}</CardTitle>
+                  {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
+                </CardHeader>
+                <CardMeta>{formatDate(notice.createdAt)}</CardMeta>
+                <CardActions>
+                  {canUpdate && (
+                    <SmallButton onClick={() => openEditModal(notice)}>
+                      {labels.edit}
+                    </SmallButton>
+                  )}
+                  {canDelete && (
+                    <SmallButton onClick={() => openDeleteModal(notice)}>
+                      {labels.delete}
+                    </SmallButton>
+                  )}
+                </CardActions>
+              </NoticeCard>
+            ))}
+          </NoticeCards>
+
           <Pagination
             currentPage={pagination.page}
             totalPages={pagination.totalPages}

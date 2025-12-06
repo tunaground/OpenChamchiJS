@@ -9,6 +9,10 @@ const Container = styled.div`
   padding: 3.2rem;
   max-width: 120rem;
   margin: 0 auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 const Header = styled.div`
@@ -24,31 +28,43 @@ const Title = styled.h1`
   color: ${(props) => props.theme.textPrimary};
 `;
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
+const RoleCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+`;
+
+const RoleCard = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  overflow: hidden;
+  padding: 1.2rem;
 `;
 
-const Th = styled.th`
-  text-align: left;
-  padding: 1.2rem 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
+const CardHeader = styled.div`
+  margin-bottom: 0.8rem;
+`;
+
+const CardTitle = styled.div`
+  font-size: 1.4rem;
   font-weight: 500;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
+  color: ${(props) => props.theme.textPrimary};
 `;
 
-const Td = styled.td`
-  padding: 1.2rem 1.6rem;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textPrimary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-  vertical-align: top;
+const CardDescription = styled.div`
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.textSecondary};
+  margin-top: 0.4rem;
+`;
+
+const CardPermissions = styled.div`
+  margin-bottom: 1rem;
+`;
+
+const CardActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
 `;
 
 const PermissionBadge = styled.span`
@@ -534,58 +550,50 @@ export function AdminRolesContent({
         {roles.length === 0 ? (
           <EmptyState>{labels.noRoles}</EmptyState>
         ) : (
-          <Table>
-            <thead>
-              <tr>
-                <Th>{labels.name}</Th>
-                <Th>{labels.description}</Th>
-                <Th>{labels.permissions}</Th>
-                <Th>{labels.actions}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {roles.map((role) => (
-                <tr key={role.id}>
-                  <Td style={{ fontWeight: 500 }}>{role.name}</Td>
-                  <Td>{role.description || "-"}</Td>
-                  <Td>
-                    {role.permissions.length === 0 ? (
-                      <span style={{ color: "gray" }}>
-                        {labels.noPermissions}
-                      </span>
-                    ) : (
-                      role.permissions.map((p) => (
-                        <PermissionBadge key={p.id}>{p.name}</PermissionBadge>
-                      ))
-                    )}
-                  </Td>
-                  <Td>
-                    <ActionButtons>
-                      {canUpdate && (
-                        <>
-                          <SmallButton onClick={() => openEditModal(role)}>
-                            {labels.edit}
-                          </SmallButton>
-                          <SmallButton
-                            onClick={() => openEditPermissionsModal(role)}
-                          >
-                            {labels.editPermissions}
-                          </SmallButton>
-                        </>
-                      )}
-                      {canDelete && (
-                        <DangerSmallButton
-                          onClick={() => openDeleteModal(role)}
-                        >
-                          {labels.delete}
-                        </DangerSmallButton>
-                      )}
-                    </ActionButtons>
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <RoleCards>
+            {roles.map((role) => (
+              <RoleCard key={role.id}>
+                <CardHeader>
+                  <CardTitle>{role.name}</CardTitle>
+                  {role.description && (
+                    <CardDescription>{role.description}</CardDescription>
+                  )}
+                </CardHeader>
+                <CardPermissions>
+                  {role.permissions.length === 0 ? (
+                    <span style={{ color: "gray", fontSize: "1.2rem" }}>
+                      {labels.noPermissions}
+                    </span>
+                  ) : (
+                    role.permissions.map((p) => (
+                      <PermissionBadge key={p.id}>{p.name}</PermissionBadge>
+                    ))
+                  )}
+                </CardPermissions>
+                <CardActions>
+                  {canUpdate && (
+                    <>
+                      <SmallButton onClick={() => openEditModal(role)}>
+                        {labels.edit}
+                      </SmallButton>
+                      <SmallButton
+                        onClick={() => openEditPermissionsModal(role)}
+                      >
+                        {labels.editPermissions}
+                      </SmallButton>
+                    </>
+                  )}
+                  {canDelete && (
+                    <DangerSmallButton
+                      onClick={() => openDeleteModal(role)}
+                    >
+                      {labels.delete}
+                    </DangerSmallButton>
+                  )}
+                </CardActions>
+              </RoleCard>
+            ))}
+          </RoleCards>
         )}
 
         {/* Create Modal */}

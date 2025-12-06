@@ -127,7 +127,7 @@
   "boardIndex": {
     "notices": "공지사항",
     "moreNotices": "더보기",
-    "createThread": "주제글 쓰기",
+    "createThread": "글쓰기",
     "id": "ID",
     "threadTitle": "제목",
     "author": "작성자",

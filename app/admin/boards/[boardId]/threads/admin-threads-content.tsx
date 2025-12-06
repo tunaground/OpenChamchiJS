@@ -13,6 +13,10 @@ const Container = styled.div`
   padding: 3.2rem;
   max-width: 120rem;
   margin: 0 auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 const Header = styled.div`
@@ -83,6 +87,12 @@ const DangerButton = styled(Button)`
   }
 `;
 
+const ThreadCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+`;
+
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
@@ -94,19 +104,57 @@ const Table = styled.table`
 
 const Th = styled.th`
   text-align: left;
-  padding: 1.2rem 1.6rem;
+  padding: 1rem;
   background: ${(props) => props.theme.surfaceHover};
   font-weight: 500;
-  font-size: 1.4rem;
+  font-size: 1.2rem;
   color: ${(props) => props.theme.textSecondary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const Td = styled.td`
-  padding: 1.2rem 1.6rem;
-  font-size: 1.4rem;
+  padding: 1rem;
+  font-size: 1.2rem;
   color: ${(props) => props.theme.textPrimary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
+`;
+
+const ThreadCard = styled.div<{ $deleted?: boolean }>`
+  background: ${(props) => props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+  padding: 1.2rem;
+  opacity: ${(props) => props.$deleted ? 0.5 : 1};
+`;
+
+const CardTitle = styled.div`
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin-bottom: 0.8rem;
+
+  a {
+    color: ${(props) => props.theme.textPrimary};
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+`;
+
+const CardMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.textSecondary};
+  margin-bottom: 1rem;
+`;
+
+const CardActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
 `;
 
 const Badge = styled.span<{ $variant?: "top" | "ended" | "active" }>`
@@ -753,86 +801,67 @@ export function AdminThreadsContent({
         </EmptyState>
       ) : (
         <>
-          <Table>
-            <thead>
-              <tr>
-                <Th style={{ width: "8%" }}>ID</Th>
-                <Th style={{ width: "26%" }}>{labels.threadTitle}</Th>
-                <Th style={{ width: "10%" }}>{labels.author}</Th>
-                <Th style={{ width: "12%" }}>{labels.status}</Th>
-                <Th style={{ width: "13%" }}>{labels.updatedAt}</Th>
-                <Th style={{ width: "13%" }}>{labels.createdAt}</Th>
-                <Th style={{ width: "20%" }}>{labels.actions}</Th>
-              </tr>
-            </thead>
-            <tbody>
-              {threads.map((thread) => (
-                <tr key={thread.id} style={{ opacity: thread.deleted ? 0.5 : 1 }}>
-                  <Td>{thread.id}</Td>
-                  <Td>
-                    <TitleLink href={`/trace/${boardId}/${thread.id}`}>
-                      {thread.title}
-                    </TitleLink>
-                  </Td>
-                  <Td>{thread.username}</Td>
-                  <Td>
-                    {thread.deleted ? (
-                      <Badge $variant="ended">{labels.deleted}</Badge>
-                    ) : (
-                      <>
-                        {thread.top && <Badge $variant="top">{labels.top}</Badge>}
-                        {thread.ended ? (
-                          <Badge $variant="ended">{labels.ended}</Badge>
-                        ) : (
-                          <Badge $variant="active">{labels.active}</Badge>
-                        )}
-                      </>
-                    )}
-                  </Td>
-                  <Td>{formatDateTime(thread.updatedAt)}</Td>
-                  <Td>{formatDateTime(thread.createdAt)}</Td>
-                  <Td>
-                    <ActionButtons>
-                      {!thread.deleted && (
-                        <SmallButton onClick={() => openResponsesModal(thread)}>
-                          {labels.manageResponses}
-                        </SmallButton>
-                      )}
-                      {canEdit && !thread.deleted && (
-                        <>
-                          <SmallButton
-                            onClick={() => handleQuickAction(thread, "top")}
-                            disabled={loading}
-                          >
-                            {thread.top ? labels.unsetTop : labels.setTop}
-                          </SmallButton>
-                          <SmallButton
-                            onClick={() => handleQuickAction(thread, "ended")}
-                            disabled={loading}
-                          >
-                            {thread.ended ? labels.unsetEnded : labels.setEnded}
-                          </SmallButton>
-                          <SmallButton onClick={() => openEditModal(thread)}>
-                            {labels.edit}
-                          </SmallButton>
-                        </>
-                      )}
-                      {canDelete && !thread.deleted && (
-                        <SmallButton onClick={() => openDeleteModal(thread)}>
-                          {labels.delete}
-                        </SmallButton>
-                      )}
-                      {canDelete && thread.deleted && (
-                        <SmallButton onClick={() => openRestoreModal(thread)}>
-                          {labels.restore}
-                        </SmallButton>
-                      )}
-                    </ActionButtons>
-                  </Td>
-                </tr>
-              ))}
-            </tbody>
-          </Table>
+          <ThreadCards>
+            {threads.map((thread) => (
+              <ThreadCard key={thread.id} $deleted={thread.deleted}>
+                <CardTitle>
+                  {thread.deleted ? (
+                    <Badge $variant="ended">{labels.deleted}</Badge>
+                  ) : (
+                    <>
+                      {thread.top && <Badge $variant="top">{labels.top}</Badge>}
+                      {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
+                    </>
+                  )}
+                  <TitleLink href={`/trace/${boardId}/${thread.id}`}>
+                    {thread.title}
+                  </TitleLink>
+                </CardTitle>
+                <CardMeta>
+                  <span>#{thread.id}</span>
+                  <span>{thread.username}</span>
+                  <span>{formatDateTime(thread.updatedAt)}</span>
+                </CardMeta>
+                <CardActions>
+                  {!thread.deleted && (
+                    <SmallButton onClick={() => openResponsesModal(thread)}>
+                      {labels.manageResponses}
+                    </SmallButton>
+                  )}
+                  {canEdit && !thread.deleted && (
+                    <>
+                      <SmallButton
+                        onClick={() => handleQuickAction(thread, "top")}
+                        disabled={loading}
+                      >
+                        {thread.top ? labels.unsetTop : labels.setTop}
+                      </SmallButton>
+                      <SmallButton
+                        onClick={() => handleQuickAction(thread, "ended")}
+                        disabled={loading}
+                      >
+                        {thread.ended ? labels.unsetEnded : labels.setEnded}
+                      </SmallButton>
+                      <SmallButton onClick={() => openEditModal(thread)}>
+                        {labels.edit}
+                      </SmallButton>
+                    </>
+                  )}
+                  {canDelete && !thread.deleted && (
+                    <SmallButton onClick={() => openDeleteModal(thread)}>
+                      {labels.delete}
+                    </SmallButton>
+                  )}
+                  {canDelete && thread.deleted && (
+                    <SmallButton onClick={() => openRestoreModal(thread)}>
+                      {labels.restore}
+                    </SmallButton>
+                  )}
+                </CardActions>
+              </ThreadCard>
+            ))}
+          </ThreadCards>
+
           <Pagination
             currentPage={pagination.page}
             totalPages={pagination.totalPages}

@@ -12,6 +12,10 @@ const Container = styled.div`
   padding: 3.2rem;
   max-width: 120rem;
   margin: 0 auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 const Header = styled.div`
@@ -62,31 +66,34 @@ const SearchButton = styled.button`
   }
 `;
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
+const UserCards = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+`;
+
+const UserCard = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  overflow: hidden;
+  padding: 1.2rem;
 `;
 
-const Th = styled.th`
-  text-align: left;
-  padding: 1.2rem 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  font-weight: 500;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
+const CardUserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 1rem;
 `;
 
-const Td = styled.td`
-  padding: 1.2rem 1.6rem;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textPrimary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-  vertical-align: middle;
+const CardRoles = styled.div`
+  margin-bottom: 1rem;
+`;
+
+const CardActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
 `;
 
 const UserCell = styled.div`
@@ -495,60 +502,48 @@ export function AdminUsersContent({
           </EmptyState>
         ) : (
           <>
-            <Table>
-              <thead>
-                <tr>
-                  <Th>{labels.name}</Th>
-                  <Th>{labels.roles}</Th>
-                  <Th>{labels.actions}</Th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user.id}>
-                    <Td>
-                      <UserCell>
-                        <Avatar>
-                          {user.image ? (
-                            <Image
-                              src={user.image}
-                              alt={user.name || ""}
-                              width={32}
-                              height={32}
-                            />
-                          ) : (
-                            user.name?.charAt(0).toUpperCase() || "?"
-                          )}
-                        </Avatar>
-                        <UserInfo>
-                          <UserName>{user.name || "Unknown"}</UserName>
-                          <UserEmail>{user.email}</UserEmail>
-                        </UserInfo>
-                      </UserCell>
-                    </Td>
-                    <Td>
-                      {user.roles.map((role) => (
-                        <RoleBadge key={role.id}>{role.name}</RoleBadge>
-                      ))}
-                    </Td>
-                    <Td>
-                      <ActionButtons>
-                        {canUpdate && (
-                          <SmallButton onClick={() => openEditRolesModal(user)}>
-                            {labels.editRoles}
-                          </SmallButton>
-                        )}
-                        {canDelete && (
-                          <DangerSmallButton onClick={() => openDeleteModal(user)}>
-                            {labels.delete}
-                          </DangerSmallButton>
-                        )}
-                      </ActionButtons>
-                    </Td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
+            <UserCards>
+              {users.map((user) => (
+                <UserCard key={user.id}>
+                  <CardUserInfo>
+                    <Avatar>
+                      {user.image ? (
+                        <Image
+                          src={user.image}
+                          alt={user.name || ""}
+                          width={32}
+                          height={32}
+                        />
+                      ) : (
+                        user.name?.charAt(0).toUpperCase() || "?"
+                      )}
+                    </Avatar>
+                    <UserInfo>
+                      <UserName>{user.name || "Unknown"}</UserName>
+                      <UserEmail>{user.email}</UserEmail>
+                    </UserInfo>
+                  </CardUserInfo>
+                  <CardRoles>
+                    {user.roles.map((role) => (
+                      <RoleBadge key={role.id}>{role.name}</RoleBadge>
+                    ))}
+                  </CardRoles>
+                  <CardActions>
+                    {canUpdate && (
+                      <SmallButton onClick={() => openEditRolesModal(user)}>
+                        {labels.editRoles}
+                      </SmallButton>
+                    )}
+                    {canDelete && (
+                      <DangerSmallButton onClick={() => openDeleteModal(user)}>
+                        {labels.delete}
+                      </DangerSmallButton>
+                    )}
+                  </CardActions>
+                </UserCard>
+              ))}
+            </UserCards>
+
             <Pagination
               currentPage={pagination.page}
               totalPages={pagination.totalPages}

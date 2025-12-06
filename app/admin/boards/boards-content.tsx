@@ -10,6 +10,10 @@ const Container = styled.div`
   padding: 3.2rem;
   max-width: 120rem;
   margin: 0 auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 const Header = styled.div`
@@ -63,32 +67,6 @@ const DangerButton = styled(Button)`
   }
 `;
 
-const Table = styled.table`
-  width: 100%;
-  border-collapse: collapse;
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  overflow: hidden;
-`;
-
-const Th = styled.th`
-  text-align: left;
-  padding: 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  font-weight: 500;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const Td = styled.td`
-  padding: 1.6rem;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textPrimary};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
 const StatusBadge = styled.span<{ $active: boolean }>`
   display: inline-block;
   padding: 0.4rem 0.8rem;
@@ -99,8 +77,44 @@ const StatusBadge = styled.span<{ $active: boolean }>`
   color: ${(props) => (props.$active ? "#22c55e" : "#ef4444")};
 `;
 
-const ActionButtons = styled.div`
+const BoardCards = styled.div`
   display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+`;
+
+const BoardCard = styled.div`
+  background: ${(props) => props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+  padding: 1.2rem;
+`;
+
+const CardHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 0.8rem;
+`;
+
+const CardTitle = styled.div`
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: ${(props) => props.theme.textPrimary};
+`;
+
+const CardMeta = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.textSecondary};
+  margin-bottom: 1rem;
+`;
+
+const CardActions = styled.div`
+  display: flex;
+  flex-wrap: wrap;
   gap: 0.8rem;
 `;
 
@@ -493,58 +507,45 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
       {boards.length === 0 ? (
         <EmptyState>{labels.noBoards}</EmptyState>
       ) : (
-        <Table>
-          <thead>
-            <tr>
-              <Th>{labels.id}</Th>
-              <Th>{labels.name}</Th>
-              <Th>{labels.threads}</Th>
-              <Th>{labels.status}</Th>
-              <Th>{labels.actions}</Th>
-            </tr>
-          </thead>
-          <tbody>
-            {boards.map((board) => (
-              <tr key={board.id}>
-                <Td>
-                  <BoardId>{board.id}</BoardId>
-                </Td>
-                <Td>{board.name}</Td>
-                <Td>{board.threadCount}</Td>
-                <Td>
-                  <StatusBadge $active={!board.deleted}>
-                    {board.deleted ? labels.deleted : labels.active}
-                  </StatusBadge>
-                </Td>
-                <Td>
-                  <ActionButtons>
-                    <Link href={`/admin/boards/${board.id}/threads`}>
-                      <SmallButton>{labels.threads}</SmallButton>
-                    </Link>
-                    <Link href={`/admin/boards/${board.id}/notices`}>
-                      <SmallButton>{labels.notices}</SmallButton>
-                    </Link>
-                    {canUpdate && (
-                      <SmallButton onClick={() => openEditModal(board)}>
-                        {labels.edit}
-                      </SmallButton>
-                    )}
-                    {canUpdate && !board.deleted && (
-                      <SmallButton onClick={() => openDeleteModal(board)}>
-                        {labels.delete}
-                      </SmallButton>
-                    )}
-                    {canUpdate && board.deleted && (
-                      <SmallButton onClick={() => openRestoreModal(board)}>
-                        {labels.restore}
-                      </SmallButton>
-                    )}
-                  </ActionButtons>
-                </Td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <BoardCards>
+          {boards.map((board) => (
+            <BoardCard key={board.id}>
+              <CardHeader>
+                <CardTitle>{board.name}</CardTitle>
+                <StatusBadge $active={!board.deleted}>
+                  {board.deleted ? labels.deleted : labels.active}
+                </StatusBadge>
+              </CardHeader>
+              <CardMeta>
+                <span><BoardId>{board.id}</BoardId></span>
+                <span>{labels.threads}: {board.threadCount}</span>
+              </CardMeta>
+              <CardActions>
+                <Link href={`/admin/boards/${board.id}/threads`}>
+                  <SmallButton>{labels.threads}</SmallButton>
+                </Link>
+                <Link href={`/admin/boards/${board.id}/notices`}>
+                  <SmallButton>{labels.notices}</SmallButton>
+                </Link>
+                {canUpdate && (
+                  <SmallButton onClick={() => openEditModal(board)}>
+                    {labels.edit}
+                  </SmallButton>
+                )}
+                {canUpdate && !board.deleted && (
+                  <SmallButton onClick={() => openDeleteModal(board)}>
+                    {labels.delete}
+                  </SmallButton>
+                )}
+                {canUpdate && board.deleted && (
+                  <SmallButton onClick={() => openRestoreModal(board)}>
+                    {labels.restore}
+                  </SmallButton>
+                )}
+              </CardActions>
+            </BoardCard>
+          ))}
+        </BoardCards>
       )}
 
       {/* Create/Edit Modal */}

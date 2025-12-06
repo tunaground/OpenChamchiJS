@@ -10,6 +10,10 @@ const Container = styled.div`
   padding: 3.2rem;
   max-width: 80rem;
   margin: 0 auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 const Header = styled.div`
