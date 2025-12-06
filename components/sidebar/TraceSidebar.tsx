@@ -3,6 +3,19 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faArrowLeft,
+  faGear,
+  faPersonRunning,
+  faClock,
+  faChevronLeft,
+  faChevronRight,
+  faChevronUp,
+  faChevronDown,
+  faFolder,
+} from "@fortawesome/free-solid-svg-icons";
+import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 
 const SidebarTitle = styled.h2`
   font-size: 1.2rem;
@@ -11,6 +24,10 @@ const SidebarTitle = styled.h2`
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 1.2rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
 `;
 
 const NavList = styled.ul`
@@ -24,7 +41,9 @@ const NavItem = styled.li`
 `;
 
 const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   padding: 1rem 1.2rem;
   border-radius: 0.6rem;
   text-decoration: none;
@@ -49,12 +68,37 @@ const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
         ? props.theme.textSecondary + "60"
         : props.theme.textPrimary};
   }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    justify-content: center;
+    padding: 1.2rem;
+  }
+`;
+
+const NavIcon = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  font-size: 1.4rem;
+`;
+
+const NavLabel = styled.span`
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
 `;
 
 const Divider = styled.hr`
   border: none;
   border-top: 1px solid ${(props) => props.theme.surfaceBorder};
   margin: 1.2rem 0;
+`;
+
+const BoardsSection = styled.div`
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
 `;
 
 interface BoardData {
@@ -77,13 +121,17 @@ interface TraceSidebarProps {
     viewRecent: string;
     prev: string;
     next: string;
+    scrollUp: string;
+    scrollDown: string;
     boards: string;
   };
   onManageClick?: () => void;
 }
 
 const NavButton = styled.button<{ $active?: boolean }>`
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
   width: 100%;
   padding: 1rem 1.2rem;
   border-radius: 0.6rem;
@@ -101,7 +149,47 @@ const NavButton = styled.button<{ $active?: boolean }>`
     background: ${(props) => props.theme.surfaceHover};
     color: ${(props) => props.theme.textPrimary};
   }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    justify-content: center;
+    padding: 1.2rem;
+  }
 `;
+
+interface NavItemWithIconProps {
+  href?: string;
+  icon: IconDefinition;
+  label: string;
+  active?: boolean;
+  disabled?: boolean;
+  onClick?: () => void;
+}
+
+function NavItemWithIcon({ href, icon, label, active, disabled, onClick }: NavItemWithIconProps) {
+  if (onClick) {
+    return (
+      <NavItem>
+        <NavButton onClick={onClick} $active={active}>
+          <NavIcon>
+            <FontAwesomeIcon icon={icon} />
+          </NavIcon>
+          <NavLabel>{label}</NavLabel>
+        </NavButton>
+      </NavItem>
+    );
+  }
+
+  return (
+    <NavItem>
+      <NavLink href={href || "#"} $active={active} $disabled={disabled}>
+        <NavIcon>
+          <FontAwesomeIcon icon={icon} />
+        </NavIcon>
+        <NavLabel>{label}</NavLabel>
+      </NavLink>
+    </NavItem>
+  );
+}
 
 export function TraceSidebar({
   threadId,
@@ -187,75 +275,88 @@ export function TraceSidebar({
     <div>
       <SidebarTitle>{labels.navigation}</SidebarTitle>
       <NavList>
-        <NavItem>
-          <NavLink href={`/index/${boardId}`}>
-            {labels.backToBoard}
-          </NavLink>
-        </NavItem>
+        <NavItemWithIcon
+          href={`/index/${boardId}`}
+          icon={faArrowLeft}
+          label={labels.backToBoard}
+        />
         {onManageClick && (
-          <NavItem>
-            <NavButton onClick={onManageClick}>
-              {labels.manageThread}
-            </NavButton>
-          </NavItem>
+          <NavItemWithIcon
+            icon={faGear}
+            label={labels.manageThread}
+            onClick={onManageClick}
+          />
         )}
       </NavList>
 
       <Divider />
 
       <NavList>
-        <NavItem>
-          <NavLink
-            href={`/trace/${boardId}/${threadId}`}
-            $active={currentView === "all"}
-          >
-            {labels.viewAll}
-          </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink
-            href={`/trace/${boardId}/${threadId}/recent`}
-            $active={currentView === "recent"}
-          >
-            {labels.viewRecent}
-          </NavLink>
-        </NavItem>
+        <NavItemWithIcon
+          href={`/trace/${boardId}/${threadId}`}
+          icon={faPersonRunning}
+          label={labels.viewAll}
+          active={currentView === "all"}
+        />
+        <NavItemWithIcon
+          href={`/trace/${boardId}/${threadId}/recent`}
+          icon={faClock}
+          label={labels.viewRecent}
+          active={currentView === "recent"}
+        />
       </NavList>
 
       <Divider />
 
       <NavList>
-        <NavItem>
-          <NavLink
-            href={isPrevDisabled ? "#" : `/trace/${boardId}/${threadId}/${prevRange}`}
-            $disabled={isPrevDisabled}
-          >
-            {labels.prev}
-          </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink href={`/trace/${boardId}/${threadId}/${nextRange}`}>
-            {labels.next}
-          </NavLink>
-        </NavItem>
+        <NavItemWithIcon
+          href={isPrevDisabled ? "#" : `/trace/${boardId}/${threadId}/${prevRange}`}
+          icon={faChevronLeft}
+          label={labels.prev}
+          disabled={isPrevDisabled}
+        />
+        <NavItemWithIcon
+          href={`/trace/${boardId}/${threadId}/${nextRange}`}
+          icon={faChevronRight}
+          label={labels.next}
+        />
       </NavList>
 
       <Divider />
 
-      <SidebarTitle>{labels.boards}</SidebarTitle>
       <NavList>
-        {boards.map((board) => {
-          const href = `/index/${board.id}`;
-          const isActive = pathname.startsWith(href) || board.id === boardId;
-          return (
-            <NavItem key={board.id}>
-              <NavLink href={href} $active={isActive}>
-                {board.name}
-              </NavLink>
-            </NavItem>
-          );
-        })}
+        <NavItemWithIcon
+          icon={faChevronUp}
+          label={labels.scrollUp}
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+        />
+        <NavItemWithIcon
+          icon={faChevronDown}
+          label={labels.scrollDown}
+          onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })}
+        />
       </NavList>
+
+      <BoardsSection>
+        <Divider />
+
+        <SidebarTitle>{labels.boards}</SidebarTitle>
+        <NavList>
+          {boards.map((board) => {
+            const href = `/index/${board.id}`;
+            const isActive = pathname.startsWith(href) || board.id === boardId;
+            return (
+              <NavItemWithIcon
+                key={board.id}
+                href={href}
+                icon={faFolder}
+                label={board.name}
+                active={isActive}
+              />
+            );
+          })}
+        </NavList>
+      </BoardsSection>
     </div>
   );
 }

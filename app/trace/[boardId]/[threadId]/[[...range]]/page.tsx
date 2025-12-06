@@ -140,6 +140,8 @@ export default async function ThreadDetailPage({ params }: Props) {
           viewRecent: tSidebar("viewRecent"),
           prev: tSidebar("prev"),
           next: tSidebar("next"),
+          scrollUp: tSidebar("scrollUp"),
+          scrollDown: tSidebar("scrollDown"),
           boards: tSidebar("boards"),
         }}
       />

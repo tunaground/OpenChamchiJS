@@ -192,6 +192,8 @@
     "viewRecent": "View Recent",
     "prev": "Previous",
     "next": "Next",
+    "scrollUp": "Scroll Up",
+    "scrollDown": "Scroll Down",
     "boards": "Boards"
   },
   "adminSidebar": {

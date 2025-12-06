@@ -1,12 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { TopBar } from "./TopBar";
 import { Sidebar } from "./Sidebar";
 import { useSidebarStore } from "@/lib/store/sidebar";
 
-const Main = styled.main<{ $sidebarOpen: boolean }>`
+const Main = styled.main<{ $sidebarOpen: boolean; $compactOnMobile?: boolean }>`
   padding-top: 5.6rem;
   min-height: 100vh;
   transition: margin-left 0.2s ease-in-out;
@@ -14,6 +14,14 @@ const Main = styled.main<{ $sidebarOpen: boolean }>`
   @media (min-width: ${(props) => props.theme.breakpoint}) {
     margin-left: ${(props) => (props.$sidebarOpen ? "16.8rem" : "0")};
   }
+
+  ${(props) =>
+    props.$compactOnMobile &&
+    css`
+      @media (max-width: ${props.theme.breakpoint}) {
+        margin-left: 5.6rem;
+      }
+    `}
 `;
 
 const Content = styled.div`
@@ -25,6 +33,8 @@ interface PageLayoutProps {
   sidebar?: React.ReactNode;
   rightContent?: React.ReactNode;
   children: React.ReactNode;
+  /** 모바일에서 사이드바를 아이콘만 표시하고 본문과 겹치지 않게 함 */
+  compactSidebarOnMobile?: boolean;
 }
 
 export function PageLayout({
@@ -32,6 +42,7 @@ export function PageLayout({
   sidebar,
   rightContent,
   children,
+  compactSidebarOnMobile,
 }: PageLayoutProps) {
   const { open: sidebarOpen, toggle: toggleSidebar, setOpen: setSidebarOpen } = useSidebarStore();
   const [mounted, setMounted] = useState(false);
@@ -55,11 +66,18 @@ export function PageLayout({
         rightContent={rightContent}
       />
       {sidebar && (
-        <Sidebar open={effectiveSidebarOpen} onClose={closeSidebar}>
+        <Sidebar
+          open={effectiveSidebarOpen}
+          onClose={closeSidebar}
+          compactOnMobile={compactSidebarOnMobile}
+        >
           {sidebar}
         </Sidebar>
       )}
-      <Main $sidebarOpen={sidebar ? effectiveSidebarOpen : false}>
+      <Main
+        $sidebarOpen={sidebar ? effectiveSidebarOpen : false}
+        $compactOnMobile={sidebar ? compactSidebarOnMobile : false}
+      >
         <Content>{children}</Content>
       </Main>
     </>

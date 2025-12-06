@@ -547,6 +547,8 @@ interface SidebarLabels {
   viewRecent: string;
   prev: string;
   next: string;
+  scrollUp: string;
+  scrollDown: string;
   boards: string;
 }
 
@@ -900,7 +902,7 @@ export function ThreadDetailContent({
   );
 
   return (
-    <PageLayout title={thread.title} sidebar={sidebar} rightContent={rightContent}>
+    <PageLayout title={thread.title} sidebar={sidebar} rightContent={rightContent} compactSidebarOnMobile>
       <Container>
         <ThreadHeader>
           <ThreadTitle>
