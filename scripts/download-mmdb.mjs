@@ -123,5 +123,14 @@ async function downloadMmdb() {
 
 downloadMmdb().catch((err) => {
   console.error("Failed to download mmdb:", err.message);
-  process.exit(1);
+
+  // Check if file already exists - if so, continue without error
+  if (fs.existsSync(OUTPUT_PATH)) {
+    console.log("Using existing mmdb file:", OUTPUT_PATH);
+    process.exit(0);
+  }
+
+  // Don't fail the build - foreign IP blocking just won't work
+  console.log("Warning: No mmdb file available. Foreign IP blocking will not work.");
+  process.exit(0);
 });
