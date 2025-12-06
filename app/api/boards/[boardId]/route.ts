@@ -35,15 +35,15 @@ function handleServiceError(error: BoardServiceError) {
   );
 }
 
-// GET /api/boards/[id] - 보드 상세 조회
+// GET /api/boards/[boardId] - 보드 상세 조회
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ boardId: string }> }
 ) {
-  const { id } = await params;
+  const { boardId } = await params;
 
   try {
-    const board = await boardService.findById(id);
+    const board = await boardService.findById(boardId);
     return NextResponse.json(board);
   } catch (error) {
     if (error instanceof BoardServiceError) {
@@ -53,12 +53,12 @@ export async function GET(
   }
 }
 
-// PUT /api/boards/[id] - 보드 전체 수정 (board:edit)
+// PUT /api/boards/[boardId] - 보드 전체 수정 (board:edit)
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ boardId: string }> }
 ) {
-  const { id } = await params;
+  const { boardId } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -73,7 +73,7 @@ export async function PUT(
   }
 
   try {
-    const board = await boardService.update(session.user.id, id, parsed.data);
+    const board = await boardService.update(session.user.id, boardId, parsed.data);
     return NextResponse.json(board);
   } catch (error) {
     if (error instanceof BoardServiceError) {
@@ -83,12 +83,12 @@ export async function PUT(
   }
 }
 
-// PATCH /api/boards/[id] - 보드 설정만 수정 (board:config)
+// PATCH /api/boards/[boardId] - 보드 설정만 수정 (board:config)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ boardId: string }> }
 ) {
-  const { id } = await params;
+  const { boardId } = await params;
   const session = await getServerSession(authOptions);
 
   if (!session?.user?.id) {
@@ -103,7 +103,7 @@ export async function PATCH(
   }
 
   try {
-    const board = await boardService.updateConfig(session.user.id, id, parsed.data);
+    const board = await boardService.updateConfig(session.user.id, boardId, parsed.data);
     return NextResponse.json(board);
   } catch (error) {
     if (error instanceof BoardServiceError) {
