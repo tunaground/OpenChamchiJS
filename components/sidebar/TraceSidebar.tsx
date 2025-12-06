@@ -154,22 +154,25 @@ export function TraceSidebar({
   const getNextRange = (): string => {
     if (!currentRange) {
       // If viewing all or recent, next goes to last page
+      // seq 0 is thread body, responses start from seq 1
       const newStart = Math.max(1, lastSeq - responsesPerPage + 1);
-      return `${newStart}/${lastSeq}`;
+      const newEnd = Math.max(newStart + responsesPerPage - 1, lastSeq);
+      return `${newStart}/${newEnd}`;
     }
 
-    const newStart = currentRange.end + 1;
+    const newStart = Math.max(1, currentRange.end + 1);
     const newEnd = newStart + responsesPerPage - 1;
 
     // If we're already at or past lastSeq, show the latest page
     if (currentRange.end >= lastSeq) {
       const latestStart = Math.max(1, lastSeq - responsesPerPage + 1);
-      return `${latestStart}/${lastSeq}`;
+      const latestEnd = Math.max(latestStart + responsesPerPage - 1, lastSeq);
+      return `${latestStart}/${latestEnd}`;
     }
 
-    // If newEnd exceeds lastSeq, cap it
+    // If newEnd exceeds lastSeq, cap it but ensure valid range
     if (newEnd > lastSeq) {
-      return `${newStart}/${lastSeq}`;
+      return `${newStart}/${Math.max(newEnd, lastSeq)}`;
     }
 
     return `${newStart}/${newEnd}`;
