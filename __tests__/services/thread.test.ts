@@ -1,9 +1,24 @@
+import bcrypt from "bcryptjs";
 import { createThreadService, ThreadServiceError } from "@/lib/services/thread";
 import { PermissionService } from "@/lib/services/permission";
 import { ThreadRepository, ThreadData } from "@/lib/repositories/interfaces/thread";
 import { BoardRepository, BoardData } from "@/lib/repositories/interfaces/board";
 
+jest.mock("bcryptjs");
+
+const mockedBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
+
 describe("ThreadService", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedBcrypt.hash.mockImplementation((password: string) =>
+      Promise.resolve(`hashed_${password}`)
+    );
+    mockedBcrypt.compare.mockImplementation((password: string, hash: string) =>
+      Promise.resolve(hash === `hashed_${password}`)
+    );
+  });
+
   const mockBoard: BoardData = {
     id: "test-board",
     name: "Test Board",
@@ -21,7 +36,7 @@ describe("ThreadService", () => {
     id: 1,
     boardId: "test-board",
     title: "Test Thread",
-    password: "test-password",
+    password: "hashed_test-password",
     username: "testuser",
     ended: false,
     deleted: false,
@@ -195,7 +210,10 @@ describe("ThreadService", () => {
       const result = await service.create(createInput);
 
       expect(result.title).toBe("New Thread");
-      expect(mockThreadRepo.create).toHaveBeenCalledWith(createInput);
+      expect(mockThreadRepo.create).toHaveBeenCalledWith({
+        ...createInput,
+        password: "hashed_password123",
+      });
     });
 
     it("should throw NOT_FOUND when board does not exist", async () => {

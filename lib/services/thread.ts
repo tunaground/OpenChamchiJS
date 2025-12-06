@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import {
   permissionService as defaultPermissionService,
   PermissionService,
@@ -74,8 +75,7 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
     password?: string
   ): Promise<boolean> {
     if (!password) return false;
-    // TODO: 해시 비교로 변경 필요
-    return thread.password === password;
+    return bcrypt.compare(password, thread.password);
   }
 
   return {
@@ -105,8 +105,11 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
         throw new ThreadServiceError("Board not found", "NOT_FOUND");
       }
 
-      // TODO: password 해시 처리
-      return threadRepository.create(data);
+      const hashedPassword = await bcrypt.hash(data.password, 10);
+      return threadRepository.create({
+        ...data,
+        password: hashedPassword,
+      });
     },
 
     async update(

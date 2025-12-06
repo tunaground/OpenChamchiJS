@@ -1,14 +1,26 @@
+import bcrypt from "bcryptjs";
 import { createResponseService, ResponseServiceError } from "@/lib/services/response";
 import { PermissionService } from "@/lib/services/permission";
 import { ResponseRepository, ResponseData } from "@/lib/repositories/interfaces/response";
 import { ThreadRepository, ThreadData } from "@/lib/repositories/interfaces/thread";
 
+jest.mock("bcryptjs");
+
+const mockedBcrypt = bcrypt as jest.Mocked<typeof bcrypt>;
+
 describe("ResponseService", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedBcrypt.compare.mockImplementation((password: string, hash: string) =>
+      Promise.resolve(hash === `hashed_${password}`)
+    );
+  });
+
   const mockThread: ThreadData = {
     id: 1,
     boardId: "test-board",
     title: "Test Thread",
-    password: "thread-password",
+    password: "hashed_thread-password",
     username: "testuser",
     ended: false,
     deleted: false,

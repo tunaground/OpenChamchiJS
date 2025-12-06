@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import {
   permissionService as defaultPermissionService,
   PermissionService,
@@ -80,8 +81,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
     if (!password) return false;
     const thread = await threadRepository.findById(threadId);
     if (!thread) return false;
-    // TODO: 해시 비교로 변경 필요
-    return thread.password === password;
+    return bcrypt.compare(password, thread.password);
   }
 
   return {
