@@ -12,7 +12,7 @@ const Bar = styled.header`
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
   display: flex;
   align-items: center;
-  padding: 0 1rem;
+  padding: 0 1.6rem;
   z-index: 100;
 `;
 
@@ -39,10 +39,10 @@ const MenuButton = styled.button`
 `;
 
 const Title = styled.div`
-  font-size: 1.125rem;
+  font-size: 1.8rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
-  margin-left: 0.75rem;
+  margin-left: 1.2rem;
 `;
 
 const Spacer = styled.div`
@@ -52,7 +52,7 @@ const Spacer = styled.div`
 const RightSection = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.8rem;
 `;
 
 interface TopBarProps {

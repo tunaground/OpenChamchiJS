@@ -6,13 +6,13 @@ import styled from "styled-components";
 const Button = styled.button`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.8rem;
+  padding: 0.8rem 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 6px;
   background: transparent;
   color: ${(props) => props.theme.textPrimary};
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   cursor: pointer;
   transition: background 0.15s;
 

@@ -6,37 +6,37 @@ import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/compon
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
-  padding: 2rem;
+  padding: 3.2rem;
   max-width: 600px;
   margin: 0 auto;
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 2rem;
+  margin-bottom: 3.2rem;
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.4rem;
 `;
 
 const Label = styled.label`
   display: block;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const Input = styled.input`
   width: 100%;
   max-width: 120px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.8rem 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
   text-transform: uppercase;
@@ -48,18 +48,18 @@ const Input = styled.input`
 `;
 
 const Description = styled.p`
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   color: ${(props) => props.theme.textSecondary};
-  margin-top: 0.5rem;
+  margin-top: 0.8rem;
 `;
 
 const Button = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   cursor: pointer;
 
   &:hover {
@@ -74,15 +74,15 @@ const Button = styled.button`
 
 const SuccessMessage = styled.span`
   display: inline-block;
-  margin-left: 1rem;
+  margin-left: 1.6rem;
   color: #16a34a;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 `;
 
 const StatusBox = styled.div<{ $available: boolean }>`
-  padding: 1rem;
+  padding: 1.6rem;
   border-radius: 6px;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.4rem;
   background: ${(props) =>
     props.$available ? "#16a34a15" : "#dc262615"};
   border: 1px solid ${(props) =>
@@ -90,15 +90,15 @@ const StatusBox = styled.div<{ $available: boolean }>`
 `;
 
 const StatusTitle = styled.div<{ $available: boolean }>`
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 500;
   color: ${(props) =>
     props.$available ? "#16a34a" : "#dc2626"};
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
 `;
 
 const StatusDescription = styled.div`
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 

@@ -38,7 +38,7 @@ const SidebarContainer = styled.aside<{ $open: boolean }>`
 `;
 
 const SidebarContent = styled.div`
-  padding: 1rem;
+  padding: 1.6rem;
 `;
 
 interface SidebarProps {

@@ -12,7 +12,7 @@ const Container = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 2rem;
+  font-size: 3.2rem;
   margin-bottom: 24px;
 `;
 
@@ -21,14 +21,14 @@ const Section = styled.section`
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.25rem;
+  font-size: 2rem;
   margin-bottom: 16px;
   color: ${(props) => props.theme.textSecondary};
 `;
 
 const ThemeToggleButton = styled.button`
   padding: 12px 24px;
-  font-size: 1rem;
+  font-size: 1.6rem;
   font-weight: bold;
   border: none;
   border-radius: 8px;
@@ -52,7 +52,7 @@ const ThemeInfo = styled.div`
 const Badge = styled.span`
   padding: 4px 12px;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
@@ -77,7 +77,7 @@ const ColorName = styled.div`
 `;
 
 const ColorValue = styled.div`
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   font-family: monospace;
   opacity: 0.8;
 `;
@@ -116,7 +116,7 @@ const StatusRow = styled.div`
 const StatusBadge = styled.span<{ $type: "success" | "warning" | "error" | "info" }>`
   padding: 6px 12px;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: white;
   background: ${(props) => props.theme[props.$type]};
 `;
@@ -144,13 +144,13 @@ function ThemeDemo() {
           <Badge>{mode}</Badge>
           <ThemeToggleButton
             onClick={() => setMode("light")}
-            style={{ padding: "8px 16px", fontSize: "0.875rem" }}
+            style={{ padding: "8px 16px", fontSize: "1.4rem" }}
           >
             Light
           </ThemeToggleButton>
           <ThemeToggleButton
             onClick={() => setMode("dark")}
-            style={{ padding: "8px 16px", fontSize: "0.875rem" }}
+            style={{ padding: "8px 16px", fontSize: "1.4rem" }}
           >
             Dark
           </ThemeToggleButton>

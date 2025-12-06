@@ -20,7 +20,7 @@ const Container = styled.div`
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   margin: 0;
 `;
 
@@ -44,7 +44,7 @@ const Panel = styled.div`
 `;
 
 const PanelTitle = styled.h2`
-  font-size: 1rem;
+  font-size: 1.6rem;
   margin: 0;
   color: ${(props) => props.theme.textSecondary};
 `;

@@ -1,8 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+import bcrypt from "bcryptjs";
 import { z } from "zod";
+import { authOptions } from "@/lib/auth";
 import { responseService, ResponseServiceError } from "@/lib/services/response";
 import { boardService, BoardServiceError } from "@/lib/services/board";
+import { threadService } from "@/lib/services/thread";
+import { permissionService } from "@/lib/services/permission";
 import { checkForeignIpBlocked, getClientIp } from "@/lib/api/foreign-ip-check";
+import { parse, preprocess, stringifyPreprocessed } from "@/lib/tom";
+import { threadRepository } from "@/lib/repositories/prisma/thread";
 
 const createResponseSchema = z.object({
   username: z.string().max(50).optional(),
@@ -28,7 +35,7 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string; threadId: string }> }
 ) {
-  const { threadId } = await params;
+  const { boardId, threadId } = await params;
   const id = parseInt(threadId, 10);
 
   if (isNaN(id)) {
@@ -38,10 +45,64 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get("limit") || "50", 10);
   const offset = parseInt(searchParams.get("offset") || "0", 10);
+  const includeIp = searchParams.get("includeIp") === "true";
+  const includeDeleted = searchParams.get("includeDeleted") === "true";
+  const includeHidden = searchParams.get("includeHidden") === "true";
+  const password = request.headers.get("X-Thread-Password");
 
   try {
-    const responses = await responseService.findByThreadId(id, { limit, offset });
-    return NextResponse.json(responses);
+    // Check if user has admin permission
+    let isAdmin = false;
+    const session = await getServerSession(authOptions);
+    if (session?.user?.id) {
+      const hasGlobalPermission = await permissionService.checkUserPermission(
+        session.user.id,
+        "response:delete"
+      );
+      const hasBoardPermission = await permissionService.checkUserPermission(
+        session.user.id,
+        `response:${boardId}:delete`
+      );
+      isAdmin = hasGlobalPermission || hasBoardPermission;
+    }
+
+    // Check password for includeHidden
+    let passwordValid = false;
+    if (includeHidden && password) {
+      const thread = await threadRepository.findById(id);
+      if (thread) {
+        passwordValid = await bcrypt.compare(password, thread.password);
+      }
+    }
+
+    // Determine what to include
+    // - Admin can see everything with includeDeleted
+    // - Password holder can see hidden (visible=false) but not deleted
+    const canSeeHidden = isAdmin || passwordValid;
+
+    // If user requested includeHidden but doesn't have permission, return error
+    if (includeHidden && !canSeeHidden) {
+      return NextResponse.json({ error: "Invalid password" }, { status: 403 });
+    }
+
+    const responses = await responseService.findByThreadId(id, {
+      limit,
+      offset,
+      includeDeleted: includeDeleted && isAdmin,
+      includeHidden: includeHidden && canSeeHidden,
+    });
+
+    // Strip IP from responses if user doesn't have permission
+    const sanitizedResponses = responses.map((response) => {
+      if (includeIp && isAdmin) {
+        return response;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { ip, ...rest } = response;
+      return rest;
+    });
+
+    return NextResponse.json(sanitizedResponses);
   } catch (error) {
     if (error instanceof ResponseServiceError) {
       return handleServiceError(error);
@@ -89,9 +150,14 @@ export async function POST(
 
     const username = parsed.data.username?.trim() || board.defaultUsername;
 
+    // Preprocess TOM content (only processes dice at write time)
+    const parsedContent = parse(parsed.data.content);
+    const preprocessedContent = preprocess(parsedContent);
+    const content = stringifyPreprocessed(preprocessedContent);
+
     const response = await responseService.create({
       threadId: id,
-      content: parsed.data.content,
+      content,
       attachment: parsed.data.attachment,
       username,
       ip,

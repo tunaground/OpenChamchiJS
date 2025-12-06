@@ -34,7 +34,7 @@ export type ResponseRangeType =
 export interface ResponseService {
   findByThreadId(
     threadId: number,
-    options?: { limit?: number; offset?: number }
+    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean }
   ): Promise<ResponseData[]>;
   findByRange(
     threadId: number,
@@ -46,6 +46,11 @@ export interface ResponseService {
     userId: string,
     id: string,
     data: UpdateResponseInput
+  ): Promise<ResponseData>;
+  updateWithPassword(
+    id: string,
+    password: string,
+    data: { visible?: boolean }
   ): Promise<ResponseData>;
   delete(
     userId: string | null,
@@ -97,7 +102,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
   return {
     async findByThreadId(
       threadId: number,
-      options?: { limit?: number; offset?: number }
+      options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean }
     ): Promise<ResponseData[]> {
       const thread = await threadRepository.findById(threadId);
       if (!thread || thread.deleted) {
@@ -231,6 +236,30 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
       }
 
       return responseRepository.update(id, data);
+    },
+
+    async updateWithPassword(
+      id: string,
+      password: string,
+      data: { visible?: boolean }
+    ): Promise<ResponseData> {
+      const response = await responseRepository.findById(id);
+      if (!response) {
+        throw new ResponseServiceError("Response not found", "NOT_FOUND");
+      }
+
+      // Password holders can restore hidden responses, so we don't check response.deleted here
+      // But they cannot restore deleted responses (deleted can only be managed by admins)
+      if (response.deleted) {
+        throw new ResponseServiceError("Response not found", "NOT_FOUND");
+      }
+
+      const passwordValid = await verifyThreadPassword(response.threadId, password);
+      if (!passwordValid) {
+        throw new ResponseServiceError("Invalid password", "FORBIDDEN");
+      }
+
+      return responseRepository.update(id, { visible: data.visible });
     },
 
     async delete(

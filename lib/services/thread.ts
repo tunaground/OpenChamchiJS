@@ -32,6 +32,11 @@ export class ThreadServiceError extends Error {
 
 export interface FindThreadParams extends PaginationParams {
   search?: string;
+  includeDeleted?: boolean;
+}
+
+export interface FindByIdOptions {
+  includeDeleted?: boolean;
 }
 
 export interface ThreadService {
@@ -39,7 +44,7 @@ export interface ThreadService {
     boardId: string,
     options?: FindThreadParams
   ): Promise<PaginatedResult<ThreadWithResponseCount>>;
-  findById(id: number): Promise<ThreadData>;
+  findById(id: number, options?: FindByIdOptions): Promise<ThreadData>;
   create(data: CreateThreadInput): Promise<ThreadData>;
   update(
     userId: string,
@@ -90,17 +95,19 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
 
       const { page, limit, offset } = normalizePaginationParams(options ?? {});
       const search = options?.search;
+      const includeDeleted = options?.includeDeleted ?? false;
       const [data, total] = await Promise.all([
-        threadRepository.findByBoardIdWithResponseCount(boardId, { limit, offset, search }),
-        threadRepository.countByBoardId(boardId, { search }),
+        threadRepository.findByBoardIdWithResponseCount(boardId, { limit, offset, search, includeDeleted }),
+        threadRepository.countByBoardId(boardId, { search, includeDeleted }),
       ]);
 
       return createPaginatedResult(data, total, page, limit);
     },
 
-    async findById(id: number): Promise<ThreadData> {
+    async findById(id: number, options?: FindByIdOptions): Promise<ThreadData> {
+      const includeDeleted = options?.includeDeleted ?? false;
       const thread = await threadRepository.findById(id);
-      if (!thread || thread.deleted) {
+      if (!thread || (!includeDeleted && thread.deleted)) {
         throw new ThreadServiceError("Thread not found", "NOT_FOUND");
       }
       return thread;
@@ -125,7 +132,12 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
       data: UpdateThreadInput
     ): Promise<ThreadData> {
       const thread = await threadRepository.findById(id);
-      if (!thread || thread.deleted) {
+      if (!thread) {
+        throw new ThreadServiceError("Thread not found", "NOT_FOUND");
+      }
+
+      // If thread is deleted, only allow restoring (setting deleted: false)
+      if (thread.deleted && data.deleted !== false) {
         throw new ThreadServiceError("Thread not found", "NOT_FOUND");
       }
 

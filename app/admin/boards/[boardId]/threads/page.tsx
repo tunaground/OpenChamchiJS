@@ -30,7 +30,7 @@ export default async function AdminThreadsPage({ params, searchParams }: Props) 
 
   try {
     const board = await boardService.findById(boardId);
-    const result = await threadService.findByBoardId(boardId, { page, search });
+    const result = await threadService.findByBoardId(boardId, { page, search, includeDeleted: true });
 
     const t = await getTranslations("adminThreads");
     const tCommon = await getTranslations("common");
@@ -53,6 +53,7 @@ export default async function AdminThreadsPage({ params, searchParams }: Props) 
           username: thread.username,
           ended: thread.ended,
           top: thread.top,
+          deleted: thread.deleted,
           createdAt: thread.createdAt.toISOString(),
           updatedAt: thread.updatedAt.toISOString(),
         }))}
@@ -87,6 +88,20 @@ export default async function AdminThreadsPage({ params, searchParams }: Props) 
           unsetTop: t("unsetTop"),
           setEnded: t("setEnded"),
           unsetEnded: t("unsetEnded"),
+          manageResponses: t("manageResponses"),
+          responsesTitle: t("responsesTitle"),
+          seq: t("seq"),
+          content: t("content"),
+          noResponses: t("noResponses"),
+          confirmDeleteResponse: t("confirmDeleteResponse"),
+          close: t("close"),
+          visible: t("visible"),
+          hidden: t("hidden"),
+          deleted: t("deleted"),
+          hide: t("hide"),
+          show: t("show"),
+          restore: t("restore"),
+          confirmRestore: t("confirmRestore"),
         }}
       />
     );

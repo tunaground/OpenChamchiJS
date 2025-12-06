@@ -8,40 +8,40 @@ import { Pagination } from "@/components/Pagination";
 
 const Container = styled.div`
   min-height: 100vh;
-  padding: 2rem;
+  padding: 3.2rem;
   max-width: 1000px;
   margin: 0 auto;
 `;
 
 const Header = styled.div`
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.4rem;
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
 `;
 
 const BoardName = styled.span`
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
 const SearchForm = styled.form`
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 0.8rem;
+  margin-bottom: 2.4rem;
 `;
 
 const SearchInput = styled.input`
   width: 100%;
   max-width: 400px;
-  padding: 0.75rem;
+  padding: 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.surface};
   color: ${(props) => props.theme.textPrimary};
 
@@ -56,12 +56,12 @@ const SearchInput = styled.input`
 `;
 
 const SearchButton = styled.button`
-  padding: 0.75rem 1rem;
+  padding: 1.2rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   cursor: pointer;
 
   &:hover {
@@ -80,17 +80,17 @@ const Table = styled.table`
 
 const Th = styled.th`
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 1.2rem 1.6rem;
   background: ${(props) => props.theme.surfaceHover};
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const Td = styled.td`
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
+  padding: 1.2rem 1.6rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textPrimary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
@@ -112,18 +112,18 @@ const PinnedRow = styled.tr`
 
 const PinnedBadge = styled.span`
   display: inline-block;
-  padding: 0.125rem 0.5rem;
+  padding: 0.2rem 0.8rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   font-weight: 500;
-  margin-right: 0.5rem;
+  margin-right: 0.8rem;
 `;
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 3rem;
+  padding: 4.8rem;
   color: ${(props) => props.theme.textSecondary};
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};

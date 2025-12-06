@@ -8,6 +8,8 @@ const updateResponseSchema = z.object({
   content: z.string().min(1).optional(),
   attachment: z.string().optional(),
   visible: z.boolean().optional(),
+  deleted: z.boolean().optional(),
+  password: z.string().optional(),
 });
 
 const deleteResponseSchema = z.object({
@@ -45,17 +47,12 @@ export async function GET(
   }
 }
 
-// PUT /api/boards/[boardId]/threads/[threadId]/responses/[responseId] - 응답 수정 (권한 필요)
+// PUT /api/boards/[boardId]/threads/[threadId]/responses/[responseId] - 응답 수정 (권한 또는 비밀번호)
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string; threadId: string; responseId: string }> }
 ) {
   const { responseId } = await params;
-
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
 
   const body = await request.json();
   const parsed = updateResponseSchema.safeParse(body);
@@ -64,8 +61,39 @@ export async function PUT(
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
   }
 
+  const { password, ...updateData } = parsed.data;
+
+  // Password authentication: only allows visible toggle
+  if (password) {
+    // Password can only change visible, not deleted or content
+    if (updateData.deleted !== undefined || updateData.content !== undefined || updateData.attachment !== undefined) {
+      return NextResponse.json(
+        { error: "Password authentication only allows changing visibility" },
+        { status: 400 }
+      );
+    }
+
+    try {
+      const response = await responseService.updateWithPassword(responseId, password, {
+        visible: updateData.visible,
+      });
+      return NextResponse.json(response);
+    } catch (error) {
+      if (error instanceof ResponseServiceError) {
+        return handleServiceError(error);
+      }
+      throw error;
+    }
+  }
+
+  // Admin authentication
+  const session = await getServerSession(authOptions);
+  if (!session?.user?.id) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
-    const response = await responseService.update(session.user.id, responseId, parsed.data);
+    const response = await responseService.update(session.user.id, responseId, updateData);
     return NextResponse.json(response);
   } catch (error) {
     if (error instanceof ResponseServiceError) {

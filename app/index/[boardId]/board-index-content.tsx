@@ -9,13 +9,11 @@ import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/compon
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
-  padding: 2rem;
-  max-width: 1000px;
-  margin: 0 auto;
+  padding: 3.2rem;
 `;
 
 const NoticesSection = styled.section`
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.4rem;
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
@@ -26,20 +24,20 @@ const NoticesHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
+  padding: 1.2rem 1.6rem;
   background: ${(props) => props.theme.surfaceHover};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const NoticesTitle = styled.h2`
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
   margin: 0;
 `;
 
 const MoreLink = styled(Link)`
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   color: ${(props) => props.theme.textSecondary};
   text-decoration: none;
 
@@ -57,10 +55,10 @@ const NoticeList = styled.ul`
 const NoticeItem = styled.li`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
+  gap: 0.8rem;
+  padding: 0.8rem 1.6rem;
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 
   &:last-child {
     border-bottom: none;
@@ -82,18 +80,18 @@ const NoticeItem = styled.li`
 
 const PinnedBadge = styled.span`
   display: inline-block;
-  padding: 0.125rem 0.375rem;
+  padding: 0.2rem 0.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border-radius: 4px;
-  font-size: 0.625rem;
+  font-size: 1rem;
   font-weight: 500;
   flex-shrink: 0;
 `;
 
 const NoticeDate = styled.span`
   color: ${(props) => props.theme.textSecondary};
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   flex-shrink: 0;
 `;
 
@@ -101,18 +99,18 @@ const ActionsBar = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 1.6rem;
+  margin-bottom: 1.6rem;
   flex-wrap: wrap;
 `;
 
 const CreateButton = styled(Link)`
   display: inline-block;
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   text-decoration: none;
 
   &:hover {
@@ -131,17 +129,17 @@ const Table = styled.table`
 
 const Th = styled.th`
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 1.2rem 1.6rem;
   background: ${(props) => props.theme.surfaceHover};
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const Td = styled.td`
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
+  padding: 1.2rem 1.6rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textPrimary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
@@ -163,11 +161,11 @@ const TopRow = styled.tr`
 
 const Badge = styled.span<{ $variant?: "top" | "ended" }>`
   display: inline-block;
-  padding: 0.125rem 0.375rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 4px;
-  font-size: 0.625rem;
+  font-size: 1rem;
   font-weight: 500;
-  margin-right: 0.5rem;
+  margin-right: 0.8rem;
   background: ${(props) =>
     props.$variant === "ended"
       ? props.theme.textSecondary + "30"
@@ -185,7 +183,7 @@ const DateCell = styled(Td)`
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 3rem;
+  padding: 4.8rem;
   color: ${(props) => props.theme.textSecondary};
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
@@ -194,16 +192,16 @@ const EmptyState = styled.div`
 
 const SearchForm = styled.form`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.8rem;
 `;
 
 const SearchInput = styled.input`
   flex: 1;
   max-width: 300px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.8rem 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
 
@@ -218,12 +216,12 @@ const SearchInput = styled.input`
 `;
 
 const SearchButton = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   cursor: pointer;
 
   &:hover {

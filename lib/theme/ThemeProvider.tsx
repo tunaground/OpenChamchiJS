@@ -6,6 +6,23 @@ import { useThemeStore } from "@/lib/store/theme";
 import { themes } from "./themes";
 
 const GlobalStyle = createGlobalStyle`
+  @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap');
+
+  @font-face {
+    font-family: "Saitamaar";
+    src: url("https://da1eth.github.io/AA/HeadKasen.woff2") format("woff2");
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Saitamaar";
+    font-style: normal;
+    font-weight: 400;
+    src: url(//cdn.jsdelivr.net/font-nanum/1.0/nanumgothiccoding/v2/NanumGothicCoding-Regular.eot);
+    src: url(//cdn.jsdelivr.net/font-nanum/1.0/nanumgothiccoding/v2/NanumGothicCoding-Regular.eot?#iefix) format('embedded-opentype'), url(//cdn.jsdelivr.net/font-nanum/1.0/nanumgothiccoding/v2/NanumGothicCoding-Regular.woff) format('woff'), url(//cdn.jsdelivr.net/font-nanum/1.0/nanumgothiccoding/v2/NanumGothicCoding-Regular.ttf) format('truetype');
+    unicode-range: U+AC00-D7A3, U+3130-318F;
+  }
+
   * {
     box-sizing: border-box;
     padding: 0;
@@ -13,6 +30,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   html {
+    font-size: 62.5%;
     color-scheme: ${(props) => props.theme.mode};
   }
 
@@ -22,12 +40,19 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
+    font-size: 1.6rem;
     background: ${(props) => props.theme.background};
     color: ${(props) => props.theme.foreground};
     font-family: Arial, Helvetica, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background 0.2s, color 0.2s;
+
+    @media (max-width: ${(props) => props.theme.breakpoint}) {
+      font-size: 1.4rem;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
   }
 
   a {

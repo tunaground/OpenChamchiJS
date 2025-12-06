@@ -7,7 +7,7 @@ import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/compon
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
-  padding: 2rem;
+  padding: 3.2rem;
   max-width: 1200px;
   margin: 0 auto;
 `;
@@ -16,22 +16,22 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3.2rem;
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const Button = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   cursor: pointer;
 
   &:hover {
@@ -74,26 +74,26 @@ const Table = styled.table`
 
 const Th = styled.th`
   text-align: left;
-  padding: 1rem;
+  padding: 1.6rem;
   background: ${(props) => props.theme.surfaceHover};
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const Td = styled.td`
-  padding: 1rem;
-  font-size: 0.875rem;
+  padding: 1.6rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textPrimary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const StatusBadge = styled.span<{ $active: boolean }>`
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   font-weight: 500;
   background: ${(props) => (props.$active ? "#22c55e20" : "#ef444420")};
   color: ${(props) => (props.$active ? "#22c55e" : "#ef4444")};
@@ -101,12 +101,12 @@ const StatusBadge = styled.span<{ $active: boolean }>`
 
 const ActionButtons = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.8rem;
 `;
 
 const SmallButton = styled.button`
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 1.2rem;
   border-radius: 4px;
   cursor: pointer;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
@@ -120,7 +120,7 @@ const SmallButton = styled.button`
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 3rem;
+  padding: 4.8rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
@@ -141,7 +141,7 @@ const ModalContent = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 2.4rem;
   width: 100%;
   max-width: 500px;
   max-height: 90vh;
@@ -149,30 +149,30 @@ const ModalContent = styled.div`
 `;
 
 const ModalTitle = styled.h2`
-  font-size: 1.25rem;
+  font-size: 2rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.4rem;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 1.6rem;
 `;
 
 const Label = styled.label`
   display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  margin-bottom: 0.8rem;
+  font-size: 1.4rem;
   font-weight: 500;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const Input = styled.input<{ $error?: boolean }>`
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.8rem;
   border: 1px solid ${(props) => props.$error ? "#dc2626" : props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
 
@@ -184,33 +184,33 @@ const Input = styled.input<{ $error?: boolean }>`
 
 const ErrorText = styled.span`
   color: #dc2626;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
+  font-size: 1.2rem;
+  margin-top: 0.4rem;
   display: block;
 `;
 
 const Checkbox = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.8rem;
 
   input {
-    width: 1rem;
-    height: 1rem;
+    width: 1.6rem;
+    height: 1.6rem;
   }
 `;
 
 const ModalActions = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
+  gap: 0.8rem;
+  margin-top: 2.4rem;
 `;
 
 const BoardId = styled.code`
   font-family: monospace;
   background: ${(props) => props.theme.surfaceHover};
-  padding: 0.125rem 0.375rem;
+  padding: 0.2rem 0.6rem;
   border-radius: 4px;
 `;
 
@@ -696,7 +696,7 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalTitle>{labels.delete}</ModalTitle>
             <p>{labels.confirmDelete}</p>
-            <p style={{ marginTop: "0.5rem" }}>
+            <p style={{ marginTop: "0.8rem" }}>
               <BoardId>{selectedBoard.id}</BoardId> - {selectedBoard.name}
             </p>
             <ModalActions>
@@ -717,7 +717,7 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalTitle>{labels.restore}</ModalTitle>
             <p>{labels.confirmRestore}</p>
-            <p style={{ marginTop: "0.5rem" }}>
+            <p style={{ marginTop: "0.8rem" }}>
               <BoardId>{selectedBoard.id}</BoardId> - {selectedBoard.name}
             </p>
             <ModalActions>

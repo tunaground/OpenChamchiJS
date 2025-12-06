@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import styled from "styled-components";
 
 const SidebarTitle = styled.h2`
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: ${(props) => props.theme.textSecondary};
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.2rem;
 `;
 
 const NavList = styled.ul`
@@ -20,15 +20,15 @@ const NavList = styled.ul`
 `;
 
 const NavItem = styled.li`
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
 `;
 
 const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
   display: block;
-  padding: 0.625rem 0.75rem;
+  padding: 1rem 1.2rem;
   border-radius: 6px;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) =>
     props.$disabled
       ? props.theme.textSecondary + "60"
@@ -54,7 +54,7 @@ const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
 const Divider = styled.hr`
   border: none;
   border-top: 1px solid ${(props) => props.theme.surfaceBorder};
-  margin: 0.75rem 0;
+  margin: 1.2rem 0;
 `;
 
 interface BoardData {
@@ -72,13 +72,36 @@ interface TraceSidebarProps {
   labels: {
     navigation: string;
     backToBoard: string;
+    manageThread: string;
     viewAll: string;
     viewRecent: string;
     prev: string;
     next: string;
     boards: string;
   };
+  onManageClick?: () => void;
 }
+
+const NavButton = styled.button<{ $active?: boolean }>`
+  display: block;
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 1.4rem;
+  color: ${(props) => props.theme.textSecondary};
+  background: transparent;
+  font-weight: 400;
+  transition: background 0.15s, color 0.15s;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+    color: ${(props) => props.theme.textPrimary};
+  }
+`;
 
 export function TraceSidebar({
   threadId,
@@ -88,6 +111,7 @@ export function TraceSidebar({
   responsesPerPage,
   boards,
   labels,
+  onManageClick,
 }: TraceSidebarProps) {
   const pathname = usePathname();
   // Parse current range from currentView
@@ -164,6 +188,13 @@ export function TraceSidebar({
             {labels.backToBoard}
           </NavLink>
         </NavItem>
+        {onManageClick && (
+          <NavItem>
+            <NavButton onClick={onManageClick}>
+              {labels.manageThread}
+            </NavButton>
+          </NavItem>
+        )}
       </NavList>
 
       <Divider />

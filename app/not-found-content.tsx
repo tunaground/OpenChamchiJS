@@ -8,7 +8,7 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.6rem;
 `;
 
 const Card = styled.div`
@@ -16,7 +16,7 @@ const Card = styled.div`
 `;
 
 const Code = styled.h1`
-  font-size: 6rem;
+  font-size: 9.6rem;
   font-weight: 700;
   margin: 0;
   line-height: 1;
@@ -24,19 +24,19 @@ const Code = styled.h1`
 `;
 
 const Message = styled.p`
-  font-size: 1.25rem;
+  font-size: 2rem;
   color: ${(props) => props.theme.textSecondary};
-  margin: 1rem 0 2rem;
+  margin: 1.6rem 0 3.2rem;
 `;
 
 const StyledLink = styled(Link)`
   display: inline-block;
-  padding: 0.75rem 1.5rem;
+  padding: 1.2rem 2.4rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border-radius: 4px;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 
   &:hover {
     opacity: 0.9;

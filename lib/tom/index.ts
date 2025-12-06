@@ -30,8 +30,12 @@ export {
   type TomCalcResult,
   type PrerenderedNode,
   type PrerenderedRoot,
+  type PreprocessedNode,
+  type PreprocessedRoot,
   type RandomFn,
   // Functions
+  preprocess,
+  stringifyPreprocessed,
   prerender,
   // Type guards
   isTomDiceResult,

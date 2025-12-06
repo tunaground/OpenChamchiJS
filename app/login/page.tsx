@@ -10,36 +10,36 @@ const Container = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.6rem;
 `;
 
 const Card = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  padding: 2rem;
+  padding: 3.2rem;
   width: 100%;
   max-width: 400px;
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.4rem;
   text-align: center;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const Button = styled.button`
-  padding: 0.75rem;
+  padding: 1.2rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 1.6rem;
   font-weight: 500;
   cursor: pointer;
-  margin-top: 0.5rem;
+  margin-top: 0.8rem;
   width: 100%;
 
   &:hover {

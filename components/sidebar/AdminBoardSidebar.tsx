@@ -5,12 +5,12 @@ import { usePathname } from "next/navigation";
 import styled from "styled-components";
 
 const SidebarTitle = styled.h2`
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   font-weight: 600;
   color: ${(props) => props.theme.textSecondary};
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1.2rem;
 `;
 
 const NavList = styled.ul`
@@ -20,15 +20,15 @@ const NavList = styled.ul`
 `;
 
 const NavItem = styled.li`
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
 `;
 
 const NavLink = styled(Link)<{ $active: boolean }>`
   display: block;
-  padding: 0.625rem 0.75rem;
+  padding: 1rem 1.2rem;
   border-radius: 6px;
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) =>
     props.$active ? props.theme.textPrimary : props.theme.textSecondary};
   background: ${(props) =>
@@ -43,23 +43,23 @@ const NavLink = styled(Link)<{ $active: boolean }>`
 `;
 
 const BoardSection = styled.div`
-  margin-top: 0.5rem;
-  padding-top: 0.5rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
   border-top: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const BoardName = styled.div`
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 500;
   color: ${(props) => props.theme.textPrimary};
-  padding: 0.5rem 0.75rem;
-  margin-bottom: 0.25rem;
+  padding: 0.8rem 1.2rem;
+  margin-bottom: 0.4rem;
 `;
 
 const Divider = styled.hr`
   border: none;
   border-top: 1px solid ${(props) => props.theme.surfaceBorder};
-  margin: 0.75rem 0;
+  margin: 1.2rem 0;
 `;
 
 interface AdminBoardSidebarProps {

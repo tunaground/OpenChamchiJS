@@ -11,14 +11,32 @@ import {
 export const responseRepository: ResponseRepository = {
   async findByThreadId(
     threadId: number,
-    options?: { limit?: number; offset?: number; includeDeleted?: boolean }
+    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean }
   ): Promise<ResponseData[]> {
-    const { limit = 50, offset = 0, includeDeleted = false } = options ?? {};
+    const { limit = 50, offset = 0, includeDeleted = false, includeHidden = false } = options ?? {};
+
+    // Build visibility filter
+    // includeDeleted: include deleted=true (admin only)
+    // includeHidden: include visible=false (password holder or admin)
+    let visibilityFilter = {};
+    if (!includeDeleted && !includeHidden) {
+      // Normal view: only visible and not deleted
+      visibilityFilter = { deleted: false, visible: true };
+    } else if (includeDeleted && includeHidden) {
+      // Admin view: show everything
+      visibilityFilter = {};
+    } else if (includeDeleted) {
+      // Admin view without hidden filter
+      visibilityFilter = {};
+    } else if (includeHidden) {
+      // Password holder view: show hidden but not deleted
+      visibilityFilter = { deleted: false };
+    }
 
     return prisma.response.findMany({
       where: {
         threadId,
-        ...(includeDeleted ? {} : { deleted: false }),
+        ...visibilityFilter,
       },
       orderBy: { seq: "asc" },
       take: limit,
@@ -52,7 +70,7 @@ export const responseRepository: ResponseRepository = {
           gte: startSeq,
           lte: endSeq,
         },
-        ...(includeDeleted ? {} : { deleted: false }),
+        ...(includeDeleted ? {} : { deleted: false, visible: true }),
       },
       orderBy: { seq: "asc" },
     });
@@ -70,14 +88,14 @@ export const responseRepository: ResponseRepository = {
         where: {
           threadId,
           seq: 0,
-          ...(includeDeleted ? {} : { deleted: false }),
+          ...(includeDeleted ? {} : { deleted: false, visible: true }),
         },
       }),
       prisma.response.findMany({
         where: {
           threadId,
           seq: { gt: 0 },
-          ...(includeDeleted ? {} : { deleted: false }),
+          ...(includeDeleted ? {} : { deleted: false, visible: true }),
         },
         orderBy: { seq: "desc" },
         take: limit,

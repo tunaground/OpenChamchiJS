@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 const Container = styled.div`
   min-height: 100vh;
-  padding: 2rem;
+  padding: 3.2rem;
   max-width: 800px;
   margin: 0 auto;
 `;
@@ -13,11 +13,11 @@ const Container = styled.div`
 const BackLink = styled(Link)`
   display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 0.4rem;
   color: ${(props) => props.theme.textSecondary};
   text-decoration: none;
-  font-size: 0.875rem;
-  margin-bottom: 1.5rem;
+  font-size: 1.4rem;
+  margin-bottom: 2.4rem;
 
   &:hover {
     color: ${(props) => props.theme.textPrimary};
@@ -32,19 +32,19 @@ const Article = styled.article`
 `;
 
 const Header = styled.header`
-  padding: 1.5rem;
+  padding: 2.4rem;
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const TitleRow = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.75rem;
+  gap: 0.8rem;
+  margin-bottom: 1.2rem;
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
   margin: 0;
@@ -52,26 +52,26 @@ const Title = styled.h1`
 
 const PinnedBadge = styled.span`
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.4rem 0.8rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   font-weight: 500;
 `;
 
 const Meta = styled.div`
   display: flex;
-  gap: 1.5rem;
-  font-size: 0.875rem;
+  gap: 2.4rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
 const MetaItem = styled.span``;
 
 const Content = styled.div`
-  padding: 1.5rem;
-  font-size: 1rem;
+  padding: 2.4rem;
+  font-size: 1.6rem;
   line-height: 1.75;
   color: ${(props) => props.theme.textPrimary};
   white-space: pre-wrap;

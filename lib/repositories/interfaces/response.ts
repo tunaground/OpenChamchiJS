@@ -44,7 +44,7 @@ export interface FindRecentOptions {
 export interface ResponseRepository {
   findByThreadId(
     threadId: number,
-    options?: { limit?: number; offset?: number; includeDeleted?: boolean }
+    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean }
   ): Promise<ResponseData[]>;
   findById(id: string): Promise<ResponseData | null>;
   findByThreadIdAndSeq(threadId: number, seq: number): Promise<ResponseData | null>;

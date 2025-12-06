@@ -5,7 +5,7 @@ import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/compon
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
-  padding: 2rem;
+  padding: 3.2rem;
   max-width: 1000px;
   margin: 0 auto;
 `;

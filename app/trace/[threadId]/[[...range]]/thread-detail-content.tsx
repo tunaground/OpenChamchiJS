@@ -9,9 +9,7 @@ import { useTranslations } from "next-intl";
 import { parse, prerender, render, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
 
 const Container = styled.div`
-  padding: 2rem;
-  max-width: 800px;
-  margin: 0 auto;
+  padding: 3.2rem;
 `;
 
 
@@ -19,28 +17,28 @@ const ThreadHeader = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding: 2.4rem;
+  margin-bottom: 2.4rem;
 `;
 
 const ThreadTitle = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
-  margin: 0 0 1rem 0;
+  margin: 0 0 1.6rem 0;
 `;
 
 const BadgeContainer = styled.div`
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  gap: 0.8rem;
+  margin-bottom: 1.6rem;
 `;
 
 const Badge = styled.span<{ $variant?: "top" | "ended" }>`
   display: inline-block;
-  padding: 0.25rem 0.5rem;
+  padding: 0.4rem 0.8rem;
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   font-weight: 500;
   background: ${(props) =>
     props.$variant === "ended"
@@ -54,15 +52,15 @@ const Badge = styled.span<{ $variant?: "top" | "ended" }>`
 
 const ThreadMeta = styled.div`
   display: flex;
-  gap: 1.5rem;
+  gap: 2.4rem;
   flex-wrap: wrap;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
 const MetaItem = styled.span`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.8rem;
 `;
 
 const MetaLabel = styled.span`
@@ -76,7 +74,7 @@ const MetaValue = styled.span`
 const ResponsesSection = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.6rem;
 `;
 
 const ResponseCard = styled.div`
@@ -90,7 +88,7 @@ const ResponseHeader = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.75rem 1rem;
+  padding: 1.2rem 1.6rem;
   background: ${(props) => props.theme.surfaceHover};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
@@ -98,8 +96,8 @@ const ResponseHeader = styled.div`
 const ResponseInfo = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 0.875rem;
+  gap: 1.2rem;
+  font-size: 1.4rem;
 `;
 
 const ResponseSeq = styled.span`
@@ -114,17 +112,17 @@ const ResponseUsername = styled.span`
 
 const ResponseAuthorId = styled.span`
   color: ${(props) => props.theme.textSecondary};
-  font-size: 0.75rem;
+  font-size: 1.2rem;
 `;
 
 const ResponseDate = styled.span`
   color: ${(props) => props.theme.textSecondary};
-  font-size: 0.75rem;
+  font-size: 1.2rem;
 `;
 
 const ResponseContent = styled.div`
-  padding: 1rem;
-  font-size: 0.9375rem;
+  padding: 1.6rem;
+  font-size: 1.5rem;
   line-height: 1.6;
   color: ${(props) => props.theme.textPrimary};
   word-break: break-word;
@@ -133,25 +131,25 @@ const ResponseContent = styled.div`
   hr {
     border: none;
     border-top: 1px solid ${(props) => props.theme.surfaceBorder};
-    margin: 1rem 0;
+    margin: 1.6rem 0;
   }
 `;
 
 const ResponseAttachment = styled.div`
-  padding: 0 1rem 1rem;
+  padding: 0 1.6rem 1.6rem;
 `;
 
 const AttachmentLink = styled.a`
   display: inline-flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0.75rem;
+  gap: 0.8rem;
+  padding: 0.8rem 1.2rem;
   background: ${(props) => props.theme.surfaceHover};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   color: ${(props) => props.theme.textPrimary};
   text-decoration: none;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 
   &:hover {
     background: ${(props) => props.theme.surface};
@@ -160,7 +158,7 @@ const AttachmentLink = styled.a`
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 3rem;
+  padding: 4.8rem;
   color: ${(props) => props.theme.textSecondary};
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
@@ -171,8 +169,8 @@ const ResponseForm = styled.form`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  padding: 1.5rem;
-  margin-top: 1.5rem;
+  padding: 2.4rem;
+  margin-top: 2.4rem;
 `;
 
 
@@ -182,10 +180,10 @@ const FormGroup = styled.div`
 
 const FormInput = styled.input`
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.8rem 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
 
@@ -202,10 +200,10 @@ const FormInput = styled.input`
 const FormTextarea = styled.textarea`
   width: 100%;
   min-height: 120px;
-  padding: 0.75rem;
+  padding: 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
   resize: vertical;
@@ -224,12 +222,12 @@ const FormTextarea = styled.textarea`
 
 const SubmitButton = styled.button`
   width: 100%;
-  padding: 0.75rem 1.5rem;
+  padding: 1.2rem 2.4rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 500;
   cursor: pointer;
 
@@ -245,14 +243,184 @@ const SubmitButton = styled.button`
 
 const EndedNotice = styled.div`
   text-align: center;
-  padding: 1.5rem;
+  padding: 2.4rem;
   color: ${(props) => props.theme.textSecondary};
   background: ${(props) => props.theme.surfaceHover};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  margin-top: 1.5rem;
+  margin-top: 2.4rem;
 `;
 
+const Modal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContent = styled.div`
+  background: ${(props) => props.theme.surface};
+  border-radius: 8px;
+  padding: 2.4rem;
+  max-width: 400px;
+  width: 90%;
+`;
+
+const ModalTitle = styled.h2`
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin: 0 0 1.6rem 0;
+  color: ${(props) => props.theme.textPrimary};
+`;
+
+const ModalDescription = styled.p`
+  font-size: 1.4rem;
+  color: ${(props) => props.theme.textSecondary};
+  margin: 0 0 1.6rem 0;
+`;
+
+const ModalInput = styled.input`
+  width: 100%;
+  padding: 1rem 1.2rem;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  font-size: 1.4rem;
+  background: ${(props) => props.theme.background};
+  color: ${(props) => props.theme.textPrimary};
+  margin-bottom: 1.6rem;
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.textSecondary};
+  }
+`;
+
+const ModalActions = styled.div`
+  display: flex;
+  gap: 1.2rem;
+  justify-content: flex-end;
+`;
+
+const ModalButton = styled.button`
+  padding: 0.8rem 1.6rem;
+  border-radius: 4px;
+  font-size: 1.4rem;
+  font-weight: 500;
+  cursor: pointer;
+`;
+
+const CancelButton = styled(ModalButton)`
+  background: transparent;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  color: ${(props) => props.theme.textPrimary};
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+  }
+`;
+
+const ConfirmButton = styled(ModalButton)`
+  background: ${(props) => props.theme.error};
+  border: none;
+  color: white;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const ErrorMessage = styled.p`
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.error};
+  margin: -0.8rem 0 1.6rem 0;
+`;
+
+const ManageModalContent = styled(ModalContent)`
+  max-width: 700px;
+`;
+
+const ResponseTable = styled.table`
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1.6rem;
+  font-size: 1.4rem;
+`;
+
+const Th = styled.th`
+  text-align: left;
+  padding: 1rem;
+  background: ${(props) => props.theme.surfaceHover};
+  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
+  font-weight: 500;
+`;
+
+const Td = styled.td`
+  padding: 1rem;
+  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
+  vertical-align: middle;
+`;
+
+const StatusBadge = styled.span<{ $visible: boolean }>`
+  display: inline-block;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 1.2rem;
+  background: ${(props) => props.$visible ? props.theme.success + "20" : props.theme.error + "20"};
+  color: ${(props) => props.$visible ? props.theme.success : props.theme.error};
+`;
+
+const ActionButton = styled.button`
+  padding: 0.4rem 0.8rem;
+  background: transparent;
+  color: ${(props) => props.theme.textSecondary};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const ContentPreview = styled.span`
+  display: inline-block;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const UnlockSection = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+`;
+
+const UnlockInput = styled(ModalInput)`
+  margin-bottom: 0;
+  flex: 1;
+`;
+
+const UnlockButton = styled(ConfirmButton)`
+  background: ${(props) => props.theme.buttonPrimary};
+`;
 
 interface ThreadData {
   id: number;
@@ -288,6 +456,27 @@ interface Labels {
   submit: string;
   submitting: string;
   threadEnded: string;
+  deleteResponse: string;
+  deleteModalTitle: string;
+  deleteModalDescription: string;
+  passwordPlaceholder: string;
+  cancel: string;
+  confirm: string;
+  invalidPassword: string;
+  manageResponses: string;
+  manageModalTitle: string;
+  manageModalDescription: string;
+  seq: string;
+  content: string;
+  status: string;
+  actions: string;
+  visible: string;
+  hidden: string;
+  restore: string;
+  hide: string;
+  noHiddenResponses: string;
+  close: string;
+  unlock: string;
 }
 
 interface AuthLabels {
@@ -298,6 +487,7 @@ interface AuthLabels {
 interface SidebarLabels {
   navigation: string;
   backToBoard: string;
+  manageThread: string;
   viewAll: string;
   viewRecent: string;
   prev: string;
@@ -339,6 +529,15 @@ export function ThreadDetailContent({
   const [username, setUsername] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+
+  // Manage modal state
+  const [manageModalOpen, setManageModalOpen] = useState(false);
+  const [managePassword, setManagePassword] = useState("");
+  const [manageUnlocked, setManageUnlocked] = useState(false);
+  const [manageError, setManageError] = useState("");
+  const [allResponses, setAllResponses] = useState<(ResponseData & { visible: boolean })[]>([]);
+  const [loadingResponses, setLoadingResponses] = useState(false);
+  const [togglingId, setTogglingId] = useState<string | null>(null);
 
   useEffect(() => {
     setResponses(initialResponses);
@@ -403,6 +602,84 @@ export function ThreadDetailContent({
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
+  // Manage modal handlers
+  const openManageModal = () => {
+    setManageModalOpen(true);
+    setManagePassword("");
+    setManageUnlocked(false);
+    setManageError("");
+    setAllResponses([]);
+  };
+
+  const closeManageModal = () => {
+    setManageModalOpen(false);
+    setManagePassword("");
+    setManageUnlocked(false);
+    setManageError("");
+    setAllResponses([]);
+  };
+
+  const unlockManage = async () => {
+    if (!managePassword.trim()) return;
+
+    setLoadingResponses(true);
+    setManageError("");
+
+    try {
+      const res = await fetch(
+        `/api/boards/${thread.boardId}/threads/${thread.id}/responses?includeHidden=true&limit=10000`,
+        {
+          headers: {
+            "X-Thread-Password": managePassword,
+          },
+        }
+      );
+
+      if (res.ok) {
+        const data = await res.json();
+        setAllResponses(data);
+        setManageUnlocked(true);
+      } else {
+        setManageError(labels.invalidPassword);
+      }
+    } catch {
+      setManageError("Network error");
+    } finally {
+      setLoadingResponses(false);
+    }
+  };
+
+  const toggleVisibility = async (responseId: string, currentVisible: boolean) => {
+    setTogglingId(responseId);
+
+    try {
+      const res = await fetch(
+        `/api/boards/${thread.boardId}/threads/${thread.id}/responses/${responseId}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            password: managePassword,
+            visible: !currentVisible,
+          }),
+        }
+      );
+
+      if (res.ok) {
+        // Update local state
+        setAllResponses((prev) =>
+          prev.map((r) =>
+            r.id === responseId ? { ...r, visible: !currentVisible } : r
+          )
+        );
+        // Refresh the page to update main view
+        router.refresh();
+      }
+    } finally {
+      setTogglingId(null);
+    }
+  };
+
   const sidebar = (
     <TraceSidebar
       threadId={thread.id}
@@ -412,6 +689,7 @@ export function ThreadDetailContent({
       responsesPerPage={responsesPerPage}
       boards={boards}
       labels={sidebarLabels}
+      onManageClick={openManageModal}
     />
   );
   const rightContent = (
@@ -431,7 +709,7 @@ export function ThreadDetailContent({
       <Container>
         <ThreadHeader>
           <ThreadTitle>
-            {thread.title} ({Math.max(0, responses.length - 1)})
+            &gt;{thread.id}&gt; {thread.title} ({Math.max(0, responses.length - 1)})
           </ThreadTitle>
 
           {(thread.top || thread.ended) && (
@@ -469,7 +747,9 @@ export function ThreadDetailContent({
                   <ResponseUsername>{response.username}</ResponseUsername>
                   <ResponseAuthorId>({response.authorId})</ResponseAuthorId>
                 </ResponseInfo>
-                <ResponseDate>{formatDate(response.createdAt)}</ResponseDate>
+                <ResponseInfo>
+                  <ResponseDate>{formatDate(response.createdAt)}</ResponseDate>
+                </ResponseInfo>
               </ResponseHeader>
               <ResponseContent>
                 {prerenderedContents.has(response.id)
@@ -501,7 +781,7 @@ export function ThreadDetailContent({
         <EndedNotice>{labels.threadEnded}</EndedNotice>
       ) : (
         <ResponseForm onSubmit={handleSubmit}>
-          <FormGroup style={{ marginBottom: "1rem" }}>
+          <FormGroup style={{ marginBottom: "1.6rem" }}>
             <FormInput
               type="text"
               value={username}
@@ -509,7 +789,7 @@ export function ThreadDetailContent({
               placeholder={labels.usernamePlaceholder}
             />
           </FormGroup>
-          <FormGroup style={{ marginBottom: "1rem" }}>
+          <FormGroup style={{ marginBottom: "1.6rem" }}>
             <FormTextarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
@@ -526,6 +806,88 @@ export function ThreadDetailContent({
         </ResponseForm>
       )}
       </Container>
+
+      {/* Manage Responses Modal */}
+      {manageModalOpen && (
+        <Modal onClick={closeManageModal}>
+          <ManageModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>{labels.manageModalTitle}</ModalTitle>
+
+            {!manageUnlocked ? (
+              <>
+                <ModalDescription>{labels.manageModalDescription}</ModalDescription>
+                <UnlockSection>
+                  <UnlockInput
+                    type="password"
+                    value={managePassword}
+                    onChange={(e) => setManagePassword(e.target.value)}
+                    placeholder={labels.passwordPlaceholder}
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter" && managePassword.trim()) {
+                        unlockManage();
+                      }
+                    }}
+                  />
+                  <UnlockButton
+                    onClick={unlockManage}
+                    disabled={loadingResponses || !managePassword.trim()}
+                  >
+                    {labels.unlock}
+                  </UnlockButton>
+                </UnlockSection>
+                {manageError && <ErrorMessage style={{ marginTop: "1rem" }}>{manageError}</ErrorMessage>}
+              </>
+            ) : (
+              <>
+                {allResponses.length === 0 ? (
+                  <ModalDescription>{labels.noHiddenResponses}</ModalDescription>
+                ) : (
+                  <ResponseTable>
+                    <thead>
+                      <tr>
+                        <Th style={{ width: "10%" }}>{labels.seq}</Th>
+                        <Th style={{ width: "45%" }}>{labels.content}</Th>
+                        <Th style={{ width: "20%" }}>{labels.status}</Th>
+                        <Th style={{ width: "25%" }}>{labels.actions}</Th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {allResponses.map((response) => (
+                        <tr key={response.id}>
+                          <Td>#{response.seq}</Td>
+                          <Td>
+                            <ContentPreview>{response.content}</ContentPreview>
+                          </Td>
+                          <Td>
+                            <StatusBadge $visible={response.visible}>
+                              {response.visible ? labels.visible : labels.hidden}
+                            </StatusBadge>
+                          </Td>
+                          <Td>
+                            <ActionButton
+                              onClick={() => toggleVisibility(response.id, response.visible)}
+                              disabled={togglingId === response.id}
+                            >
+                              {response.visible ? labels.hide : labels.restore}
+                            </ActionButton>
+                          </Td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </ResponseTable>
+                )}
+              </>
+            )}
+
+            <ModalActions style={{ marginTop: "2rem" }}>
+              <CancelButton onClick={closeManageModal}>
+                {labels.close}
+              </CancelButton>
+            </ModalActions>
+          </ManageModalContent>
+        </Modal>
+      )}
     </PageLayout>
   );
 }

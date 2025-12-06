@@ -7,18 +7,18 @@ const PaginationWrapper = styled.nav`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.25rem;
-  margin-top: 1.5rem;
+  gap: 0.4rem;
+  margin-top: 2.4rem;
 `;
 
 const PageLink = styled(Link)<{ $active?: boolean }>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2rem;
-  height: 2rem;
-  padding: 0 0.5rem;
-  font-size: 0.875rem;
+  min-width: 3.2rem;
+  height: 3.2rem;
+  padding: 0 0.8rem;
+  font-size: 1.4rem;
   text-decoration: none;
   border-radius: 4px;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
@@ -37,10 +37,10 @@ const PageSpan = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2rem;
-  height: 2rem;
-  padding: 0 0.5rem;
-  font-size: 0.875rem;
+  min-width: 3.2rem;
+  height: 3.2rem;
+  padding: 0 0.8rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
@@ -48,10 +48,10 @@ const DisabledLink = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 2rem;
-  height: 2rem;
-  padding: 0 0.5rem;
-  font-size: 0.875rem;
+  min-width: 3.2rem;
+  height: 3.2rem;
+  padding: 0 0.8rem;
+  font-size: 1.4rem;
   border-radius: 4px;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   background: ${(props) => props.theme.surface};

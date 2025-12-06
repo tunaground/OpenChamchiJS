@@ -9,7 +9,7 @@ import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/compon
 import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
 
 const Container = styled.div`
-  padding: 2rem;
+  padding: 3.2rem;
   max-width: 1200px;
   margin: 0 auto;
 `;
@@ -18,20 +18,20 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 2rem;
+  margin-bottom: 3.2rem;
 `;
 
 const TitleSection = styled.div``;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.4rem;
 `;
 
 const Breadcrumb = styled.div`
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
 
   a {
@@ -45,12 +45,12 @@ const Breadcrumb = styled.div`
 `;
 
 const Button = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   cursor: pointer;
 
   &:hover {
@@ -93,39 +93,39 @@ const Table = styled.table`
 
 const Th = styled.th`
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 1.2rem 1.6rem;
   background: ${(props) => props.theme.surfaceHover};
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const Td = styled.td`
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
+  padding: 1.2rem 1.6rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textPrimary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const PinnedBadge = styled.span`
   display: inline-block;
-  padding: 0.125rem 0.5rem;
+  padding: 0.2rem 0.8rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border-radius: 4px;
-  font-size: 0.75rem;
+  font-size: 1.2rem;
   font-weight: 500;
 `;
 
 const ActionButtons = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.8rem;
 `;
 
 const SmallButton = styled.button`
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 1.2rem;
   border-radius: 4px;
   cursor: pointer;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
@@ -139,7 +139,7 @@ const SmallButton = styled.button`
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 3rem;
+  padding: 4.8rem;
   color: ${(props) => props.theme.textSecondary};
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
@@ -148,17 +148,17 @@ const EmptyState = styled.div`
 
 const SearchForm = styled.form`
   display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  gap: 0.8rem;
+  margin-bottom: 2.4rem;
 `;
 
 const SearchInput = styled.input`
   width: 100%;
   max-width: 300px;
-  padding: 0.5rem;
+  padding: 0.8rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
 
@@ -173,12 +173,12 @@ const SearchInput = styled.input`
 `;
 
 const SearchButton = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   cursor: pointer;
 
   &:hover {
@@ -203,7 +203,7 @@ const ModalContent = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 2.4rem;
   width: 100%;
   max-width: 600px;
   max-height: 90vh;
@@ -211,30 +211,30 @@ const ModalContent = styled.div`
 `;
 
 const ModalTitle = styled.h2`
-  font-size: 1.25rem;
+  font-size: 2rem;
   font-weight: 600;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2.4rem;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 1.6rem;
 `;
 
 const Label = styled.label`
   display: block;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  margin-bottom: 0.8rem;
+  font-size: 1.4rem;
   font-weight: 500;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.8rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
 
@@ -246,10 +246,10 @@ const Input = styled.input`
 
 const Textarea = styled.textarea`
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.8rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
   min-height: 150px;
@@ -265,19 +265,19 @@ const Textarea = styled.textarea`
 const Checkbox = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.8rem;
 
   input {
-    width: 1rem;
-    height: 1rem;
+    width: 1.6rem;
+    height: 1.6rem;
   }
 `;
 
 const ModalActions = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
+  gap: 0.8rem;
+  margin-top: 2.4rem;
 `;
 
 interface NoticeData {
@@ -652,7 +652,7 @@ export function AdminNoticesContent({
           <ModalContent onClick={(e) => e.stopPropagation()}>
             <ModalTitle>{labels.delete}</ModalTitle>
             <p>{labels.confirmDelete}</p>
-            <p style={{ marginTop: "0.5rem", fontWeight: 500 }}>
+            <p style={{ marginTop: "0.8rem", fontWeight: 500 }}>
               {selectedNotice.title}
             </p>
             <ModalActions>

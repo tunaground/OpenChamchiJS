@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
 import { z } from "zod";
+import { authOptions } from "@/lib/auth";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { boardService, BoardServiceError } from "@/lib/services/board";
+import { permissionService } from "@/lib/services/permission";
 import { checkForeignIpBlocked } from "@/lib/api/foreign-ip-check";
 
 const createThreadSchema = z.object({
@@ -32,9 +35,33 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const page = parseInt(searchParams.get("page") || "1", 10);
   const limit = parseInt(searchParams.get("limit") || "20", 10);
+  const search = searchParams.get("search") || undefined;
+  const includeDeleted = searchParams.get("includeDeleted") === "true";
 
   try {
-    const threads = await threadService.findByBoardId(boardId, { page, limit });
+    // Check if user has admin permission for includeDeleted
+    let canViewDeleted = false;
+    if (includeDeleted) {
+      const session = await getServerSession(authOptions);
+      if (session?.user?.id) {
+        const hasGlobalPermission = await permissionService.checkUserPermission(
+          session.user.id,
+          "thread:delete"
+        );
+        const hasBoardPermission = await permissionService.checkUserPermission(
+          session.user.id,
+          `thread:${boardId}:delete`
+        );
+        canViewDeleted = hasGlobalPermission || hasBoardPermission;
+      }
+    }
+
+    const threads = await threadService.findByBoardId(boardId, {
+      page,
+      limit,
+      search,
+      includeDeleted: includeDeleted && canViewDeleted,
+    });
     return NextResponse.json(threads);
   } catch (error) {
     if (error instanceof ThreadServiceError) {

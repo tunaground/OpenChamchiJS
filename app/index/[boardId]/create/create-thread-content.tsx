@@ -7,50 +7,50 @@ import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/compon
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
-  padding: 2rem;
+  padding: 3.2rem;
   max-width: 800px;
   margin: 0 auto;
 `;
 
 const Header = styled.div`
-  margin-bottom: 2rem;
+  margin-bottom: 3.2rem;
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
 `;
 
 const BoardName = styled.span`
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 2.4rem;
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.8rem;
 `;
 
 const Label = styled.label`
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 500;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const Input = styled.input`
-  padding: 0.75rem;
+  padding: 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 1.6rem;
   background: ${(props) => props.theme.surface};
   color: ${(props) => props.theme.textPrimary};
 
@@ -65,10 +65,10 @@ const Input = styled.input`
 `;
 
 const Textarea = styled.textarea`
-  padding: 0.75rem;
+  padding: 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 1rem;
+  font-size: 1.6rem;
   background: ${(props) => props.theme.surface};
   color: ${(props) => props.theme.textPrimary};
   min-height: 200px;
@@ -88,7 +88,7 @@ const Textarea = styled.textarea`
 const Row = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
+  gap: 1.6rem;
 
   @media (max-width: 600px) {
     grid-template-columns: 1fr;
@@ -97,14 +97,14 @@ const Row = styled.div`
 
 const Actions = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 1.6rem;
   justify-content: flex-end;
 `;
 
 const Button = styled.button`
-  padding: 0.75rem 1.5rem;
+  padding: 1.2rem 2.4rem;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 500;
   cursor: pointer;
   transition: opacity 0.2s;
@@ -136,12 +136,12 @@ const SecondaryButton = styled(Button)`
 `;
 
 const ErrorMessage = styled.div`
-  padding: 1rem;
+  padding: 1.6rem;
   background: #ef444420;
   border: 1px solid #ef4444;
   border-radius: 4px;
   color: #ef4444;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
 `;
 
 

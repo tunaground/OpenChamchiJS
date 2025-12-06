@@ -6,7 +6,7 @@ import { PageLayout, AdminButton, AuthButton, ThemeToggleButton } from "@/compon
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
-  padding: 2rem;
+  padding: 3.2rem;
   max-width: 1200px;
   margin: 0 auto;
 `;
@@ -15,11 +15,11 @@ const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3.2rem;
 `;
 
 const Title = styled.h1`
-  font-size: 1.5rem;
+  font-size: 2.4rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
 `;
@@ -35,17 +35,17 @@ const Table = styled.table`
 
 const Th = styled.th`
   text-align: left;
-  padding: 0.75rem 1rem;
+  padding: 1.2rem 1.6rem;
   background: ${(props) => props.theme.surfaceHover};
   font-weight: 500;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
 const Td = styled.td`
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
+  padding: 1.2rem 1.6rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textPrimary};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
   vertical-align: top;
@@ -53,24 +53,24 @@ const Td = styled.td`
 
 const PermissionBadge = styled.span`
   display: inline-block;
-  padding: 0.125rem 0.5rem;
+  padding: 0.2rem 0.8rem;
   background: ${(props) => props.theme.surfaceHover};
   color: ${(props) => props.theme.textPrimary};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.75rem;
-  margin-right: 0.25rem;
-  margin-bottom: 0.25rem;
+  font-size: 1.2rem;
+  margin-right: 0.4rem;
+  margin-bottom: 0.4rem;
 `;
 
 const ActionButtons = styled.div`
   display: flex;
-  gap: 0.5rem;
+  gap: 0.8rem;
 `;
 
 const SmallButton = styled.button`
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 1.2rem;
   border-radius: 4px;
   cursor: pointer;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
@@ -92,12 +92,12 @@ const DangerSmallButton = styled(SmallButton)`
 `;
 
 const CreateButton = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   cursor: pointer;
 
   &:hover {
@@ -107,7 +107,7 @@ const CreateButton = styled.button`
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 3rem;
+  padding: 4.8rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
@@ -128,7 +128,7 @@ const ModalContent = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  padding: 1.5rem;
+  padding: 2.4rem;
   width: 100%;
   max-width: 500px;
   max-height: 80vh;
@@ -136,26 +136,26 @@ const ModalContent = styled.div`
 `;
 
 const ModalTitle = styled.h2`
-  font-size: 1.25rem;
+  font-size: 2rem;
   font-weight: 600;
-  margin-bottom: 1rem;
+  margin-bottom: 1.6rem;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const ModalActions = styled.div`
   display: flex;
   justify-content: flex-end;
-  gap: 0.5rem;
-  margin-top: 1.5rem;
+  gap: 0.8rem;
+  margin-top: 2.4rem;
 `;
 
 const Button = styled.button`
-  padding: 0.5rem 1rem;
+  padding: 0.8rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   cursor: pointer;
 
   &:hover {
@@ -188,23 +188,23 @@ const DangerButton = styled(Button)`
 `;
 
 const FormGroup = styled.div`
-  margin-bottom: 1rem;
+  margin-bottom: 1.6rem;
 `;
 
 const Label = styled.label`
   display: block;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 500;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
   color: ${(props) => props.theme.textPrimary};
 `;
 
 const Input = styled.input`
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.8rem 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
 
@@ -217,7 +217,7 @@ const Input = styled.input`
 const PermissionList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.8rem;
   max-height: 300px;
   overflow-y: auto;
 `;
@@ -226,20 +226,20 @@ const PermissionItem = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.5rem;
+  padding: 0.8rem;
   background: ${(props) => props.theme.surfaceHover};
   border-radius: 4px;
 `;
 
 const Select = styled.select`
-  padding: 0.5rem;
+  padding: 0.8rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   width: 100%;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
 
   &:focus {
     outline: none;
@@ -248,9 +248,9 @@ const Select = styled.select`
 `;
 
 const SectionTitle = styled.h3`
-  font-size: 0.875rem;
+  font-size: 1.4rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.8rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
@@ -672,7 +672,7 @@ export function AdminRolesContent({
               <SectionTitle>{labels.permissions}</SectionTitle>
               <PermissionList>
                 {selectedRole.permissions.length === 0 ? (
-                  <div style={{ color: "gray", padding: "0.5rem" }}>
+                  <div style={{ color: "gray", padding: "0.8rem" }}>
                     {labels.noPermissions}
                   </div>
                 ) : (
@@ -682,7 +682,7 @@ export function AdminRolesContent({
                         <div style={{ fontWeight: 500 }}>{permission.name}</div>
                         {permission.description && (
                           <div
-                            style={{ fontSize: "0.75rem", color: "gray" }}
+                            style={{ fontSize: "1.2rem", color: "gray" }}
                           >
                             {permission.description}
                           </div>
@@ -700,7 +700,7 @@ export function AdminRolesContent({
               </PermissionList>
 
               {availablePermissions.length > 0 && (
-                <div style={{ marginTop: "1rem" }}>
+                <div style={{ marginTop: "1.6rem" }}>
                   <SectionTitle>{labels.addPermission}</SectionTitle>
                   <Select
                     value={selectedPermissionId}
@@ -740,7 +740,7 @@ export function AdminRolesContent({
             <ModalContent onClick={(e) => e.stopPropagation()}>
               <ModalTitle>{labels.delete}</ModalTitle>
               <p>{labels.confirmDelete}</p>
-              <p style={{ marginTop: "0.5rem", fontWeight: 500 }}>
+              <p style={{ marginTop: "0.8rem", fontWeight: 500 }}>
                 {selectedRole.name}
               </p>
               <ModalActions>
