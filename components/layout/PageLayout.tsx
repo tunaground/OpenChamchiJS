@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styled from "styled-components";
 import { TopBar } from "./TopBar";
 import { Sidebar } from "./Sidebar";
+import { useSidebarStore } from "@/lib/store/sidebar";
 
 const Main = styled.main<{ $sidebarOpen: boolean }>`
   padding-top: 5.6rem;
@@ -24,7 +25,6 @@ interface PageLayoutProps {
   sidebar?: React.ReactNode;
   rightContent?: React.ReactNode;
   children: React.ReactNode;
-  defaultSidebarOpen?: boolean;
 }
 
 export function PageLayout({
@@ -32,17 +32,20 @@ export function PageLayout({
   sidebar,
   rightContent,
   children,
-  defaultSidebarOpen = true,
 }: PageLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(defaultSidebarOpen);
+  const { open: sidebarOpen, toggle: toggleSidebar, setOpen: setSidebarOpen } = useSidebarStore();
+  const [mounted, setMounted] = useState(false);
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
-  };
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const closeSidebar = () => {
     setSidebarOpen(false);
   };
+
+  // Use default value until hydration is complete to prevent mismatch
+  const effectiveSidebarOpen = mounted ? sidebarOpen : true;
 
   return (
     <>
@@ -52,11 +55,11 @@ export function PageLayout({
         rightContent={rightContent}
       />
       {sidebar && (
-        <Sidebar open={sidebarOpen} onClose={closeSidebar}>
+        <Sidebar open={effectiveSidebarOpen} onClose={closeSidebar}>
           {sidebar}
         </Sidebar>
       )}
-      <Main $sidebarOpen={sidebar ? sidebarOpen : false}>
+      <Main $sidebarOpen={sidebar ? effectiveSidebarOpen : false}>
         <Content>{children}</Content>
       </Main>
     </>
