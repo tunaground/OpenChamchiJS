@@ -1,9 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import {useState, useSyncExternalStore} from "react";
 import styled from "styled-components";
-import { parse, prerender, render, RenderContext } from "@/lib/tom";
-import { useThemeStore } from "@/lib/store/theme";
+import {parse, prerender, render, RenderContext} from "@/lib/tom";
+import {useThemeStore} from "@/lib/store/theme";
 
 const Container = styled.div`
   max-width: 1200px;
@@ -163,14 +163,16 @@ const defaultText = `[bld]TOM 마크업 테스트[/bld]
 　 しーＪ　　　°。+ *´¨)
 [/aa]`;
 
+const emptySubscribe = () => () => {};
+
 function TomDemo() {
   const [text, setText] = useState(defaultText);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
   const { mode, toggleMode } = useThemeStore();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const ctx: RenderContext = {
     boardId: "test",

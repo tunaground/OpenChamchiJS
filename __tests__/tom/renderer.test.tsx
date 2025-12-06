@@ -9,7 +9,7 @@ import { ThemeProvider } from "styled-components";
 import { parse } from "@/lib/tom/parser";
 import { prerender } from "@/lib/tom/prerenderer";
 import { render, RenderContext } from "@/lib/tom/renderer";
-
+import { lightTheme } from "@/lib/theme/themes";
 
 // Mock next/link
 jest.mock("next/link", () => {
@@ -22,12 +22,6 @@ jest.mock("next/link", () => {
 jest.mock("@fortawesome/react-fontawesome", () => ({
   FontAwesomeIcon: () => <span data-testid="fa-icon" />,
 }));
-
-const theme = {
-  calcExpColor: "#888",
-  breakpoint: "768px",
-  anchorALinkColor: "#0066cc",
-};
 
 const mockT = ((key: string) => key) as unknown as RenderContext["t"];
 
@@ -45,7 +39,7 @@ function renderTom(input: string, ctx: RenderContext = defaultCtx) {
   const nodes = render(prerendered, ctx);
 
   return rtlRender(
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={lightTheme}>
       <div>{nodes}</div>
     </ThemeProvider>
   );
