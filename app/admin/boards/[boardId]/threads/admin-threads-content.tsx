@@ -455,6 +455,9 @@ interface SidebarLabels {
   backToHome: string;
   admin: string;
   boards: string;
+  users: string;
+  roles?: string;
+  settings?: string;
   threads: string;
   notices: string;
 }

@@ -49,6 +49,9 @@ export default async function AdminNoticesPage({ params, searchParams }: Props) 
           backToHome: tSidebar("backToHome"),
           admin: tSidebar("admin"),
           boards: tSidebar("boards"),
+          users: tSidebar("users"),
+          roles: tSidebar("roles"),
+          settings: tSidebar("settings"),
           threads: tSidebar("threads"),
           notices: tSidebar("notices"),
         }}
