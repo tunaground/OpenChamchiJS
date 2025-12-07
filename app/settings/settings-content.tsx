@@ -1,6 +1,8 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -11,6 +13,7 @@ import {
   faArrowLeft,
   faKeyboard,
   faHandPointer,
+  faTrash,
 } from "@fortawesome/free-solid-svg-icons";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
@@ -176,6 +179,105 @@ const ResetButton = styled(Button)`
   }
 `;
 
+const DangerSection = styled(Section)`
+  border-color: ${(props) => props.theme.error};
+  margin-top: 2.4rem;
+`;
+
+const DangerSectionTitle = styled(SectionTitle)`
+  color: ${(props) => props.theme.error};
+`;
+
+const DangerDescription = styled.p`
+  font-size: 1.4rem;
+  color: ${(props) => props.theme.textSecondary};
+  margin: 0 0 1.6rem 0;
+  line-height: 1.5;
+`;
+
+const DeleteAccountButton = styled(Button)`
+  background: transparent;
+  border: 1px solid ${(props) => props.theme.error};
+  color: ${(props) => props.theme.error};
+
+  &:hover {
+    background: ${(props) => props.theme.error};
+    color: white;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1.6rem;
+`;
+
+const ModalContent = styled.div`
+  background: ${(props) => props.theme.surface};
+  border-radius: 8px;
+  padding: 2.4rem;
+  max-width: 40rem;
+  width: 100%;
+`;
+
+const ModalTitle = styled.h3`
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: ${(props) => props.theme.error};
+  margin: 0 0 1.6rem 0;
+`;
+
+const ModalDescription = styled.p`
+  font-size: 1.4rem;
+  color: ${(props) => props.theme.textSecondary};
+  margin: 0 0 2.4rem 0;
+  line-height: 1.5;
+`;
+
+const ModalButtons = styled.div`
+  display: flex;
+  gap: 1.2rem;
+  justify-content: flex-end;
+`;
+
+const CancelButton = styled(Button)`
+  background: transparent;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  color: ${(props) => props.theme.textPrimary};
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+  }
+`;
+
+const ConfirmDeleteButton = styled(Button)`
+  background: ${(props) => props.theme.error};
+  border: none;
+  color: white;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
 const QuickSubmitOptions = styled.div`
   display: flex;
   gap: 0.8rem;
@@ -236,6 +338,11 @@ interface Labels {
   sidebarSwipeDescription: string;
   reset: string;
   back: string;
+  deleteAccount: string;
+  deleteAccountDescription: string;
+  deleteAccountConfirm: string;
+  deleteAccountButton: string;
+  cancel: string;
 }
 
 interface BoardData {
@@ -263,6 +370,9 @@ export function SettingsContent({
   manualLabel,
 }: SettingsContentProps) {
   const router = useRouter();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
   // Select individual values to avoid creating new object references
   const aaMode = useResponseOptionsStore((state) => state.aaMode);
   const previewMode = useResponseOptionsStore((state) => state.previewMode);
@@ -273,6 +383,25 @@ export function SettingsContent({
   const toggleOption = useResponseOptionsStore((state) => state.toggleOption);
   const setOption = useResponseOptionsStore((state) => state.setOption);
   const resetOptions = useResponseOptionsStore((state) => state.resetOptions);
+
+  const handleDeleteAccount = async () => {
+    setIsDeleting(true);
+    try {
+      const res = await fetch("/api/users/me", {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        await signOut({ callbackUrl: "/" });
+      } else {
+        setIsDeleting(false);
+        setShowDeleteModal(false);
+      }
+    } catch {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
 
   // chatMode and quickSubmitKey are excluded from toggle options
   const options: Omit<ResponseOptions, "chatMode" | "quickSubmitKey" | "sidebarSwipe"> = {
@@ -396,7 +525,36 @@ export function SettingsContent({
           </BackButton>
           <ResetButton onClick={resetOptions}>{labels.reset}</ResetButton>
         </ButtonGroup>
+
+        {isLoggedIn && (
+          <DangerSection>
+            <DangerSectionTitle>{labels.deleteAccount}</DangerSectionTitle>
+            <DangerDescription>{labels.deleteAccountDescription}</DangerDescription>
+            <DeleteAccountButton onClick={() => setShowDeleteModal(true)}>
+              <FontAwesomeIcon icon={faTrash} />
+              {labels.deleteAccountButton}
+            </DeleteAccountButton>
+          </DangerSection>
+        )}
       </Container>
+
+      {showDeleteModal && (
+        <ModalOverlay onClick={() => setShowDeleteModal(false)}>
+          <ModalContent onClick={(e) => e.stopPropagation()}>
+            <ModalTitle>{labels.deleteAccount}</ModalTitle>
+            <ModalDescription>{labels.deleteAccountConfirm}</ModalDescription>
+            <ModalButtons>
+              <CancelButton onClick={() => setShowDeleteModal(false)} disabled={isDeleting}>
+                {labels.cancel}
+              </CancelButton>
+              <ConfirmDeleteButton onClick={handleDeleteAccount} disabled={isDeleting}>
+                <FontAwesomeIcon icon={faTrash} />
+                {labels.deleteAccountButton}
+              </ConfirmDeleteButton>
+            </ModalButtons>
+          </ModalContent>
+        </ModalOverlay>
+      )}
     </PageLayout>
   );
 }

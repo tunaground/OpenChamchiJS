@@ -334,7 +334,12 @@
     "sidebarSwipe": "사이드바 스와이프",
     "sidebarSwipeDescription": "모바일에서 스와이프로 사이드바를 열고 닫습니다.",
     "reset": "초기화",
-    "back": "뒤로"
+    "back": "뒤로",
+    "deleteAccount": "회원탈퇴",
+    "deleteAccountDescription": "계정을 삭제하면 복구할 수 없습니다. 작성한 응답은 유지되지만 작성자 정보가 제거됩니다.",
+    "deleteAccountConfirm": "정말로 탈퇴하시겠습니까?",
+    "deleteAccountButton": "탈퇴하기",
+    "cancel": "취소"
   },
   "manual": {
     "title": "사용 매뉴얼",

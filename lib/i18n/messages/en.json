@@ -334,7 +334,12 @@
     "sidebarSwipe": "Sidebar Swipe",
     "sidebarSwipeDescription": "Open and close sidebar with swipe on mobile.",
     "reset": "Reset",
-    "back": "Back"
+    "back": "Back",
+    "deleteAccount": "Delete Account",
+    "deleteAccountDescription": "Once you delete your account, it cannot be recovered. Your responses will remain but author information will be removed.",
+    "deleteAccountConfirm": "Are you sure you want to delete your account?",
+    "deleteAccountButton": "Delete Account",
+    "cancel": "Cancel"
   },
   "manual": {
     "title": "User Manual",

@@ -40,6 +40,11 @@ export default async function SettingsPage() {
     sidebarSwipeDescription: t("sidebarSwipeDescription"),
     reset: t("reset"),
     back: t("back"),
+    deleteAccount: t("deleteAccount"),
+    deleteAccountDescription: t("deleteAccountDescription"),
+    deleteAccountConfirm: t("deleteAccountConfirm"),
+    deleteAccountButton: t("deleteAccountButton"),
+    cancel: t("cancel"),
   };
 
   return (

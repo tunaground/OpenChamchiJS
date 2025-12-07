@@ -37,6 +37,7 @@ export interface UserService {
   addRole(requesterId: string, userId: string, roleId: string): Promise<void>;
   removeRole(requesterId: string, userId: string, roleId: string): Promise<void>;
   delete(requesterId: string, userId: string): Promise<void>;
+  deleteSelf(userId: string): Promise<void>;
 }
 
 interface UserServiceDeps {
@@ -155,6 +156,15 @@ export function createUserService(deps: UserServiceDeps): UserService {
         throw new UserServiceError("Cannot delete yourself", "BAD_REQUEST");
       }
 
+      const user = await userRepository.findById(userId);
+      if (!user) {
+        throw new UserServiceError("User not found", "NOT_FOUND");
+      }
+
+      await userRepository.delete(userId);
+    },
+
+    async deleteSelf(userId: string): Promise<void> {
       const user = await userRepository.findById(userId);
       if (!user) {
         throw new UserServiceError("User not found", "NOT_FOUND");
