@@ -35,18 +35,24 @@ const Content = styled.div`
 interface PageLayoutProps {
   title?: string;
   sidebar?: React.ReactNode;
-  rightContent?: React.ReactNode;
   children: React.ReactNode;
   /** 모바일에서 사이드바를 아이콘만 표시하고 본문과 겹치지 않게 함 */
   compactSidebarOnMobile?: boolean;
+  isLoggedIn: boolean;
+  canAccessAdmin: boolean;
+  authLabels: { login: string; logout: string };
+  hideSettings?: boolean;
 }
 
 export function PageLayout({
   title,
   sidebar,
-  rightContent,
   children,
   compactSidebarOnMobile,
+  isLoggedIn,
+  canAccessAdmin,
+  authLabels,
+  hideSettings,
 }: PageLayoutProps) {
   const {
     desktopOpen,
@@ -92,7 +98,10 @@ export function PageLayout({
       <TopBar
         title={title}
         onMenuClick={handleMenuClick}
-        rightContent={rightContent}
+        isLoggedIn={isLoggedIn}
+        canAccessAdmin={canAccessAdmin}
+        authLabels={authLabels}
+        hideSettings={hideSettings}
       />
       {mounted && sidebar && (
         <Sidebar

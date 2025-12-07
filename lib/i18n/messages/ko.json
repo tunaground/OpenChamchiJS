@@ -298,5 +298,22 @@
     "addPermission": "권한 추가",
     "removePermission": "제거",
     "noPermissions": "할당된 권한이 없습니다."
+  },
+  "settings": {
+    "title": "설정",
+    "description": "응답 작성 시 사용할 기본 옵션을 설정합니다. 스레드별로 다른 설정을 적용할 수 있습니다.",
+    "responseOptions": "응답 옵션",
+    "chatMode": "채팅 모드",
+    "chatModeDescription": "실시간으로 새 응답을 수신합니다. (준비 중)",
+    "aaMode": "AA 모드",
+    "aaModeDescription": "작성한 내용을 AA(아스키 아트) 형식으로 감쌉니다.",
+    "previewMode": "미리보기 모드",
+    "previewModeDescription": "입력 중인 내용을 실시간으로 미리 볼 수 있습니다.",
+    "noupMode": "Noup 모드",
+    "noupModeDescription": "응답을 작성해도 스레드가 상단으로 올라가지 않습니다.",
+    "alwaysBottom": "하단 고정",
+    "alwaysBottomDescription": "항상 페이지 하단을 유지합니다.",
+    "reset": "초기화",
+    "back": "뒤로"
   }
 }

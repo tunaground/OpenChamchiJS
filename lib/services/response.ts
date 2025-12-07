@@ -195,14 +195,16 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Thread has reached maximum responses", "BAD_REQUEST");
       }
 
-      const response = await responseRepository.create(data);
+      // Extract noup flag before passing to repository (repository doesn't need it)
+      const { noup, ...repoData } = data;
+      const response = await responseRepository.create(repoData);
 
       // If this response reaches the max limit, end the thread
       // seq starts from 0, so seq == maxResponsesPerThread means we have maxResponsesPerThread + 1 responses
       if (response.seq >= board.maxResponsesPerThread) {
         await threadRepository.update(data.threadId, { ended: true });
-      } else {
-        // 새 응답 추가 시 스레드 범프
+      } else if (!noup) {
+        // 새 응답 추가 시 스레드 범프 (noup이 아닌 경우에만)
         await threadRepository.updateBumpTime(data.threadId);
       }
 

@@ -16,28 +16,17 @@ import {
   faFolder,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+import {
+  SidebarTitle as BaseSidebarTitle,
+  NavList,
+  NavItem,
+  SidebarDivider,
+} from "./SidebarStyles";
 
-const SidebarTitle = styled.h2`
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textSecondary};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1.2rem;
-
+const SidebarTitle = styled(BaseSidebarTitle)`
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     display: none;
   }
-`;
-
-const NavList = styled.ul`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-`;
-
-const NavItem = styled.li`
-  margin-bottom: 0.4rem;
 `;
 
 const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
@@ -87,12 +76,6 @@ const NavLabel = styled.span`
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     display: none;
   }
-`;
-
-const Divider = styled.hr`
-  border: none;
-  border-top: 1px solid ${(props) => props.theme.surfaceBorder};
-  margin: 1.2rem 0;
 `;
 
 const BoardsSection = styled.div`
@@ -289,7 +272,7 @@ export function TraceSidebar({
         )}
       </NavList>
 
-      <Divider />
+      <SidebarDivider />
 
       <NavList>
         <NavItemWithIcon
@@ -306,7 +289,7 @@ export function TraceSidebar({
         />
       </NavList>
 
-      <Divider />
+      <SidebarDivider />
 
       <NavList>
         <NavItemWithIcon
@@ -322,7 +305,7 @@ export function TraceSidebar({
         />
       </NavList>
 
-      <Divider />
+      <SidebarDivider />
 
       <NavList>
         <NavItemWithIcon
@@ -338,7 +321,7 @@ export function TraceSidebar({
       </NavList>
 
       <BoardsSection>
-        <Divider />
+        <SidebarDivider />
 
         <SidebarTitle>{labels.boards}</SidebarTitle>
         <NavList>

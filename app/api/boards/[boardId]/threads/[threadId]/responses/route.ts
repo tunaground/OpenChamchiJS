@@ -171,6 +171,7 @@ export async function POST(
       username,
       ip,
       authorId,
+      noup: parsed.data.noup,
     });
     return NextResponse.json(response, { status: 201 });
   } catch (error) {

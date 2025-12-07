@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
+import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
@@ -343,21 +343,15 @@ export function BoardIndexContent({
   };
 
   const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
-  const rightContent = (
-    <>
-      <HomeButton />
-      <ThemeToggleButton />
-      {canAccessAdmin && <AdminButton />}
-      <AuthButton
-        isLoggedIn={isLoggedIn}
-        loginLabel={authLabels.login}
-        logoutLabel={authLabels.logout}
-      />
-    </>
-  );
 
   return (
-    <PageLayout title={boardName} sidebar={sidebar} rightContent={rightContent}>
+    <PageLayout
+      title={boardName}
+      sidebar={sidebar}
+      isLoggedIn={isLoggedIn}
+      canAccessAdmin={canAccessAdmin}
+      authLabels={authLabels}
+    >
       <Container>
         {notices.length > 0 && (
         <NoticesSection>

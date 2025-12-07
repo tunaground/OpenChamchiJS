@@ -298,5 +298,22 @@
     "addPermission": "Add Permission",
     "removePermission": "Remove",
     "noPermissions": "No permissions assigned."
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Set default options for writing responses. You can apply different settings per thread.",
+    "responseOptions": "Response Options",
+    "chatMode": "Chat Mode",
+    "chatModeDescription": "Receive new responses in real-time. (Coming soon)",
+    "aaMode": "AA Mode",
+    "aaModeDescription": "Wrap your content in AA (ASCII Art) format.",
+    "previewMode": "Preview Mode",
+    "previewModeDescription": "Preview your content in real-time while typing.",
+    "noupMode": "Noup Mode",
+    "noupModeDescription": "Thread won't be bumped when you post a response.",
+    "alwaysBottom": "Stay at Bottom",
+    "alwaysBottomDescription": "Always stay at the bottom of the page.",
+    "reset": "Reset",
+    "back": "Back"
   }
 }

@@ -94,6 +94,7 @@ export const createResponseSchema = z.object({
   username: usernameSchema,
   content: contentSchema,
   attachment: attachmentSchema,
+  noup: z.boolean().optional(),
 });
 
 export const updateResponseSchema = z.object({

@@ -21,6 +21,7 @@ export interface CreateResponseInput {
   ip: string;
   content: string;
   attachment?: string;
+  noup?: boolean;
 }
 
 export interface UpdateResponseInput {

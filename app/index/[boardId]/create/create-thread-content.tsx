@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
+import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
@@ -214,18 +214,6 @@ export function CreateThreadContent({
   });
 
   const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
-  const rightContent = (
-    <>
-      <HomeButton />
-      <ThemeToggleButton />
-      {canAccessAdmin && <AdminButton />}
-      <AuthButton
-        isLoggedIn={isLoggedIn}
-        loginLabel={authLabels.login}
-        logoutLabel={authLabels.logout}
-      />
-    </>
-  );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -295,7 +283,13 @@ export function CreateThreadContent({
   };
 
   return (
-    <PageLayout title={labels.title} sidebar={sidebar} rightContent={rightContent}>
+    <PageLayout
+      title={labels.title}
+      sidebar={sidebar}
+      isLoggedIn={isLoggedIn}
+      canAccessAdmin={canAccessAdmin}
+      authLabels={authLabels}
+    >
       <Container>
         <Header>
           <Title>{labels.title}</Title>

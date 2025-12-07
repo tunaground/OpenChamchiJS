@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
+import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
+import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
+import { useResponseOptions } from "@/lib/hooks/useResponseOptions";
 import { useTranslations } from "next-intl";
 import { parse, prerender, render, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
 import { formatDateTime } from "@/lib/utils/date-formatter";
@@ -600,6 +602,13 @@ export function ThreadDetailContent({
   const [username, setUsername] = useState("");
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const pageEndRef = useRef<HTMLDivElement>(null);
+
+  // Response options
+  const { options: responseOptions, toggleOption, isGlobalActive } = useResponseOptions(
+    thread.boardId,
+    thread.id
+  );
 
   // Anchor preview stack state
   interface AnchorStackItem {
@@ -641,6 +650,13 @@ export function ThreadDetailContent({
   useEffect(() => {
     setResponses(initialResponses);
   }, [initialResponses]);
+
+  // Always-on-Bottom mode: scroll to bottom when enabled or when responses change
+  useEffect(() => {
+    if (responseOptions.alwaysBottom && pageEndRef.current) {
+      pageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [responseOptions.alwaysBottom, responses]);
 
   // Fetch anchor responses when a new item is added to the stack
   useEffect(() => {
@@ -725,12 +741,19 @@ export function ThreadDetailContent({
 
     setSubmitting(true);
     try {
+      // Apply AA mode: wrap content with [aa][/aa] tags
+      let finalContent = content.trim();
+      if (responseOptions.aaMode) {
+        finalContent = `[aa]${finalContent}[/aa]`;
+      }
+
       const res = await fetch(`/api/boards/${thread.boardId}/threads/${thread.id}/responses`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: username.trim() || undefined,
-          content: content.trim(),
+          content: finalContent,
+          noup: responseOptions.noupMode || undefined,
         }),
       });
 
@@ -973,21 +996,16 @@ export function ThreadDetailContent({
       onManageClick={openManageModal}
     />
   );
-  const rightContent = (
-    <>
-      <HomeButton />
-      <ThemeToggleButton />
-      {canAccessAdmin && <AdminButton />}
-      <AuthButton
-        isLoggedIn={isLoggedIn}
-        loginLabel={authLabels.login}
-        logoutLabel={authLabels.logout}
-      />
-    </>
-  );
 
   return (
-    <PageLayout title={thread.title} sidebar={sidebar} rightContent={rightContent} compactSidebarOnMobile>
+    <PageLayout
+      title={thread.title}
+      sidebar={sidebar}
+      compactSidebarOnMobile
+      isLoggedIn={isLoggedIn}
+      canAccessAdmin={canAccessAdmin}
+      authLabels={authLabels}
+    >
       <Container>
         <ThreadHeader>
           <ThreadTitle>
@@ -1070,6 +1088,18 @@ export function ThreadDetailContent({
         <EndedNotice>{labels.threadEnded}</EndedNotice>
       ) : (
         <ResponseForm onSubmit={handleSubmit}>
+          <ResponseOptionButtons
+            options={responseOptions}
+            onToggle={toggleOption}
+            isOverridden={isGlobalActive}
+          />
+          {responseOptions.previewMode && (
+            <ResponsePreview
+              content={content}
+              boardId={thread.boardId}
+              threadId={thread.id}
+            />
+          )}
           <FormGroup style={{ marginBottom: "1.6rem" }}>
             <FormInput
               type="text"
@@ -1094,6 +1124,7 @@ export function ThreadDetailContent({
           </SubmitButton>
         </ResponseForm>
       )}
+      <div ref={pageEndRef} />
       </Container>
 
       {/* Manage Responses Modal */}

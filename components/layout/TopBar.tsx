@@ -1,6 +1,11 @@
 "use client";
 
 import styled from "styled-components";
+import { HomeButton } from "./HomeButton";
+import { ThemeToggleButton } from "./ThemeToggleButton";
+import { SettingsButton } from "./SettingsButton";
+import { AdminButton } from "./AdminButton";
+import { AuthButton } from "./AuthButton";
 
 const Bar = styled.header`
   position: fixed;
@@ -58,10 +63,20 @@ const RightSection = styled.div`
 interface TopBarProps {
   title?: string;
   onMenuClick: () => void;
-  rightContent?: React.ReactNode;
+  isLoggedIn: boolean;
+  canAccessAdmin: boolean;
+  authLabels: { login: string; logout: string };
+  hideSettings?: boolean;
 }
 
-export function TopBar({ title, onMenuClick, rightContent }: TopBarProps) {
+export function TopBar({
+  title,
+  onMenuClick,
+  isLoggedIn,
+  canAccessAdmin,
+  authLabels,
+  hideSettings,
+}: TopBarProps) {
   return (
     <Bar>
       <MenuButton onClick={onMenuClick} aria-label="Toggle menu">
@@ -81,7 +96,17 @@ export function TopBar({ title, onMenuClick, rightContent }: TopBarProps) {
       </MenuButton>
       {title && <Title>{title}</Title>}
       <Spacer />
-      {rightContent && <RightSection>{rightContent}</RightSection>}
+      <RightSection>
+        <HomeButton />
+        <ThemeToggleButton />
+        {!hideSettings && <SettingsButton />}
+        {canAccessAdmin && <AdminButton />}
+        <AuthButton
+          isLoggedIn={isLoggedIn}
+          loginLabel={authLabels.login}
+          logoutLabel={authLabels.logout}
+        />
+      </RightSection>
     </Bar>
   );
 }

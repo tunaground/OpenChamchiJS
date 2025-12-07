@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import styled from "styled-components";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
+import { PageLayout } from "@/components/layout";
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
@@ -511,24 +511,14 @@ export function AdminRolesContent({
     : [];
 
   const sidebar = <AdminSidebar labels={sidebarLabels} />;
-  const rightContent = (
-    <>
-      <HomeButton />
-      <ThemeToggleButton />
-      <AdminButton />
-      <AuthButton
-        isLoggedIn={true}
-        loginLabel={authLabels.login}
-        logoutLabel={authLabels.logout}
-      />
-    </>
-  );
 
   return (
     <PageLayout
       title={labels.title}
       sidebar={sidebar}
-      rightContent={rightContent}
+      isLoggedIn={true}
+      canAccessAdmin={true}
+      authLabels={authLabels}
     >
       <Container>
         <Header>

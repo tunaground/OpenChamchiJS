@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
+import { PageLayout } from "@/components/layout";
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
@@ -466,18 +466,6 @@ export function AdminUsersContent({
     : [];
 
   const sidebar = <AdminSidebar labels={sidebarLabels} />;
-  const rightContent = (
-    <>
-      <HomeButton />
-      <ThemeToggleButton />
-      <AdminButton />
-      <AuthButton
-        isLoggedIn={true}
-        loginLabel={authLabels.login}
-        logoutLabel={authLabels.logout}
-      />
-    </>
-  );
 
   const buildBaseUrl = () => {
     const params = new URLSearchParams();
@@ -486,7 +474,13 @@ export function AdminUsersContent({
   };
 
   return (
-    <PageLayout title={labels.title} sidebar={sidebar} rightContent={rightContent}>
+    <PageLayout
+      title={labels.title}
+      sidebar={sidebar}
+      isLoggedIn={true}
+      canAccessAdmin={true}
+      authLabels={authLabels}
+    >
       <Container>
         <Header>
           <Title>{labels.title}</Title>

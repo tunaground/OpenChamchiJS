@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
-import { PageLayout, AdminButton, AuthButton, ThemeToggleButton, HomeButton } from "@/components/layout";
+import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
@@ -226,21 +226,15 @@ export function NoticeListContent({
   };
 
   const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
-  const rightContent = (
-    <>
-      <HomeButton />
-      <ThemeToggleButton />
-      {canAccessAdmin && <AdminButton />}
-      <AuthButton
-        isLoggedIn={isLoggedIn}
-        loginLabel={authLabels.login}
-        logoutLabel={authLabels.logout}
-      />
-    </>
-  );
 
   return (
-    <PageLayout title={labels.title} sidebar={sidebar} rightContent={rightContent}>
+    <PageLayout
+      title={labels.title}
+      sidebar={sidebar}
+      isLoggedIn={isLoggedIn}
+      canAccessAdmin={canAccessAdmin}
+      authLabels={authLabels}
+    >
       <Container>
         <Header>
           <Title>{labels.title}</Title>

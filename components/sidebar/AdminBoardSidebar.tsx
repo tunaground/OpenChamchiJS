@@ -1,90 +1,20 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import styled from "styled-components";
-
-const BackLink = styled(Link)`
-  display: block;
-  padding: 1rem 1.2rem;
-  border-radius: 0.6rem;
-  text-decoration: none;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  transition: background 0.15s, color 0.15s;
-  margin-bottom: 1.2rem;
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-    color: ${(props) => props.theme.textPrimary};
-  }
-`;
-
-const SidebarTitle = styled.h2`
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textSecondary};
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 1.2rem;
-`;
-
-const NavList = styled.ul`
-  list-style: none;
-  margin: 0;
-  padding: 0;
-`;
-
-const NavItem = styled.li`
-  margin-bottom: 0.4rem;
-`;
-
-const NavLink = styled(Link)<{ $active?: boolean }>`
-  display: block;
-  padding: 1rem 1.2rem;
-  border-radius: 0.6rem;
-  text-decoration: none;
-  font-size: 1.4rem;
-  color: ${(props) =>
-    props.$active ? props.theme.textPrimary : props.theme.textSecondary};
-  background: ${(props) =>
-    props.$active ? props.theme.surfaceHover : "transparent"};
-  font-weight: ${(props) => (props.$active ? 500 : 400)};
-  transition: background 0.15s, color 0.15s;
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-    color: ${(props) => props.theme.textPrimary};
-  }
-`;
-
-const BoardSection = styled.div`
-  margin-top: 0.8rem;
-  padding-top: 0.8rem;
-  border-top: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const BoardName = styled.div`
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
-  padding: 0.8rem 1.2rem;
-  margin-bottom: 0.4rem;
-`;
+import { AdminSidebar } from "./AdminSidebar";
+import {
+  SidebarSection,
+  SectionTitle,
+  NavList,
+  NavItem,
+  NavLink,
+} from "./SidebarStyles";
+import type { AdminBoardSidebarLabels } from "./types";
 
 interface AdminBoardSidebarProps {
   boardId: string;
   boardName: string;
-  labels: {
-    backToHome: string;
-    admin: string;
-    boards: string;
-    users: string;
-    roles?: string;
-    settings?: string;
-    threads: string;
-    notices: string;
-  };
+  labels: AdminBoardSidebarLabels;
 }
 
 export function AdminBoardSidebar({
@@ -100,49 +30,9 @@ export function AdminBoardSidebar({
   ];
 
   return (
-    <div>
-      <BackLink href="/">{labels.backToHome}</BackLink>
-      <SidebarTitle>{labels.admin}</SidebarTitle>
-      <NavList>
-        <NavItem>
-          <NavLink
-            href="/admin/boards"
-            $active={pathname.startsWith("/admin/boards")}
-          >
-            {labels.boards}
-          </NavLink>
-        </NavItem>
-        <NavItem>
-          <NavLink
-            href="/admin/users"
-            $active={pathname.startsWith("/admin/users")}
-          >
-            {labels.users}
-          </NavLink>
-        </NavItem>
-        {labels.roles && (
-          <NavItem>
-            <NavLink
-              href="/admin/roles"
-              $active={pathname.startsWith("/admin/roles")}
-            >
-              {labels.roles}
-            </NavLink>
-          </NavItem>
-        )}
-        {labels.settings && (
-          <NavItem>
-            <NavLink
-              href="/admin/settings"
-              $active={pathname.startsWith("/admin/settings")}
-            >
-              {labels.settings}
-            </NavLink>
-          </NavItem>
-        )}
-      </NavList>
-      <BoardSection>
-        <BoardName>{boardName}</BoardName>
+    <AdminSidebar labels={labels}>
+      <SidebarSection>
+        <SectionTitle>{boardName}</SectionTitle>
         <NavList>
           {boardNavItems.map((item) => (
             <NavItem key={item.href}>
@@ -152,7 +42,7 @@ export function AdminBoardSidebar({
             </NavItem>
           ))}
         </NavList>
-      </BoardSection>
-    </div>
+      </SidebarSection>
+    </AdminSidebar>
   );
 }
