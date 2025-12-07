@@ -6,6 +6,7 @@ export interface ThreadData {
   username: string;
   ended: boolean;
   deleted: boolean;
+  published: boolean;
   createdAt: Date;
   updatedAt: Date;
   top: boolean;

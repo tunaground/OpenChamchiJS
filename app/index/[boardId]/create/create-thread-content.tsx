@@ -3,8 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
+import { useTranslations } from "next-intl";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
+import { ImageUpload } from "@/components/response/ImageUpload";
+import { CreateThreadOptionButtons, CreateThreadOptions } from "@/components/response/CreateThreadOptionButtons";
+import { ContentPreview } from "@/components/response/ContentPreview";
+import { formatBytes } from "@/lib/utils/format-bytes";
 
 const Container = styled.div`
   padding: 3.2rem;
@@ -160,13 +165,16 @@ interface Labels {
   passwordPlaceholder: string;
   content: string;
   contentPlaceholder: string;
-  attachment: string;
-  attachmentPlaceholder: string;
+  selectImage: string;
+  removeImage: string;
   submit: string;
   cancel: string;
   creating: string;
   foreignIpBlocked: string;
   unknownError: string;
+  aaMode: string;
+  previewMode: string;
+  preview: string;
 }
 
 interface BoardData {
@@ -184,6 +192,8 @@ interface CreateThreadContentProps {
   boardName: string;
   defaultUsername: string;
   boards: BoardData[];
+  storageEnabled: boolean;
+  uploadMaxSize: number;
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: AuthLabels;
@@ -197,6 +207,8 @@ export function CreateThreadContent({
   boardName,
   defaultUsername: _defaultUsername,
   boards,
+  storageEnabled,
+  uploadMaxSize,
   isLoggedIn,
   canAccessAdmin,
   authLabels,
@@ -207,6 +219,11 @@ export function CreateThreadContent({
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
+  const [options, setOptions] = useState<CreateThreadOptions>({
+    aaMode: false,
+    previewMode: false,
+  });
 
   const [formData, setFormData] = useState({
     title: "",
@@ -214,6 +231,26 @@ export function CreateThreadContent({
     password: "",
     content: "",
   });
+
+  const handleToggleOption = (key: keyof CreateThreadOptions) => {
+    setOptions((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  // Apply AA mode wrapper to content
+  const getFinalContent = (content: string) => {
+    if (options.aaMode && content.trim()) {
+      return `[aa]${content}[/aa]`;
+    }
+    return content;
+  };
+
+  // Preview content (with AA mode applied)
+  const previewContent = options.aaMode && formData.content.trim()
+    ? `[aa]${formData.content}[/aa]`
+    : formData.content;
+
+  const t = useTranslations("createThread");
+  const maxSizeLabel = t("maxSize", { size: formatBytes(uploadMaxSize) });
 
   const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
 
@@ -254,18 +291,36 @@ export function CreateThreadContent({
       const thread = await threadRes.json();
 
       // 2. Create first response (seq 0)
-      const responseRes = await fetch(
-        `/api/boards/${boardId}/threads/${thread.id}/responses`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: usernameToSend,
-            content: formData.content,
-            // TODO: attachment
-          }),
+      const finalContent = getFinalContent(formData.content);
+      let responseRes: Response;
+      if (attachmentFile) {
+        const responseFormData = new FormData();
+        responseFormData.append("file", attachmentFile);
+        responseFormData.append("content", finalContent);
+        if (usernameToSend) {
+          responseFormData.append("username", usernameToSend);
         }
-      );
+
+        responseRes = await fetch(
+          `/api/boards/${boardId}/threads/${thread.id}/responses`,
+          {
+            method: "POST",
+            body: responseFormData,
+          }
+        );
+      } else {
+        responseRes = await fetch(
+          `/api/boards/${boardId}/threads/${thread.id}/responses`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              username: usernameToSend,
+              content: finalContent,
+            }),
+          }
+        );
+      }
 
       if (!responseRes.ok) {
         const data = await responseRes.json();
@@ -346,6 +401,21 @@ export function CreateThreadContent({
 
           <FormGroup>
             <Label>{labels.content}</Label>
+            <CreateThreadOptionButtons
+              options={options}
+              onToggle={handleToggleOption}
+              labels={{
+                aaMode: labels.aaMode,
+                previewMode: labels.previewMode,
+              }}
+            />
+            {options.previewMode && (
+              <ContentPreview
+                content={previewContent}
+                emptyLabel={labels.preview}
+                boardId={boardId}
+              />
+            )}
             <Textarea
               value={formData.content}
               onChange={(e) =>
@@ -356,15 +426,20 @@ export function CreateThreadContent({
             />
           </FormGroup>
 
-          {/* TODO: Implement file attachment upload feature
-          <FormGroup>
-            <Label>{labels.attachment}</Label>
-            <Input
-              type="file"
-              placeholder={labels.attachmentPlaceholder}
-            />
-          </FormGroup>
-          */}
+          {storageEnabled && (
+            <FormGroup>
+              <ImageUpload
+                onFileSelect={setAttachmentFile}
+                currentFile={attachmentFile}
+                maxSizeLabel={maxSizeLabel}
+                disabled={loading}
+                labels={{
+                  selectImage: labels.selectImage,
+                  removeImage: labels.removeImage,
+                }}
+              />
+            </FormGroup>
+          )}
 
           <Actions>
             <SecondaryButton type="button" onClick={handleCancel} disabled={loading}>

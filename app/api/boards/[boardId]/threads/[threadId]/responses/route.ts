@@ -12,6 +12,7 @@ import { parse, preprocess, stringifyPreprocessed } from "@/lib/tom";
 import { threadRepository } from "@/lib/repositories/prisma/thread";
 import { createResponseSchema } from "@/lib/schemas";
 import { getPublisher, isRealtimeEnabled, CHANNELS, EVENTS } from "@/lib/realtime";
+import { getStorage, isStorageEnabled, StorageError } from "@/lib/storage";
 
 // GET /api/boards/[boardId]/threads/[threadId]/responses - 응답 목록 조회
 export async function GET(
@@ -128,6 +129,7 @@ function generateAuthorId(ip: string): string {
 }
 
 // POST /api/boards/[boardId]/threads/[threadId]/responses - 응답 생성 (누구나 가능)
+// Accepts both JSON and FormData (for file upload)
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string; threadId: string }> }
@@ -139,8 +141,26 @@ export async function POST(
     return NextResponse.json({ error: "Invalid thread ID" }, { status: 400 });
   }
 
-  const body = await request.json();
-  const parsed = createResponseSchema.safeParse(body);
+  // Parse request body - support both JSON and FormData
+  let bodyData: { username?: string; content?: string; noup?: boolean };
+  let file: File | null = null;
+
+  const contentType = request.headers.get("content-type") || "";
+  if (contentType.includes("multipart/form-data")) {
+    const formData = await request.formData();
+    const usernameValue = formData.get("username");
+    const contentValue = formData.get("content");
+    bodyData = {
+      username: typeof usernameValue === "string" ? usernameValue : undefined,
+      content: typeof contentValue === "string" ? contentValue : undefined,
+      noup: formData.get("noup") === "true",
+    };
+    file = formData.get("file") as File | null;
+  } else {
+    bodyData = await request.json();
+  }
+
+  const parsed = createResponseSchema.safeParse(bodyData);
 
   if (!parsed.success) {
     return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
@@ -149,6 +169,9 @@ export async function POST(
   const ip = getClientIp(request);
   const authorId = generateAuthorId(ip);
 
+  let uploadedKey: string | null = null;
+  let attachmentUrl: string | null = null;
+
   try {
     const board = await boardService.findById(boardId);
 
@@ -156,6 +179,26 @@ export async function POST(
     const foreignIpBlocked = await checkForeignIpBlocked(request, board);
     if (foreignIpBlocked) {
       return foreignIpBlocked;
+    }
+
+    // Handle file upload if present
+    if (file && isStorageEnabled()) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      const allowedMimeTypes = board.uploadMimeTypes
+        .split(",")
+        .map((t) => t.trim());
+
+      const storage = getStorage();
+      const result = await storage.upload(buffer, file.name, file.type, {
+        maxSizeBytes: board.uploadMaxSize,
+        allowedMimeTypes,
+        folder: `boards/${boardId}`,
+      });
+
+      uploadedKey = result.key;
+      attachmentUrl = result.url;
     }
 
     const username = parsed.data.username?.trim() || board.defaultUsername;
@@ -168,7 +211,7 @@ export async function POST(
     const response = await responseService.create({
       threadId: id,
       content,
-      attachment: parsed.data.attachment,
+      attachment: attachmentUrl ?? undefined,
       username,
       ip,
       authorId,
@@ -195,6 +238,28 @@ export async function POST(
 
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
+    // If response creation failed but image was uploaded, delete the image
+    if (uploadedKey) {
+      try {
+        const storage = getStorage();
+        await storage.delete(uploadedKey);
+      } catch (deleteError) {
+        console.error("Failed to delete uploaded image after error:", deleteError);
+      }
+    }
+
+    if (error instanceof StorageError) {
+      const statusMap: Record<string, number> = {
+        FILE_TOO_LARGE: 413,
+        INVALID_MIME_TYPE: 415,
+        NOT_CONFIGURED: 503,
+        UPLOAD_FAILED: 500,
+      };
+      return NextResponse.json(
+        { error: error.message },
+        { status: statusMap[error.code] || 500 }
+      );
+    }
     if (error instanceof ResponseServiceError) {
       return handleServiceError(error);
     }

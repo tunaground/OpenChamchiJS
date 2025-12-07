@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { boardService } from "@/lib/services/board";
 import { BoardServiceError } from "@/lib/services/board";
 import { permissionService } from "@/lib/services/permission";
+import { isStorageEnabled } from "@/lib/storage";
 import { CreateThreadContent } from "./create-thread-content";
 
 interface Props {
@@ -32,6 +33,8 @@ export default async function CreateThreadPage({ params }: Props) {
         boardName={board.name}
         defaultUsername={board.defaultUsername}
         boards={boards.map((b) => ({ id: b.id, name: b.name }))}
+        storageEnabled={isStorageEnabled()}
+        uploadMaxSize={board.uploadMaxSize}
         isLoggedIn={isLoggedIn}
         canAccessAdmin={canAccessAdmin}
         authLabels={{
@@ -48,13 +51,16 @@ export default async function CreateThreadPage({ params }: Props) {
           passwordPlaceholder: t("passwordPlaceholder"),
           content: t("content"),
           contentPlaceholder: t("contentPlaceholder"),
-          attachment: t("attachment"),
-          attachmentPlaceholder: t("attachmentPlaceholder"),
+          selectImage: t("selectImage"),
+          removeImage: t("removeImage"),
           submit: t("submit"),
           cancel: t("cancel"),
           creating: t("creating"),
           foreignIpBlocked: t("foreignIpBlocked"),
           unknownError: t("unknownError"),
+          aaMode: t("aaMode"),
+          previewMode: t("previewMode"),
+          preview: t("preview"),
         }}
         boardsTitle={tCommon("boards")}
         manualLabel={tCommon("manual")}

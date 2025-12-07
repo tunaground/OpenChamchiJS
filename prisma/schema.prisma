@@ -149,6 +149,7 @@ model Thread {
   username  String
   ended     Boolean    @default(false)
   deleted   Boolean    @default(false)
+  published Boolean    @default(false)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @default(now())
   top       Boolean    @default(false)

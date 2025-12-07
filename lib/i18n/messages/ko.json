@@ -123,13 +123,17 @@
     "passwordPlaceholder": "주제글 관리용 비밀번호",
     "content": "내용",
     "contentPlaceholder": "내용을 입력하세요",
-    "attachment": "첨부파일",
-    "attachmentPlaceholder": "파일 선택",
+    "selectImage": "이미지 선택",
+    "removeImage": "제거",
+    "maxSize": "최대 {size}",
     "submit": "작성",
     "cancel": "취소",
     "creating": "작성 중...",
     "foreignIpBlocked": "해외 IP에서는 작성할 수 없습니다.",
-    "unknownError": "오류가 발생했습니다."
+    "unknownError": "오류가 발생했습니다.",
+    "aaMode": "AA",
+    "previewMode": "미리보기",
+    "preview": "미리보기"
   },
   "boardIndex": {
     "notices": "공지사항",

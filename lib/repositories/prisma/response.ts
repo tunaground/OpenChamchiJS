@@ -117,10 +117,29 @@ export const responseRepository: ResponseRepository = {
       where: { threadId: data.threadId },
     });
 
+    const seq = count;
+
+    // If this is the first response (seq 0), also publish the thread
+    if (seq === 0) {
+      const [response] = await prisma.$transaction([
+        prisma.response.create({
+          data: {
+            ...data,
+            seq,
+          },
+        }),
+        prisma.thread.update({
+          where: { id: data.threadId },
+          data: { published: true },
+        }),
+      ]);
+      return response;
+    }
+
     return prisma.response.create({
       data: {
         ...data,
-        seq: count,
+        seq,
       },
     });
   },

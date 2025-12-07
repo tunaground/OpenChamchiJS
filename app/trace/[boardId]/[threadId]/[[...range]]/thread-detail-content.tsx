@@ -818,46 +818,42 @@ export function ThreadDetailContent({
     if (!content.trim()) return;
 
     setSubmitting(true);
-    let uploadedKey: string | null = null;
-    let attachmentUrl: string | null = null;
 
     try {
-      // Upload image first if exists
-      if (attachmentFile) {
-        const formData = new FormData();
-        formData.append("file", attachmentFile);
-
-        const uploadRes = await fetch(`/api/boards/${thread.boardId}/upload`, {
-          method: "POST",
-          body: formData,
-        });
-
-        if (!uploadRes.ok) {
-          const data = await uploadRes.json();
-          throw new Error(data.error || "Upload failed");
-        }
-
-        const uploadData = await uploadRes.json();
-        uploadedKey = uploadData.key;
-        attachmentUrl = uploadData.url;
-      }
-
       // Apply AA mode: wrap content with [aa][/aa] tags
       let finalContent = content.trim();
       if (responseOptions.aaMode) {
         finalContent = `[aa]${finalContent}[/aa]`;
       }
 
-      const res = await fetch(`/api/boards/${thread.boardId}/threads/${thread.id}/responses`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          username: username.trim() || undefined,
-          content: finalContent,
-          noup: responseOptions.noupMode || undefined,
-          attachment: attachmentUrl || undefined,
-        }),
-      });
+      // Use FormData if there's a file, otherwise use JSON
+      let res: Response;
+      if (attachmentFile) {
+        const formData = new FormData();
+        formData.append("file", attachmentFile);
+        formData.append("content", finalContent);
+        if (username.trim()) {
+          formData.append("username", username.trim());
+        }
+        if (responseOptions.noupMode) {
+          formData.append("noup", "true");
+        }
+
+        res = await fetch(`/api/boards/${thread.boardId}/threads/${thread.id}/responses`, {
+          method: "POST",
+          body: formData,
+        });
+      } else {
+        res = await fetch(`/api/boards/${thread.boardId}/threads/${thread.id}/responses`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            username: username.trim() || undefined,
+            content: finalContent,
+            noup: responseOptions.noupMode || undefined,
+          }),
+        });
+      }
 
       if (res.ok) {
         setContent("");
@@ -868,19 +864,6 @@ export function ThreadDetailContent({
           router.refresh();
         }
       } else {
-        // Response creation failed - delete uploaded image if exists
-        if (uploadedKey) {
-          try {
-            await fetch(`/api/boards/${thread.boardId}/upload`, {
-              method: "DELETE",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ key: uploadedKey }),
-            });
-          } catch {
-            console.error("Failed to delete uploaded image");
-          }
-        }
-
         let errorMessage = labels.unknownError;
         try {
           const data = await res.json();
@@ -892,18 +875,6 @@ export function ThreadDetailContent({
         alert(errorMessage);
       }
     } catch (err) {
-      // Upload or other error - delete uploaded image if exists
-      if (uploadedKey) {
-        try {
-          await fetch(`/api/boards/${thread.boardId}/upload`, {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ key: uploadedKey }),
-          });
-        } catch {
-          console.error("Failed to delete uploaded image");
-        }
-      }
       alert(err instanceof Error ? err.message : labels.unknownError);
     } finally {
       setSubmitting(false);

@@ -19,6 +19,7 @@ export const threadRepository: ThreadRepository = {
     return prisma.thread.findMany({
       where: {
         boardId,
+        published: true,
         ...(includeDeleted ? {} : { deleted: false }),
         ...(search
           ? {
@@ -44,6 +45,7 @@ export const threadRepository: ThreadRepository = {
     const threads = await prisma.thread.findMany({
       where: {
         boardId,
+        published: true,
         ...(includeDeleted ? {} : { deleted: false }),
         ...(search
           ? {
@@ -80,6 +82,7 @@ export const threadRepository: ThreadRepository = {
     return prisma.thread.count({
       where: {
         boardId,
+        published: true,
         ...(includeDeleted ? {} : { deleted: false }),
         ...(search
           ? {

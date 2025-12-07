@@ -123,13 +123,17 @@
     "passwordPlaceholder": "Password for thread management",
     "content": "Content",
     "contentPlaceholder": "Enter content",
-    "attachment": "Attachment",
-    "attachmentPlaceholder": "Select file",
+    "selectImage": "Select Image",
+    "removeImage": "Remove",
+    "maxSize": "max {size}",
     "submit": "Submit",
     "cancel": "Cancel",
     "creating": "Creating...",
     "foreignIpBlocked": "Writing from foreign IP addresses is not allowed.",
-    "unknownError": "An error occurred."
+    "unknownError": "An error occurred.",
+    "aaMode": "AA",
+    "previewMode": "Preview",
+    "preview": "Preview"
   },
   "boardIndex": {
     "notices": "Notices",
