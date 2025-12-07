@@ -29,7 +29,8 @@ export type TomDiceResult = {
 export type TomCalcResult = {
   type: "element";
   name: "calc" | "calcn";
-  expression: string;
+  expression: string; // Display expression (e.g., "(3+4+[1~10]5)")
+  originalExpression: string; // Original expression for copy (e.g., "(3+4+[dice 1 10])")
   result: number;
   attributes: TomNode[];
   children: TomNode[];
@@ -205,11 +206,14 @@ function processCalc(node: TomElement, random: RandomFn): TomCalcResult {
 
   // Build expression string for display
   const expression = stringifyNested(nested);
+  // Build original expression for copy (preserves dice format)
+  const originalExpression = stringifyNestedOriginal(nested);
 
   return {
     type: "element",
     name: "calc",
     expression,
+    originalExpression,
     result,
     attributes: node.attributes,
     children: node.children,
@@ -218,32 +222,38 @@ function processCalc(node: TomElement, random: RandomFn): TomCalcResult {
 
 // Process [calcn expr] -> TomCalcResult (infix notation)
 function processCalcn(node: TomElement, random: RandomFn): TomCalcResult {
-  // Collect expression parts for display and evaluation
+  // Collect expression parts for display, evaluation, and original
   const displayParts: string[] = []; // For display (shows dice as [min~max]result)
   const evalParts: string[] = []; // For mathjs evaluation (numbers only)
+  const originalParts: string[] = []; // For copy (original format with [dice min max])
 
   function collectExpr(nodes: TomNode[]): void {
     for (const n of nodes) {
       if (isTomText(n)) {
         displayParts.push(n.value);
         evalParts.push(n.value);
+        originalParts.push(n.value);
       } else if (isTomNested(n)) {
         displayParts.push("(");
         evalParts.push("(");
+        originalParts.push("(");
         collectExpr(n.children);
         displayParts.push(")");
         evalParts.push(")");
+        originalParts.push(")");
       } else if (isTomElement(n)) {
         if (n.name === "dice") {
-          // dice: show as [min~max]result in display, number in eval
+          // dice: show as [min~max]result in display, number in eval, [dice min max] in original
           const diceResult = processDice(n, random);
           displayParts.push(`[${diceResult.min}~${diceResult.max}]${diceResult.result}`);
           evalParts.push(String(diceResult.result));
+          originalParts.push(`[dice ${diceResult.min} ${diceResult.max}]`);
         } else {
           // Other nested calc/calcn
           const num = extractNumber(n, random);
           displayParts.push(String(num));
           evalParts.push(String(num));
+          originalParts.push(String(num));
         }
       }
     }
@@ -252,6 +262,7 @@ function processCalcn(node: TomElement, random: RandomFn): TomCalcResult {
   collectExpr(node.attributes);
   const expression = displayParts.join("");
   const evalExpression = evalParts.join("");
+  const originalExpression = originalParts.join("");
 
   // Evaluate using mathjs
   const evaluated = evaluate(evalExpression);
@@ -261,6 +272,7 @@ function processCalcn(node: TomElement, random: RandomFn): TomCalcResult {
     type: "element",
     name: "calcn",
     expression,
+    originalExpression,
     result,
     attributes: node.attributes,
     children: node.children,
@@ -277,6 +289,32 @@ function stringifyNested(node: TomNested): string {
       parts.push("(" + stringifyNested(child) + ")");
     } else if (isTomElement(child)) {
       parts.push(`[${child.name}]`);
+    }
+  }
+  return parts.join(" ");
+}
+
+// Helper to stringify nested for original format (preserves dice format)
+function stringifyNestedOriginal(node: TomNested): string {
+  const parts: string[] = [];
+  for (const child of node.children) {
+    if (isTomText(child)) {
+      parts.push(child.value);
+    } else if (isTomNested(child)) {
+      parts.push("(" + stringifyNestedOriginal(child) + ")");
+    } else if (isTomElement(child)) {
+      if (child.name === "dice" && child.attributes.length === 2) {
+        // Preserve dice format: [dice min max]
+        const minAttr = child.attributes[0];
+        const maxAttr = child.attributes[1];
+        if (isTomText(minAttr) && isTomText(maxAttr)) {
+          parts.push(`[dice ${minAttr.value} ${maxAttr.value}]`);
+        } else {
+          parts.push(`[${child.name}]`);
+        }
+      } else {
+        parts.push(`[${child.name}]`);
+      }
     }
   }
   return parts.join(" ");

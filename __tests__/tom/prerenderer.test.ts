@@ -140,6 +140,13 @@ describe("TOM Prerenderer", () => {
       const calc = result.children[0] as TomCalcResult;
       expect(calc.result).toBe(11); // 1 (from fixedRandom) + 10
     });
+
+    it("preserves original dice format in originalExpression (full flow)", () => {
+      const result = writeAndRead("[calc (+ [dice 1 6] 10)][/calc]");
+
+      const calc = result.children[0] as TomCalcResult;
+      expect(calc.originalExpression).toBe("+ [dice 1 6] 10");
+    });
   });
 
   describe("calcn (infix notation)", () => {
@@ -224,6 +231,20 @@ describe("TOM Prerenderer", () => {
       const calc = result.children[0] as TomCalcResult;
       expect(calc.result).toBe(2); // 1 + 1 (fixedRandom returns min for both)
       expect(calc.expression).toBe("[1~6]1+[1~6]1");
+    });
+
+    it("preserves original dice format in originalExpression (full flow)", () => {
+      const result = writeAndRead("[calcn (3+4+[dice 1 10])][/calcn]");
+
+      const calc = result.children[0] as TomCalcResult;
+      expect(calc.originalExpression).toBe("(3+4+[dice 1 10])");
+    });
+
+    it("preserves multiple dice in originalExpression (full flow)", () => {
+      const result = writeAndRead("[calcn [dice 1 6]+[dice 1 6]][/calcn]");
+
+      const calc = result.children[0] as TomCalcResult;
+      expect(calc.originalExpression).toBe("[dice 1 6]+[dice 1 6]");
     });
   });
 

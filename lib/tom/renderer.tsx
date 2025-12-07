@@ -350,10 +350,12 @@ function renderNode(node: PrerenderedNode, key: number, ctx: RenderContext): Rea
   // Calc result
   if (isTomCalcResult(node)) {
     const calc = node as TomCalcResult;
+    // Use originalExpression for copy (preserves [dice min max] format)
+    const copyExpr = calc.originalExpression || calc.expression;
     const copy =
       calc.name === "calc"
-        ? `[calc ${calc.expression}][/calc]`
-        : `[calcn ${calc.expression}][/calcn]`;
+        ? `[calc ${copyExpr}][/calc]`
+        : `[calcn ${copyExpr}][/calcn]`;
 
     const handleClick = async () => {
       await navigator.clipboard.writeText(copy);
