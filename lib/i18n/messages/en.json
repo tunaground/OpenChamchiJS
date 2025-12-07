@@ -318,6 +318,8 @@
     "quickSubmitCtrl": "Ctrl+Enter",
     "quickSubmitShift": "Shift+Enter",
     "quickSubmitNone": "Disabled",
+    "sidebarSwipe": "Sidebar Swipe",
+    "sidebarSwipeDescription": "Open and close sidebar with swipe on mobile.",
     "reset": "Reset",
     "back": "Back"
   }

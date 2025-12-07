@@ -45,6 +45,8 @@ export function useResponseOptions(
     (state) => state.clearThreadOption
   );
 
+  const globalSidebarSwipe = useResponseOptionsStore((state) => state.sidebarSwipe);
+
   const options = useMemo<ResponseOptions>(() => {
     return {
       chatMode: threadOptions.chatMode ?? globalChatMode,
@@ -53,6 +55,7 @@ export function useResponseOptions(
       noupMode: threadOptions.noupMode ?? globalNoupMode,
       alwaysBottom: threadOptions.alwaysBottom ?? globalAlwaysBottom,
       quickSubmitKey: globalQuickSubmitKey, // quickSubmitKey is global only
+      sidebarSwipe: globalSidebarSwipe, // sidebarSwipe is global only
     };
   }, [
     globalChatMode,
@@ -61,6 +64,7 @@ export function useResponseOptions(
     globalNoupMode,
     globalAlwaysBottom,
     globalQuickSubmitKey,
+    globalSidebarSwipe,
     threadOptions,
   ]);
 
@@ -78,7 +82,8 @@ export function useResponseOptions(
     noupMode: globalNoupMode,
     alwaysBottom: globalAlwaysBottom,
     quickSubmitKey: globalQuickSubmitKey,
-  }), [globalChatMode, globalAaMode, globalPreviewMode, globalNoupMode, globalAlwaysBottom, globalQuickSubmitKey]);
+    sidebarSwipe: globalSidebarSwipe,
+  }), [globalChatMode, globalAaMode, globalPreviewMode, globalNoupMode, globalAlwaysBottom, globalQuickSubmitKey, globalSidebarSwipe]);
 
   const isGlobalActive = useCallback(
     (key: keyof ResponseOptions): boolean => {

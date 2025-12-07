@@ -318,6 +318,8 @@
     "quickSubmitCtrl": "Ctrl+Enter",
     "quickSubmitShift": "Shift+Enter",
     "quickSubmitNone": "사용 안 함",
+    "sidebarSwipe": "사이드바 스와이프",
+    "sidebarSwipeDescription": "모바일에서 스와이프로 사이드바를 열고 닫습니다.",
     "reset": "초기화",
     "back": "뒤로"
   }

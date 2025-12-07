@@ -36,6 +36,8 @@ export default async function SettingsPage() {
     quickSubmitCtrl: t("quickSubmitCtrl"),
     quickSubmitShift: t("quickSubmitShift"),
     quickSubmitNone: t("quickSubmitNone"),
+    sidebarSwipe: t("sidebarSwipe"),
+    sidebarSwipeDescription: t("sidebarSwipeDescription"),
     reset: t("reset"),
     back: t("back"),
   };

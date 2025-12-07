@@ -140,6 +140,51 @@ export interface RenderContext {
   onCopy?: (text: string) => void;
 }
 
+const ExternalLink = styled.a`
+  color: ${(props) => props.theme.anchorALinkColor};
+  text-decoration: underline;
+  word-break: break-all;
+
+  &:hover {
+    text-decoration: none;
+  }
+`;
+
+// Helper: Apply URL links to text
+function applyLinks(
+  text: string,
+  keyPrefix: string
+): (string | ReactNode)[] {
+  const urlRegex = /(https?:\/\/[^\s<>"{}|\\^`\[\]]+)/g;
+  const result: (string | ReactNode)[] = [];
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = urlRegex.exec(text)) !== null) {
+    const [url] = match;
+    if (lastIndex < match.index) {
+      result.push(text.slice(lastIndex, match.index));
+    }
+    result.push(
+      <ExternalLink
+        key={`${keyPrefix}-link-${match.index}`}
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        {url}
+      </ExternalLink>
+    );
+    lastIndex = urlRegex.lastIndex;
+  }
+
+  if (lastIndex < text.length) {
+    result.push(text.slice(lastIndex));
+  }
+
+  return result;
+}
+
 // Helper: Convert text with anchors to ReactNodes
 function applyAnchor(
   text: string,
@@ -155,7 +200,9 @@ function applyAnchor(
 
     while ((match = regex.exec(line)) !== null) {
       const [fullMatch, p1, p2, p3, p4] = match;
-      result.push(decode(line.slice(lastIndex, match.index)));
+      const beforeText = decode(line.slice(lastIndex, match.index));
+      // Apply URL links to text before anchor
+      result.push(...applyLinks(beforeText, `${lineIdx}-${lastIndex}`));
 
       if (p2 === "" && p3 === "") {
         result.push(fullMatch);
@@ -206,7 +253,9 @@ function applyAnchor(
       lastIndex = regex.lastIndex;
     }
 
-    result.push(decode(line.slice(lastIndex)));
+    const remainingText = decode(line.slice(lastIndex));
+    // Apply URL links to remaining text
+    result.push(...applyLinks(remainingText, `${lineIdx}-end`));
 
     if (lineIdx < lines.length - 1) {
       result.push(<br key={`br-${lineIdx}`} />);

@@ -10,6 +10,7 @@ import {
   faArrowDown,
   faArrowLeft,
   faKeyboard,
+  faHandPointer,
 } from "@fortawesome/free-solid-svg-icons";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
@@ -202,8 +203,8 @@ const QuickSubmitOption = styled.button<{ $active: boolean }>`
   }
 `;
 
-// Options available in global settings (excludes chatMode which is thread-specific, and quickSubmitKey which has separate UI)
-type GlobalOptionKey = Exclude<keyof ResponseOptions, "chatMode" | "quickSubmitKey">;
+// Options available in global settings (excludes chatMode which is thread-specific, quickSubmitKey and sidebarSwipe which have separate UI)
+type GlobalOptionKey = Exclude<keyof ResponseOptions, "chatMode" | "quickSubmitKey" | "sidebarSwipe">;
 
 interface OptionConfig {
   key: GlobalOptionKey;
@@ -231,6 +232,8 @@ interface Labels {
   quickSubmitCtrl: string;
   quickSubmitShift: string;
   quickSubmitNone: string;
+  sidebarSwipe: string;
+  sidebarSwipeDescription: string;
   reset: string;
   back: string;
 }
@@ -264,12 +267,13 @@ export function SettingsContent({
   const noupMode = useResponseOptionsStore((state) => state.noupMode);
   const alwaysBottom = useResponseOptionsStore((state) => state.alwaysBottom);
   const quickSubmitKey = useResponseOptionsStore((state) => state.quickSubmitKey);
+  const sidebarSwipe = useResponseOptionsStore((state) => state.sidebarSwipe);
   const toggleOption = useResponseOptionsStore((state) => state.toggleOption);
   const setOption = useResponseOptionsStore((state) => state.setOption);
   const resetOptions = useResponseOptionsStore((state) => state.resetOptions);
 
   // chatMode and quickSubmitKey are excluded from toggle options
-  const options: Omit<ResponseOptions, "chatMode" | "quickSubmitKey"> = {
+  const options: Omit<ResponseOptions, "chatMode" | "quickSubmitKey" | "sidebarSwipe"> = {
     aaMode,
     previewMode,
     noupMode,
@@ -365,6 +369,20 @@ export function SettingsContent({
                   ))}
                 </QuickSubmitOptions>
               </OptionContent>
+            </OptionItem>
+            <OptionItem>
+              <OptionIcon $active={sidebarSwipe}>
+                <FontAwesomeIcon icon={faHandPointer} />
+              </OptionIcon>
+              <OptionContent>
+                <OptionLabel>{labels.sidebarSwipe}</OptionLabel>
+                <OptionDescription>{labels.sidebarSwipeDescription}</OptionDescription>
+              </OptionContent>
+              <Toggle
+                $active={sidebarSwipe}
+                onClick={() => toggleOption("sidebarSwipe")}
+                aria-label={`Toggle ${labels.sidebarSwipe}`}
+              />
             </OptionItem>
           </OptionList>
         </Section>

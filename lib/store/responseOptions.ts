@@ -10,6 +10,7 @@ export interface ResponseOptions {
   noupMode: boolean;
   alwaysBottom: boolean;
   quickSubmitKey: QuickSubmitKey;
+  sidebarSwipe: boolean;
 }
 
 interface ResponseOptionsState extends ResponseOptions {
@@ -25,6 +26,7 @@ const defaultOptions: ResponseOptions = {
   noupMode: false,
   alwaysBottom: false,
   quickSubmitKey: "ctrl",
+  sidebarSwipe: true,
 };
 
 export const useResponseOptionsStore = create<ResponseOptionsState>()(
