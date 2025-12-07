@@ -4,6 +4,7 @@ export interface ThreadData {
   title: string;
   password: string;
   username: string;
+  userId: string | null;
   ended: boolean;
   deleted: boolean;
   published: boolean;
@@ -21,6 +22,7 @@ export interface CreateThreadInput {
   title: string;
   password: string;
   username: string;
+  userId?: string;
 }
 
 export interface UpdateThreadInput {

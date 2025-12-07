@@ -49,6 +49,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   userRoles     UserRole[]
+  threads       Thread[]
   responses     Response[]
 }
 
@@ -147,6 +148,7 @@ model Thread {
   title     String
   password  String
   username  String
+  userId    String?
   ended     Boolean    @default(false)
   deleted   Boolean    @default(false)
   published Boolean    @default(false)
@@ -155,8 +157,10 @@ model Thread {
   top       Boolean    @default(false)
   responses Response[]
   board     Board      @relation(fields: [boardId], references: [id])
+  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([boardId])
+  @@index([userId])
 }
 
 model Response {
@@ -176,4 +180,5 @@ model Response {
   user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([threadId, seq])
+  @@index([userId])
 }

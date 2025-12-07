@@ -181,6 +181,10 @@ export async function POST(
       return foreignIpBlocked;
     }
 
+    // Get userId from session if logged in
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
     // Handle file upload if present
     if (file && isStorageEnabled()) {
       const bytes = await file.arrayBuffer();
@@ -215,6 +219,7 @@ export async function POST(
       username,
       ip,
       authorId,
+      userId,
       noup: parsed.data.noup,
     });
 

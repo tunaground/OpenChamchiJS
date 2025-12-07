@@ -75,6 +75,10 @@ export async function POST(
       return foreignIpBlocked;
     }
 
+    // Get userId from session if logged in
+    const session = await getServerSession(authOptions);
+    const userId = session?.user?.id;
+
     const username = parsed.data.username?.trim() || board.defaultUsername;
 
     const thread = await threadService.create({
@@ -82,6 +86,7 @@ export async function POST(
       title: parsed.data.title,
       password: parsed.data.password,
       username,
+      userId,
     });
     return NextResponse.json(thread, { status: 201 });
   } catch (error) {
