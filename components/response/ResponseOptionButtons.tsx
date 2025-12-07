@@ -112,8 +112,11 @@ const ResetTooltip = styled(Tooltip)`
   }
 `;
 
+// Boolean option keys only (excludes quickSubmitKey which is a string type)
+type BooleanOptionKey = Exclude<keyof ResponseOptions, "quickSubmitKey">;
+
 interface OptionConfig {
-  key: keyof ResponseOptions;
+  key: BooleanOptionKey;
   icon: typeof faComments;
   label: string;
 }

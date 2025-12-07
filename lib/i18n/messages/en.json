@@ -313,6 +313,11 @@
     "noupModeDescription": "Thread won't be bumped when you post a response.",
     "alwaysBottom": "Stay at Bottom",
     "alwaysBottomDescription": "Always stay at the bottom of the page.",
+    "quickSubmit": "Quick Submit",
+    "quickSubmitDescription": "Submit responses quickly using keyboard shortcuts.",
+    "quickSubmitCtrl": "Ctrl+Enter",
+    "quickSubmitShift": "Shift+Enter",
+    "quickSubmitNone": "Disabled",
     "reset": "Reset",
     "back": "Back"
   }

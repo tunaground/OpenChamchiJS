@@ -313,6 +313,11 @@
     "noupModeDescription": "응답을 작성해도 스레드가 상단으로 올라가지 않습니다.",
     "alwaysBottom": "하단 고정",
     "alwaysBottomDescription": "항상 페이지 하단을 유지합니다.",
+    "quickSubmit": "퀵 서브밋",
+    "quickSubmitDescription": "키보드 단축키로 빠르게 응답을 작성합니다.",
+    "quickSubmitCtrl": "Ctrl+Enter",
+    "quickSubmitShift": "Shift+Enter",
+    "quickSubmitNone": "사용 안 함",
     "reset": "초기화",
     "back": "뒤로"
   }

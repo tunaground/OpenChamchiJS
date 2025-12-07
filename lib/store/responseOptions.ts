@@ -1,12 +1,15 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 
+export type QuickSubmitKey = "ctrl" | "shift" | "none";
+
 export interface ResponseOptions {
   chatMode: boolean;
   aaMode: boolean;
   previewMode: boolean;
   noupMode: boolean;
   alwaysBottom: boolean;
+  quickSubmitKey: QuickSubmitKey;
 }
 
 interface ResponseOptionsState extends ResponseOptions {
@@ -21,6 +24,7 @@ const defaultOptions: ResponseOptions = {
   previewMode: false,
   noupMode: false,
   alwaysBottom: false,
+  quickSubmitKey: "ctrl",
 };
 
 export const useResponseOptionsStore = create<ResponseOptionsState>()(

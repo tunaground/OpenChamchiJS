@@ -31,6 +31,11 @@ export default async function SettingsPage() {
     noupModeDescription: t("noupModeDescription"),
     alwaysBottom: t("alwaysBottom"),
     alwaysBottomDescription: t("alwaysBottomDescription"),
+    quickSubmit: t("quickSubmit"),
+    quickSubmitDescription: t("quickSubmitDescription"),
+    quickSubmitCtrl: t("quickSubmitCtrl"),
+    quickSubmitShift: t("quickSubmitShift"),
+    quickSubmitNone: t("quickSubmitNone"),
     reset: t("reset"),
     back: t("back"),
   };

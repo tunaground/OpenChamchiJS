@@ -9,10 +9,15 @@ import {
   faArrowUp,
   faArrowDown,
   faArrowLeft,
+  faKeyboard,
 } from "@fortawesome/free-solid-svg-icons";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
-import { useResponseOptionsStore, ResponseOptions } from "@/lib/store/responseOptions";
+import {
+  useResponseOptionsStore,
+  ResponseOptions,
+  QuickSubmitKey,
+} from "@/lib/store/responseOptions";
 
 const Container = styled.div`
   padding: 3.2rem;
@@ -170,8 +175,35 @@ const ResetButton = styled(Button)`
   }
 `;
 
-// Options available in global settings (excludes chatMode which is thread-specific)
-type GlobalOptionKey = Exclude<keyof ResponseOptions, "chatMode">;
+const QuickSubmitOptions = styled.div`
+  display: flex;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+`;
+
+const QuickSubmitOption = styled.button<{ $active: boolean }>`
+  padding: 0.8rem 1.6rem;
+  border-radius: 4px;
+  font-size: 1.3rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  border: 1px solid
+    ${(props) =>
+      props.$active ? props.theme.buttonPrimary : props.theme.surfaceBorder};
+  background: ${(props) =>
+    props.$active ? props.theme.buttonPrimary : "transparent"};
+  color: ${(props) =>
+    props.$active ? props.theme.buttonPrimaryText : props.theme.textPrimary};
+
+  &:hover {
+    background: ${(props) =>
+      props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
+  }
+`;
+
+// Options available in global settings (excludes chatMode which is thread-specific, and quickSubmitKey which has separate UI)
+type GlobalOptionKey = Exclude<keyof ResponseOptions, "chatMode" | "quickSubmitKey">;
 
 interface OptionConfig {
   key: GlobalOptionKey;
@@ -194,6 +226,11 @@ interface Labels {
   noupModeDescription: string;
   alwaysBottom: string;
   alwaysBottomDescription: string;
+  quickSubmit: string;
+  quickSubmitDescription: string;
+  quickSubmitCtrl: string;
+  quickSubmitShift: string;
+  quickSubmitNone: string;
   reset: string;
   back: string;
 }
@@ -226,16 +263,24 @@ export function SettingsContent({
   const previewMode = useResponseOptionsStore((state) => state.previewMode);
   const noupMode = useResponseOptionsStore((state) => state.noupMode);
   const alwaysBottom = useResponseOptionsStore((state) => state.alwaysBottom);
+  const quickSubmitKey = useResponseOptionsStore((state) => state.quickSubmitKey);
   const toggleOption = useResponseOptionsStore((state) => state.toggleOption);
+  const setOption = useResponseOptionsStore((state) => state.setOption);
   const resetOptions = useResponseOptionsStore((state) => state.resetOptions);
 
-  // chatMode is excluded from global settings (thread-specific only)
-  const options: Omit<ResponseOptions, "chatMode"> = {
+  // chatMode and quickSubmitKey are excluded from toggle options
+  const options: Omit<ResponseOptions, "chatMode" | "quickSubmitKey"> = {
     aaMode,
     previewMode,
     noupMode,
     alwaysBottom,
   };
+
+  const quickSubmitOptions: { key: QuickSubmitKey; label: string }[] = [
+    { key: "ctrl", label: labels.quickSubmitCtrl },
+    { key: "shift", label: labels.quickSubmitShift },
+    { key: "none", label: labels.quickSubmitNone },
+  ];
 
   // chatMode is excluded - it's thread-specific only
   const optionConfigs: OptionConfig[] = [
@@ -301,6 +346,26 @@ export function SettingsContent({
                 />
               </OptionItem>
             ))}
+            <OptionItem>
+              <OptionIcon $active={quickSubmitKey !== "none"}>
+                <FontAwesomeIcon icon={faKeyboard} />
+              </OptionIcon>
+              <OptionContent>
+                <OptionLabel>{labels.quickSubmit}</OptionLabel>
+                <OptionDescription>{labels.quickSubmitDescription}</OptionDescription>
+                <QuickSubmitOptions style={{ marginTop: "1rem" }}>
+                  {quickSubmitOptions.map((option) => (
+                    <QuickSubmitOption
+                      key={option.key}
+                      $active={quickSubmitKey === option.key}
+                      onClick={() => setOption("quickSubmitKey", option.key)}
+                    >
+                      {option.label}
+                    </QuickSubmitOption>
+                  ))}
+                </QuickSubmitOptions>
+              </OptionContent>
+            </OptionItem>
           </OptionList>
         </Section>
 

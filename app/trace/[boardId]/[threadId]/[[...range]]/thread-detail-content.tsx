@@ -845,6 +845,24 @@ export function ThreadDetailContent({
     }
   };
 
+  // Quick submit handler for keyboard shortcut
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const { quickSubmitKey } = responseOptions;
+    if (quickSubmitKey === "none") return;
+
+    const isCtrlEnter = e.key === "Enter" && (e.ctrlKey || e.metaKey);
+    const isShiftEnter = e.key === "Enter" && e.shiftKey;
+
+    if (
+      (quickSubmitKey === "ctrl" && isCtrlEnter) ||
+      (quickSubmitKey === "shift" && isShiftEnter)
+    ) {
+      e.preventDefault();
+      if (content.trim() && !submitting) {
+        handleSubmit(e as unknown as React.FormEvent);
+      }
+    }
+  };
 
   // Render anchor stack recursively for a given source key
   // sourceKey format: "main:{responseId}" for main responses, "anchor:{parentSourceKey}:{responseId}" for nested
@@ -1185,6 +1203,7 @@ export function ThreadDetailContent({
             <FormTextarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder={labels.contentPlaceholder}
               required
             />

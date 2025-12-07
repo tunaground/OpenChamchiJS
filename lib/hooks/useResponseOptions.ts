@@ -32,6 +32,7 @@ export function useResponseOptions(
   const globalPreviewMode = useResponseOptionsStore((state) => state.previewMode);
   const globalNoupMode = useResponseOptionsStore((state) => state.noupMode);
   const globalAlwaysBottom = useResponseOptionsStore((state) => state.alwaysBottom);
+  const globalQuickSubmitKey = useResponseOptionsStore((state) => state.quickSubmitKey);
 
   const threadOptionsMap = useThreadResponseOptionsStore((state) => state.options);
   const threadKey = `${boardId}:${threadId}`;
@@ -51,6 +52,7 @@ export function useResponseOptions(
       previewMode: threadOptions.previewMode ?? globalPreviewMode,
       noupMode: threadOptions.noupMode ?? globalNoupMode,
       alwaysBottom: threadOptions.alwaysBottom ?? globalAlwaysBottom,
+      quickSubmitKey: globalQuickSubmitKey, // quickSubmitKey is global only
     };
   }, [
     globalChatMode,
@@ -58,6 +60,7 @@ export function useResponseOptions(
     globalPreviewMode,
     globalNoupMode,
     globalAlwaysBottom,
+    globalQuickSubmitKey,
     threadOptions,
   ]);
 
@@ -74,7 +77,8 @@ export function useResponseOptions(
     previewMode: globalPreviewMode,
     noupMode: globalNoupMode,
     alwaysBottom: globalAlwaysBottom,
-  }), [globalChatMode, globalAaMode, globalPreviewMode, globalNoupMode, globalAlwaysBottom]);
+    quickSubmitKey: globalQuickSubmitKey,
+  }), [globalChatMode, globalAaMode, globalPreviewMode, globalNoupMode, globalAlwaysBottom, globalQuickSubmitKey]);
 
   const isGlobalActive = useCallback(
     (key: keyof ResponseOptions): boolean => {
