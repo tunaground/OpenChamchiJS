@@ -195,7 +195,8 @@
     "selectImage": "Select Image",
     "removeImage": "Remove",
     "uploading": "Uploading...",
-    "maxSize": "max {size}"
+    "maxSize": "max {size}",
+    "viewSource": "View Source"
   },
   "traceSidebar": {
     "navigation": "Navigation",

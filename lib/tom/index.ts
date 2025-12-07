@@ -65,3 +65,6 @@ export {
   render,
   renderTom,
 } from "./renderer";
+
+// Utilities
+export { toOriginalFormat } from "./utils";

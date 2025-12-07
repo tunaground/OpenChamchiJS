@@ -13,7 +13,9 @@ import { useChatMode } from "@/lib/hooks/useChatMode";
 import { usePresence } from "@/lib/hooks/usePresence";
 import { CHANNELS } from "@/lib/realtime";
 import { useTranslations } from "next-intl";
-import { parse, prerender, render, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
+import { parse, prerender, render, toOriginalFormat, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCode } from "@fortawesome/free-solid-svg-icons";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 import { formatBytes } from "@/lib/utils/format-bytes";
 
@@ -180,6 +182,29 @@ const ResponseDate = styled.span`
   margin-left: auto;
 `;
 
+const RawContentButton = styled.button<{ $active: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 0.4rem;
+  background: ${(props) =>
+    props.$active ? props.theme.buttonPrimary : "transparent"};
+  color: ${(props) =>
+    props.$active ? props.theme.buttonPrimaryText : props.theme.textSecondary};
+  cursor: pointer;
+  transition: all 0.15s ease;
+  margin-left: 0.8rem;
+
+  &:hover {
+    background: ${(props) =>
+      props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
+    opacity: ${(props) => (props.$active ? 0.9 : 1)};
+  }
+`;
+
 const ResponseContent = styled.div`
   padding: 1.6rem;
   font-size: 1.5rem;
@@ -193,6 +218,10 @@ const ResponseContent = styled.div`
     border-top: 1px solid ${(props) => props.theme.surfaceBorder};
     margin: 1.6rem 0;
   }
+`;
+
+const RawContentDisplay = styled.span`
+  white-space: pre-wrap;
 `;
 
 const ResponseAttachment = styled.div`
@@ -556,6 +585,7 @@ interface Labels {
   unknownError: string;
   selectImage: string;
   removeImage: string;
+  viewSource: string;
 }
 
 interface AuthLabels {
@@ -670,6 +700,21 @@ export function ThreadDetailContent({
     loading: boolean;
   }
   const [anchorStack, setAnchorStack] = useState<AnchorStackItem[]>([]);
+
+  // Raw content toggle state
+  const [rawContentIds, setRawContentIds] = useState<Set<string>>(new Set());
+
+  const toggleRawContent = useCallback((id: string) => {
+    setRawContentIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  }, []);
 
   // Handle anchor click - push to stack
   const handleAnchorClick = (info: AnchorInfo) => {
@@ -1177,6 +1222,13 @@ export function ThreadDetailContent({
                     <ResponseUsername>{response.username}</ResponseUsername>
                     <ResponseAuthorId>({response.authorId})</ResponseAuthorId>
                     <ResponseDate>{formatDateTime(response.createdAt)}</ResponseDate>
+                    <RawContentButton
+                      $active={rawContentIds.has(response.id)}
+                      onClick={() => toggleRawContent(response.id)}
+                      title={labels.viewSource}
+                    >
+                      <FontAwesomeIcon icon={faCode} />
+                    </RawContentButton>
                   </ResponseInfo>
                 </ResponseHeader>
                 {response.attachment && (
@@ -1196,15 +1248,21 @@ export function ThreadDetailContent({
                   </ResponseAttachment>
                 )}
                 <ResponseContent>
-                  {prerenderedContents.has(response.id)
-                    ? render(prerenderedContents.get(response.id)!, {
-                        boardId: thread.boardId,
-                        threadId: thread.id,
-                        responseId: mainKey,
-                        setAnchorInfo: handleAnchorClick,
-                        t,
-                      })
-                    : response.content}
+                  {rawContentIds.has(response.id) ? (
+                    <RawContentDisplay>
+                      {toOriginalFormat(response.content)}
+                    </RawContentDisplay>
+                  ) : prerenderedContents.has(response.id) ? (
+                    render(prerenderedContents.get(response.id)!, {
+                      boardId: thread.boardId,
+                      threadId: thread.id,
+                      responseId: mainKey,
+                      setAnchorInfo: handleAnchorClick,
+                      t,
+                    })
+                  ) : (
+                    response.content
+                  )}
                 </ResponseContent>
               </ResponseCard>
             </div>

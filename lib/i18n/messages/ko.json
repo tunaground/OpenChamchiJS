@@ -195,7 +195,8 @@
     "selectImage": "이미지 선택",
     "removeImage": "제거",
     "uploading": "업로드 중...",
-    "maxSize": "최대 {size}"
+    "maxSize": "최대 {size}",
+    "viewSource": "원본 보기"
   },
   "traceSidebar": {
     "navigation": "네비게이션",

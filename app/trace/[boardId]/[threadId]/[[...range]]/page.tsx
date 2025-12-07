@@ -139,6 +139,7 @@ export default async function ThreadDetailPage({ params }: Props) {
           unknownError: t("unknownError"),
           selectImage: t("selectImage"),
           removeImage: t("removeImage"),
+          viewSource: t("viewSource"),
         }}
         sidebarLabels={{
           navigation: tSidebar("navigation"),
