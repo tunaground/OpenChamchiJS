@@ -64,6 +64,8 @@ export const updateBoardSchema = z.object({
   responsesPerPage: z.number().int().positive().optional(),
   showUserCount: z.boolean().optional(),
   threadsPerPage: z.number().int().positive().optional(),
+  uploadMaxSize: z.number().int().positive().optional(),
+  uploadMimeTypes: trimmedString.pipe(z.string().max(500)).optional(),
 });
 
 export const configBoardSchema = z.object({
