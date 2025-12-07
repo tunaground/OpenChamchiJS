@@ -62,13 +62,13 @@ const Badge = styled.span<{ $variant?: "top" | "ended" }>`
 
 const ThreadMeta = styled.div`
   display: flex;
-  gap: 2.4rem;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 0.4rem;
   font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
-const MetaItem = styled.span`
+const MetaItem = styled.div`
   display: flex;
   gap: 0.8rem;
 `;
@@ -1113,12 +1113,12 @@ export function ThreadDetailContent({
               <MetaValue>{thread.username}</MetaValue>
             </MetaItem>
             <MetaItem>
-              <MetaLabel>{labels.updatedAt}:</MetaLabel>
-              <MetaValue>{formatDateTime(thread.updatedAt)}</MetaValue>
-            </MetaItem>
-            <MetaItem>
               <MetaLabel>{labels.createdAt}:</MetaLabel>
               <MetaValue>{formatDateTime(thread.createdAt)}</MetaValue>
+            </MetaItem>
+            <MetaItem>
+              <MetaLabel>{labels.updatedAt}:</MetaLabel>
+              <MetaValue>{formatDateTime(thread.updatedAt)}</MetaValue>
             </MetaItem>
           </ThreadMeta>
         </ThreadHeader>
