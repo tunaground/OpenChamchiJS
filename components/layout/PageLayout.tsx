@@ -168,7 +168,7 @@ export function PageLayout({
       )}
       <Main
         $desktopOpen={sidebar ? (mounted ? desktopOpen : true) : false}
-        $mobileOpen={mounted && sidebar ? mobileOpen : false}
+        $mobileOpen={sidebar ? (compactSidebarOnMobile && mobileOpen ? true : (mounted ? mobileOpen : false)) : false}
         $compactOnMobile={sidebar ? compactSidebarOnMobile : false}
       >
         <Content>{children}</Content>

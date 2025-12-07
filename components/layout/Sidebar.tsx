@@ -1,6 +1,7 @@
 "use client";
 
 import styled, { css } from "styled-components";
+import { SidebarContext } from "@/components/sidebar/SidebarContext";
 
 const Overlay = styled.div<{ $open: boolean; $compact?: boolean }>`
   position: fixed;
@@ -74,11 +75,11 @@ interface SidebarProps {
 
 export function Sidebar({ open, onClose, children, compactOnMobile }: SidebarProps) {
   return (
-    <>
+    <SidebarContext.Provider value={{ onClose, compactOnMobile }}>
       <Overlay $open={open} $compact={compactOnMobile} onClick={onClose} />
       <SidebarContainer $open={open} $compact={compactOnMobile}>
         <SidebarContent $compact={compactOnMobile}>{children}</SidebarContent>
       </SidebarContainer>
-    </>
+    </SidebarContext.Provider>
   );
 }

@@ -1097,7 +1097,7 @@ export function ThreadDetailContent({
       <Container>
         <ThreadHeader>
           <ThreadTitle>
-            &gt;{thread.id}&gt; {thread.title} ({Math.max(0, responses.length - 1)})
+            &gt;{thread.id}&gt; {thread.title} ({lastSeq})
           </ThreadTitle>
 
           {(thread.top || thread.ended) && (

@@ -22,6 +22,7 @@ import {
   NavItem,
   SidebarDivider,
 } from "./SidebarStyles";
+import { useSidebarContext } from "./SidebarContext";
 
 const SidebarTitle = styled(BaseSidebarTitle)`
   @media (max-width: ${(props) => props.theme.breakpoint}) {
@@ -29,7 +30,7 @@ const SidebarTitle = styled(BaseSidebarTitle)`
   }
 `;
 
-const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
+const StyledNavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -63,6 +64,35 @@ const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
     padding: 1.2rem;
   }
 `;
+
+interface NavLinkProps {
+  href: string;
+  $active?: boolean;
+  $disabled?: boolean;
+  children: React.ReactNode;
+}
+
+function NavLink({ href, $active, $disabled, children }: NavLinkProps) {
+  const sidebarContext = useSidebarContext();
+
+  const handleClick = () => {
+    // Don't close sidebar in compact mode (it stays fixed on mobile)
+    if (!sidebarContext?.compactOnMobile) {
+      sidebarContext?.onClose();
+    }
+  };
+
+  return (
+    <StyledNavLink
+      href={href}
+      $active={$active}
+      $disabled={$disabled}
+      onClick={handleClick}
+    >
+      {children}
+    </StyledNavLink>
+  );
+}
 
 const NavIcon = styled.span`
   display: flex;

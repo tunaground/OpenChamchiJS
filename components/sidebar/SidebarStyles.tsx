@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import styled from "styled-components";
+import { useSidebarContext } from "./SidebarContext";
 
 export const SidebarTitle = styled.h2`
   font-size: 1.2rem;
@@ -22,7 +23,7 @@ export const NavItem = styled.li`
   margin-bottom: 0.4rem;
 `;
 
-export const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
+const StyledNavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
   display: block;
   padding: 1rem 1.2rem;
   border-radius: 0.6rem;
@@ -50,7 +51,36 @@ export const NavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
   }
 `;
 
-export const BackLink = styled(Link)`
+interface NavLinkProps {
+  href: string;
+  $active?: boolean;
+  $disabled?: boolean;
+  children: React.ReactNode;
+}
+
+export function NavLink({ href, $active, $disabled, children }: NavLinkProps) {
+  const sidebarContext = useSidebarContext();
+
+  const handleClick = () => {
+    // Don't close sidebar in compact mode (it stays fixed on mobile)
+    if (!sidebarContext?.compactOnMobile) {
+      sidebarContext?.onClose();
+    }
+  };
+
+  return (
+    <StyledNavLink
+      href={href}
+      $active={$active}
+      $disabled={$disabled}
+      onClick={handleClick}
+    >
+      {children}
+    </StyledNavLink>
+  );
+}
+
+const StyledBackLink = styled(Link)`
   display: block;
   padding: 1rem 1.2rem;
   border-radius: 0.6rem;
@@ -65,6 +95,28 @@ export const BackLink = styled(Link)`
     color: ${(props) => props.theme.textPrimary};
   }
 `;
+
+interface BackLinkProps {
+  href: string;
+  children: React.ReactNode;
+}
+
+export function BackLink({ href, children }: BackLinkProps) {
+  const sidebarContext = useSidebarContext();
+
+  const handleClick = () => {
+    // Don't close sidebar in compact mode (it stays fixed on mobile)
+    if (!sidebarContext?.compactOnMobile) {
+      sidebarContext?.onClose();
+    }
+  };
+
+  return (
+    <StyledBackLink href={href} onClick={handleClick}>
+      {children}
+    </StyledBackLink>
+  );
+}
 
 export const SidebarDivider = styled.hr`
   border: none;

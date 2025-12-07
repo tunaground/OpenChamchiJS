@@ -1,6 +1,7 @@
 "use client";
 
-import styled from "styled-components";
+import { useEffect, useRef, useState } from "react";
+import styled, { css, keyframes } from "styled-components";
 import { HomeButton } from "./HomeButton";
 import { ThemeToggleButton } from "./ThemeToggleButton";
 import { SettingsButton } from "./SettingsButton";
@@ -44,21 +45,66 @@ const MenuButton = styled.button`
   }
 `;
 
-const Title = styled.div`
+const TitleWrapper = styled.div`
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  margin-left: 1.2rem;
+  margin-right: 1.2rem;
+`;
+
+const scrollLeft = keyframes`
+  0% {
+    transform: translateX(0);
+  }
+  80% {
+    transform: translateX(var(--scroll-amount));
+  }
+  100% {
+    transform: translateX(var(--scroll-amount));
+  }
+`;
+
+const reset = keyframes`
+  0% {
+    transform: translateX(var(--scroll-amount));
+  }
+  100% {
+    transform: translateX(0);
+  }
+`;
+
+const TitleText = styled.div<{ $animate: boolean }>`
+  display: inline-block;
   font-size: 1.8rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
-  margin-left: 1.2rem;
-`;
+  white-space: nowrap;
+  will-change: transform;
 
-const Spacer = styled.div`
-  flex: 1;
+  ${({ $animate }) =>
+    $animate &&
+    css`
+      animation:
+        ${scrollLeft} 4s linear 0s 1 forwards,
+        ${reset} 0.5s ease 4.5s 1 forwards;
+    `}
 `;
 
 const RightSection = styled.div`
   display: flex;
   align-items: center;
   gap: 0.8rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    gap: 0.4rem;
+  }
+`;
+
+const ButtonGroup = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0;
 `;
 
 interface TopBarProps {
@@ -70,6 +116,70 @@ interface TopBarProps {
   hideSettings?: boolean;
   userCount?: number;
   userCountTitle?: string;
+}
+
+function MarqueeTitle({ title }: { title: string }) {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+  const [animate, setAnimate] = useState(false);
+
+  useEffect(() => {
+    const wrapper = wrapperRef.current;
+    const content = contentRef.current;
+    if (!wrapper || !content) return;
+
+    let timeout: NodeJS.Timeout;
+
+    const evaluateOverflow = () => {
+      const scrollDistance = content.scrollWidth - wrapper.clientWidth;
+
+      if (scrollDistance > 0) {
+        content.style.setProperty("--scroll-amount", `-${scrollDistance}px`);
+        if (!animate) {
+          startAnimationLoop();
+        }
+      } else {
+        stopAnimation();
+      }
+    };
+
+    const startAnimationLoop = () => {
+      setAnimate(true);
+      timeout = setTimeout(() => {
+        setAnimate(false);
+        timeout = setTimeout(() => {
+          evaluateOverflow();
+        }, 2000);
+      }, 5000);
+    };
+
+    const stopAnimation = () => {
+      clearTimeout(timeout);
+      setAnimate(false);
+    };
+
+    evaluateOverflow();
+
+    const observer = new ResizeObserver(() => {
+      evaluateOverflow();
+    });
+
+    observer.observe(wrapper);
+    observer.observe(content);
+
+    return () => {
+      observer.disconnect();
+      clearTimeout(timeout);
+    };
+  }, [title]);
+
+  return (
+    <TitleWrapper ref={wrapperRef}>
+      <TitleText ref={contentRef} $animate={animate}>
+        {title}
+      </TitleText>
+    </TitleWrapper>
+  );
 }
 
 export function TopBar({
@@ -99,16 +209,17 @@ export function TopBar({
           />
         </svg>
       </MenuButton>
-      {title && <Title>{title}</Title>}
-      <Spacer />
+      {title && <MarqueeTitle title={title} />}
       <RightSection>
         {userCount !== undefined && (
           <UserCounter count={userCount} title={userCountTitle} />
         )}
-        <HomeButton />
-        <ThemeToggleButton />
-        {!hideSettings && <SettingsButton />}
-        {canAccessAdmin && <AdminButton />}
+        <ButtonGroup>
+          <HomeButton />
+          <ThemeToggleButton />
+          {!hideSettings && <SettingsButton />}
+          {canAccessAdmin && <AdminButton />}
+        </ButtonGroup>
         <AuthButton
           isLoggedIn={isLoggedIn}
           loginLabel={authLabels.login}
