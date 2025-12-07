@@ -31,6 +31,7 @@ interface HomeContentProps {
   authLabels: AuthLabels;
   boardsTitle: string;
   siteName: string;
+  manualLabel: string;
 }
 
 export function HomeContent({
@@ -40,8 +41,9 @@ export function HomeContent({
   authLabels,
   boardsTitle,
   siteName,
+  manualLabel,
 }: HomeContentProps) {
-  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
+  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
 
   return (
     <PageLayout

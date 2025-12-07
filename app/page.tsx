@@ -27,6 +27,7 @@ export default async function HomePage() {
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
       boardsTitle={tCommon("boards")}
       siteName={siteName}
+      manualLabel={tCommon("manual")}
     />
   );
 }

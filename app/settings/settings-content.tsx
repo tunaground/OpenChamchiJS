@@ -250,6 +250,7 @@ interface SettingsContentProps {
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: { login: string; logout: string };
+  manualLabel: string;
 }
 
 export function SettingsContent({
@@ -259,6 +260,7 @@ export function SettingsContent({
   isLoggedIn,
   canAccessAdmin,
   authLabels,
+  manualLabel,
 }: SettingsContentProps) {
   const router = useRouter();
   // Select individual values to avoid creating new object references
@@ -314,7 +316,7 @@ export function SettingsContent({
     },
   ];
 
-  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
+  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
 
   return (
     <PageLayout

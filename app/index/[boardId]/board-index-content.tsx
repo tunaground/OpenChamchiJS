@@ -298,6 +298,7 @@ interface BoardIndexContentProps {
   notices: NoticeData[];
   labels: Labels;
   boardsTitle: string;
+  manualLabel: string;
 }
 
 export function BoardIndexContent({
@@ -314,6 +315,7 @@ export function BoardIndexContent({
   notices,
   labels,
   boardsTitle,
+  manualLabel,
 }: BoardIndexContentProps) {
   const router = useRouter();
   const [search, setSearch] = useState(initialSearch);
@@ -351,7 +353,7 @@ export function BoardIndexContent({
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   };
 
-  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
+  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
 
   return (
     <PageLayout

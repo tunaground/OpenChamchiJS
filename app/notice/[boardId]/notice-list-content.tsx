@@ -178,6 +178,7 @@ interface NoticeListContentProps {
   search: string;
   labels: Labels;
   boardsTitle: string;
+  manualLabel: string;
 }
 
 export function NoticeListContent({
@@ -192,6 +193,7 @@ export function NoticeListContent({
   search: initialSearch,
   labels,
   boardsTitle,
+  manualLabel,
 }: NoticeListContentProps) {
   const router = useRouter();
   const [search, setSearch] = useState(initialSearch);
@@ -225,7 +227,7 @@ export function NoticeListContent({
     return `/notice/${boardId}${queryString ? `?${queryString}` : ""}`;
   };
 
-  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
+  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
 
   return (
     <PageLayout

@@ -50,6 +50,7 @@ export default async function SettingsPage() {
       isLoggedIn={!!session}
       canAccessAdmin={canAccessAdmin}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
+      manualLabel={tCommon("manual")}
     />
   );
 }

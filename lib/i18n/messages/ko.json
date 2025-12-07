@@ -3,7 +3,8 @@
     "login": "로그인",
     "logout": "로그아웃",
     "home": "홈",
-    "boards": "게시판"
+    "boards": "게시판",
+    "manual": "매뉴얼"
   },
   "login": {
     "title": "로그인",
@@ -322,5 +323,92 @@
     "sidebarSwipeDescription": "모바일에서 스와이프로 사이드바를 열고 닫습니다.",
     "reset": "초기화",
     "back": "뒤로"
+  },
+  "manual": {
+    "title": "사용 매뉴얼",
+    "description": "이 사이트의 주요 기능과 사용 방법을 안내합니다.",
+    "basics": {
+      "title": "기본 개념",
+      "threadTitle": "주제글",
+      "threadDescription": "주제글은 하나의 주제에 대한 대화 공간입니다. 제목, 본문, 작성자명을 입력하여 새 주제글을 생성할 수 있습니다.",
+      "responseTitle": "답글",
+      "responseDescription": "답글은 주제글에 달리는 댓글입니다. 주제글 본문은 0번이며, 이후 답글은 1번부터 순차적으로 번호가 부여됩니다.",
+      "authorIdTitle": "작성자 ID",
+      "authorIdDescription": "익명 게시판에서 같은 사람을 구분하기 위해 IP와 날짜 기반으로 생성되는 식별자입니다. 날짜가 바뀌면 ID도 변경됩니다."
+    },
+    "threadSettings": {
+      "title": "주제글 설정",
+      "description": "주제글과 관련된 설정 및 상태입니다.",
+      "endedTitle": "종료",
+      "endedDescription": "주제글이 종료 상태가 되면 새로운 답글을 작성할 수 없습니다. 게시판 설정에 따라 일정 답글 수에 도달하면 자동으로 종료됩니다.",
+      "passwordTitle": "비밀번호",
+      "passwordDescription": "주제글 생성 시 설정한 비밀번호로 답글 삭제가 가능합니다."
+    },
+    "settings": {
+      "title": "설정 옵션",
+      "description": "설정 페이지에서 변경할 수 있는 옵션들입니다. 이 설정은 브라우저에 저장됩니다.",
+      "chatModeTitle": "채팅 모드",
+      "chatModeDescription": "활성화하면 실시간으로 새 답글을 자동 수신합니다. 주제글 페이지에서만 사용 가능합니다.",
+      "aaModeTitle": "AA 모드",
+      "aaModeDescription": "작성하는 내용을 자동으로 AA(아스키 아트) 태그로 감쌉니다. AA 작성 시 유용합니다.",
+      "previewModeTitle": "미리보기 모드",
+      "previewModeDescription": "입력 중인 내용이 어떻게 표시될지 실시간으로 미리 볼 수 있습니다.",
+      "noupModeTitle": "Noup 모드",
+      "noupModeDescription": "답글을 작성해도 주제글이 목록 상단으로 올라가지 않습니다 (bump 방지).",
+      "alwaysBottomTitle": "하단 고정",
+      "alwaysBottomDescription": "페이지를 항상 최하단으로 스크롤합니다. 실시간 채팅 시 유용합니다.",
+      "quickSubmitTitle": "퀵 서브밋",
+      "quickSubmitDescription": "Ctrl+Enter 또는 Shift+Enter로 빠르게 답글을 작성할 수 있습니다.",
+      "sidebarSwipeTitle": "사이드바 스와이프",
+      "sidebarSwipeDescription": "모바일에서 좌우 스와이프로 사이드바를 열고 닫을 수 있습니다."
+    },
+    "tom": {
+      "title": "TOM 마크업",
+      "description": "TOM(Text Object Markup)은 텍스트 서식 지정을 위한 마크업 언어입니다. 대괄호를 사용하여 다양한 효과를 적용할 수 있습니다.",
+      "boldTitle": "굵게",
+      "boldExample": "[bld]굵은 텍스트[/bld]",
+      "italicTitle": "기울임",
+      "italicExample": "[itl]기울어진 텍스트[/itl]",
+      "colorTitle": "색상",
+      "colorExample": "[clr red]빨간색 텍스트[/clr]",
+      "colorGlowTitle": "발광 색상",
+      "colorGlowExample": "[clr red yellow]발광 효과[/clr]",
+      "spoilerTitle": "스포일러",
+      "spoilerExample": "[spo]드래그하면 보임[/spo]",
+      "rubyTitle": "루비 (후리가나)",
+      "rubyExample": "[ruby 읽는법]한자[/ruby]",
+      "aaTitle": "아스키 아트",
+      "aaExample": "[aa]아스키 아트 내용[/aa]",
+      "diceTitle": "주사위",
+      "diceExample": "[dice 1 100]",
+      "calcTitle": "계산",
+      "calcExample": "[calc 1+2*3][/calc]",
+      "anchorTitle": "앵커 (링크)",
+      "anchorExample": ">1>5 또는 >1>5-10 또는 board>1>5",
+      "youtubeTitle": "유튜브",
+      "youtubeExample": "[youtube VIDEO_ID]",
+      "hrTitle": "구분선",
+      "hrExample": "[hr]"
+    },
+    "sidebar": {
+      "title": "주제글 페이지 메뉴",
+      "description": "주제글 상세 페이지의 사이드바에서 사용할 수 있는 메뉴입니다.",
+      "backTitle": "게시판으로",
+      "backDescription": "게시판 목록으로 돌아갑니다.",
+      "manageTitle": "주제글 관리",
+      "manageDescription": "주제글 관리 모달을 열어 답글 숨기기/복구 등을 할 수 있습니다.",
+      "viewAllTitle": "전부 보기",
+      "viewAllDescription": "주제글의 모든 답글을 한 페이지에 표시합니다.",
+      "viewRecentTitle": "최신 보기",
+      "viewRecentDescription": "최신 답글만 표시합니다.",
+      "prevTitle": "이전",
+      "prevDescription": "이전 페이지의 답글을 표시합니다.",
+      "nextTitle": "다음",
+      "nextDescription": "다음 페이지의 답글을 표시합니다.",
+      "scrollUpTitle": "위로",
+      "scrollUpDescription": "페이지 최상단으로 스크롤합니다.",
+      "scrollDownTitle": "아래로",
+      "scrollDownDescription": "페이지 최하단으로 스크롤합니다."
+    }
   }
 }

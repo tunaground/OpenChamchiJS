@@ -57,6 +57,7 @@ export default async function CreateThreadPage({ params }: Props) {
           unknownError: t("unknownError"),
         }}
         boardsTitle={tCommon("boards")}
+        manualLabel={tCommon("manual")}
       />
     );
   } catch (error) {

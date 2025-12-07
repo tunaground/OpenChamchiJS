@@ -60,6 +60,7 @@ export default async function NoticeListPage({ params, searchParams }: Props) {
           createdAt: t("createdAt"),
         }}
         boardsTitle={tCommon("boards")}
+        manualLabel={tCommon("manual")}
       />
     );
   } catch (error) {

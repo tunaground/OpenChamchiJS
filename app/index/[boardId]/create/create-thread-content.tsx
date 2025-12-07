@@ -189,6 +189,7 @@ interface CreateThreadContentProps {
   authLabels: AuthLabels;
   labels: Labels;
   boardsTitle: string;
+  manualLabel: string;
 }
 
 export function CreateThreadContent({
@@ -201,6 +202,7 @@ export function CreateThreadContent({
   authLabels,
   labels,
   boardsTitle,
+  manualLabel,
 }: CreateThreadContentProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -213,7 +215,7 @@ export function CreateThreadContent({
     content: "",
   });
 
-  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} />;
+  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

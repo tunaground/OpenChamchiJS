@@ -3,7 +3,8 @@
     "login": "Login",
     "logout": "Logout",
     "home": "Home",
-    "boards": "Boards"
+    "boards": "Boards",
+    "manual": "Manual"
   },
   "login": {
     "title": "Login",
@@ -322,5 +323,92 @@
     "sidebarSwipeDescription": "Open and close sidebar with swipe on mobile.",
     "reset": "Reset",
     "back": "Back"
+  },
+  "manual": {
+    "title": "User Manual",
+    "description": "A guide to the main features and how to use this site.",
+    "basics": {
+      "title": "Basic Concepts",
+      "threadTitle": "Thread",
+      "threadDescription": "A thread is a conversation space for a topic. You can create a new thread by entering a title, content, and username.",
+      "responseTitle": "Response",
+      "responseDescription": "Responses are replies to a thread. The thread body is #0, and subsequent replies are numbered from 1.",
+      "authorIdTitle": "Author ID",
+      "authorIdDescription": "An identifier generated based on IP and date to distinguish users on anonymous boards. The ID changes when the date changes."
+    },
+    "threadSettings": {
+      "title": "Thread Settings",
+      "description": "Settings and status related to threads.",
+      "endedTitle": "Ended",
+      "endedDescription": "When a thread is ended, no new responses can be written. Depending on board settings, threads may automatically end after reaching a certain number of responses.",
+      "passwordTitle": "Password",
+      "passwordDescription": "The password set when creating the thread can be used to delete responses."
+    },
+    "settings": {
+      "title": "Settings Options",
+      "description": "Options that can be changed on the settings page. These settings are stored in your browser.",
+      "chatModeTitle": "Chat Mode",
+      "chatModeDescription": "When enabled, new responses are automatically received in real-time. Only available on thread pages.",
+      "aaModeTitle": "AA Mode",
+      "aaModeDescription": "Automatically wraps your content with AA (ASCII Art) tags. Useful when writing ASCII art.",
+      "previewModeTitle": "Preview Mode",
+      "previewModeDescription": "Preview how your content will be displayed in real-time while typing.",
+      "noupModeTitle": "Noup Mode",
+      "noupModeDescription": "The thread won't be bumped to the top when you write a response.",
+      "alwaysBottomTitle": "Stay at Bottom",
+      "alwaysBottomDescription": "Always scroll to the bottom of the page. Useful for real-time chat.",
+      "quickSubmitTitle": "Quick Submit",
+      "quickSubmitDescription": "Quickly submit responses using Ctrl+Enter or Shift+Enter.",
+      "sidebarSwipeTitle": "Sidebar Swipe",
+      "sidebarSwipeDescription": "Open and close the sidebar with left/right swipe on mobile."
+    },
+    "tom": {
+      "title": "TOM Markup",
+      "description": "TOM (Text Object Markup) is a markup language for text formatting. Use brackets to apply various effects.",
+      "boldTitle": "Bold",
+      "boldExample": "[bld]bold text[/bld]",
+      "italicTitle": "Italic",
+      "italicExample": "[itl]italic text[/itl]",
+      "colorTitle": "Color",
+      "colorExample": "[clr red]red text[/clr]",
+      "colorGlowTitle": "Color with Glow",
+      "colorGlowExample": "[clr red yellow]glowing effect[/clr]",
+      "spoilerTitle": "Spoiler",
+      "spoilerExample": "[spo]visible when selected[/spo]",
+      "rubyTitle": "Ruby (Furigana)",
+      "rubyExample": "[ruby reading]text[/ruby]",
+      "aaTitle": "ASCII Art",
+      "aaExample": "[aa]ascii art content[/aa]",
+      "diceTitle": "Dice",
+      "diceExample": "[dice 1 100]",
+      "calcTitle": "Calculate",
+      "calcExample": "[calc 1+2*3][/calc]",
+      "anchorTitle": "Anchor (Link)",
+      "anchorExample": ">1>5 or >1>5-10 or board>1>5",
+      "youtubeTitle": "YouTube",
+      "youtubeExample": "[youtube VIDEO_ID]",
+      "hrTitle": "Horizontal Rule",
+      "hrExample": "[hr]"
+    },
+    "sidebar": {
+      "title": "Thread Page Menu",
+      "description": "Menu available in the sidebar on the thread detail page.",
+      "backTitle": "Back to Board",
+      "backDescription": "Return to the board list.",
+      "manageTitle": "Manage Thread",
+      "manageDescription": "Open the thread management modal to hide/restore responses.",
+      "viewAllTitle": "View All",
+      "viewAllDescription": "Display all responses in the thread on one page.",
+      "viewRecentTitle": "View Recent",
+      "viewRecentDescription": "Display only the most recent responses.",
+      "prevTitle": "Previous",
+      "prevDescription": "Display responses from the previous page.",
+      "nextTitle": "Next",
+      "nextDescription": "Display responses from the next page.",
+      "scrollUpTitle": "Scroll Up",
+      "scrollUpDescription": "Scroll to the top of the page.",
+      "scrollDownTitle": "Scroll Down",
+      "scrollDownDescription": "Scroll to the bottom of the page."
+    }
   }
 }
