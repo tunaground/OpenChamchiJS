@@ -42,6 +42,7 @@ const ThreadTitle = styled.h1`
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
   margin: 0 0 1.6rem 0;
+  word-break: break-all;
 `;
 
 const BadgeContainer = styled.div`
