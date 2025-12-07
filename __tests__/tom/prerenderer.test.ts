@@ -207,6 +207,24 @@ describe("TOM Prerenderer", () => {
       const calc = result.children[0] as TomCalcResult;
       expect(calc.result).toBe(28); // (10+5)*2 - 8/4 = 30 - 2 = 28
     });
+
+    it("shows dice range in expression (full flow)", () => {
+      // [calcn (3+4+[dice 1 10])][/calcn] should show "(3+4+[1~10]1)" with result 8
+      const result = writeAndRead("[calcn (3+4+[dice 1 10])][/calcn]");
+
+      const calc = result.children[0] as TomCalcResult;
+      expect(isTomCalcResult(calc)).toBe(true);
+      expect(calc.result).toBe(8); // 3 + 4 + 1 (fixedRandom returns min)
+      expect(calc.expression).toBe("(3+4+[1~10]1)");
+    });
+
+    it("shows multiple dice in expression (full flow)", () => {
+      const result = writeAndRead("[calcn [dice 1 6]+[dice 1 6]][/calcn]");
+
+      const calc = result.children[0] as TomCalcResult;
+      expect(calc.result).toBe(2); // 1 + 1 (fixedRandom returns min for both)
+      expect(calc.expression).toBe("[1~6]1+[1~6]1");
+    });
   });
 
   describe("mixed content", () => {

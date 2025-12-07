@@ -218,30 +218,43 @@ function processCalc(node: TomElement, random: RandomFn): TomCalcResult {
 
 // Process [calcn expr] -> TomCalcResult (infix notation)
 function processCalcn(node: TomElement, random: RandomFn): TomCalcResult {
-  // Collect all attributes into expression string
-  const exprParts: string[] = [];
+  // Collect expression parts for display and evaluation
+  const displayParts: string[] = []; // For display (shows dice as [min~max]result)
+  const evalParts: string[] = []; // For mathjs evaluation (numbers only)
 
   function collectExpr(nodes: TomNode[]): void {
     for (const n of nodes) {
       if (isTomText(n)) {
-        exprParts.push(n.value);
+        displayParts.push(n.value);
+        evalParts.push(n.value);
       } else if (isTomNested(n)) {
-        exprParts.push("(");
+        displayParts.push("(");
+        evalParts.push("(");
         collectExpr(n.children);
-        exprParts.push(")");
+        displayParts.push(")");
+        evalParts.push(")");
       } else if (isTomElement(n)) {
-        // Nested dice/calc in calcn
-        const num = extractNumber(n, random);
-        exprParts.push(String(num));
+        if (n.name === "dice") {
+          // dice: show as [min~max]result in display, number in eval
+          const diceResult = processDice(n, random);
+          displayParts.push(`[${diceResult.min}~${diceResult.max}]${diceResult.result}`);
+          evalParts.push(String(diceResult.result));
+        } else {
+          // Other nested calc/calcn
+          const num = extractNumber(n, random);
+          displayParts.push(String(num));
+          evalParts.push(String(num));
+        }
       }
     }
   }
 
   collectExpr(node.attributes);
-  const expression = exprParts.join("");
+  const expression = displayParts.join("");
+  const evalExpression = evalParts.join("");
 
   // Evaluate using mathjs
-  const evaluated = evaluate(expression);
+  const evaluated = evaluate(evalExpression);
   const result = typeof evaluated === "number" ? evaluated : NaN;
 
   return {
