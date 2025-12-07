@@ -35,6 +35,10 @@ export const lightTheme = {
   anchorALinkColor: "#0066cc",
   spoilerBackground: "rgba(0, 0, 0, 0.8)",
 
+  // Toast
+  toastBackground: "rgba(0, 0, 0, 0.85)",
+  toastText: "#ffffff",
+
   // Layout
   breakpoint: "768px",
 };
@@ -73,6 +77,10 @@ export const darkTheme = {
   calcExpColor: "#aaaaaa",
   anchorALinkColor: "#4da6ff",
   spoilerBackground: "rgba(255, 255, 255, 0.8)",
+
+  // Toast
+  toastBackground: "rgba(50, 50, 50, 0.95)",
+  toastText: "#ffffff",
 
   // Layout
   breakpoint: "768px",

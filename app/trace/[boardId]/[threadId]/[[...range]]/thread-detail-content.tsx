@@ -14,6 +14,7 @@ import { usePresence } from "@/lib/hooks/usePresence";
 import { CHANNELS } from "@/lib/realtime";
 import { useTranslations } from "next-intl";
 import { parse, prerender, render, toOriginalFormat, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
+import { useToast } from "@/components/Toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCode } from "@fortawesome/free-solid-svg-icons";
 import { formatDateTime } from "@/lib/utils/date-formatter";
@@ -586,6 +587,7 @@ interface Labels {
   selectImage: string;
   removeImage: string;
   viewSource: string;
+  copied: string;
 }
 
 interface AuthLabels {
@@ -651,6 +653,7 @@ export function ThreadDetailContent({
   const [submitting, setSubmitting] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
+  const { showToast } = useToast();
 
   // Response options
   const {
@@ -994,6 +997,7 @@ export function ThreadDetailContent({
                           responseId: nestedKey,
                           setAnchorInfo: handleAnchorClick,
                           t,
+                          onCopy: () => showToast(labels.copied),
                         })
                       : anchorResponse.content}
                   </ResponseContent>
@@ -1259,6 +1263,7 @@ export function ThreadDetailContent({
                       responseId: mainKey,
                       setAnchorInfo: handleAnchorClick,
                       t,
+                      onCopy: () => showToast(labels.copied),
                     })
                   ) : (
                     response.content

@@ -196,7 +196,8 @@
     "removeImage": "제거",
     "uploading": "업로드 중...",
     "maxSize": "최대 {size}",
-    "viewSource": "원본 보기"
+    "viewSource": "원본 보기",
+    "copied": "클립보드에 복사됨"
   },
   "traceSidebar": {
     "navigation": "네비게이션",

@@ -196,7 +196,8 @@
     "removeImage": "Remove",
     "uploading": "Uploading...",
     "maxSize": "max {size}",
-    "viewSource": "View Source"
+    "viewSource": "View Source",
+    "copied": "Copied to clipboard"
   },
   "traceSidebar": {
     "navigation": "Navigation",
