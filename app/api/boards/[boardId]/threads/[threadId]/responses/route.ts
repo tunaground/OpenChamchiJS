@@ -227,13 +227,13 @@ export async function POST(
     if (isRealtimeEnabled()) {
       try {
         const publisher = getPublisher();
-        // Strip IP before publishing
+        // Strip sensitive fields before publishing
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { ip: _ip, ...responseWithoutIp } = response;
+        const { ip: _ip, userId: _userId, ...safeResponse } = response;
         await publisher.publish(
           CHANNELS.thread(id),
           EVENTS.NEW_RESPONSE,
-          responseWithoutIp
+          safeResponse
         );
       } catch (error) {
         // Log but don't fail the request if realtime publish fails
