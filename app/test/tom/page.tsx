@@ -2,7 +2,7 @@
 
 import {useState, useSyncExternalStore} from "react";
 import styled from "styled-components";
-import {parse, prerender, render, RenderContext} from "@/lib/tom";
+import {preparse, prerender, render, RenderContext} from "@/lib/tom";
 import {useThemeStore} from "@/lib/store/theme";
 
 const Container = styled.div`
@@ -189,7 +189,7 @@ function TomDemo() {
     rendered = null;
   } else {
     try {
-      const ast = parse(text);
+      const ast = preparse(text);
       const prerendered = prerender(ast);
       rendered = render(prerendered, ctx);
     } catch (e) {

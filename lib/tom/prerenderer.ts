@@ -1,5 +1,5 @@
-// TOM Prerenderer - Processes AST before rendering
-// Handles: dice rolling, calc/calcn evaluation
+// TOM Prerenderer - Processes AST before rendering (read-time)
+// Handles: dice result extraction, calc/calcn evaluation
 
 import { evaluate } from "mathjs";
 
@@ -146,15 +146,15 @@ function evaluateNestedAsCalc(node: TomNested, random: RandomFn): number {
   return calculate(operator, operands);
 }
 
-// Process [dice min max] or [dice min max result] -> TomDiceResult
+// Process [dice min max]result[/dice] -> TomDiceResult (from parser, non-self-closing)
 function processDice(node: TomElement, random: RandomFn): TomDiceResult {
-  if (node.attributes.length < 2 || node.attributes.length > 3) {
-    throw new Error(`dice requires 2-3 attributes, got ${node.attributes.length}`);
+  // In parser output (DB data), dice has exactly 2 attributes and result in children
+  if (node.attributes.length !== 2) {
+    throw new Error(`dice requires exactly 2 attributes (min, max), got ${node.attributes.length}`);
   }
 
   const minNode = node.attributes[0];
   const maxNode = node.attributes[1];
-  const resultNode = node.attributes[2];
 
   const min = extractNumber(minNode, random);
   const max = extractNumber(maxNode, random);
@@ -167,11 +167,19 @@ function processDice(node: TomElement, random: RandomFn): TomDiceResult {
     throw new Error(`dice min (${min}) cannot be greater than max (${max})`);
   }
 
-  // If result is already provided (prerendered), use it; otherwise roll
+  // Read result from children (DB stores [dice min max]result[/dice])
   let result: number;
-  if (resultNode) {
-    result = extractNumber(resultNode, random);
+  if (node.children.length > 0 && isTomText(node.children[0])) {
+    const resultText = node.children[0].value.trim();
+    const parsedResult = parseInt(resultText, 10);
+    if (!isNaN(parsedResult)) {
+      result = parsedResult;
+    } else {
+      // Fallback to random if result is not a valid number
+      result = random(min, max);
+    }
   } else {
+    // Fallback to random if no children
     result = random(min, max);
   }
 
@@ -288,92 +296,7 @@ function elementToText(node: TomElement): TomText {
   };
 }
 
-// Preprocessed result type (only dice is processed at write time)
-export type PreprocessedNode = TomNode | TomDiceResult;
-
-export type PreprocessedRoot = {
-  type: "root";
-  children: PreprocessedNode[];
-};
-
-// Preprocess: Only processes dice at write time (before saving to DB)
-export function preprocess(root: TomRoot, random: RandomFn = defaultRandom): PreprocessedRoot {
-  function processNode(node: TomNode): PreprocessedNode {
-    if (isTomText(node)) {
-      return node;
-    }
-
-    if (isTomNested(node)) {
-      return {
-        type: "nested",
-        children: node.children.map(processNode),
-      };
-    }
-
-    if (isTomElement(node)) {
-      // Only process dice at write time
-      if (node.name === "dice") {
-        try {
-          return processDice(node, random);
-        } catch {
-          return elementToText(node);
-        }
-      }
-
-      // All other elements: process children recursively but don't evaluate
-      return {
-        type: "element",
-        name: node.name,
-        attributes: node.attributes.map(processNode),
-        children: node.children.map(processNode),
-      };
-    }
-
-    return node;
-  }
-
-  return {
-    type: "root",
-    children: root.children.map(processNode),
-  };
-}
-
-// Stringify preprocessed result back to TOM string (only dice results embedded)
-export function stringifyPreprocessed(root: PreprocessedRoot): string {
-  function stringifyNode(node: PreprocessedNode): string {
-    if (isTomText(node)) {
-      return node.value;
-    }
-
-    if (isTomNested(node)) {
-      return "(" + node.children.map((c) => stringifyNode(c as PreprocessedNode)).join(" ") + ")";
-    }
-
-    if (isTomDiceResult(node)) {
-      // [dice min max] with result -> [dice min max result]
-      return `[dice ${node.min} ${node.max} ${node.result}]`;
-    }
-
-    if (isTomElement(node)) {
-      const attrs = node.attributes.map((a) => stringifyNode(a as PreprocessedNode)).join(" ");
-      const children = node.children.map((c) => stringifyNode(c as PreprocessedNode)).join("");
-
-      const selfClosingTags = ["youtube", "hr", "dice"];
-      if (selfClosingTags.includes(node.name)) {
-        return attrs ? `[${node.name} ${attrs}]` : `[${node.name}]`;
-      }
-
-      const opening = attrs ? `[${node.name} ${attrs}]` : `[${node.name}]`;
-      return `${opening}${children}[/${node.name}]`;
-    }
-
-    return "";
-  }
-
-  return root.children.map(stringifyNode).join("");
-}
-
-// Main prerender function
+// Main prerender function (read-time)
 export function prerender(root: TomRoot, random: RandomFn = defaultRandom): PrerenderedRoot {
   function processNode(node: TomNode): PrerenderedNode {
     if (isTomText(node)) {

@@ -8,7 +8,7 @@ import { boardService, BoardServiceError } from "@/lib/services/board";
 import { permissionService } from "@/lib/services/permission";
 import { checkForeignIpBlocked, getClientIp } from "@/lib/api/foreign-ip-check";
 import { handleServiceError } from "@/lib/api/error-handler";
-import { parse, preprocess, stringifyPreprocessed } from "@/lib/tom";
+import { preparse, preprocess, stringifyPreprocessed } from "@/lib/tom";
 import { threadRepository } from "@/lib/repositories/prisma/thread";
 import { createResponseSchema } from "@/lib/schemas";
 import { getPublisher, isRealtimeEnabled, CHANNELS, EVENTS } from "@/lib/realtime";
@@ -208,8 +208,8 @@ export async function POST(
     const username = parsed.data.username?.trim() || board.defaultUsername;
 
     // Preprocess TOM content (only processes dice at write time)
-    const parsedContent = parse(parsed.data.content);
-    const preprocessedContent = preprocess(parsedContent);
+    const preparsedContent = preparse(parsed.data.content);
+    const preprocessedContent = preprocess(preparsedContent);
     const content = stringifyPreprocessed(preprocessedContent);
 
     const response = await responseService.create({

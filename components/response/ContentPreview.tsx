@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import styled from "styled-components";
 import { useTranslations } from "next-intl";
-import { parse, prerender, render, AnchorInfo } from "@/lib/tom";
+import { preparse, prerender, render, AnchorInfo } from "@/lib/tom";
 
 const PreviewContainer = styled.div`
   padding: 1.2rem;
@@ -41,8 +41,8 @@ export function ContentPreview({ content, emptyLabel, boardId = "" }: ContentPre
     }
 
     try {
-      const parsed = parse(content);
-      const prerendered = prerender(parsed);
+      const preparsed = preparse(content);
+      const prerendered = prerender(preparsed);
       return render(prerendered, {
         boardId,
         threadId: 0,

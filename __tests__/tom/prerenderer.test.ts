@@ -1,4 +1,9 @@
 import { parse } from "@/lib/tom/parser";
+import { preparse } from "@/lib/tom/preparser";
+import {
+  preprocess,
+  stringify,
+} from "@/lib/tom/preprocessor";
 import {
   prerender,
   isTomDiceResult,
@@ -11,11 +16,22 @@ import {
 // Fixed random for deterministic tests
 const fixedRandom = (min: number, _max: number) => min;
 
+// Helper: simulate full write-then-read flow
+function writeAndRead(input: string, random = fixedRandom) {
+  // Write flow: preparse → preprocess → stringify
+  const preparsed = preparse(input);
+  const preprocessed = preprocess(preparsed, random);
+  const dbContent = stringify(preprocessed);
+  // Read flow: parse → prerender
+  const parsed = parse(dbContent);
+  return prerender(parsed, random);
+}
+
 describe("TOM Prerenderer", () => {
   describe("dice", () => {
-    it("processes dice with fixed random", () => {
-      const ast = parse("[dice 1 6]");
-      const result = prerender(ast, fixedRandom);
+    it("processes dice with fixed random (full flow)", () => {
+      // Use full flow: user input → DB → render
+      const result = writeAndRead("[dice 1 6]");
 
       expect(result.children).toHaveLength(1);
       const dice = result.children[0] as TomDiceResult;
@@ -26,35 +42,41 @@ describe("TOM Prerenderer", () => {
       expect(dice.result).toBe(1); // fixedRandom returns min
     });
 
-    it("processes dice with max random", () => {
+    it("processes dice with max random (full flow)", () => {
       const maxRandom = (min: number, max: number) => max;
-      const ast = parse("[dice 1 20]");
-      const result = prerender(ast, maxRandom);
+      const result = writeAndRead("[dice 1 20]", maxRandom);
 
       const dice = result.children[0] as TomDiceResult;
       expect(dice.result).toBe(20);
     });
 
-    it("processes dice with large range", () => {
-      const ast = parse("[dice 1 100]");
-      const result = prerender(ast, fixedRandom);
+    it("processes dice with large range (full flow)", () => {
+      const result = writeAndRead("[dice 1 100]");
 
       const dice = result.children[0] as TomDiceResult;
       expect(dice.min).toBe(1);
       expect(dice.max).toBe(100);
     });
 
-    it("falls back to text on invalid dice attributes", () => {
-      const ast = parse("[dice 1]");
+    it("reads stored dice result from DB format", () => {
+      // Test reading DB format directly: [dice min max]result[/dice]
+      const ast = parse("[dice 1 6]3[/dice]");
       const result = prerender(ast, fixedRandom);
+
+      const dice = result.children[0] as TomDiceResult;
+      expect(dice.result).toBe(3); // Should read from children, not random
+    });
+
+    it("falls back to text on invalid dice attributes", () => {
+      // Invalid input (only 1 attribute) - test via full flow
+      const result = writeAndRead("[dice 1]");
 
       expect(result.children).toHaveLength(1);
       expect((result.children[0] as any).type).toBe("text");
     });
 
     it("falls back to text when min > max", () => {
-      const ast = parse("[dice 10 5]");
-      const result = prerender(ast, fixedRandom);
+      const result = writeAndRead("[dice 10 5]");
 
       expect(result.children).toHaveLength(1);
       expect((result.children[0] as any).type).toBe("text");
@@ -111,9 +133,9 @@ describe("TOM Prerenderer", () => {
       expect(calc.expression).toContain("+");
     });
 
-    it("evaluates with nested dice", () => {
-      const ast = parse("[calc (+ [dice 1 6] 10)][/calc]");
-      const result = prerender(ast, fixedRandom);
+    it("evaluates with nested dice (full flow)", () => {
+      // Use full flow for calc with nested dice
+      const result = writeAndRead("[calc (+ [dice 1 6] 10)][/calc]");
 
       const calc = result.children[0] as TomCalcResult;
       expect(calc.result).toBe(11); // 1 (from fixedRandom) + 10
@@ -198,9 +220,8 @@ describe("TOM Prerenderer", () => {
       expect((elem as any).name).toBe("bld");
     });
 
-    it("processes dice inside other elements", () => {
-      const ast = parse("[bld][dice 1 6][/bld]");
-      const result = prerender(ast, fixedRandom);
+    it("processes dice inside other elements (full flow)", () => {
+      const result = writeAndRead("[bld][dice 1 6][/bld]");
 
       const bld = result.children[0] as any;
       expect(bld.name).toBe("bld");
@@ -210,9 +231,8 @@ describe("TOM Prerenderer", () => {
       expect(dice.result).toBe(1);
     });
 
-    it("handles text alongside dice", () => {
-      const ast = parse("Roll: [dice 1 20]");
-      const result = prerender(ast, fixedRandom);
+    it("handles text alongside dice (full flow)", () => {
+      const result = writeAndRead("Roll: [dice 1 20]");
 
       expect(result.children).toHaveLength(2);
       expect((result.children[0] as any).value).toBe("Roll: ");
@@ -220,12 +240,23 @@ describe("TOM Prerenderer", () => {
       const dice = result.children[1] as TomDiceResult;
       expect(dice.result).toBe(1);
     });
+
+    it("handles text after dice (full flow)", () => {
+      const result = writeAndRead("[dice 1 3]text");
+
+      expect(result.children).toHaveLength(2);
+
+      const dice = result.children[0] as TomDiceResult;
+      expect(isTomDiceResult(dice)).toBe(true);
+      expect(dice.result).toBe(1);
+
+      expect((result.children[1] as any).value).toBe("text");
+    });
   });
 
   describe("type guards", () => {
     it("isTomDiceResult correctly identifies dice results", () => {
-      const ast = parse("[dice 1 6]");
-      const result = prerender(ast, fixedRandom);
+      const result = writeAndRead("[dice 1 6]");
 
       expect(isTomDiceResult(result.children[0])).toBe(true);
       expect(isTomDiceResult({ type: "text", value: "hello" })).toBe(false);
@@ -260,9 +291,8 @@ describe("TOM Prerenderer", () => {
       expect((result.children[0] as any).value).toContain("[calc");
     });
 
-    it("falls back to text on nested invalid dice in calcn", () => {
-      const ast = parse("[calcn (1+[dice 1])][/calcn]");
-      const result = prerender(ast, fixedRandom);
+    it("falls back to text on nested invalid dice in calcn (full flow)", () => {
+      const result = writeAndRead("[calcn (1+[dice 1])][/calcn]");
 
       expect(result.children).toHaveLength(1);
       expect((result.children[0] as any).type).toBe("text");
