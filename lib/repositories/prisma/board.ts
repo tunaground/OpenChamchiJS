@@ -21,7 +21,11 @@ export const boardRepository: BoardRepository = {
       orderBy: { createdAt: "desc" },
       include: {
         _count: {
-          select: { threads: true },
+          select: {
+            threads: {
+              where: { published: true },
+            },
+          },
         },
       },
     });
