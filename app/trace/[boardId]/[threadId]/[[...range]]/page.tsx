@@ -8,6 +8,7 @@ import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { responseService } from "@/lib/services/response";
 import { responseRepository } from "@/lib/repositories/prisma/response";
 import { parseRangeParam } from "@/lib/types/response-range";
+import { isRealtimeEnabled } from "@/lib/realtime";
 import { ThreadDetailContent } from "./thread-detail-content";
 
 interface Props {
@@ -80,6 +81,8 @@ export default async function ThreadDetailPage({ params }: Props) {
         }}
         boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
         defaultUsername={board.defaultUsername}
+        showUserCount={board.showUserCount && isRealtimeEnabled()}
+        realtimeEnabled={isRealtimeEnabled()}
         isLoggedIn={!!session}
         canAccessAdmin={canAccessAdmin}
         authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}

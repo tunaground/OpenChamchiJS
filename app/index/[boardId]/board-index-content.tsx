@@ -288,6 +288,7 @@ interface BoardIndexContentProps {
   boardId: string;
   boardName: string;
   boards: BoardData[];
+  realtimeEnabled: boolean;
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: AuthLabels;
@@ -303,6 +304,7 @@ export function BoardIndexContent({
   boardId,
   boardName,
   boards,
+  realtimeEnabled,
   isLoggedIn,
   canAccessAdmin,
   authLabels,
@@ -317,8 +319,9 @@ export function BoardIndexContent({
   const [search, setSearch] = useState(initialSearch);
 
   // Presence tracking for user counter (board level for /index page)
+  // Always enabled on /index page if realtime is configured
   const boardChannel = CHANNELS.board(boardId);
-  const { memberCount: boardMemberCount } = usePresence(boardChannel, true);
+  const { memberCount: boardMemberCount } = usePresence(boardChannel, realtimeEnabled);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -357,7 +360,7 @@ export function BoardIndexContent({
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}
       authLabels={authLabels}
-      userCount={boardMemberCount}
+      userCount={realtimeEnabled ? boardMemberCount : undefined}
     >
       <Container>
         {notices.length > 0 && (

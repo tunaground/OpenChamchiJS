@@ -133,6 +133,7 @@ interface ResponseOptionButtonsProps {
   hasThreadOverride?: (key: keyof ResponseOptions) => boolean;
   onResetThreadOptions?: () => void;
   resetLabel?: string;
+  realtimeEnabled?: boolean;
 }
 
 export function ResponseOptionButtons({
@@ -142,14 +143,20 @@ export function ResponseOptionButtons({
   hasThreadOverride,
   onResetThreadOptions,
   resetLabel = "초기화",
+  realtimeEnabled = true,
 }: ResponseOptionButtonsProps) {
+  // Filter out chatMode if realtime is not enabled
+  const visibleConfigs = realtimeEnabled
+    ? optionConfigs
+    : optionConfigs.filter((config) => config.key !== "chatMode");
+
   const hasAnyOverride = hasThreadOverride
-    ? optionConfigs.some((config) => hasThreadOverride(config.key))
+    ? visibleConfigs.some((config) => hasThreadOverride(config.key))
     : false;
 
   return (
     <Container>
-      {optionConfigs.map((config) => (
+      {visibleConfigs.map((config) => (
         <OptionButton
           key={config.key}
           type="button"

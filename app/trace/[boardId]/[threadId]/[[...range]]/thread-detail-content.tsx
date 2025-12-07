@@ -575,6 +575,8 @@ interface ThreadDetailContentProps {
   thread: ThreadData;
   boards: { id: string; name: string }[];
   defaultUsername: string;
+  showUserCount: boolean;
+  realtimeEnabled: boolean;
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: AuthLabels;
@@ -590,6 +592,8 @@ export function ThreadDetailContent({
   thread,
   boards,
   defaultUsername,
+  showUserCount,
+  realtimeEnabled,
   isLoggedIn,
   canAccessAdmin,
   authLabels,
@@ -645,8 +649,9 @@ export function ThreadDetailContent({
   );
 
   // Presence tracking for user counter (thread level for /trace page)
+  // Only enabled if board.showUserCount is true
   const threadChannel = CHANNELS.thread(thread.id);
-  const { memberCount: threadMemberCount } = usePresence(threadChannel, true);
+  const { memberCount: threadMemberCount } = usePresence(threadChannel, showUserCount);
 
   // Anchor preview stack state
   interface AnchorStackItem {
@@ -1069,7 +1074,7 @@ export function ThreadDetailContent({
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}
       authLabels={authLabels}
-      userCount={threadMemberCount}
+      userCount={showUserCount ? threadMemberCount : undefined}
     >
       <Container>
         <ThreadHeader>
@@ -1159,6 +1164,7 @@ export function ThreadDetailContent({
             isOverridden={isGlobalActive}
             hasThreadOverride={hasThreadOverride}
             onResetThreadOptions={resetAllThreadOptions}
+            realtimeEnabled={realtimeEnabled}
           />
           {responseOptions.previewMode && (
             <ResponsePreview

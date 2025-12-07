@@ -6,6 +6,7 @@ import { permissionService } from "@/lib/services/permission";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { threadService } from "@/lib/services/thread";
 import { noticeService } from "@/lib/services/notice";
+import { isRealtimeEnabled } from "@/lib/realtime";
 import { BoardIndexContent } from "./board-index-content";
 
 interface Props {
@@ -41,6 +42,7 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
         boardId={boardId}
         boardName={board.name}
         boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
+        realtimeEnabled={isRealtimeEnabled()}
         isLoggedIn={!!session}
         canAccessAdmin={canAccessAdmin}
         authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
