@@ -6,6 +6,7 @@ import { ThemeToggleButton } from "./ThemeToggleButton";
 import { SettingsButton } from "./SettingsButton";
 import { AdminButton } from "./AdminButton";
 import { AuthButton } from "./AuthButton";
+import { UserCounter } from "./UserCounter";
 
 const Bar = styled.header`
   position: fixed;
@@ -67,6 +68,8 @@ interface TopBarProps {
   canAccessAdmin: boolean;
   authLabels: { login: string; logout: string };
   hideSettings?: boolean;
+  userCount?: number;
+  userCountTitle?: string;
 }
 
 export function TopBar({
@@ -76,6 +79,8 @@ export function TopBar({
   canAccessAdmin,
   authLabels,
   hideSettings,
+  userCount,
+  userCountTitle,
 }: TopBarProps) {
   return (
     <Bar>
@@ -97,6 +102,9 @@ export function TopBar({
       {title && <Title>{title}</Title>}
       <Spacer />
       <RightSection>
+        {userCount !== undefined && (
+          <UserCounter count={userCount} title={userCountTitle} />
+        )}
         <HomeButton />
         <ThemeToggleButton />
         {!hideSettings && <SettingsButton />}

@@ -4,7 +4,6 @@ import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faComments,
   faFont,
   faEye,
   faArrowUp,
@@ -171,9 +170,12 @@ const ResetButton = styled(Button)`
   }
 `;
 
+// Options available in global settings (excludes chatMode which is thread-specific)
+type GlobalOptionKey = Exclude<keyof ResponseOptions, "chatMode">;
+
 interface OptionConfig {
-  key: keyof ResponseOptions;
-  icon: typeof faComments;
+  key: GlobalOptionKey;
+  icon: typeof faFont;
   label: string;
   description: string;
 }
@@ -220,7 +222,6 @@ export function SettingsContent({
 }: SettingsContentProps) {
   const router = useRouter();
   // Select individual values to avoid creating new object references
-  const chatMode = useResponseOptionsStore((state) => state.chatMode);
   const aaMode = useResponseOptionsStore((state) => state.aaMode);
   const previewMode = useResponseOptionsStore((state) => state.previewMode);
   const noupMode = useResponseOptionsStore((state) => state.noupMode);
@@ -228,21 +229,16 @@ export function SettingsContent({
   const toggleOption = useResponseOptionsStore((state) => state.toggleOption);
   const resetOptions = useResponseOptionsStore((state) => state.resetOptions);
 
-  const options: ResponseOptions = {
-    chatMode,
+  // chatMode is excluded from global settings (thread-specific only)
+  const options: Omit<ResponseOptions, "chatMode"> = {
     aaMode,
     previewMode,
     noupMode,
     alwaysBottom,
   };
 
+  // chatMode is excluded - it's thread-specific only
   const optionConfigs: OptionConfig[] = [
-    {
-      key: "chatMode",
-      icon: faComments,
-      label: labels.chatMode,
-      description: labels.chatModeDescription,
-    },
     {
       key: "aaMode",
       icon: faFont,

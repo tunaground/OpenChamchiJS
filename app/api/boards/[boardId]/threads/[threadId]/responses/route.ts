@@ -11,6 +11,7 @@ import { handleServiceError } from "@/lib/api/error-handler";
 import { parse, preprocess, stringifyPreprocessed } from "@/lib/tom";
 import { threadRepository } from "@/lib/repositories/prisma/thread";
 import { createResponseSchema } from "@/lib/schemas";
+import { getPublisher, isRealtimeEnabled, CHANNELS, EVENTS } from "@/lib/realtime";
 
 // GET /api/boards/[boardId]/threads/[threadId]/responses - 응답 목록 조회
 export async function GET(
@@ -173,6 +174,25 @@ export async function POST(
       authorId,
       noup: parsed.data.noup,
     });
+
+    // Publish to realtime channel for chat mode subscribers
+    if (isRealtimeEnabled()) {
+      try {
+        const publisher = getPublisher();
+        // Strip IP before publishing
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { ip: _ip, ...responseWithoutIp } = response;
+        await publisher.publish(
+          CHANNELS.thread(id),
+          EVENTS.NEW_RESPONSE,
+          responseWithoutIp
+        );
+      } catch (error) {
+        // Log but don't fail the request if realtime publish fails
+        console.error("Failed to publish realtime message:", error);
+      }
+    }
+
     return NextResponse.json(response, { status: 201 });
   } catch (error) {
     if (error instanceof ResponseServiceError) {

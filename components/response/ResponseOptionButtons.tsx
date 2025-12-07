@@ -8,6 +8,7 @@ import {
   faEye,
   faArrowUp,
   faArrowDown,
+  faRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { ResponseOptions } from "@/lib/store/responseOptions";
 
@@ -79,6 +80,38 @@ const Tooltip = styled.span`
   }
 `;
 
+const ResetButton = styled.button<{ $hasOverrides: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 0.4rem;
+  background: ${(props) => props.theme.surface};
+  color: ${(props) =>
+    props.$hasOverrides ? props.theme.warning : props.theme.textSecondary};
+  cursor: pointer;
+  transition: all 0.15s ease;
+  position: relative;
+  opacity: ${(props) => (props.$hasOverrides ? 1 : 0.5)};
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+`;
+
+const ResetTooltip = styled(Tooltip)`
+  ${ResetButton}:hover & {
+    opacity: 1;
+    visibility: visible;
+  }
+`;
+
 interface OptionConfig {
   key: keyof ResponseOptions;
   icon: typeof faComments;
@@ -97,13 +130,23 @@ interface ResponseOptionButtonsProps {
   options: ResponseOptions;
   onToggle: (key: keyof ResponseOptions) => void;
   isOverridden?: (key: keyof ResponseOptions) => boolean;
+  hasThreadOverride?: (key: keyof ResponseOptions) => boolean;
+  onResetThreadOptions?: () => void;
+  resetLabel?: string;
 }
 
 export function ResponseOptionButtons({
   options,
   onToggle,
   isOverridden,
+  hasThreadOverride,
+  onResetThreadOptions,
+  resetLabel = "초기화",
 }: ResponseOptionButtonsProps) {
+  const hasAnyOverride = hasThreadOverride
+    ? optionConfigs.some((config) => hasThreadOverride(config.key))
+    : false;
+
   return (
     <Container>
       {optionConfigs.map((config) => (
@@ -119,6 +162,18 @@ export function ResponseOptionButtons({
           <Tooltip>{config.label}</Tooltip>
         </OptionButton>
       ))}
+      {onResetThreadOptions && (
+        <ResetButton
+          type="button"
+          $hasOverrides={hasAnyOverride}
+          onClick={onResetThreadOptions}
+          disabled={!hasAnyOverride}
+          title={resetLabel}
+        >
+          <FontAwesomeIcon icon={faRotateLeft} />
+          <ResetTooltip>{resetLabel}</ResetTooltip>
+        </ResetButton>
+      )}
     </Container>
   );
 }

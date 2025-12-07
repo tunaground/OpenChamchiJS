@@ -21,6 +21,7 @@
     "@maxmind/geoip2-node": "^6.3.4",
     "@prisma/adapter-pg": "^7.1.0",
     "@prisma/client": "^7.1.0",
+    "ably": "^2.15.0",
     "bcryptjs": "^3.0.3",
     "dotenv": "^17.2.3",
     "entities": "^7.0.0",

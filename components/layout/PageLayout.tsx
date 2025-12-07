@@ -42,6 +42,8 @@ interface PageLayoutProps {
   canAccessAdmin: boolean;
   authLabels: { login: string; logout: string };
   hideSettings?: boolean;
+  userCount?: number;
+  userCountTitle?: string;
 }
 
 export function PageLayout({
@@ -53,6 +55,8 @@ export function PageLayout({
   canAccessAdmin,
   authLabels,
   hideSettings,
+  userCount,
+  userCountTitle,
 }: PageLayoutProps) {
   const {
     desktopOpen,
@@ -102,6 +106,8 @@ export function PageLayout({
         canAccessAdmin={canAccessAdmin}
         authLabels={authLabels}
         hideSettings={hideSettings}
+        userCount={userCount}
+        userCountTitle={userCountTitle}
       />
       {mounted && sidebar && (
         <Sidebar

@@ -7,6 +7,8 @@ import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
+import { usePresence } from "@/lib/hooks/usePresence";
+import { CHANNELS } from "@/lib/realtime";
 
 const Container = styled.div`
   padding: 3.2rem;
@@ -314,6 +316,10 @@ export function BoardIndexContent({
   const router = useRouter();
   const [search, setSearch] = useState(initialSearch);
 
+  // Presence tracking for user counter (board level for /index page)
+  const boardChannel = CHANNELS.board(boardId);
+  const { memberCount: boardMemberCount } = usePresence(boardChannel, true);
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const params = new URLSearchParams();
@@ -351,6 +357,7 @@ export function BoardIndexContent({
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}
       authLabels={authLabels}
+      userCount={boardMemberCount}
     >
       <Container>
         {notices.length > 0 && (

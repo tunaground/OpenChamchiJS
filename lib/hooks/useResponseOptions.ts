@@ -14,8 +14,12 @@ interface UseResponseOptionsResult {
   toggleOption: (key: keyof ResponseOptions) => void;
   // Check if option is active in global settings
   isGlobalActive: (key: keyof ResponseOptions) => boolean;
+  // Check if option has a thread-specific override
+  hasThreadOverride: (key: keyof ResponseOptions) => boolean;
   // Clear thread-specific option (fall back to global)
   clearThreadOption: (key: keyof ResponseOptions) => void;
+  // Clear all thread-specific options
+  resetAllThreadOptions: () => void;
 }
 
 export function useResponseOptions(
@@ -79,6 +83,13 @@ export function useResponseOptions(
     [globalOptions]
   );
 
+  const hasThreadOverride = useCallback(
+    (key: keyof ResponseOptions): boolean => {
+      return threadOptions[key] !== undefined;
+    },
+    [threadOptions]
+  );
+
   const clearThreadOption = useCallback(
     (key: keyof ResponseOptions) => {
       clearThreadOptionFn(boardId, threadId, key);
@@ -86,10 +97,20 @@ export function useResponseOptions(
     [boardId, threadId, clearThreadOptionFn]
   );
 
+  const clearAllThreadOptionsFn = useThreadResponseOptionsStore(
+    (state) => state.clearThreadOptions
+  );
+
+  const resetAllThreadOptions = useCallback(() => {
+    clearAllThreadOptionsFn(boardId, threadId);
+  }, [boardId, threadId, clearAllThreadOptionsFn]);
+
   return {
     options,
     toggleOption,
     isGlobalActive,
+    hasThreadOverride,
     clearThreadOption,
+    resetAllThreadOptions,
   };
 }

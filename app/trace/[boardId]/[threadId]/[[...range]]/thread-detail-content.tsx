@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
 import { useResponseOptions } from "@/lib/hooks/useResponseOptions";
+import { useChatMode } from "@/lib/hooks/useChatMode";
+import { usePresence } from "@/lib/hooks/usePresence";
+import { CHANNELS } from "@/lib/realtime";
 import { useTranslations } from "next-intl";
 import { parse, prerender, render, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
 import { formatDateTime } from "@/lib/utils/date-formatter";
@@ -603,12 +606,47 @@ export function ThreadDetailContent({
   const [content, setContent] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
+  const isAtBottomRef = useRef(true);
 
   // Response options
-  const { options: responseOptions, toggleOption, isGlobalActive } = useResponseOptions(
+  const {
+    options: responseOptions,
+    toggleOption,
+    isGlobalActive,
+    hasThreadOverride,
+    resetAllThreadOptions,
+  } = useResponseOptions(thread.boardId, thread.id);
+
+  // Track the current last seq for chat mode
+  const currentLastSeq = useMemo(() => {
+    if (responses.length === 0) return lastSeq;
+    return Math.max(lastSeq, ...responses.map((r) => r.seq));
+  }, [responses, lastSeq]);
+
+  // Chat mode: handle new responses from realtime
+  const handleNewResponse = useCallback((newResponse: ResponseData) => {
+    setResponses((prev) => {
+      // Avoid duplicates
+      if (prev.some((r) => r.id === newResponse.id)) {
+        return prev;
+      }
+      return [...prev, newResponse];
+    });
+  }, []);
+
+  // Chat mode hook
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { isConnected: _isChatConnected, error: _chatError } = useChatMode(
+    responseOptions.chatMode,
     thread.boardId,
-    thread.id
+    thread.id,
+    currentLastSeq,
+    handleNewResponse
   );
+
+  // Presence tracking for user counter (thread level for /trace page)
+  const threadChannel = CHANNELS.thread(thread.id);
+  const { memberCount: threadMemberCount } = usePresence(threadChannel, true);
 
   // Anchor preview stack state
   interface AnchorStackItem {
@@ -651,12 +689,34 @@ export function ThreadDetailContent({
     setResponses(initialResponses);
   }, [initialResponses]);
 
-  // Always-on-Bottom mode: scroll to bottom when enabled or when responses change
+  // Track scroll position to detect if user is at bottom
   useEffect(() => {
-    if (responseOptions.alwaysBottom && pageEndRef.current) {
-      pageEndRef.current.scrollIntoView({ behavior: "smooth" });
+    const handleScroll = () => {
+      const scrollTop = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      // Consider "at bottom" if within 100px of the bottom
+      isAtBottomRef.current = scrollTop + windowHeight >= documentHeight - 100;
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    // Check initial position
+    handleScroll();
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
+  // Always-on-Bottom mode: scroll to bottom only when user is already at bottom
+  useEffect(() => {
+    if (responseOptions.alwaysBottom && pageEndRef.current && isAtBottomRef.current) {
+      // In chat mode, use instant scroll to prevent jitter
+      // Otherwise, use smooth scroll for better UX
+      const behavior = responseOptions.chatMode ? "instant" : "smooth";
+      pageEndRef.current.scrollIntoView({ behavior });
     }
-  }, [responseOptions.alwaysBottom, responses]);
+  }, [responseOptions.alwaysBottom, responseOptions.chatMode, responses]);
 
   // Fetch anchor responses when a new item is added to the stack
   useEffect(() => {
@@ -759,7 +819,11 @@ export function ThreadDetailContent({
 
       if (res.ok) {
         setContent("");
-        router.refresh();
+        // In chat mode, the response will arrive via WebSocket
+        // Otherwise, refresh the page to fetch the new response
+        if (!responseOptions.chatMode) {
+          router.refresh();
+        }
       } else {
         let errorMessage = labels.unknownError;
         try {
@@ -1005,6 +1069,7 @@ export function ThreadDetailContent({
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}
       authLabels={authLabels}
+      userCount={threadMemberCount}
     >
       <Container>
         <ThreadHeader>
@@ -1092,6 +1157,8 @@ export function ThreadDetailContent({
             options={responseOptions}
             onToggle={toggleOption}
             isOverridden={isGlobalActive}
+            hasThreadOverride={hasThreadOverride}
+            onResetThreadOptions={resetAllThreadOptions}
           />
           {responseOptions.previewMode && (
             <ResponsePreview

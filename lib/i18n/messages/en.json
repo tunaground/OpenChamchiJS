@@ -304,7 +304,7 @@
     "description": "Set default options for writing responses. You can apply different settings per thread.",
     "responseOptions": "Response Options",
     "chatMode": "Chat Mode",
-    "chatModeDescription": "Receive new responses in real-time. (Coming soon)",
+    "chatModeDescription": "Receive new responses in real-time.",
     "aaMode": "AA Mode",
     "aaModeDescription": "Wrap your content in AA (ASCII Art) format.",
     "previewMode": "Preview Mode",
