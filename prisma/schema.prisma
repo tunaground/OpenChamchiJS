@@ -119,6 +119,8 @@ model Board {
   responsesPerPage      Int      @default(50)
   showUserCount         Boolean  @default(false)
   threadsPerPage        Int      @default(20)
+  uploadMaxSize         Int      @default(5242880) // 5MB
+  uploadMimeTypes       String   @default("image/png,image/jpeg,image/gif,image/webp")
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   threads               Thread[]

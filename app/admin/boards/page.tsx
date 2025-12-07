@@ -31,6 +31,8 @@ export default async function AdminBoardsPage() {
         maxResponsesPerThread: board.maxResponsesPerThread,
         blockForeignIp: board.blockForeignIp,
         showUserCount: board.showUserCount,
+        uploadMaxSize: board.uploadMaxSize,
+        uploadMimeTypes: board.uploadMimeTypes,
         createdAt: board.createdAt.toISOString(),
       }))}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
@@ -73,6 +75,10 @@ export default async function AdminBoardsPage() {
         maxResponsesPerThread: t("maxResponsesPerThread"),
         blockForeignIp: t("blockForeignIp"),
         showUserCount: t("showUserCount"),
+        uploadMaxSize: t("uploadMaxSize"),
+        uploadMaxSizePlaceholder: t("uploadMaxSizePlaceholder"),
+        uploadMimeTypes: t("uploadMimeTypes"),
+        uploadMimeTypesPlaceholder: t("uploadMimeTypesPlaceholder"),
         save: t("save"),
         cancel: t("cancel"),
         create: t("create"),

@@ -246,6 +246,8 @@ interface BoardData {
   maxResponsesPerThread: number;
   blockForeignIp: boolean;
   showUserCount: boolean;
+  uploadMaxSize: number;
+  uploadMimeTypes: string;
   createdAt: string;
 }
 
@@ -278,6 +280,10 @@ interface Labels {
   maxResponsesPerThread: string;
   blockForeignIp: string;
   showUserCount: string;
+  uploadMaxSize: string;
+  uploadMaxSizePlaceholder: string;
+  uploadMimeTypes: string;
+  uploadMimeTypesPlaceholder: string;
   save: string;
   cancel: string;
   create: string;
@@ -322,6 +328,8 @@ interface FormData {
   maxResponsesPerThread: number;
   blockForeignIp: boolean;
   showUserCount: boolean;
+  uploadMaxSize: number;
+  uploadMimeTypes: string;
 }
 
 const defaultFormData: FormData = {
@@ -333,6 +341,8 @@ const defaultFormData: FormData = {
   maxResponsesPerThread: 1000,
   blockForeignIp: false,
   showUserCount: false,
+  uploadMaxSize: 5,
+  uploadMimeTypes: "image/png,image/jpeg,image/gif,image/webp",
 };
 
 export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels, canCreate, canUpdate, labels }: BoardsContentProps) {
@@ -360,6 +370,8 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
       maxResponsesPerThread: board.maxResponsesPerThread,
       blockForeignIp: board.blockForeignIp,
       showUserCount: board.showUserCount,
+      uploadMaxSize: Math.round(board.uploadMaxSize / (1024 * 1024)),
+      uploadMimeTypes: board.uploadMimeTypes,
     });
     setSelectedBoard(board);
     setModalType("edit");
@@ -397,7 +409,10 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
       const res = await fetch("/api/boards", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          uploadMaxSize: formData.uploadMaxSize * 1024 * 1024,
+        }),
       });
 
       if (res.ok) {
@@ -424,6 +439,8 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
           maxResponsesPerThread: formData.maxResponsesPerThread,
           blockForeignIp: formData.blockForeignIp,
           showUserCount: formData.showUserCount,
+          uploadMaxSize: formData.uploadMaxSize * 1024 * 1024,
+          uploadMimeTypes: formData.uploadMimeTypes,
         }),
       });
 
@@ -682,6 +699,36 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
                   {labels.showUserCount}
                 </Label>
               </Checkbox>
+            </FormGroup>
+
+            <FormGroup>
+              <Label>{labels.uploadMaxSize}</Label>
+              <Input
+                type="number"
+                value={formData.uploadMaxSize}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    uploadMaxSize: parseInt(e.target.value) || 0,
+                  })
+                }
+                placeholder={labels.uploadMaxSizePlaceholder}
+                min={1}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label>{labels.uploadMimeTypes}</Label>
+              <Input
+                value={formData.uploadMimeTypes}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    uploadMimeTypes: e.target.value,
+                  })
+                }
+                placeholder={labels.uploadMimeTypesPlaceholder}
+              />
             </FormGroup>
 
             <ModalActions>

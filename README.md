@@ -9,6 +9,7 @@ Next.js 기반의 오픈소스 익명 게시판 시스템입니다.
 
 - **익명 게시판** - 스레드/응답 기반 게시판 시스템
 - **실시간 기능** - 채팅 모드, 접속자 수 표시 (Ably WebSocket)
+- **이미지 업로드** - 응답에 이미지 첨부 (Supabase Storage)
 - **관리자 페이지** - 사용자, 역할, 보드, 스레드, 공지사항 관리
 - **권한 시스템** - 역할 기반 접근 제어 (RBAC)
 - **다국어 지원** - 한국어, 영어
@@ -74,6 +75,10 @@ Vercel 프로젝트 Settings → Environment Variables에서 다음 변수 추�
 |--------|------|
 | `ABLY_API_KEY` | 실시간 기능용 Ably API 키 ([무료 발급](https://ably.com/)) |
 | `MAXMIND_LICENSE_KEY` | 해외 IP 차단용 GeoIP 라이센스 키 ([무료 발급](https://www.maxmind.com/en/geolite2/signup)) |
+| `STORAGE_PROVIDER` | 이미지 업로드 스토리지 (`supabase`) |
+| `SUPABASE_URL` | Supabase 프로젝트 URL |
+| `SUPABASE_SERVICE_KEY` | Supabase service_role 키 |
+| `SUPABASE_STORAGE_BUCKET` | 스토리지 버킷 이름 |
 
 ### 6. 배포
 
@@ -179,6 +184,47 @@ npx prisma studio      # Prisma Studio GUI
   - `/trace` 페이지: 보드 설정에서 "접속자 수 표시" 활성화 시 표시 (스레드별 접속자)
 
 Ably 무료 플랜: 월 600만 메시지, 동시 접속 200명
+
+## 이미지 업로드 설정 (Supabase Storage)
+
+응답에 이미지 첨부 기능을 사용하려면 Supabase Storage 설정이 필요합니다.
+
+### 1. Supabase 프로젝트 설정
+
+1. [Supabase](https://supabase.com/)에서 프로젝트 생성 (또는 기존 프로젝트 사용)
+2. Settings → API에서 Project URL과 service_role 키 확인
+
+### 2. Storage 버킷 생성
+
+1. Supabase 대시보드 → Storage
+2. "New bucket" 클릭
+3. 버킷 이름 입력 (예: `attachments`)
+4. **Public bucket** 체크 (이미지를 공개 URL로 제공하기 위해 필요)
+5. Create bucket
+
+### 3. 환경 변수 설정
+
+```env
+STORAGE_PROVIDER=supabase
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_KEY=your-service-role-key
+SUPABASE_STORAGE_BUCKET=attachments
+```
+
+### 4. 보드별 업로드 설정
+
+관리자 페이지 → 보드 설정에서 각 보드별로 설정 가능:
+- **최대 업로드 용량**: 기본 5MB
+- **허용 MIME 타입**: 기본 `image/png,image/jpeg,image/gif,image/webp`
+
+### 기능
+
+- 응답 작성 시 이미지 첨부 가능
+- 이미지는 응답 본문 상단에 썸네일(최대 400px)로 표시
+- 클릭 시 원본 크기로 확대
+- 글 작성 실패 시 업로드된 이미지 자동 정리
+
+> 환경 변수가 설정되지 않으면 이미지 업로드 버튼이 표시되지 않습니다.
 
 ## 해외 IP 차단 설정
 

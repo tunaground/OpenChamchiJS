@@ -79,6 +79,10 @@
     "maxResponsesPerThread": "주제글당 최대 답글 수",
     "blockForeignIp": "해외 IP 차단",
     "showUserCount": "사용자 수 표시",
+    "uploadMaxSize": "최대 업로드 용량 (MB)",
+    "uploadMaxSizePlaceholder": "예: 5",
+    "uploadMimeTypes": "허용 파일 형식",
+    "uploadMimeTypesPlaceholder": "예: image/png,image/jpeg",
     "save": "저장",
     "cancel": "취소",
     "create": "생성",
@@ -183,7 +187,11 @@
     "close": "닫기",
     "unlock": "잠금해제",
     "foreignIpBlocked": "해외 IP에서는 작성할 수 없습니다.",
-    "unknownError": "오류가 발생했습니다."
+    "unknownError": "오류가 발생했습니다.",
+    "selectImage": "이미지 선택",
+    "removeImage": "제거",
+    "uploading": "업로드 중...",
+    "maxSize": "최대 {size}"
   },
   "traceSidebar": {
     "navigation": "네비게이션",

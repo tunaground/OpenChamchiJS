@@ -6,6 +6,8 @@ import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
+import { ImageUpload } from "@/components/response/ImageUpload";
+import { ImageAttachment } from "@/components/response/ImageAttachment";
 import { useResponseOptions } from "@/lib/hooks/useResponseOptions";
 import { useChatMode } from "@/lib/hooks/useChatMode";
 import { usePresence } from "@/lib/hooks/usePresence";
@@ -13,6 +15,7 @@ import { CHANNELS } from "@/lib/realtime";
 import { useTranslations } from "next-intl";
 import { parse, prerender, render, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
 import { formatDateTime } from "@/lib/utils/date-formatter";
+import { formatBytes } from "@/lib/utils/format-bytes";
 
 const Container = styled.div`
   padding: 3.2rem;
@@ -193,7 +196,7 @@ const ResponseContent = styled.div`
 `;
 
 const ResponseAttachment = styled.div`
-  padding: 0 1.6rem 1.6rem;
+  padding: 1.6rem 1.6rem 0;
 `;
 
 const AttachmentLink = styled.a`
@@ -551,6 +554,8 @@ interface Labels {
   unlock: string;
   foreignIpBlocked: string;
   unknownError: string;
+  selectImage: string;
+  removeImage: string;
 }
 
 interface AuthLabels {
@@ -577,6 +582,8 @@ interface ThreadDetailContentProps {
   defaultUsername: string;
   showUserCount: boolean;
   realtimeEnabled: boolean;
+  storageEnabled: boolean;
+  uploadMaxSize: number;
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: AuthLabels;
@@ -594,6 +601,8 @@ export function ThreadDetailContent({
   defaultUsername,
   showUserCount,
   realtimeEnabled,
+  storageEnabled,
+  uploadMaxSize,
   isLoggedIn,
   canAccessAdmin,
   authLabels,
@@ -608,6 +617,7 @@ export function ThreadDetailContent({
   const [responses, setResponses] = useState(initialResponses);
   const [username, setUsername] = useState("");
   const [content, setContent] = useState("");
+  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
@@ -789,6 +799,9 @@ export function ThreadDetailContent({
   }, [anchorStack]);
 
   const t = useTranslations();
+  const tThread = useTranslations("threadDetail");
+
+  const maxSizeLabel = tThread("maxSize", { size: formatBytes(uploadMaxSize) });
 
   const getErrorMessage = (data: { error: string | object }): string => {
     if (typeof data.error === "string") {
@@ -805,7 +818,30 @@ export function ThreadDetailContent({
     if (!content.trim()) return;
 
     setSubmitting(true);
+    let uploadedKey: string | null = null;
+    let attachmentUrl: string | null = null;
+
     try {
+      // Upload image first if exists
+      if (attachmentFile) {
+        const formData = new FormData();
+        formData.append("file", attachmentFile);
+
+        const uploadRes = await fetch(`/api/boards/${thread.boardId}/upload`, {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadRes.ok) {
+          const data = await uploadRes.json();
+          throw new Error(data.error || "Upload failed");
+        }
+
+        const uploadData = await uploadRes.json();
+        uploadedKey = uploadData.key;
+        attachmentUrl = uploadData.url;
+      }
+
       // Apply AA mode: wrap content with [aa][/aa] tags
       let finalContent = content.trim();
       if (responseOptions.aaMode) {
@@ -819,17 +855,32 @@ export function ThreadDetailContent({
           username: username.trim() || undefined,
           content: finalContent,
           noup: responseOptions.noupMode || undefined,
+          attachment: attachmentUrl || undefined,
         }),
       });
 
       if (res.ok) {
         setContent("");
+        setAttachmentFile(null);
         // In chat mode, the response will arrive via WebSocket
         // Otherwise, refresh the page to fetch the new response
         if (!responseOptions.chatMode) {
           router.refresh();
         }
       } else {
+        // Response creation failed - delete uploaded image if exists
+        if (uploadedKey) {
+          try {
+            await fetch(`/api/boards/${thread.boardId}/upload`, {
+              method: "DELETE",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ key: uploadedKey }),
+            });
+          } catch {
+            console.error("Failed to delete uploaded image");
+          }
+        }
+
         let errorMessage = labels.unknownError;
         try {
           const data = await res.json();
@@ -840,6 +891,20 @@ export function ThreadDetailContent({
         }
         alert(errorMessage);
       }
+    } catch (err) {
+      // Upload or other error - delete uploaded image if exists
+      if (uploadedKey) {
+        try {
+          await fetch(`/api/boards/${thread.boardId}/upload`, {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ key: uploadedKey }),
+          });
+        } catch {
+          console.error("Failed to delete uploaded image");
+        }
+      }
+      alert(err instanceof Error ? err.message : labels.unknownError);
     } finally {
       setSubmitting(false);
     }
@@ -1143,6 +1208,22 @@ export function ThreadDetailContent({
                     <ResponseDate>{formatDateTime(response.createdAt)}</ResponseDate>
                   </ResponseInfo>
                 </ResponseHeader>
+                {response.attachment && (
+                  <ResponseAttachment>
+                    {response.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                    response.attachment.includes("/storage/") ? (
+                      <ImageAttachment src={response.attachment} />
+                    ) : (
+                      <AttachmentLink
+                        href={response.attachment}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        📎 Attachment
+                      </AttachmentLink>
+                    )}
+                  </ResponseAttachment>
+                )}
                 <ResponseContent>
                   {prerenderedContents.has(response.id)
                     ? render(prerenderedContents.get(response.id)!, {
@@ -1154,17 +1235,6 @@ export function ThreadDetailContent({
                       })
                     : response.content}
                 </ResponseContent>
-                {response.attachment && (
-                  <ResponseAttachment>
-                    <AttachmentLink
-                      href={response.attachment}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      📎 Attachment
-                    </AttachmentLink>
-                  </ResponseAttachment>
-                )}
               </ResponseCard>
             </div>
             );
@@ -1208,6 +1278,20 @@ export function ThreadDetailContent({
               required
             />
           </FormGroup>
+          {storageEnabled && (
+            <FormGroup style={{ marginBottom: "1.6rem" }}>
+              <ImageUpload
+                onFileSelect={setAttachmentFile}
+                currentFile={attachmentFile}
+                maxSizeLabel={maxSizeLabel}
+                disabled={submitting}
+                labels={{
+                  selectImage: labels.selectImage,
+                  removeImage: labels.removeImage,
+                }}
+              />
+            </FormGroup>
+          )}
           <SubmitButton
             type="submit"
             disabled={submitting || !content.trim()}

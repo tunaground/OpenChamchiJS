@@ -9,6 +9,7 @@ import { responseService } from "@/lib/services/response";
 import { responseRepository } from "@/lib/repositories/prisma/response";
 import { parseRangeParam } from "@/lib/types/response-range";
 import { isRealtimeEnabled } from "@/lib/realtime";
+import { isStorageEnabled } from "@/lib/storage";
 import { ThreadDetailContent } from "./thread-detail-content";
 
 interface Props {
@@ -83,6 +84,8 @@ export default async function ThreadDetailPage({ params }: Props) {
         defaultUsername={board.defaultUsername}
         showUserCount={board.showUserCount && isRealtimeEnabled()}
         realtimeEnabled={isRealtimeEnabled()}
+        storageEnabled={isStorageEnabled()}
+        uploadMaxSize={board.uploadMaxSize}
         isLoggedIn={!!session}
         canAccessAdmin={canAccessAdmin}
         authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
@@ -134,6 +137,8 @@ export default async function ThreadDetailPage({ params }: Props) {
           unlock: t("unlock"),
           foreignIpBlocked: t("foreignIpBlocked"),
           unknownError: t("unknownError"),
+          selectImage: t("selectImage"),
+          removeImage: t("removeImage"),
         }}
         sidebarLabels={{
           navigation: tSidebar("navigation"),

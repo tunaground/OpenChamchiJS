@@ -8,6 +8,8 @@ export interface BoardData {
   responsesPerPage: number;
   showUserCount: boolean;
   threadsPerPage: number;
+  uploadMaxSize: number;
+  uploadMimeTypes: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +23,8 @@ export interface CreateBoardInput {
   responsesPerPage?: number;
   showUserCount?: boolean;
   threadsPerPage?: number;
+  uploadMaxSize?: number;
+  uploadMimeTypes?: string;
 }
 
 export interface UpdateBoardInput {
@@ -32,6 +36,8 @@ export interface UpdateBoardInput {
   responsesPerPage?: number;
   showUserCount?: boolean;
   threadsPerPage?: number;
+  uploadMaxSize?: number;
+  uploadMimeTypes?: string;
 }
 
 export interface ConfigBoardInput {

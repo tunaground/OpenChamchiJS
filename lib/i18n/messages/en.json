@@ -79,6 +79,10 @@
     "maxResponsesPerThread": "Max responses per thread",
     "blockForeignIp": "Block foreign IPs",
     "showUserCount": "Show user count",
+    "uploadMaxSize": "Max upload size (MB)",
+    "uploadMaxSizePlaceholder": "e.g. 5",
+    "uploadMimeTypes": "Allowed file types",
+    "uploadMimeTypesPlaceholder": "e.g. image/png,image/jpeg",
     "save": "Save",
     "cancel": "Cancel",
     "create": "Create",
@@ -183,7 +187,11 @@
     "close": "Close",
     "unlock": "Unlock",
     "foreignIpBlocked": "Writing from foreign IP addresses is not allowed.",
-    "unknownError": "An error occurred."
+    "unknownError": "An error occurred.",
+    "selectImage": "Select Image",
+    "removeImage": "Remove",
+    "uploading": "Uploading...",
+    "maxSize": "max {size}"
   },
   "traceSidebar": {
     "navigation": "Navigation",
