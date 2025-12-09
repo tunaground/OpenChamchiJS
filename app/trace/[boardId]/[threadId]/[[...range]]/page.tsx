@@ -62,6 +62,20 @@ export default async function ThreadDetailPage({ params }: Props) {
       ? await permissionService.checkUserPermission(session.user.id, "admin:read")
       : false;
 
+    // Check if user can manage responses (global or board-specific permission)
+    let canManageResponses = false;
+    if (session?.user?.id) {
+      const hasGlobalPermission = await permissionService.checkUserPermission(
+        session.user.id,
+        "response:delete"
+      );
+      const hasBoardPermission = await permissionService.checkUserPermission(
+        session.user.id,
+        `response:${boardId}:delete`
+      );
+      canManageResponses = hasGlobalPermission || hasBoardPermission;
+    }
+
     // Determine current view type for navigation
     // Format: "all", "recent", "5" (single), or "5/10" (range)
     const currentView = !rangeParam || rangeParam.length === 0
@@ -90,6 +104,7 @@ export default async function ThreadDetailPage({ params }: Props) {
         uploadMaxSize={board.uploadMaxSize}
         isLoggedIn={!!session}
         canAccessAdmin={canAccessAdmin}
+        canManageResponses={canManageResponses}
         authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
         responses={responses.map((response) => ({
           id: response.id,
@@ -143,6 +158,8 @@ export default async function ThreadDetailPage({ params }: Props) {
           removeImage: t("removeImage"),
           viewSource: t("viewSource"),
           copied: t("copied"),
+          loadMore: t("loadMore"),
+          loadingMore: t("loadingMore"),
         }}
         sidebarLabels={{
           navigation: tSidebar("navigation"),

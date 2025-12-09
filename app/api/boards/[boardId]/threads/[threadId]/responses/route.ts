@@ -10,6 +10,7 @@ import { checkForeignIpBlocked, getClientIp } from "@/lib/api/foreign-ip-check";
 import { handleServiceError } from "@/lib/api/error-handler";
 import { preparse, preprocess, stringifyPreprocessed } from "@/lib/tom";
 import { threadRepository } from "@/lib/repositories/prisma/thread";
+import { userRepository } from "@/lib/repositories/prisma/user";
 import { createResponseSchema } from "@/lib/schemas";
 import { getPublisher, isRealtimeEnabled, CHANNELS, EVENTS } from "@/lib/realtime";
 import { getStorage, isStorageEnabled, StorageError } from "@/lib/storage";
@@ -99,13 +100,14 @@ export async function GET(
       });
     }
 
-    // Strip IP from responses if user doesn't have permission
+    // Strip sensitive fields from responses
     const sanitizedResponses = responses.map((response) => {
       if (includeIp && isAdmin) {
+        // Admin with includeIp can see everything
         return response;
       }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { ip, ...rest } = response;
+      const { ip, userId, ...rest } = response;
       return rest;
     });
 
@@ -142,7 +144,7 @@ export async function POST(
   }
 
   // Parse request body - support both JSON and FormData
-  let bodyData: { username?: string; content?: string; noup?: boolean };
+  let bodyData: { username?: string; content?: string; noup?: boolean; anonId?: string };
   let file: File | null = null;
 
   const contentType = request.headers.get("content-type") || "";
@@ -150,10 +152,12 @@ export async function POST(
     const formData = await request.formData();
     const usernameValue = formData.get("username");
     const contentValue = formData.get("content");
+    const anonIdValue = formData.get("anonId");
     bodyData = {
       username: typeof usernameValue === "string" ? usernameValue : undefined,
       content: typeof contentValue === "string" ? contentValue : undefined,
       noup: formData.get("noup") === "true",
+      anonId: typeof anonIdValue === "string" ? anonIdValue : undefined,
     };
     file = formData.get("file") as File | null;
   } else {
@@ -184,6 +188,17 @@ export async function POST(
     // Get userId from session if logged in
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
+
+    // Verify user exists if logged in (user might have been deleted)
+    if (userId) {
+      const user = await userRepository.findById(userId);
+      if (!user) {
+        return NextResponse.json(
+          { error: "USER_NOT_FOUND" },
+          { status: 401 }
+        );
+      }
+    }
 
     // Handle file upload if present
     if (file && isStorageEnabled()) {
@@ -233,7 +248,7 @@ export async function POST(
         await publisher.publish(
           CHANNELS.thread(id),
           EVENTS.NEW_RESPONSE,
-          safeResponse
+          { ...safeResponse, anonId: parsed.data.anonId }
         );
       } catch (error) {
         // Log but don't fail the request if realtime publish fails
@@ -241,7 +256,10 @@ export async function POST(
       }
     }
 
-    return NextResponse.json(response, { status: 201 });
+    // Strip sensitive fields before returning
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { ip: _ip2, userId: _userId2, ...safeResponseForClient } = response;
+    return NextResponse.json(safeResponseForClient, { status: 201 });
   } catch (error) {
     // If response creation failed but image was uploaded, delete the image
     if (uploadedKey) {

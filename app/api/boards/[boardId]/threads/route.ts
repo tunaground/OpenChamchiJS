@@ -8,6 +8,7 @@ import { checkForeignIpBlocked } from "@/lib/api/foreign-ip-check";
 import { handleServiceError } from "@/lib/api/error-handler";
 import { parsePaginationQuery } from "@/lib/types/pagination";
 import { createThreadSchema } from "@/lib/schemas";
+import { userRepository } from "@/lib/repositories/prisma/user";
 
 // GET /api/boards/[boardId]/threads - 스레드 목록 조회
 export async function GET(
@@ -78,6 +79,17 @@ export async function POST(
     // Get userId from session if logged in
     const session = await getServerSession(authOptions);
     const userId = session?.user?.id;
+
+    // Verify user exists if logged in (user might have been deleted)
+    if (userId) {
+      const user = await userRepository.findById(userId);
+      if (!user) {
+        return NextResponse.json(
+          { error: "USER_NOT_FOUND" },
+          { status: 401 }
+        );
+      }
+    }
 
     const username = parsed.data.username?.trim() || board.defaultUsername;
 

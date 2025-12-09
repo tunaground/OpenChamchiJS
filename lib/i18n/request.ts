@@ -14,14 +14,14 @@ export default getRequestConfig(async () => {
     const acceptLanguage = headerStore.get("accept-language");
     if (acceptLanguage) {
       const preferred = acceptLanguage.split(",")[0].split("-")[0];
-      if (routing.locales.includes(preferred as "ko" | "en")) {
+      if (routing.locales.includes(preferred as "ko" | "en" | "ja")) {
         locale = preferred;
       }
     }
   }
 
   // Fallback to default
-  if (!locale || !routing.locales.includes(locale as "ko" | "en")) {
+  if (!locale || !routing.locales.includes(locale as "ko" | "en" | "ja")) {
     locale = routing.defaultLocale;
   }
 

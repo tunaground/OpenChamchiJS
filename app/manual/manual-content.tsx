@@ -8,7 +8,6 @@ import {
   faArrowUp,
   faArrowDown,
   faKeyboard,
-  faHandPointer,
   faArrowLeft,
   faGear,
   faPersonRunning,
@@ -20,10 +19,10 @@ import {
   faSun,
   faCloud,
   faMoon,
-  faUsers,
   faList,
   faComments,
   faFingerprint,
+  faCommentDots,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { PageLayout } from "@/components/layout";
@@ -168,6 +167,10 @@ interface Labels {
   settings: {
     title: string;
     description: string;
+    quickSubmitTitle: string;
+    quickSubmitDescription: string;
+    chatModeTitle: string;
+    chatModeDescription: string;
     aaModeTitle: string;
     aaModeDescription: string;
     previewModeTitle: string;
@@ -176,12 +179,6 @@ interface Labels {
     noupModeDescription: string;
     alwaysBottomTitle: string;
     alwaysBottomDescription: string;
-    quickSubmitTitle: string;
-    quickSubmitDescription: string;
-    sidebarSwipeTitle: string;
-    sidebarSwipeDescription: string;
-    chatModeTitle: string;
-    chatModeDescription: string;
   };
   tom: {
     title: string;
@@ -196,6 +193,8 @@ interface Labels {
     colorGlowExample: string;
     spoilerTitle: string;
     spoilerExample: string;
+    subTitle: string;
+    subExample: string;
     rubyTitle: string;
     rubyExample: string;
     aaTitle: string;
@@ -361,6 +360,12 @@ export function ManualContent({
           <SectionDescription>{labels.settings.description}</SectionDescription>
           <ItemList>
             <SettingItem
+              icon={faKeyboard}
+              title={labels.settings.quickSubmitTitle}
+              description={labels.settings.quickSubmitDescription}
+            />
+            <SettingItem
+              icon={faCommentDots}
               title={labels.settings.chatModeTitle}
               description={labels.settings.chatModeDescription}
             />
@@ -383,16 +388,6 @@ export function ManualContent({
               icon={faArrowDown}
               title={labels.settings.alwaysBottomTitle}
               description={labels.settings.alwaysBottomDescription}
-            />
-            <SettingItem
-              icon={faKeyboard}
-              title={labels.settings.quickSubmitTitle}
-              description={labels.settings.quickSubmitDescription}
-            />
-            <SettingItem
-              icon={faHandPointer}
-              title={labels.settings.sidebarSwipeTitle}
-              description={labels.settings.sidebarSwipeDescription}
             />
           </ItemList>
         </Section>
@@ -479,6 +474,12 @@ export function ManualContent({
                 <ItemTitle>{labels.tom.spoilerTitle}</ItemTitle>
               </ItemHeader>
               <TomExample><Code>{labels.tom.spoilerExample}</Code></TomExample>
+            </Item>
+            <Item>
+              <ItemHeader>
+                <ItemTitle>{labels.tom.subTitle}</ItemTitle>
+              </ItemHeader>
+              <TomExample><Code>{labels.tom.subExample}</Code></TomExample>
             </Item>
             <Item>
               <ItemHeader>

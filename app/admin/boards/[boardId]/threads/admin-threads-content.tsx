@@ -840,7 +840,7 @@ export function AdminThreadsContent({
             {threads.map((thread) => (
               <ThreadCard key={thread.id} $deleted={thread.deleted}>
                 <CardTitle>
-                  <span>&gt;{thread.id}&gt; </span>
+                  <span>#{thread.id} </span>
                   <TitleLink href={`/trace/${boardId}/${thread.id}`}>
                     {thread.title}
                   </TitleLink>

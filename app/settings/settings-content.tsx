@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import styled from "styled-components";
@@ -14,6 +14,7 @@ import {
   faKeyboard,
   faHandPointer,
   faTrash,
+  faGlobe,
 } from "@fortawesome/free-solid-svg-icons";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
@@ -336,6 +337,10 @@ interface Labels {
   quickSubmitNone: string;
   sidebarSwipe: string;
   sidebarSwipeDescription: string;
+  siteSettings: string;
+  language: string;
+  languageDescription: string;
+  languageAuto: string;
   reset: string;
   back: string;
   deleteAccount: string;
@@ -380,6 +385,32 @@ export function SettingsContent({
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [currentLocale, setCurrentLocale] = useState<string | null>(null);
+
+  // Read NEXT_LOCALE cookie on mount
+  useEffect(() => {
+    const cookies = document.cookie.split(";");
+    for (const cookie of cookies) {
+      const [name, value] = cookie.trim().split("=");
+      if (name === "NEXT_LOCALE") {
+        setCurrentLocale(value);
+        return;
+      }
+    }
+    setCurrentLocale(null); // No cookie = auto
+  }, []);
+
+  const handleLanguageChange = (locale: string | null) => {
+    if (locale === null) {
+      // Delete cookie for auto mode
+      document.cookie = "NEXT_LOCALE=; path=/; max-age=0";
+    } else {
+      // Set cookie with 1 year expiry
+      document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=31536000`;
+    }
+    // Refresh to apply new locale
+    window.location.reload();
+  };
 
   // Select individual values to avoid creating new object references
   const aaMode = useResponseOptionsStore((state) => state.aaMode);
@@ -423,6 +454,13 @@ export function SettingsContent({
     { key: "ctrl", label: labels.quickSubmitCtrl },
     { key: "shift", label: labels.quickSubmitShift },
     { key: "none", label: labels.quickSubmitNone },
+  ];
+
+  const languageOptions: { key: string | null; label: string }[] = [
+    { key: null, label: labels.languageAuto },
+    { key: "ko", label: "한국어" },
+    { key: "en", label: "English" },
+    { key: "ja", label: "日本語" },
   ];
 
   // chatMode is excluded - it's thread-specific only
@@ -471,24 +509,48 @@ export function SettingsContent({
         </Header>
 
         <Section>
-          <SectionTitle>{labels.responseOptions}</SectionTitle>
           <OptionList>
-            {optionConfigs.map((config) => (
-              <OptionItem key={config.key}>
-                <OptionIcon $active={options[config.key]}>
-                  <FontAwesomeIcon icon={config.icon} />
-                </OptionIcon>
-                <OptionContent>
-                  <OptionLabel>{config.label}</OptionLabel>
-                  <OptionDescription>{config.description}</OptionDescription>
-                </OptionContent>
-                <Toggle
-                  $active={options[config.key]}
-                  onClick={() => toggleOption(config.key)}
-                  aria-label={`Toggle ${config.label}`}
-                />
-              </OptionItem>
-            ))}
+            {/* Site Settings */}
+            <SectionTitle>{labels.siteSettings}</SectionTitle>
+            {/* Language */}
+            <OptionItem>
+              <OptionIcon $active={currentLocale !== null}>
+                <FontAwesomeIcon icon={faGlobe} />
+              </OptionIcon>
+              <OptionContent>
+                <OptionLabel>{labels.language}</OptionLabel>
+                <OptionDescription>{labels.languageDescription}</OptionDescription>
+                <QuickSubmitOptions style={{ marginTop: "1rem" }}>
+                  {languageOptions.map((option) => (
+                    <QuickSubmitOption
+                      key={option.key ?? "auto"}
+                      $active={currentLocale === option.key}
+                      onClick={() => handleLanguageChange(option.key)}
+                    >
+                      {option.label}
+                    </QuickSubmitOption>
+                  ))}
+                </QuickSubmitOptions>
+              </OptionContent>
+            </OptionItem>
+            {/* Sidebar swipe */}
+            <OptionItem>
+              <OptionIcon $active={sidebarSwipe}>
+                <FontAwesomeIcon icon={faHandPointer} />
+              </OptionIcon>
+              <OptionContent>
+                <OptionLabel>{labels.sidebarSwipe}</OptionLabel>
+                <OptionDescription>{labels.sidebarSwipeDescription}</OptionDescription>
+              </OptionContent>
+              <Toggle
+                $active={sidebarSwipe}
+                onClick={() => toggleOption("sidebarSwipe")}
+                aria-label={`Toggle ${labels.sidebarSwipe}`}
+              />
+            </OptionItem>
+            {/* Global Writing Settings */}
+            <SectionTitle style={{ marginTop: "1.6rem" }}>{labels.responseOptions}</SectionTitle>
+            {/* Quick Submit */}
             <OptionItem>
               <OptionIcon $active={quickSubmitKey !== "none"}>
                 <FontAwesomeIcon icon={faKeyboard} />
@@ -509,20 +571,23 @@ export function SettingsContent({
                 </QuickSubmitOptions>
               </OptionContent>
             </OptionItem>
-            <OptionItem>
-              <OptionIcon $active={sidebarSwipe}>
-                <FontAwesomeIcon icon={faHandPointer} />
-              </OptionIcon>
-              <OptionContent>
-                <OptionLabel>{labels.sidebarSwipe}</OptionLabel>
-                <OptionDescription>{labels.sidebarSwipeDescription}</OptionDescription>
-              </OptionContent>
-              <Toggle
-                $active={sidebarSwipe}
-                onClick={() => toggleOption("sidebarSwipe")}
-                aria-label={`Toggle ${labels.sidebarSwipe}`}
-              />
-            </OptionItem>
+            {/* Mode options */}
+            {optionConfigs.map((config) => (
+              <OptionItem key={config.key}>
+                <OptionIcon $active={options[config.key]}>
+                  <FontAwesomeIcon icon={config.icon} />
+                </OptionIcon>
+                <OptionContent>
+                  <OptionLabel>{config.label}</OptionLabel>
+                  <OptionDescription>{config.description}</OptionDescription>
+                </OptionContent>
+                <Toggle
+                  $active={options[config.key]}
+                  onClick={() => toggleOption(config.key)}
+                  aria-label={`Toggle ${config.label}`}
+                />
+              </OptionItem>
+            ))}
           </OptionList>
         </Section>
 

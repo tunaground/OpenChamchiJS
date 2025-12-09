@@ -65,7 +65,7 @@ npx prisma studio      # Open Prisma Studio GUI
 
 ### Internationalization (i18n)
 - **next-intl** with browser language detection (no URL prefix)
-- Supported locales: `ko` (default), `en`
+- Supported locales: `ko` (default), `en`, `ja`
 - Locale detected from: cookie (`NEXT_LOCALE`) → `Accept-Language` header → default
 - Server: `import { getTranslations } from 'next-intl/server'`
 - Client: `import { useTranslations } from 'next-intl'`
@@ -83,7 +83,8 @@ npx prisma studio      # Open Prisma Studio GUI
 - **Board** - 게시판 설정 (threadsPerPage, responsesPerPage, blockForeignIp 등)
 - **Thread** - 글타래, `password`는 Response 삭제용 (bcryptjs로 해시 저장)
 - **Response** - 스레드 응답, `seq` 0번이 스레드 본문 (작성자)
-- `authorId` - IP+날짜 기반 익명 식별자 (같은 사람 구분용)
+- `authorId` - IP+날짜 기반 익명 식별자 (같은 사람 구분용, 서버 생성)
+- `anonId` - 클라이언트 생성 UUID (localStorage), realtime에서 자기 글 식별용
 - `userId` - 로그인 사용자만 저장 (optional)
 - `Thread.updatedAt` - 새 Response 추가 시 수동 갱신 (범프)
 - `blockForeignIp` - 외국 IP 차단, `foreign:write` 권한 있으면 허용
@@ -132,7 +133,21 @@ npx prisma studio      # Open Prisma Studio GUI
 - `parse()` - Parse TOM string to AST
 - `prerender()` - Process dice rolls, calculations before rendering
 - `render()` - Convert AST to React elements
-- Tags: `>>N` (anchor), `[dice:NdM]`, `[calc:expr]`, `[color:hex]`, `[s]` (spoiler), etc.
+- Tags: `>>N` (anchor), `[dice min max]`, `[calc]expr[/calc]`, `[clr color]text[/clr]`, `[spo]spoiler[/spo]`, `[aa]ascii art[/aa]`, etc.
+- Input shortcuts: `.d10.` → `[dice 1 10]`, `.D10.` → `[dice 0 10]`
+
+### Realtime (Chat Mode)
+- **Ably** for WebSocket-based realtime messaging (`lib/realtime/`)
+- Chat mode: 새 응답이 WebSocket으로 실시간 수신
+- `useChatMode` hook - 채팅 모드 연결 관리
+- `usePresence` hook - 접속자 수 표시
+- 브라우저 알림: 새 응답 시 Notification API 사용 (자기 글은 anonId로 필터링)
+- 환경변수: `ABLY_API_KEY`, `NEXT_PUBLIC_ABLY_SUBSCRIBE_KEY`
+
+### Storage (File Upload)
+- S3-compatible storage (`lib/storage/`)
+- Board별 업로드 설정: `uploadMaxSize`, `uploadMimeTypes`
+- 환경변수: `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`, `S3_PUBLIC_URL`
 
 ### Page Layout Pattern
 - Use `PageLayout` component with `sidebar` and `rightContent` props

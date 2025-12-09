@@ -29,12 +29,14 @@ interface ResponsePreviewProps {
   content: string;
   boardId: string;
   threadId: number;
+  aaMode?: boolean;
 }
 
 export function ResponsePreview({
   content,
   boardId,
   threadId,
+  aaMode,
 }: ResponsePreviewProps) {
   const t = useTranslations();
   const [, setAnchorInfo] = useState<AnchorInfo | null>(null);
@@ -45,7 +47,9 @@ export function ResponsePreview({
     }
 
     try {
-      const preparsed = preparse(content);
+      // Apply AA mode: wrap content with [aa][/aa] tags
+      const processedContent = aaMode ? `[aa]${content}[/aa]` : content;
+      const preparsed = preparse(processedContent);
       const prerendered = prerender(preparsed);
       return render(prerendered, {
         boardId,
@@ -56,7 +60,7 @@ export function ResponsePreview({
     } catch {
       return content;
     }
-  }, [content, boardId, threadId, t]);
+  }, [content, boardId, threadId, aaMode, t]);
 
   return (
     <PreviewContainer>

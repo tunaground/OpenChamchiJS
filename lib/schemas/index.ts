@@ -97,6 +97,7 @@ export const createResponseSchema = z.object({
   content: contentSchema,
   attachment: attachmentSchema,
   noup: z.boolean().optional(),
+  anonId: z.string().uuid().optional(),
 });
 
 export const updateResponseSchema = z.object({

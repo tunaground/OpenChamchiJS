@@ -49,10 +49,11 @@ const Calc = styled.span<{ $exp: string }>`
   cursor: pointer;
 
   &::before {
-    content: ${(props) => `"${props.$exp} "`};
+    content: ${(props) => `"${props.$exp}"`};
     color: ${(props) => props.theme.calcExpColor};
-    vertical-align: text-top;
+    vertical-align: super;
     font-size: 1.2rem;
+    margin-right: 0.4rem;
   }
 `;
 

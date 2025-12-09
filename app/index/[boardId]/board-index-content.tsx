@@ -418,7 +418,7 @@ export function BoardIndexContent({
                 <CardTitle>
                   {thread.top && <Badge $variant="top">{labels.top}</Badge>}
                   {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
-                  <span>&gt;{thread.id}&gt; </span>
+                  <span>#{thread.id} </span>
                   <Link href={`/trace/${boardId}/${thread.id}/recent`}>
                     {thread.title}
                   </Link>

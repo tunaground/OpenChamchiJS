@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
@@ -19,6 +20,12 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCode } from "@fortawesome/free-solid-svg-icons";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 import { formatBytes } from "@/lib/utils/format-bytes";
+import { applyShortcuts } from "@/lib/utils/shortcuts";
+import {
+  requestNotificationPermission,
+  createThrottledNotifier,
+} from "@/lib/utils/notification";
+import { getAnonId } from "@/lib/utils/anon-id";
 
 const Container = styled.div`
   padding: 3.2rem;
@@ -528,6 +535,56 @@ const UnlockButton = styled(ConfirmButton)`
   background: ${(props) => props.theme.buttonPrimary};
 `;
 
+const LoadMoreSection = styled.div`
+  display: flex;
+  align-items: stretch;
+  gap: 0.8rem;
+  padding: 1.2rem 1.6rem;
+  margin-top: 1.6rem;
+  background: ${(props) => props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    gap: 0.4rem;
+    padding: 0.8rem;
+  }
+`;
+
+const LoadMoreButton = styled.button<{ $primary?: boolean }>`
+  flex: 1;
+  padding: 0.6rem 1.2rem;
+  background: ${(props) =>
+    props.$primary ? props.theme.buttonPrimary : "transparent"};
+  color: ${(props) =>
+    props.$primary ? props.theme.buttonPrimaryText : props.theme.textSecondary};
+  border: 1px solid
+    ${(props) =>
+      props.$primary ? "transparent" : props.theme.surfaceBorder};
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+
+  &:hover {
+    opacity: 0.8;
+    background: ${(props) =>
+      props.$primary ? props.theme.buttonPrimary : props.theme.surfaceHover};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 0.6rem 0.4rem;
+    font-size: 1.2rem;
+  }
+`;
+
 interface ThreadData {
   id: number;
   boardId: string;
@@ -589,6 +646,8 @@ interface Labels {
   removeImage: string;
   viewSource: string;
   copied: string;
+  loadMore: string;
+  loadingMore: string;
 }
 
 interface AuthLabels {
@@ -625,6 +684,7 @@ interface ThreadDetailContentProps {
   uploadMaxSize: number;
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
+  canManageResponses: boolean;
   authLabels: AuthLabels;
   responses: ResponseData[];
   currentView: string;
@@ -645,6 +705,7 @@ export function ThreadDetailContent({
   uploadMaxSize,
   isLoggedIn,
   canAccessAdmin,
+  canManageResponses,
   authLabels,
   responses: initialResponses,
   currentView,
@@ -660,9 +721,60 @@ export function ThreadDetailContent({
   const [content, setContent] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
   const { showToast } = useToast();
+
+  // Calculate minLoadedSeq (smallest seq excluding 0)
+  const minLoadedSeq = useMemo(() => {
+    const nonZeroSeqs = responses.filter((r) => r.seq > 0).map((r) => r.seq);
+    return nonZeroSeqs.length > 0 ? Math.min(...nonZeroSeqs) : null;
+  }, [responses]);
+
+  // Check if there are more responses to load
+  const hasMoreToLoad = minLoadedSeq !== null && minLoadedSeq > 1;
+
+  // Load more responses
+  const loadMoreResponses = useCallback(
+    async (count: number) => {
+      if (!hasMoreToLoad || isLoadingMore || minLoadedSeq === null) return;
+
+      setIsLoadingMore(true);
+      try {
+        const endSeq = minLoadedSeq - 1;
+        const startSeq = Math.max(1, endSeq - count + 1);
+
+        const res = await fetch(
+          `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${startSeq}&endSeq=${endSeq}`
+        );
+
+        if (res.ok) {
+          const data = await res.json();
+          // Merge new responses: insert after seq 0, dedupe by id
+          setResponses((prev) => {
+            const existingIds = new Set(prev.map((r) => r.id));
+            const seq0Response = prev.find((r) => r.seq === 0);
+            const otherResponses = prev.filter((r) => r.seq > 0);
+            // Only add responses that don't already exist
+            const newResponses = (data as ResponseData[]).filter(
+              (r) => !existingIds.has(r.id)
+            );
+            // Sort by seq
+            const merged = [...otherResponses, ...newResponses].sort(
+              (a, b) => a.seq - b.seq
+            );
+            return seq0Response ? [seq0Response, ...merged] : merged;
+          });
+        }
+      } catch (error) {
+        console.error("Failed to load more responses:", error);
+      } finally {
+        setIsLoadingMore(false);
+      }
+    },
+    [hasMoreToLoad, isLoadingMore, minLoadedSeq, thread.boardId, thread.id]
+  );
 
   // Response options
   const {
@@ -679,8 +791,21 @@ export function ThreadDetailContent({
     return Math.max(lastSeq, ...responses.map((r) => r.seq));
   }, [responses, lastSeq]);
 
+  // Throttled notification for chat mode (1 second throttle, shows last response only)
+  const throttledNotify = useMemo(() => createThrottledNotifier(1000), []);
+
+  // Anonymous ID for identifying own messages in chat mode
+  const anonId = useMemo(() => getAnonId(), []);
+
+  // Request notification permission when chat mode is enabled
+  useEffect(() => {
+    if (responseOptions.chatMode) {
+      requestNotificationPermission();
+    }
+  }, [responseOptions.chatMode]);
+
   // Chat mode: handle new responses from realtime
-  const handleNewResponse = useCallback((newResponse: ResponseData) => {
+  const handleNewResponse = useCallback((newResponse: ResponseData & { anonId?: string }) => {
     setResponses((prev) => {
       // Avoid duplicates
       if (prev.some((r) => r.id === newResponse.id)) {
@@ -688,7 +813,16 @@ export function ThreadDetailContent({
       }
       return [...prev, newResponse];
     });
-  }, []);
+
+    // Skip notification for own messages
+    if (newResponse.anonId === anonId) {
+      return;
+    }
+
+    // Browser notification
+    const body = `${newResponse.username}: ${newResponse.content}`;
+    throttledNotify(thread.title, body);
+  }, [throttledNotify, thread.title, anonId]);
 
   // Chat mode hook
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -749,6 +883,7 @@ export function ThreadDetailContent({
   const [manageModalOpen, setManageModalOpen] = useState(false);
   const [managePassword, setManagePassword] = useState("");
   const [manageUnlocked, setManageUnlocked] = useState(false);
+  const [manageUnlockedByAdmin, setManageUnlockedByAdmin] = useState(false);
   const [manageError, setManageError] = useState("");
   const [allResponses, setAllResponses] = useState<(ResponseData & { visible: boolean })[]>([]);
   const [loadingResponses, setLoadingResponses] = useState(false);
@@ -878,10 +1013,10 @@ export function ThreadDetailContent({
 
     try {
       // Apply AA mode: wrap content with [aa][/aa] tags
-      let finalContent = content.trim();
-      if (responseOptions.aaMode) {
-        finalContent = `[aa]${finalContent}[/aa]`;
-      }
+      // Don't trim in AA mode to preserve whitespace
+      let finalContent = responseOptions.aaMode
+        ? `[aa]${content}[/aa]`
+        : content.trim();
 
       // Use FormData if there's a file, otherwise use JSON
       let res: Response;
@@ -889,6 +1024,7 @@ export function ThreadDetailContent({
         const formData = new FormData();
         formData.append("file", attachmentFile);
         formData.append("content", finalContent);
+        formData.append("anonId", anonId);
         if (username.trim()) {
           formData.append("username", username.trim());
         }
@@ -908,6 +1044,7 @@ export function ThreadDetailContent({
             username: username.trim() || undefined,
             content: finalContent,
             noup: responseOptions.noupMode || undefined,
+            anonId,
           }),
         });
       }
@@ -925,6 +1062,13 @@ export function ThreadDetailContent({
         try {
           const data = await res.json();
           console.error("Failed to create response:", data);
+
+          // Handle deleted user - sign out and redirect
+          if (data.error === "USER_NOT_FOUND") {
+            await signOut({ redirect: true, callbackUrl: "/" });
+            return;
+          }
+
           errorMessage = getErrorMessage(data);
         } catch {
           console.error("Failed to parse error response");
@@ -1020,18 +1164,42 @@ export function ThreadDetailContent({
   };
 
   // Manage modal handlers
-  const openManageModal = () => {
+  const openManageModal = async () => {
     setManageModalOpen(true);
     setManagePassword("");
-    setManageUnlocked(false);
     setManageError("");
     setAllResponses([]);
+
+    // If user has manage permission, skip password and load responses directly
+    if (canManageResponses) {
+      setManageUnlocked(true);
+      setManageUnlockedByAdmin(true);
+      setLoadingResponses(true);
+
+      try {
+        const res = await fetch(
+          `/api/boards/${thread.boardId}/threads/${thread.id}/responses?includeHidden=true&limit=10000`
+        );
+        if (res.ok) {
+          const data = await res.json();
+          setAllResponses(data.filter((r: ResponseData & { visible: boolean }) => r.seq !== 0));
+        }
+      } catch {
+        setManageError("Network error");
+      } finally {
+        setLoadingResponses(false);
+      }
+    } else {
+      setManageUnlocked(false);
+      setManageUnlockedByAdmin(false);
+    }
   };
 
   const closeManageModal = () => {
     setManageModalOpen(false);
     setManagePassword("");
     setManageUnlocked(false);
+    setManageUnlockedByAdmin(false);
     setManageError("");
     setAllResponses([]);
     setSelectedResponseIds(new Set());
@@ -1045,6 +1213,7 @@ export function ThreadDetailContent({
     setManageError("");
 
     try {
+      // Password-based unlock (for non-admin users)
       const res = await fetch(
         `/api/boards/${thread.boardId}/threads/${thread.id}/responses?includeHidden=true&limit=10000`,
         {
@@ -1059,6 +1228,7 @@ export function ThreadDetailContent({
         // Filter out seq 0 (thread body) - it cannot be modified via this modal
         setAllResponses(data.filter((r: ResponseData & { visible: boolean }) => r.seq !== 0));
         setManageUnlocked(true);
+        setManageUnlockedByAdmin(false); // Password-based unlock
       } else {
         setManageError(labels.invalidPassword);
       }
@@ -1073,15 +1243,18 @@ export function ThreadDetailContent({
     setTogglingId(responseId);
 
     try {
+      // If unlocked by admin, use admin API (no password needed)
+      // Otherwise, use password-based API
+      const body = manageUnlockedByAdmin
+        ? { visible: !currentVisible }
+        : { password: managePassword, visible: !currentVisible };
+
       const res = await fetch(
         `/api/boards/${thread.boardId}/threads/${thread.id}/responses/${responseId}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            password: managePassword,
-            visible: !currentVisible,
-          }),
+          body: JSON.stringify(body),
         }
       );
 
@@ -1137,16 +1310,19 @@ export function ThreadDetailContent({
     if (selectedResponseIds.size === 0) return;
     setBulkDeleting(true);
     try {
+      // If unlocked by admin, use admin API (no password needed)
+      // Otherwise, use password-based API
+      const body = manageUnlockedByAdmin
+        ? { visible: false }
+        : { password: managePassword, visible: false };
+
       const hidePromises = Array.from(selectedResponseIds).map((id) =>
         fetch(
           `/api/boards/${thread.boardId}/threads/${thread.id}/responses/${id}`,
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              password: managePassword,
-              visible: false,
-            }),
+            body: JSON.stringify(body),
           }
         )
       );
@@ -1192,7 +1368,7 @@ export function ThreadDetailContent({
       <Container>
         <ThreadHeader>
           <ThreadTitle>
-            &gt;{thread.id}&gt; {thread.title} ({lastSeq})
+            #{thread.id} {thread.title} ({lastSeq})
           </ThreadTitle>
 
           {(thread.top || thread.ended) && (
@@ -1280,6 +1456,27 @@ export function ThreadDetailContent({
                   )}
                 </ResponseContent>
               </ResponseCard>
+              {/* Load More button - shown after seq 0 */}
+              {response.seq === 0 && hasMoreToLoad && (
+                <LoadMoreSection>
+                  <LoadMoreButton
+                    $primary
+                    onClick={() => loadMoreResponses(10)}
+                    disabled={isLoadingMore}
+                  >
+                    {isLoadingMore ? labels.loadingMore : labels.loadMore}
+                  </LoadMoreButton>
+                  {[50, 100, 200, 500, 1000].map((count) => (
+                    <LoadMoreButton
+                      key={count}
+                      onClick={() => loadMoreResponses(count)}
+                      disabled={isLoadingMore}
+                    >
+                      {count}
+                    </LoadMoreButton>
+                  ))}
+                </LoadMoreSection>
+              )}
             </div>
             );
           })
@@ -1303,6 +1500,7 @@ export function ThreadDetailContent({
               content={content}
               boardId={thread.boardId}
               threadId={thread.id}
+              aaMode={responseOptions.aaMode}
             />
           )}
           <FormGroup style={{ marginBottom: "1.6rem" }}>
@@ -1316,7 +1514,7 @@ export function ThreadDetailContent({
           <FormGroup style={{ marginBottom: "1.6rem" }}>
             <FormTextarea
               value={content}
-              onChange={(e) => setContent(e.target.value)}
+              onChange={(e) => setContent(applyShortcuts(e.target.value))}
               onKeyDown={handleKeyDown}
               placeholder={labels.contentPlaceholder}
               required
@@ -1353,7 +1551,9 @@ export function ThreadDetailContent({
           <ManageModalContent onClick={(e) => e.stopPropagation()}>
             <ModalTitle>{labels.manageModalTitle}</ModalTitle>
 
-            {!manageUnlocked ? (
+            {loadingResponses ? (
+              <ModalDescription style={{ textAlign: "center" }}>Loading...</ModalDescription>
+            ) : !manageUnlocked ? (
               <>
                 <ModalDescription>{labels.manageModalDescription}</ModalDescription>
                 <UnlockSection>

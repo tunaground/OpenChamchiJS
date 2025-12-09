@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signOut } from "next-auth/react";
 import styled from "styled-components";
 import { useTranslations } from "next-intl";
 import { PageLayout } from "@/components/layout";
@@ -10,6 +11,7 @@ import { ImageUpload } from "@/components/response/ImageUpload";
 import { CreateThreadOptionButtons, CreateThreadOptions } from "@/components/response/CreateThreadOptionButtons";
 import { ContentPreview } from "@/components/response/ContentPreview";
 import { formatBytes } from "@/lib/utils/format-bytes";
+import { applyShortcuts } from "@/lib/utils/shortcuts";
 
 const Container = styled.div`
   padding: 3.2rem;
@@ -259,8 +261,13 @@ export function CreateThreadContent({
     setLoading(true);
     setError(null);
 
-    const getErrorMessage = (data: { error: string | object }): string => {
+    const handleErrorResponse = async (data: { error: string | object }): Promise<string> => {
       if (typeof data.error === "string") {
+        // Handle deleted user - sign out and redirect
+        if (data.error === "USER_NOT_FOUND") {
+          await signOut({ redirect: true, callbackUrl: "/" });
+          return ""; // Won't be shown as we're redirecting
+        }
         if (data.error === "FOREIGN_IP_BLOCKED") {
           return labels.foreignIpBlocked;
         }
@@ -285,7 +292,9 @@ export function CreateThreadContent({
 
       if (!threadRes.ok) {
         const data = await threadRes.json();
-        throw new Error(getErrorMessage(data) || "Failed to create thread");
+        const errorMsg = await handleErrorResponse(data);
+        if (errorMsg) throw new Error(errorMsg);
+        return; // Redirecting after signOut
       }
 
       const thread = await threadRes.json();
@@ -324,7 +333,9 @@ export function CreateThreadContent({
 
       if (!responseRes.ok) {
         const data = await responseRes.json();
-        throw new Error(getErrorMessage(data) || "Failed to create response");
+        const errorMsg = await handleErrorResponse(data);
+        if (errorMsg) throw new Error(errorMsg);
+        return; // Redirecting after signOut
       }
 
       // Redirect to thread page (recent view)
@@ -419,7 +430,7 @@ export function CreateThreadContent({
             <Textarea
               value={formData.content}
               onChange={(e) =>
-                setFormData({ ...formData, content: e.target.value })
+                setFormData({ ...formData, content: applyShortcuts(e.target.value) })
               }
               placeholder={labels.contentPlaceholder}
               required
