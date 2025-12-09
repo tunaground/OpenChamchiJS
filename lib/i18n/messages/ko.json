@@ -226,12 +226,24 @@
     "countryCode": "허용 국가 코드",
     "countryCodePlaceholder": "예: KR, US, JP",
     "countryCodeDescription": "해외 IP 차단 시 허용할 국가 코드 (ISO 3166-1 alpha-2)",
+    "homepageContent": "홈페이지 내용",
+    "homepageContentPlaceholder": "홈페이지에 표시할 내용을 입력하세요...",
+    "homepageContentDescription": "TOM 마크업을 사용할 수 있습니다. ([bld], [itl], [clr], [hr] 등)",
     "save": "저장",
     "saved": "저장되었습니다.",
     "geoIpStatus": "GeoIP 데이터베이스",
     "geoIpAvailable": "사용 가능",
     "geoIpUnavailable": "사용 불가",
-    "geoIpUnavailableDescription": "해외 IP 차단 기능이 비활성화됩니다. MAXMIND_LICENSE_KEY 환경변수를 설정하고 다시 빌드하세요."
+    "geoIpUnavailableDescription": "해외 IP 차단 기능이 비활성화됩니다. MAXMIND_LICENSE_KEY 환경변수를 설정하고 다시 빌드하세요.",
+    "customLinks": "커스텀 링크",
+    "customLinksDescription": "사이드바에 표시될 외부 링크입니다.",
+    "addLink": "링크 추가",
+    "linkLabel": "이름",
+    "linkLabelPlaceholder": "예: 위키",
+    "linkUrl": "URL",
+    "linkUrlPlaceholder": "https://example.com",
+    "noLinks": "등록된 링크가 없습니다.",
+    "deleteLink": "삭제"
   },
   "adminThreads": {
     "title": "주제글 관리",
@@ -408,6 +420,26 @@
       "youtubeExample": "[youtube VIDEO_ID]",
       "hrTitle": "구분선",
       "hrExample": "[hr]"
+    },
+    "theme": {
+      "title": "테마",
+      "description": "화면 테마를 변경할 수 있습니다. 상단 바의 테마 버튼을 클릭하면 순환합니다.",
+      "lightTitle": "라이트",
+      "lightDescription": "기본 밝은 테마입니다. 흰색 배경에 어두운 글씨를 사용합니다.",
+      "greyTitle": "그레이",
+      "greyDescription": "눈의 피로를 줄여주는 회색조 테마입니다. 흰색을 사용하지 않고 부드러운 회색 톤을 사용합니다.",
+      "darkTitle": "다크",
+      "darkDescription": "어두운 환경에 적합한 다크 테마입니다. 어두운 배경에 밝은 글씨를 사용합니다."
+    },
+    "userCounter": {
+      "title": "접속자 수",
+      "description": "상단 바에 현재 페이지를 보고 있는 사용자 수가 표시됩니다.",
+      "indexTitle": "게시판 페이지",
+      "indexDescription": "해당 게시판을 보고 있는 접속자 수가 항상 표시됩니다.",
+      "traceTitle": "주제글 페이지",
+      "traceDescription": "해당 주제글을 보고 있는 접속자 수가 표시됩니다. 게시판 설정에서 '사용자 수 표시'가 활성화된 경우에만 표시됩니다.",
+      "deduplicationTitle": "중복 제거",
+      "deduplicationDescription": "동일 사용자가 여러 탭을 열어도 1명으로 카운트됩니다."
     },
     "sidebar": {
       "title": "주제글 페이지 메뉴",

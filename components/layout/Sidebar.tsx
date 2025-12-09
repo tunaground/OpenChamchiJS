@@ -32,12 +32,13 @@ const SidebarContainer = styled.aside<{ $open: boolean; $compact?: boolean }>`
   left: 0;
   bottom: 0;
   width: 16.8rem;
-  background: ${(props) => props.theme.surface};
+  background: ${(props) => props.theme.sidebar};
   border-right: 1px solid ${(props) => props.theme.surfaceBorder};
   transform: translateX(${(props) => (props.$open ? "0" : "-100%")});
   transition: transform 0.2s ease-in-out, width 0.2s ease-in-out;
   z-index: 95;
   overflow-y: auto;
+  color: ${(props) => props.theme.sidebarText};
 
   @media (min-width: ${(props) => props.theme.breakpoint}) {
     transform: translateX(${(props) => (props.$open ? "0" : "-100%")});

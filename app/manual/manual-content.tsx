@@ -17,6 +17,13 @@ import {
   faChevronRight,
   faChevronUp,
   faChevronDown,
+  faSun,
+  faCloud,
+  faMoon,
+  faUsers,
+  faList,
+  faComments,
+  faFingerprint,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { PageLayout } from "@/components/layout";
@@ -204,6 +211,26 @@ interface Labels {
     hrTitle: string;
     hrExample: string;
   };
+  theme: {
+    title: string;
+    description: string;
+    lightTitle: string;
+    lightDescription: string;
+    greyTitle: string;
+    greyDescription: string;
+    darkTitle: string;
+    darkDescription: string;
+  };
+  userCounter?: {
+    title: string;
+    description: string;
+    indexTitle: string;
+    indexDescription: string;
+    traceTitle: string;
+    traceDescription: string;
+    deduplicationTitle: string;
+    deduplicationDescription: string;
+  };
   sidebar: {
     title: string;
     description: string;
@@ -369,6 +396,54 @@ export function ManualContent({
             />
           </ItemList>
         </Section>
+
+        {/* Theme */}
+        <Section>
+          <SectionTitle>{labels.theme.title}</SectionTitle>
+          <SectionDescription>{labels.theme.description}</SectionDescription>
+          <ItemList>
+            <SettingItem
+              icon={faSun}
+              title={labels.theme.lightTitle}
+              description={labels.theme.lightDescription}
+            />
+            <SettingItem
+              icon={faCloud}
+              title={labels.theme.greyTitle}
+              description={labels.theme.greyDescription}
+            />
+            <SettingItem
+              icon={faMoon}
+              title={labels.theme.darkTitle}
+              description={labels.theme.darkDescription}
+            />
+          </ItemList>
+        </Section>
+
+        {/* User Counter */}
+        {labels.userCounter && (
+          <Section>
+            <SectionTitle>{labels.userCounter.title}</SectionTitle>
+            <SectionDescription>{labels.userCounter.description}</SectionDescription>
+            <ItemList>
+              <SettingItem
+                icon={faList}
+                title={labels.userCounter.indexTitle}
+                description={labels.userCounter.indexDescription}
+              />
+              <SettingItem
+                icon={faComments}
+                title={labels.userCounter.traceTitle}
+                description={labels.userCounter.traceDescription}
+              />
+              <SettingItem
+                icon={faFingerprint}
+                title={labels.userCounter.deduplicationTitle}
+                description={labels.userCounter.deduplicationDescription}
+              />
+            </ItemList>
+          </Section>
+        )}
 
         {/* TOM Markup */}
         <Section>

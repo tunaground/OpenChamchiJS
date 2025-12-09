@@ -42,7 +42,9 @@ interface PageLayoutProps {
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: { login: string; logout: string };
-  hideSettings?: boolean;
+  isHomePage?: boolean;
+  isSettingsPage?: boolean;
+  isAdminPage?: boolean;
   userCount?: number;
   userCountTitle?: string;
 }
@@ -55,7 +57,9 @@ export function PageLayout({
   isLoggedIn,
   canAccessAdmin,
   authLabels,
-  hideSettings,
+  isHomePage,
+  isSettingsPage,
+  isAdminPage,
   userCount,
   userCountTitle,
 }: PageLayoutProps) {
@@ -153,7 +157,9 @@ export function PageLayout({
         isLoggedIn={isLoggedIn}
         canAccessAdmin={canAccessAdmin}
         authLabels={authLabels}
-        hideSettings={hideSettings}
+        isHomePage={isHomePage}
+        isSettingsPage={isSettingsPage}
+        isAdminPage={isAdminPage}
         userCount={userCount}
         userCountTitle={userCountTitle}
       />

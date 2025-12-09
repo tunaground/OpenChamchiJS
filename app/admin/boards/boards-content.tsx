@@ -515,6 +515,7 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
       isLoggedIn={true}
       canAccessAdmin={true}
       authLabels={authLabels}
+      isAdminPage
     >
       <Container>
         <Header>

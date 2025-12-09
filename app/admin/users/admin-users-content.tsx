@@ -480,6 +480,7 @@ export function AdminUsersContent({
       isLoggedIn={true}
       canAccessAdmin={true}
       authLabels={authLabels}
+      isAdminPage
     >
       <Container>
         <Header>

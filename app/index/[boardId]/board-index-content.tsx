@@ -284,6 +284,12 @@ interface AuthLabels {
   logout: string;
 }
 
+interface CustomLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 interface BoardIndexContentProps {
   boardId: string;
   boardName: string;
@@ -299,6 +305,7 @@ interface BoardIndexContentProps {
   labels: Labels;
   boardsTitle: string;
   manualLabel: string;
+  customLinks?: CustomLink[];
 }
 
 export function BoardIndexContent({
@@ -316,6 +323,7 @@ export function BoardIndexContent({
   labels,
   boardsTitle,
   manualLabel,
+  customLinks,
 }: BoardIndexContentProps) {
   const router = useRouter();
   const [search, setSearch] = useState(initialSearch);
@@ -353,7 +361,7 @@ export function BoardIndexContent({
     return `${year}-${month}-${day} ${hours}:${minutes}`;
   };
 
-  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
+  const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
 
   return (
     <PageLayout

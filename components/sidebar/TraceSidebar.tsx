@@ -13,13 +13,13 @@ import {
   faChevronRight,
   faChevronUp,
   faChevronDown,
-  faFolder,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
   SidebarTitle as BaseSidebarTitle,
   NavList,
   NavItem,
+  NavLink as BaseNavLink,
   SidebarDivider,
 } from "./SidebarStyles";
 import { useSidebarContext } from "./SidebarContext";
@@ -45,7 +45,7 @@ const StyledNavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
         ? props.theme.textPrimary
         : props.theme.textSecondary};
   background: ${(props) =>
-    props.$active ? props.theme.surfaceHover : "transparent"};
+    props.$active ? props.theme.sidebarActive : "transparent"};
   font-weight: ${(props) => (props.$active ? 500 : 400)};
   transition: background 0.15s, color 0.15s;
   pointer-events: ${(props) => (props.$disabled ? "none" : "auto")};
@@ -119,6 +119,12 @@ interface BoardData {
   name: string;
 }
 
+interface CustomLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 interface TraceSidebarProps {
   threadId: number;
   boardId: string;
@@ -126,6 +132,7 @@ interface TraceSidebarProps {
   lastSeq: number;
   responsesPerPage: number;
   boards: BoardData[];
+  customLinks?: CustomLink[];
   labels: {
     navigation: string;
     backToBoard: string;
@@ -204,6 +211,23 @@ function NavItemWithIcon({ href, icon, label, active, disabled, onClick }: NavIt
   );
 }
 
+const ExternalNavLink = styled.a`
+  display: block;
+  padding: 1rem 1.2rem;
+  border-radius: 0.6rem;
+  text-decoration: none;
+  font-size: 1.4rem;
+  color: ${(props) => props.theme.textSecondary};
+  background: transparent;
+  font-weight: 400;
+  transition: background 0.15s, color 0.15s;
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+    color: ${(props) => props.theme.textPrimary};
+  }
+`;
+
 export function TraceSidebar({
   threadId,
   boardId,
@@ -211,6 +235,7 @@ export function TraceSidebar({
   lastSeq,
   responsesPerPage,
   boards,
+  customLinks,
   labels,
   onManageClick,
 }: TraceSidebarProps) {
@@ -359,16 +384,33 @@ export function TraceSidebar({
             const href = `/index/${board.id}`;
             const isActive = pathname.startsWith(href) || board.id === boardId;
             return (
-              <NavItemWithIcon
-                key={board.id}
-                href={href}
-                icon={faFolder}
-                label={board.name}
-                active={isActive}
-              />
+              <NavItem key={board.id}>
+                <BaseNavLink href={href} $active={isActive}>
+                  {board.name}
+                </BaseNavLink>
+              </NavItem>
             );
           })}
         </NavList>
+
+        {customLinks && customLinks.length > 0 && (
+          <>
+            <SidebarDivider />
+            <NavList>
+              {customLinks.map((link) => (
+                <NavItem key={link.id}>
+                  <ExternalNavLink
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {link.label}
+                  </ExternalNavLink>
+                </NavItem>
+              ))}
+            </NavList>
+          </>
+        )}
       </BoardsSection>
     </div>
   );

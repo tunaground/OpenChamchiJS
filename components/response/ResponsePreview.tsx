@@ -8,7 +8,7 @@ import { preparse, prerender, render, AnchorInfo } from "@/lib/tom";
 const PreviewContainer = styled.div`
   padding: 1.2rem;
   margin-bottom: 0.8rem;
-  background: ${(props) => props.theme.surfaceHover};
+  background: ${(props) => props.theme.responseCard};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 0.4rem;
   min-height: 4rem;

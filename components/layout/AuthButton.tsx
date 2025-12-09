@@ -11,13 +11,13 @@ const Button = styled.button`
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 0.6rem;
   background: transparent;
-  color: ${(props) => props.theme.textPrimary};
+  color: ${(props) => props.theme.topBarText};
   font-size: 1.4rem;
   cursor: pointer;
   transition: background 0.15s;
 
   &:hover {
-    background: ${(props) => props.theme.surfaceHover};
+    background: ${(props) => props.theme.topBarHover};
   }
 
   svg {

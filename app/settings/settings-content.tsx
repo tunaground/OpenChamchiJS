@@ -350,6 +350,12 @@ interface BoardData {
   name: string;
 }
 
+interface CustomLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 interface SettingsContentProps {
   labels: Labels;
   boards: BoardData[];
@@ -358,6 +364,7 @@ interface SettingsContentProps {
   canAccessAdmin: boolean;
   authLabels: { login: string; logout: string };
   manualLabel: string;
+  customLinks?: CustomLink[];
 }
 
 export function SettingsContent({
@@ -368,6 +375,7 @@ export function SettingsContent({
   canAccessAdmin,
   authLabels,
   manualLabel,
+  customLinks,
 }: SettingsContentProps) {
   const router = useRouter();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -445,7 +453,7 @@ export function SettingsContent({
     },
   ];
 
-  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
+  const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
 
   return (
     <PageLayout
@@ -454,7 +462,7 @@ export function SettingsContent({
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}
       authLabels={authLabels}
-      hideSettings
+      isSettingsPage
     >
       <Container>
         <Header>

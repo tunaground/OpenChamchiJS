@@ -23,6 +23,8 @@ export default async function AdminSettingsPage() {
     <AdminSettingsContent
       initialSettings={{
         countryCode: settings.countryCode,
+        homepageContent: settings.homepageContent,
+        customLinks: settings.customLinks,
       }}
       geoIpAvailable={geoIpAvailable}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
@@ -40,12 +42,24 @@ export default async function AdminSettingsPage() {
         countryCode: t("countryCode"),
         countryCodePlaceholder: t("countryCodePlaceholder"),
         countryCodeDescription: t("countryCodeDescription"),
+        homepageContent: t("homepageContent"),
+        homepageContentPlaceholder: t("homepageContentPlaceholder"),
+        homepageContentDescription: t("homepageContentDescription"),
         save: t("save"),
         saved: t("saved"),
         geoIpStatus: t("geoIpStatus"),
         geoIpAvailable: t("geoIpAvailable"),
         geoIpUnavailable: t("geoIpUnavailable"),
         geoIpUnavailableDescription: t("geoIpUnavailableDescription"),
+        customLinks: t("customLinks"),
+        customLinksDescription: t("customLinksDescription"),
+        addLink: t("addLink"),
+        linkLabel: t("linkLabel"),
+        linkLabelPlaceholder: t("linkLabelPlaceholder"),
+        linkUrl: t("linkUrl"),
+        linkUrlPlaceholder: t("linkUrlPlaceholder"),
+        noLinks: t("noLinks"),
+        deleteLink: t("deleteLink"),
       }}
     />
   );

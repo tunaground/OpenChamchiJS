@@ -36,7 +36,7 @@ const StyledNavLink = styled(Link)<{ $active?: boolean; $disabled?: boolean }>`
         ? props.theme.textPrimary
         : props.theme.textSecondary};
   background: ${(props) =>
-    props.$active ? props.theme.surfaceHover : "transparent"};
+    props.$active ? props.theme.sidebarActive : "transparent"};
   font-weight: ${(props) => (props.$active ? 500 : 400)};
   transition: background 0.15s, color 0.15s;
   pointer-events: ${(props) => (props.$disabled ? "none" : "auto")};

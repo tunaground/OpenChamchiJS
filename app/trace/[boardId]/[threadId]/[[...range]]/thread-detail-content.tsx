@@ -133,14 +133,14 @@ const AnchorCloseButton = styled.button`
 `;
 
 const AnchorResponseCard = styled.div`
-  background: ${(props) => props.theme.surface};
+  background: ${(props) => props.theme.responseCard};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 6px;
   overflow: hidden;
 `;
 
 const ResponseCard = styled.div`
-  background: ${(props) => props.theme.surface};
+  background: ${(props) => props.theme.responseCard};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
   overflow: hidden;
@@ -609,6 +609,12 @@ interface SidebarLabels {
   boards: string;
 }
 
+interface CustomLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 interface ThreadDetailContentProps {
   thread: ThreadData;
   boards: { id: string; name: string }[];
@@ -626,6 +632,7 @@ interface ThreadDetailContentProps {
   responsesPerPage: number;
   labels: Labels;
   sidebarLabels: SidebarLabels;
+  customLinks?: CustomLink[];
 }
 
 export function ThreadDetailContent({
@@ -645,6 +652,7 @@ export function ThreadDetailContent({
   responsesPerPage,
   labels,
   sidebarLabels,
+  customLinks,
 }: ThreadDetailContentProps) {
   const router = useRouter();
   const [responses, setResponses] = useState(initialResponses);
@@ -1165,6 +1173,7 @@ export function ThreadDetailContent({
       lastSeq={lastSeq}
       responsesPerPage={responsesPerPage}
       boards={boards}
+      customLinks={customLinks}
       labels={sidebarLabels}
       onManageClick={openManageModal}
     />

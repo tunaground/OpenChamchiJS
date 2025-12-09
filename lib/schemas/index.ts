@@ -138,8 +138,17 @@ export type CreateNoticeInput = z.infer<typeof createNoticeSchema>;
 export type UpdateNoticeInput = z.infer<typeof updateNoticeSchema>;
 
 // Settings schemas
-export const updateSettingsSchema = z.object({
-  countryCode: z.string().length(2).toUpperCase().optional(),
+const customLinkSchema = z.object({
+  id: z.string().min(1),
+  label: sanitizedTrimmedString.pipe(z.string().min(1).max(50)),
+  url: z.string().url(),
 });
 
+export const updateSettingsSchema = z.object({
+  countryCode: z.string().length(2).toUpperCase().optional(),
+  homepageContent: z.string().max(50000).optional().nullable(),
+  customLinks: z.array(customLinkSchema).max(20).optional(),
+});
+
+export type CustomLinkInput = z.infer<typeof customLinkSchema>;
 export type UpdateSettingsInput = z.infer<typeof updateSettingsSchema>;

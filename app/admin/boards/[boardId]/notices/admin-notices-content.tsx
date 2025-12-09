@@ -522,6 +522,7 @@ export function AdminNoticesContent({
       isLoggedIn={true}
       canAccessAdmin={true}
       authLabels={authLabels}
+      isAdminPage
     >
       <Container>
         <Header>

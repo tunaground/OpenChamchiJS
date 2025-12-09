@@ -18,6 +18,8 @@ export default async function ManualPage() {
     ? await permissionService.checkUserPermission(session.user.id, "admin:read")
     : false;
 
+  const hasAblyConfig = !!process.env.ABLY_API_KEY;
+
   return (
     <ManualContent
       boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
@@ -92,6 +94,28 @@ export default async function ManualPage() {
           hrTitle: t("tom.hrTitle"),
           hrExample: t("tom.hrExample"),
         },
+        theme: {
+          title: t("theme.title"),
+          description: t("theme.description"),
+          lightTitle: t("theme.lightTitle"),
+          lightDescription: t("theme.lightDescription"),
+          greyTitle: t("theme.greyTitle"),
+          greyDescription: t("theme.greyDescription"),
+          darkTitle: t("theme.darkTitle"),
+          darkDescription: t("theme.darkDescription"),
+        },
+        userCounter: hasAblyConfig
+          ? {
+              title: t("userCounter.title"),
+              description: t("userCounter.description"),
+              indexTitle: t("userCounter.indexTitle"),
+              indexDescription: t("userCounter.indexDescription"),
+              traceTitle: t("userCounter.traceTitle"),
+              traceDescription: t("userCounter.traceDescription"),
+              deduplicationTitle: t("userCounter.deduplicationTitle"),
+              deduplicationDescription: t("userCounter.deduplicationDescription"),
+            }
+          : undefined,
         sidebar: {
           title: t("sidebar.title"),
           description: t("sidebar.description"),

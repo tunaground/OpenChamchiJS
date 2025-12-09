@@ -9,11 +9,12 @@ const Container = styled.div`
   align-items: center;
   gap: 0.4rem;
   padding: 0.4rem 0.8rem;
-  background: ${(props) => props.theme.surface};
+  background: ${(props) => props.theme.topBarHover};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 0.4rem;
   font-size: 1.3rem;
-  color: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.topBarText};
+  opacity: 0.9;
 `;
 
 const Icon = styled.span`
@@ -24,7 +25,6 @@ const Icon = styled.span`
 
 const Count = styled.span`
   font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
 `;
 
 interface UserCounterProps {

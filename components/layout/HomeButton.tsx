@@ -3,19 +3,21 @@
 import Link from "next/link";
 import styled from "styled-components";
 
-const Button = styled(Link)`
+const Button = styled(Link)<{ $active?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 4rem;
   height: 4rem;
   border-radius: 0.8rem;
-  color: ${(props) => props.theme.textSecondary};
-  transition: background 0.15s, color 0.15s;
+  color: ${(props) => props.theme.topBarText};
+  opacity: ${(props) => (props.$active ? 1 : 0.8)};
+  background: ${(props) => (props.$active ? props.theme.topBarHover : "transparent")};
+  transition: background 0.15s, opacity 0.15s;
 
   &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-    color: ${(props) => props.theme.textPrimary};
+    background: ${(props) => props.theme.topBarHover};
+    opacity: 1;
   }
 
   svg {
@@ -24,9 +26,13 @@ const Button = styled(Link)`
   }
 `;
 
-export function HomeButton() {
+interface HomeButtonProps {
+  active?: boolean;
+}
+
+export function HomeButton({ active }: HomeButtonProps) {
   return (
-    <Button href="/" aria-label="Home">
+    <Button href="/" aria-label="Home" $active={active}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

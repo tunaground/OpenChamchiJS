@@ -226,12 +226,24 @@
     "countryCode": "Allowed Country Code",
     "countryCodePlaceholder": "e.g. KR, US, JP",
     "countryCodeDescription": "Country code to allow when blocking foreign IPs (ISO 3166-1 alpha-2)",
+    "homepageContent": "Homepage Content",
+    "homepageContentPlaceholder": "Enter content to display on the homepage...",
+    "homepageContentDescription": "TOM markup is available. ([bld], [itl], [clr], [hr], etc.)",
     "save": "Save",
     "saved": "Settings saved.",
     "geoIpStatus": "GeoIP Database",
     "geoIpAvailable": "Available",
     "geoIpUnavailable": "Not Available",
-    "geoIpUnavailableDescription": "Foreign IP blocking is disabled. Set MAXMIND_LICENSE_KEY environment variable and rebuild to enable."
+    "geoIpUnavailableDescription": "Foreign IP blocking is disabled. Set MAXMIND_LICENSE_KEY environment variable and rebuild to enable.",
+    "customLinks": "Custom Links",
+    "customLinksDescription": "External links displayed in the sidebar.",
+    "addLink": "Add Link",
+    "linkLabel": "Label",
+    "linkLabelPlaceholder": "e.g. Wiki",
+    "linkUrl": "URL",
+    "linkUrlPlaceholder": "https://example.com",
+    "noLinks": "No links registered.",
+    "deleteLink": "Delete"
   },
   "adminThreads": {
     "title": "Thread Management",
@@ -408,6 +420,26 @@
       "youtubeExample": "[youtube VIDEO_ID]",
       "hrTitle": "Horizontal Rule",
       "hrExample": "[hr]"
+    },
+    "theme": {
+      "title": "Theme",
+      "description": "You can change the screen theme. Click the theme button in the top bar to cycle through themes.",
+      "lightTitle": "Light",
+      "lightDescription": "The default bright theme. Uses a white background with dark text.",
+      "greyTitle": "Grey",
+      "greyDescription": "A grey-toned theme that reduces eye strain. Uses soft grey tones without any white.",
+      "darkTitle": "Dark",
+      "darkDescription": "A dark theme suitable for low-light environments. Uses a dark background with light text."
+    },
+    "userCounter": {
+      "title": "User Counter",
+      "description": "The top bar displays the number of users currently viewing the page.",
+      "indexTitle": "Board Page",
+      "indexDescription": "Shows the number of users viewing that board. Always displayed.",
+      "traceTitle": "Thread Page",
+      "traceDescription": "Shows the number of users viewing that thread. Only displayed when 'Show user count' is enabled in board settings.",
+      "deduplicationTitle": "Deduplication",
+      "deduplicationDescription": "Even if the same user opens multiple tabs, they are counted as 1 person."
     },
     "sidebar": {
       "title": "Thread Page Menu",

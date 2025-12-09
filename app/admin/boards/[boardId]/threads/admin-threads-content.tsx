@@ -808,6 +808,7 @@ export function AdminThreadsContent({
       isLoggedIn={true}
       canAccessAdmin={true}
       authLabels={authLabels}
+      isAdminPage
     >
       <Container>
         <Header>

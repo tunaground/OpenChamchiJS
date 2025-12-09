@@ -15,7 +15,7 @@ const Bar = styled.header`
   left: 0;
   right: 0;
   height: 5.6rem;
-  background: ${(props) => props.theme.surface};
+  background: ${(props) => props.theme.topBar};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
   display: flex;
   align-items: center;
@@ -33,10 +33,10 @@ const MenuButton = styled.button`
   background: transparent;
   border-radius: 0.8rem;
   cursor: pointer;
-  color: ${(props) => props.theme.textPrimary};
+  color: ${(props) => props.theme.topBarText};
 
   &:hover {
-    background: ${(props) => props.theme.surfaceHover};
+    background: ${(props) => props.theme.topBarHover};
   }
 
   svg {
@@ -78,7 +78,7 @@ const TitleText = styled.div<{ $animate: boolean }>`
   display: inline-block;
   font-size: 1.8rem;
   font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
+  color: ${(props) => props.theme.topBarText};
   white-space: nowrap;
   will-change: transform;
 
@@ -113,7 +113,9 @@ interface TopBarProps {
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: { login: string; logout: string };
-  hideSettings?: boolean;
+  isHomePage?: boolean;
+  isSettingsPage?: boolean;
+  isAdminPage?: boolean;
   userCount?: number;
   userCountTitle?: string;
 }
@@ -188,7 +190,9 @@ export function TopBar({
   isLoggedIn,
   canAccessAdmin,
   authLabels,
-  hideSettings,
+  isHomePage,
+  isSettingsPage,
+  isAdminPage,
   userCount,
   userCountTitle,
 }: TopBarProps) {
@@ -215,10 +219,10 @@ export function TopBar({
           <UserCounter count={userCount} title={userCountTitle} />
         )}
         <ButtonGroup>
-          <HomeButton />
+          <HomeButton active={isHomePage} />
           <ThemeToggleButton />
-          {!hideSettings && <SettingsButton />}
-          {canAccessAdmin && <AdminButton />}
+          <SettingsButton active={isSettingsPage} />
+          {canAccessAdmin && <AdminButton active={isAdminPage} />}
         </ButtonGroup>
         <AuthButton
           isLoggedIn={isLoggedIn}

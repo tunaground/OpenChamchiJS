@@ -3,12 +3,14 @@ import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { boardService } from "@/lib/services/board";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { SettingsContent } from "./settings-content";
 
 export default async function SettingsPage() {
-  const [session, allBoards, t, tCommon] = await Promise.all([
+  const [session, allBoards, settings, t, tCommon] = await Promise.all([
     getServerSession(authOptions),
     boardService.findAll(),
+    globalSettingsService.get(),
     getTranslations("settings"),
     getTranslations("common"),
   ]);
@@ -56,6 +58,7 @@ export default async function SettingsPage() {
       canAccessAdmin={canAccessAdmin}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
       manualLabel={tCommon("manual")}
+      customLinks={settings.customLinks}
     />
   );
 }

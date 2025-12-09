@@ -7,6 +7,7 @@ import { boardService } from "@/lib/services/board";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { responseService } from "@/lib/services/response";
 import { responseRepository } from "@/lib/repositories/prisma/response";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { parseRangeParam } from "@/lib/types/response-range";
 import { isRealtimeEnabled } from "@/lib/realtime";
 import { isStorageEnabled } from "@/lib/storage";
@@ -25,10 +26,11 @@ export default async function ThreadDetailPage({ params }: Props) {
   }
 
   try {
-    const [thread, allBoards, session] = await Promise.all([
+    const [thread, allBoards, session, settings] = await Promise.all([
       threadService.findById(threadIdNum),
       boardService.findAll(),
       getServerSession(authOptions),
+      globalSettingsService.get(),
     ]);
 
     // Verify boardId matches
@@ -154,6 +156,7 @@ export default async function ThreadDetailPage({ params }: Props) {
           scrollDown: tSidebar("scrollDown"),
           boards: tSidebar("boards"),
         }}
+        customLinks={settings.customLinks}
       />
     );
   } catch (error) {

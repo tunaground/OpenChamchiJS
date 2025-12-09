@@ -2,8 +2,15 @@
 
 import { useState } from "react";
 import styled from "styled-components";
+import { nanoid } from "nanoid";
 import { PageLayout } from "@/components/layout";
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
+
+interface CustomLink {
+  id: string;
+  label: string;
+  url: string;
+}
 
 const Container = styled.div`
   padding: 3.2rem;
@@ -47,6 +54,24 @@ const Input = styled.input`
   background: ${(props) => props.theme.background};
   color: ${(props) => props.theme.textPrimary};
   text-transform: uppercase;
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.textSecondary};
+  }
+`;
+
+const TextArea = styled.textarea`
+  width: 100%;
+  min-height: 20rem;
+  padding: 1.2rem;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  font-size: 1.4rem;
+  font-family: inherit;
+  background: ${(props) => props.theme.background};
+  color: ${(props) => props.theme.textPrimary};
+  resize: vertical;
 
   &:focus {
     outline: none;
@@ -110,6 +135,147 @@ const StatusDescription = styled.div`
   color: ${(props) => props.theme.textSecondary};
 `;
 
+const SectionTitle = styled.h2`
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: ${(props) => props.theme.textPrimary};
+  margin-bottom: 0.8rem;
+`;
+
+const SectionDescription = styled.p`
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textSecondary};
+  margin-bottom: 1.6rem;
+`;
+
+const LinkList = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 1.6rem;
+`;
+
+const LinkItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 1.2rem;
+  background: ${(props) => props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+`;
+
+const LinkLabel = styled.span`
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: ${(props) => props.theme.textPrimary};
+  min-width: 10rem;
+`;
+
+const LinkUrl = styled.span`
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textSecondary};
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const DeleteButton = styled.button`
+  padding: 0.4rem 0.8rem;
+  background: transparent;
+  color: ${(props) => props.theme.textSecondary};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  font-size: 1.2rem;
+  cursor: pointer;
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+    color: #dc2626;
+    border-color: #dc2626;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const AddLinkForm = styled.div`
+  display: flex;
+  gap: 1rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    flex-direction: column;
+    align-items: stretch;
+  }
+`;
+
+const InputGroup = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+`;
+
+const InputLabel = styled.label`
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.textSecondary};
+`;
+
+const LinkInput = styled.input`
+  padding: 0.8rem 1.2rem;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  font-size: 1.4rem;
+  background: ${(props) => props.theme.background};
+  color: ${(props) => props.theme.textPrimary};
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.textSecondary};
+  }
+`;
+
+const AddButton = styled.button`
+  height: 3.5rem;
+  padding: 0 1.6rem;
+  background: ${(props) => props.theme.surface};
+  color: ${(props) => props.theme.textPrimary};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  font-size: 1.4rem;
+  cursor: pointer;
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
+const EmptyState = styled.div`
+  padding: 2rem;
+  text-align: center;
+  color: ${(props) => props.theme.textSecondary};
+  font-size: 1.4rem;
+  background: ${(props) => props.theme.surface};
+  border: 1px dashed ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  margin-bottom: 1.6rem;
+`;
+
+const Divider = styled.hr`
+  border: none;
+  border-top: 1px solid ${(props) => props.theme.surfaceBorder};
+  margin: 3.2rem 0;
+`;
+
 interface AuthLabels {
   login: string;
   logout: string;
@@ -129,17 +295,31 @@ interface Labels {
   countryCode: string;
   countryCodePlaceholder: string;
   countryCodeDescription: string;
+  homepageContent: string;
+  homepageContentPlaceholder: string;
+  homepageContentDescription: string;
   save: string;
   saved: string;
   geoIpStatus: string;
   geoIpAvailable: string;
   geoIpUnavailable: string;
   geoIpUnavailableDescription: string;
+  customLinks: string;
+  customLinksDescription: string;
+  addLink: string;
+  linkLabel: string;
+  linkLabelPlaceholder: string;
+  linkUrl: string;
+  linkUrlPlaceholder: string;
+  noLinks: string;
+  deleteLink: string;
 }
 
 interface AdminSettingsContentProps {
   initialSettings: {
     countryCode: string;
+    homepageContent: string | null;
+    customLinks: CustomLink[];
   };
   geoIpAvailable: boolean;
   authLabels: AuthLabels;
@@ -157,8 +337,28 @@ export function AdminSettingsContent({
   canUpdate,
 }: AdminSettingsContentProps) {
   const [countryCode, setCountryCode] = useState(initialSettings.countryCode);
+  const [homepageContent, setHomepageContent] = useState(initialSettings.homepageContent ?? "");
+  const [customLinks, setCustomLinks] = useState<CustomLink[]>(initialSettings.customLinks);
+  const [newLinkLabel, setNewLinkLabel] = useState("");
+  const [newLinkUrl, setNewLinkUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
+
+  const handleAddLink = () => {
+    if (!newLinkLabel.trim() || !newLinkUrl.trim()) return;
+    const newLink: CustomLink = {
+      id: nanoid(10),
+      label: newLinkLabel.trim(),
+      url: newLinkUrl.trim(),
+    };
+    setCustomLinks([...customLinks, newLink]);
+    setNewLinkLabel("");
+    setNewLinkUrl("");
+  };
+
+  const handleDeleteLink = (id: string) => {
+    setCustomLinks(customLinks.filter((link) => link.id !== id));
+  };
 
   const handleSave = async () => {
     if (!canUpdate) return;
@@ -168,7 +368,11 @@ export function AdminSettingsContent({
       const res = await fetch("/api/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ countryCode: countryCode.toUpperCase() }),
+        body: JSON.stringify({
+          countryCode: countryCode.toUpperCase(),
+          homepageContent: homepageContent || null,
+          customLinks,
+        }),
       });
 
       if (res.ok) {
@@ -189,6 +393,7 @@ export function AdminSettingsContent({
       isLoggedIn={true}
       canAccessAdmin={true}
       authLabels={authLabels}
+      isAdminPage
     >
       <Container>
         <Header>
@@ -217,6 +422,75 @@ export function AdminSettingsContent({
           />
           <Description>{labels.countryCodeDescription}</Description>
         </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="homepageContent">{labels.homepageContent}</Label>
+          <TextArea
+            id="homepageContent"
+            value={homepageContent}
+            onChange={(e) => setHomepageContent(e.target.value)}
+            placeholder={labels.homepageContentPlaceholder}
+            disabled={!canUpdate}
+          />
+          <Description>{labels.homepageContentDescription}</Description>
+        </FormGroup>
+
+        <Divider />
+
+        <FormGroup>
+          <SectionTitle>{labels.customLinks}</SectionTitle>
+          <SectionDescription>{labels.customLinksDescription}</SectionDescription>
+
+          {customLinks.length === 0 ? (
+            <EmptyState>{labels.noLinks}</EmptyState>
+          ) : (
+            <LinkList>
+              {customLinks.map((link) => (
+                <LinkItem key={link.id}>
+                  <LinkLabel>{link.label}</LinkLabel>
+                  <LinkUrl>{link.url}</LinkUrl>
+                  {canUpdate && (
+                    <DeleteButton onClick={() => handleDeleteLink(link.id)}>
+                      {labels.deleteLink}
+                    </DeleteButton>
+                  )}
+                </LinkItem>
+              ))}
+            </LinkList>
+          )}
+
+          {canUpdate && (
+            <AddLinkForm>
+              <InputGroup>
+                <InputLabel>{labels.linkLabel}</InputLabel>
+                <LinkInput
+                  type="text"
+                  value={newLinkLabel}
+                  onChange={(e) => setNewLinkLabel(e.target.value)}
+                  placeholder={labels.linkLabelPlaceholder}
+                />
+              </InputGroup>
+              <InputGroup>
+                <InputLabel>{labels.linkUrl}</InputLabel>
+                <LinkInput
+                  type="url"
+                  value={newLinkUrl}
+                  onChange={(e) => setNewLinkUrl(e.target.value)}
+                  placeholder={labels.linkUrlPlaceholder}
+                  style={{ minWidth: "25rem" }}
+                />
+              </InputGroup>
+              <AddButton
+                onClick={handleAddLink}
+                disabled={!newLinkLabel.trim() || !newLinkUrl.trim()}
+              >
+                {labels.addLink}
+              </AddButton>
+            </AddLinkForm>
+          )}
+        </FormGroup>
+
+        <Divider />
 
         {canUpdate && (
           <div>

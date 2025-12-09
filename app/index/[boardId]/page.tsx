@@ -6,6 +6,7 @@ import { permissionService } from "@/lib/services/permission";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { threadService } from "@/lib/services/thread";
 import { noticeService } from "@/lib/services/notice";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { isRealtimeEnabled } from "@/lib/realtime";
 import { BoardIndexContent } from "./board-index-content";
 
@@ -20,10 +21,11 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
   const page = parseInt(pageParam ?? "1", 10);
 
   try {
-    const [board, allBoards, session] = await Promise.all([
+    const [board, allBoards, session, settings] = await Promise.all([
       boardService.findById(boardId),
       boardService.findAll(),
       getServerSession(authOptions),
+      globalSettingsService.get(),
     ]);
     const [threadResult, notices] = await Promise.all([
       threadService.findByBoardId(boardId, { page, search }),
@@ -83,6 +85,7 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
         }}
         boardsTitle={tCommon("boards")}
         manualLabel={tCommon("manual")}
+        customLinks={settings.customLinks}
       />
     );
   } catch (error) {
