@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
@@ -12,6 +12,21 @@ import { parseRangeParam } from "@/lib/types/response-range";
 import { isRealtimeEnabled } from "@/lib/realtime";
 import { isStorageEnabled } from "@/lib/storage";
 import { ThreadDetailContent } from "./thread-detail-content";
+
+const ARCHIVE_REDIRECT_ENABLED = process.env.ARCHIVE_REDIRECT_ENABLED === "true";
+
+async function checkArchiveExists(boardId: string, threadId: number): Promise<boolean> {
+  if (!ARCHIVE_REDIRECT_ENABLED) return false;
+  try {
+    const res = await fetch(
+      `https://archive-data.tunaground.net/data/${boardId}/${threadId}.json`,
+      { method: "HEAD" }
+    );
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
 
 interface Props {
   params: Promise<{ boardId: string; threadId: string; range?: string[] }>;
@@ -178,6 +193,12 @@ export default async function ThreadDetailPage({ params }: Props) {
     );
   } catch (error) {
     if (error instanceof ThreadServiceError && error.code === "NOT_FOUND") {
+      // Check if archive exists and redirect if enabled
+      const archiveExists = await checkArchiveExists(boardId, threadIdNum);
+      if (archiveExists) {
+        const slug = rangeParam?.join("/") || "";
+        redirect(`/archive/${boardId}/${threadIdNum}${slug ? "/" + slug : ""}`);
+      }
       notFound();
     }
     throw error;
