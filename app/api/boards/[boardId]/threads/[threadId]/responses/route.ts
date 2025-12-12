@@ -123,7 +123,10 @@ export async function GET(
 }
 
 function generateAuthorId(ip: string): string {
-  const today = new Date().toISOString().split("T")[0];
+  // Use KST (UTC+9) for date calculation
+  const now = new Date();
+  const kstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const today = kstDate.toISOString().split("T")[0];
   const hash = crypto
     .createHash("sha256")
     .update(`${ip}:${today}`)
