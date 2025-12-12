@@ -4,11 +4,13 @@ import { authOptions } from "@/lib/auth";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { permissionService } from "@/lib/services/permission";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { checkForeignIpBlocked } from "@/lib/api/foreign-ip-check";
 import { handleServiceError } from "@/lib/api/error-handler";
 import { parsePaginationQuery } from "@/lib/types/pagination";
 import { createThreadSchema } from "@/lib/schemas";
 import { userRepository } from "@/lib/repositories/prisma/user";
+import { generateTripcode } from "@/lib/utils/tripcode";
 
 // GET /api/boards/[boardId]/threads - 스레드 목록 조회
 export async function GET(
@@ -91,7 +93,11 @@ export async function POST(
       }
     }
 
-    const username = parsed.data.username?.trim() || board.defaultUsername;
+    let username = parsed.data.username?.trim() || board.defaultUsername;
+
+    // Generate tripcode (uses default salt if not configured)
+    const settings = await globalSettingsService.get();
+    username = await generateTripcode(username, settings.tripcodeSalt || undefined);
 
     const thread = await threadService.create({
       boardId,

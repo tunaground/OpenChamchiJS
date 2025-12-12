@@ -108,6 +108,7 @@ model GlobalSettings {
   countryCode     String   @default("KR") // ISO 3166-1 alpha-2 country code
   homepageContent String?  @db.Text
   customLinks     String?  @db.Text // JSON array of {id, label, url}
+  tripcodeSalt    String?  // bcrypt salt for tripcode generation
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

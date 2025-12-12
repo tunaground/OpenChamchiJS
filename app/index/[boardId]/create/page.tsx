@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { boardService } from "@/lib/services/board";
 import { BoardServiceError } from "@/lib/services/board";
 import { permissionService } from "@/lib/services/permission";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { isStorageEnabled } from "@/lib/storage";
 import { CreateThreadContent } from "./create-thread-content";
 
@@ -16,9 +17,12 @@ export default async function CreateThreadPage({ params }: Props) {
   const { boardId } = await params;
 
   try {
-    const board = await boardService.findById(boardId);
-    const boards = await boardService.findAll();
-    const session = await getServerSession(authOptions);
+    const [board, boards, session, settings] = await Promise.all([
+      boardService.findById(boardId),
+      boardService.findAll(),
+      getServerSession(authOptions),
+      globalSettingsService.get(),
+    ]);
     const isLoggedIn = !!session;
     const canAccessAdmin = session
       ? await permissionService.checkUserPermission(session.user.id, "admin:read")
@@ -32,6 +36,7 @@ export default async function CreateThreadPage({ params }: Props) {
         boardId={boardId}
         boardName={board.name}
         defaultUsername={board.defaultUsername}
+        tripcodeSalt={settings.tripcodeSalt || undefined}
         boards={boards.map((b) => ({ id: b.id, name: b.name }))}
         storageEnabled={isStorageEnabled()}
         uploadMaxSize={board.uploadMaxSize}

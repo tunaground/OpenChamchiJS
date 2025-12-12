@@ -681,6 +681,7 @@ interface ThreadDetailContentProps {
   thread: ThreadData;
   boards: { id: string; name: string }[];
   defaultUsername: string;
+  tripcodeSalt?: string;
   showUserCount: boolean;
   realtimeEnabled: boolean;
   storageEnabled: boolean;
@@ -702,6 +703,7 @@ export function ThreadDetailContent({
   thread,
   boards,
   defaultUsername,
+  tripcodeSalt,
   showUserCount,
   realtimeEnabled,
   storageEnabled,
@@ -1517,6 +1519,9 @@ export function ThreadDetailContent({
               boardId={thread.boardId}
               threadId={thread.id}
               aaMode={responseOptions.aaMode}
+              username={username}
+              defaultUsername={defaultUsername}
+              tripcodeSalt={tripcodeSalt}
             />
           )}
           <FormGroup style={{ marginBottom: "1.6rem" }}>

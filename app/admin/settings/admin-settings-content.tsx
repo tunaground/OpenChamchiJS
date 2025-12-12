@@ -61,6 +61,23 @@ const Input = styled.input`
   }
 `;
 
+const SaltInput = styled.input`
+  width: 100%;
+  max-width: 40rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  font-size: 1.4rem;
+  font-family: monospace;
+  background: ${(props) => props.theme.background};
+  color: ${(props) => props.theme.textPrimary};
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.textSecondary};
+  }
+`;
+
 const TextArea = styled.textarea`
   width: 100%;
   min-height: 20rem;
@@ -298,6 +315,9 @@ interface Labels {
   homepageContent: string;
   homepageContentPlaceholder: string;
   homepageContentDescription: string;
+  tripcodeSalt: string;
+  tripcodeSaltPlaceholder: string;
+  tripcodeSaltDescription: string;
   save: string;
   saved: string;
   geoIpStatus: string;
@@ -320,6 +340,7 @@ interface AdminSettingsContentProps {
     countryCode: string;
     homepageContent: string | null;
     customLinks: CustomLink[];
+    tripcodeSalt: string | null;
   };
   geoIpAvailable: boolean;
   authLabels: AuthLabels;
@@ -338,6 +359,7 @@ export function AdminSettingsContent({
 }: AdminSettingsContentProps) {
   const [countryCode, setCountryCode] = useState(initialSettings.countryCode);
   const [homepageContent, setHomepageContent] = useState(initialSettings.homepageContent ?? "");
+  const [tripcodeSalt, setTripcodeSalt] = useState(initialSettings.tripcodeSalt ?? "");
   const [customLinks, setCustomLinks] = useState<CustomLink[]>(initialSettings.customLinks);
   const [newLinkLabel, setNewLinkLabel] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
@@ -371,6 +393,7 @@ export function AdminSettingsContent({
         body: JSON.stringify({
           countryCode: countryCode.toUpperCase(),
           homepageContent: homepageContent || null,
+          tripcodeSalt: tripcodeSalt || null,
           customLinks,
         }),
       });
@@ -433,6 +456,20 @@ export function AdminSettingsContent({
             disabled={!canUpdate}
           />
           <Description>{labels.homepageContentDescription}</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="tripcodeSalt">{labels.tripcodeSalt}</Label>
+          <SaltInput
+            id="tripcodeSalt"
+            type="text"
+            value={tripcodeSalt}
+            onChange={(e) => setTripcodeSalt(e.target.value)}
+            placeholder={labels.tripcodeSaltPlaceholder}
+            maxLength={100}
+            disabled={!canUpdate}
+          />
+          <Description>{labels.tripcodeSaltDescription}</Description>
         </FormGroup>
 
         <Divider />

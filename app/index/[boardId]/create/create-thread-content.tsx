@@ -197,6 +197,7 @@ interface CreateThreadContentProps {
   boardId: string;
   boardName: string;
   defaultUsername: string;
+  tripcodeSalt?: string;
   boards: BoardData[];
   storageEnabled: boolean;
   uploadMaxSize: number;
@@ -211,7 +212,8 @@ interface CreateThreadContentProps {
 export function CreateThreadContent({
   boardId,
   boardName,
-  defaultUsername: _defaultUsername,
+  defaultUsername,
+  tripcodeSalt,
   boards,
   storageEnabled,
   uploadMaxSize,
@@ -443,6 +445,9 @@ export function CreateThreadContent({
                 content={previewContent}
                 emptyLabel={labels.preview}
                 boardId={boardId}
+                username={formData.username}
+                defaultUsername={defaultUsername}
+                tripcodeSalt={tripcodeSalt}
               />
             )}
             <Textarea
