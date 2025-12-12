@@ -6,6 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { responseService, ResponseServiceError } from "@/lib/services/response";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { permissionService } from "@/lib/services/permission";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { checkForeignIpBlocked, getClientIp } from "@/lib/api/foreign-ip-check";
 import { handleServiceError } from "@/lib/api/error-handler";
 import { preparse, preprocess, stringifyPreprocessed } from "@/lib/tom";
@@ -14,6 +15,7 @@ import { userRepository } from "@/lib/repositories/prisma/user";
 import { createResponseSchema } from "@/lib/schemas";
 import { getPublisher, isRealtimeEnabled, CHANNELS, EVENTS } from "@/lib/realtime";
 import { getStorage, isStorageEnabled, StorageError } from "@/lib/storage";
+import { generateTripcode } from "@/lib/utils/tripcode";
 
 // GET /api/boards/[boardId]/threads/[threadId]/responses - 응답 목록 조회
 export async function GET(
@@ -121,7 +123,10 @@ export async function GET(
 }
 
 function generateAuthorId(ip: string): string {
-  const today = new Date().toISOString().split("T")[0];
+  // Use KST (UTC+9) for date calculation
+  const now = new Date();
+  const kstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+  const today = kstDate.toISOString().split("T")[0];
   const hash = crypto
     .createHash("sha256")
     .update(`${ip}:${today}`)
@@ -220,7 +225,11 @@ export async function POST(
       attachmentUrl = result.url;
     }
 
-    const username = parsed.data.username?.trim() || board.defaultUsername;
+    let username = parsed.data.username?.trim() || board.defaultUsername;
+
+    // Generate tripcode (uses default salt if not configured)
+    const settings = await globalSettingsService.get();
+    username = await generateTripcode(username, settings.tripcodeSalt || undefined);
 
     // Preprocess TOM content (only processes dice at write time)
     const preparsedContent = preparse(parsed.data.content);

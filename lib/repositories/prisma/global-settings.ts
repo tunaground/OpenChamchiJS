@@ -24,6 +24,7 @@ function toGlobalSettingsData(settings: {
   countryCode: string;
   homepageContent: string | null;
   customLinks: string | null;
+  tripcodeSalt: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): GlobalSettingsData {
@@ -55,6 +56,7 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       countryCode?: string;
       homepageContent?: string | null;
       customLinks?: string | null;
+      tripcodeSalt?: string | null;
     } = {};
 
     if (data.countryCode !== undefined) {
@@ -65,6 +67,9 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.customLinks !== undefined) {
       updateData.customLinks = JSON.stringify(data.customLinks);
+    }
+    if (data.tripcodeSalt !== undefined) {
+      updateData.tripcodeSalt = data.tripcodeSalt;
     }
 
     const updated = await prisma.globalSettings.upsert({

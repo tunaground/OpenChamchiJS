@@ -149,6 +149,7 @@ export const updateSettingsSchema = z.object({
   countryCode: z.string().length(2).toUpperCase().optional(),
   homepageContent: z.string().max(50000).optional().nullable(),
   customLinks: z.array(customLinkSchema).max(20).optional(),
+  tripcodeSalt: z.string().max(100).optional().nullable(),
 });
 
 export type CustomLinkInput = z.infer<typeof customLinkSchema>;

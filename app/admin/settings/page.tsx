@@ -25,6 +25,7 @@ export default async function AdminSettingsPage() {
         countryCode: settings.countryCode,
         homepageContent: settings.homepageContent,
         customLinks: settings.customLinks,
+        tripcodeSalt: settings.tripcodeSalt,
       }}
       geoIpAvailable={geoIpAvailable}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
@@ -45,6 +46,9 @@ export default async function AdminSettingsPage() {
         homepageContent: t("homepageContent"),
         homepageContentPlaceholder: t("homepageContentPlaceholder"),
         homepageContentDescription: t("homepageContentDescription"),
+        tripcodeSalt: t("tripcodeSalt"),
+        tripcodeSaltPlaceholder: t("tripcodeSaltPlaceholder"),
+        tripcodeSaltDescription: t("tripcodeSaltDescription"),
         save: t("save"),
         saved: t("saved"),
         geoIpStatus: t("geoIpStatus"),

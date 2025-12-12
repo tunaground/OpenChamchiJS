@@ -113,6 +113,7 @@ export default async function ThreadDetailPage({ params }: Props) {
         }}
         boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
         defaultUsername={board.defaultUsername}
+        tripcodeSalt={settings.tripcodeSalt || undefined}
         showUserCount={board.showUserCount && isRealtimeEnabled()}
         realtimeEnabled={isRealtimeEnabled()}
         storageEnabled={isStorageEnabled()}

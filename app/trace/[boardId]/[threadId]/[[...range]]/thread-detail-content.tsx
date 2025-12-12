@@ -295,18 +295,21 @@ const FormInput = styled.input`
   }
 `;
 
-const FormTextarea = styled.textarea`
+const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
   width: 100%;
   min-height: 12rem;
   padding: 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-  resize: vertical;
-  font-family: inherit;
-  line-height: 1.5;
+  font-size: ${(props) => (props.$aaMode ? "1.6rem" : "1.4rem")};
+  background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : props.theme.background)};
+  color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
+  resize: none;
+  font-family: ${(props) => (props.$aaMode ? '"Saitamaar", sans-serif' : "inherit")};
+  line-height: ${(props) => (props.$aaMode ? "1.8rem" : "1.5")};
+  white-space: ${(props) => (props.$aaMode ? "nowrap" : "pre-wrap")};
+  overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
+  overflow-y: hidden;
 
   &:focus {
     outline: none;
@@ -678,6 +681,7 @@ interface ThreadDetailContentProps {
   thread: ThreadData;
   boards: { id: string; name: string }[];
   defaultUsername: string;
+  tripcodeSalt?: string;
   showUserCount: boolean;
   realtimeEnabled: boolean;
   storageEnabled: boolean;
@@ -699,6 +703,7 @@ export function ThreadDetailContent({
   thread,
   boards,
   defaultUsername,
+  tripcodeSalt,
   showUserCount,
   realtimeEnabled,
   storageEnabled,
@@ -724,7 +729,20 @@ export function ThreadDetailContent({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { showToast } = useToast();
+
+  const autoResize = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight + 4}px`;
+    }
+  }, []);
+
+  useEffect(() => {
+    autoResize();
+  }, [content, autoResize]);
 
   // Calculate minLoadedSeq (smallest seq excluding 0)
   const minLoadedSeq = useMemo(() => {
@@ -1501,6 +1519,9 @@ export function ThreadDetailContent({
               boardId={thread.boardId}
               threadId={thread.id}
               aaMode={responseOptions.aaMode}
+              username={username}
+              defaultUsername={defaultUsername}
+              tripcodeSalt={tripcodeSalt}
             />
           )}
           <FormGroup style={{ marginBottom: "1.6rem" }}>
@@ -1513,10 +1534,12 @@ export function ThreadDetailContent({
           </FormGroup>
           <FormGroup style={{ marginBottom: "1.6rem" }}>
             <FormTextarea
+              ref={textareaRef}
               value={content}
               onChange={(e) => setContent(applyShortcuts(e.target.value))}
               onKeyDown={handleKeyDown}
               placeholder={labels.contentPlaceholder}
+              $aaMode={responseOptions.aaMode}
               required
             />
           </FormGroup>
