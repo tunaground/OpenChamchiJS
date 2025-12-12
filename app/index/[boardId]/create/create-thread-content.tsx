@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { signOut } from "next-auth/react";
 import styled from "styled-components";
@@ -75,16 +75,20 @@ const Input = styled.input`
   }
 `;
 
-const Textarea = styled.textarea`
+const Textarea = styled.textarea<{ $aaMode?: boolean }>`
   padding: 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   font-size: 1.6rem;
-  background: ${(props) => props.theme.surface};
-  color: ${(props) => props.theme.textPrimary};
+  background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : props.theme.surface)};
+  color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
   min-height: 20rem;
-  resize: vertical;
-  font-family: inherit;
+  resize: none;
+  font-family: ${(props) => (props.$aaMode ? '"Saitamaar", sans-serif' : "inherit")};
+  line-height: ${(props) => (props.$aaMode ? "1.8rem" : "1.5")};
+  white-space: ${(props) => (props.$aaMode ? "nowrap" : "pre-wrap")};
+  overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
+  overflow-y: hidden;
 
   &:focus {
     outline: none;
@@ -233,6 +237,20 @@ export function CreateThreadContent({
     password: "",
     content: "",
   });
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const autoResize = useCallback(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight + 4}px`;
+    }
+  }, []);
+
+  useEffect(() => {
+    autoResize();
+  }, [formData.content, autoResize]);
 
   const handleToggleOption = (key: keyof CreateThreadOptions) => {
     setOptions((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -428,6 +446,8 @@ export function CreateThreadContent({
               />
             )}
             <Textarea
+              ref={textareaRef}
+              $aaMode={options.aaMode}
               value={formData.content}
               onChange={(e) =>
                 setFormData({ ...formData, content: applyShortcuts(e.target.value) })

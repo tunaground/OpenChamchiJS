@@ -6,8 +6,6 @@ import { useThemeStore } from "@/lib/store/theme";
 import { themes } from "./themes";
 
 const GlobalStyle = createGlobalStyle`
-  @import url('https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap');
-
   @font-face {
     font-family: "Saitamaar";
     src: url("https://da1eth.github.io/AA/HeadKasen.woff2") format("woff2");
@@ -58,6 +56,21 @@ const GlobalStyle = createGlobalStyle`
   a {
     color: inherit;
     text-decoration: none;
+  }
+
+  sub, sup {
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+  }
+
+  sub {
+    bottom: -0.25em;
+  }
+
+  sup {
+    top: -0.5em;
   }
 `;
 

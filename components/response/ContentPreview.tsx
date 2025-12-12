@@ -12,8 +12,6 @@ const PreviewContainer = styled.div`
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 0.4rem;
   min-height: 4rem;
-  max-height: 20rem;
-  overflow-y: auto;
   font-size: 1.4rem;
   line-height: 1.6;
   word-break: break-word;
