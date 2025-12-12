@@ -252,8 +252,15 @@ interface Labels {
   };
 }
 
+interface CustomLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 interface ManualContentProps {
   boards: BoardData[];
+  customLinks?: CustomLink[];
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: { login: string; logout: string };
@@ -286,6 +293,7 @@ function SettingItem({ icon, title, description }: SettingItemProps) {
 
 export function ManualContent({
   boards,
+  customLinks,
   isLoggedIn,
   canAccessAdmin,
   authLabels,
@@ -293,7 +301,7 @@ export function ManualContent({
   manualLabel,
   labels,
 }: ManualContentProps) {
-  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
+  const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
 
   return (
     <PageLayout

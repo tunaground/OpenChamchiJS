@@ -744,6 +744,12 @@ export function ThreadDetailContent({
     autoResize();
   }, [content, autoResize]);
 
+  // Load saved username from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem(`chamchi:username:thread:${thread.id}`);
+    if (saved) setUsername(saved);
+  }, [thread.id]);
+
   // Calculate minLoadedSeq (smallest seq excluding 0)
   const minLoadedSeq = useMemo(() => {
     const nonZeroSeqs = responses.filter((r) => r.seq > 0).map((r) => r.seq);
@@ -1068,6 +1074,10 @@ export function ThreadDetailContent({
       }
 
       if (res.ok) {
+        // Save username to localStorage for this thread
+        if (username.trim()) {
+          localStorage.setItem(`chamchi:username:thread:${thread.id}`, username.trim());
+        }
         setContent("");
         setAttachmentFile(null);
         // In chat mode, the response will arrive via WebSocket

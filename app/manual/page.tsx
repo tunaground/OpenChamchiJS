@@ -3,12 +3,14 @@ import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { boardService } from "@/lib/services/board";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { ManualContent } from "./manual-content";
 
 export default async function ManualPage() {
-  const [allBoards, session] = await Promise.all([
+  const [allBoards, session, settings] = await Promise.all([
     boardService.findAll(),
     getServerSession(authOptions),
+    globalSettingsService.get(),
   ]);
 
   const t = await getTranslations("manual");
@@ -23,6 +25,7 @@ export default async function ManualPage() {
   return (
     <ManualContent
       boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
+      customLinks={settings.customLinks}
       isLoggedIn={!!session}
       canAccessAdmin={canAccessAdmin}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
