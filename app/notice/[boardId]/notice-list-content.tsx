@@ -166,10 +166,17 @@ interface AuthLabels {
   logout: string;
 }
 
+interface CustomLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 interface NoticeListContentProps {
   boardId: string;
   boardName: string;
   boards: BoardData[];
+  customLinks?: CustomLink[];
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: AuthLabels;
@@ -185,6 +192,7 @@ export function NoticeListContent({
   boardId,
   boardName,
   boards,
+  customLinks,
   isLoggedIn,
   canAccessAdmin,
   authLabels,
@@ -227,7 +235,7 @@ export function NoticeListContent({
     return `/notice/${boardId}${queryString ? `?${queryString}` : ""}`;
   };
 
-  const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
+  const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
 
   return (
     <PageLayout

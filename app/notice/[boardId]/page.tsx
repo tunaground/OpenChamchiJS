@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { noticeService } from "@/lib/services/notice";
 import { permissionService } from "@/lib/services/permission";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { NoticeListContent } from "./notice-list-content";
 
 interface Props {
@@ -24,10 +25,13 @@ export default async function NoticeListPage({ params, searchParams }: Props) {
       ? await permissionService.checkUserPermission(session.user.id, "admin:read")
       : false;
 
-    const board = await boardService.findById(boardId);
-    const allBoards = await boardService.findAll();
+    const [board, allBoards, settings, result] = await Promise.all([
+      boardService.findById(boardId),
+      boardService.findAll(),
+      globalSettingsService.get(),
+      noticeService.findByBoardId(boardId, { page, search }),
+    ]);
     const boards = allBoards.filter((b) => !b.deleted);
-    const result = await noticeService.findByBoardId(boardId, { page, search });
 
     const t = await getTranslations("noticeList");
     const tCommon = await getTranslations("common");
@@ -37,6 +41,7 @@ export default async function NoticeListPage({ params, searchParams }: Props) {
         boardId={boardId}
         boardName={board.name}
         boards={boards.map((b) => ({ id: b.id, name: b.name }))}
+        customLinks={settings.customLinks}
         isLoggedIn={isLoggedIn}
         canAccessAdmin={canAccessAdmin}
         authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
