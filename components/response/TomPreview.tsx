@@ -112,6 +112,15 @@ export function TomPreview({
     }
   }, [content, boardId, threadId, aaMode, handleAnchorClick, sourceKey, t]);
 
+  // Real-time clock for preview
+  const [now, setNow] = useState(() => new Date().toISOString());
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setNow(new Date().toISOString());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
   // Construct preview response data
   const previewResponse = useMemo(
     () => ({
@@ -120,9 +129,9 @@ export function TomPreview({
       username: displayUsername || defaultUsername || "Anonymous",
       authorId: "PREVIEW",
       content: content,
-      createdAt: new Date().toISOString(),
+      createdAt: now,
     }),
-    [lastSeq, displayUsername, defaultUsername, content]
+    [lastSeq, displayUsername, defaultUsername, content, now]
   );
 
   return (
