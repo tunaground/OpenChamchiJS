@@ -333,6 +333,11 @@ interface Labels {
   linkUrlPlaceholder: string;
   noLinks: string;
   deleteLink: string;
+  cacheManagement: string;
+  cacheManagementDescription: string;
+  invalidateAll: string;
+  invalidating: string;
+  invalidated: string;
 }
 
 interface AdminSettingsContentProps {
@@ -365,6 +370,8 @@ export function AdminSettingsContent({
   const [newLinkUrl, setNewLinkUrl] = useState("");
   const [loading, setLoading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [cacheInvalidating, setCacheInvalidating] = useState(false);
+  const [cacheInvalidated, setCacheInvalidated] = useState(false);
 
   const handleAddLink = () => {
     if (!newLinkLabel.trim() || !newLinkUrl.trim()) return;
@@ -404,6 +411,26 @@ export function AdminSettingsContent({
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleInvalidateCache = async () => {
+    if (!canUpdate) return;
+    setCacheInvalidating(true);
+    setCacheInvalidated(false);
+    try {
+      const res = await fetch("/api/admin/cache", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ all: true }),
+      });
+
+      if (res.ok) {
+        setCacheInvalidated(true);
+        setTimeout(() => setCacheInvalidated(false), 3000);
+      }
+    } finally {
+      setCacheInvalidating(false);
     }
   };
 
@@ -526,6 +553,21 @@ export function AdminSettingsContent({
             </AddLinkForm>
           )}
         </FormGroup>
+
+        <Divider />
+
+        {canUpdate && (
+          <FormGroup>
+            <SectionTitle>{labels.cacheManagement}</SectionTitle>
+            <SectionDescription>{labels.cacheManagementDescription}</SectionDescription>
+            <div>
+              <Button onClick={handleInvalidateCache} disabled={cacheInvalidating}>
+                {cacheInvalidating ? labels.invalidating : labels.invalidateAll}
+              </Button>
+              {cacheInvalidated && <SuccessMessage>{labels.invalidated}</SuccessMessage>}
+            </div>
+          </FormGroup>
+        )}
 
         <Divider />
 

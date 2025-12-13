@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { boardService } from "@/lib/services/board";
+import { toISOString } from "@/lib/cache";
 import { BoardsContent } from "./boards-content";
 
 export default async function AdminBoardsPage() {
@@ -33,7 +34,7 @@ export default async function AdminBoardsPage() {
         showUserCount: board.showUserCount,
         uploadMaxSize: board.uploadMaxSize,
         uploadMimeTypes: board.uploadMimeTypes,
-        createdAt: board.createdAt.toISOString(),
+        createdAt: toISOString(board.createdAt),
       }))}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
       sidebarLabels={{

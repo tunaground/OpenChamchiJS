@@ -64,6 +64,11 @@ export default async function AdminSettingsPage() {
         linkUrlPlaceholder: t("linkUrlPlaceholder"),
         noLinks: t("noLinks"),
         deleteLink: t("deleteLink"),
+        cacheManagement: t("cacheManagement"),
+        cacheManagementDescription: t("cacheManagementDescription"),
+        invalidateAll: t("invalidateAll"),
+        invalidating: t("invalidating"),
+        invalidated: t("invalidated"),
       }}
     />
   );

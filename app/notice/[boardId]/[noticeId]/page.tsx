@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { noticeService, NoticeServiceError } from "@/lib/services/notice";
+import { toISOString } from "@/lib/cache";
 import { NoticeDetailContent } from "./notice-detail-content";
 
 interface Props {
@@ -36,8 +37,8 @@ export default async function NoticeDetailPage({ params }: Props) {
           title: notice.title,
           content: notice.content,
           pinned: notice.pinned,
-          createdAt: notice.createdAt.toISOString(),
-          updatedAt: notice.updatedAt.toISOString(),
+          createdAt: toISOString(notice.createdAt),
+          updatedAt: toISOString(notice.updatedAt),
         }}
         labels={{
           backToList: t("backToList"),

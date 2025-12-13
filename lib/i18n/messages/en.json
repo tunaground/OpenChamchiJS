@@ -248,7 +248,12 @@
     "linkUrl": "URL",
     "linkUrlPlaceholder": "https://example.com",
     "noLinks": "No links registered.",
-    "deleteLink": "Delete"
+    "deleteLink": "Delete",
+    "cacheManagement": "Cache Management",
+    "cacheManagementDescription": "Manually invalidate database query caches. Use when data is not reflecting the latest changes.",
+    "invalidateAll": "Invalidate All Caches",
+    "invalidating": "Invalidating...",
+    "invalidated": "Cache invalidated successfully."
   },
   "adminThreads": {
     "title": "Thread Management",
