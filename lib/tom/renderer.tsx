@@ -39,7 +39,9 @@ const Spoiler = styled.span`
 `;
 
 const Sub = styled.sub`
-  font-size: 1.0rem;
+  font-size: 1rem;
+  vertical-align: text-bottom;
+    line-height: initial;
 `;
 
 const Calc = styled.span<{ $exp: string }>`
