@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
+import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
 import { ImageUpload } from "@/components/response/ImageUpload";
 import { ImageAttachment } from "@/components/response/ImageAttachment";
 import { useResponseOptions } from "@/lib/hooks/useResponseOptions";
@@ -99,51 +100,6 @@ const ResponsesSection = styled.section`
   display: flex;
   flex-direction: column;
   gap: 1.6rem;
-`;
-
-const AnchorPreviewSection = styled.section`
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-  margin-bottom: 2.4rem;
-  padding: 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  border: 2px solid ${(props) => props.theme.anchorALinkColor || props.theme.textSecondary};
-  border-radius: 8px;
-`;
-
-const AnchorPreviewHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0.8rem;
-`;
-
-const AnchorPreviewTitle = styled.span`
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: ${(props) => props.theme.textSecondary};
-`;
-
-const AnchorCloseButton = styled.button`
-  padding: 0.4rem 0.8rem;
-  background: transparent;
-  color: ${(props) => props.theme.textSecondary};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.2rem;
-  cursor: pointer;
-
-  &:hover {
-    background: ${(props) => props.theme.surface};
-  }
-`;
-
-const AnchorResponseCard = styled.div`
-  background: ${(props) => props.theme.responseCard};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 6px;
-  overflow: hidden;
 `;
 
 const ResponseCard = styled.div`
@@ -863,13 +819,13 @@ export function ThreadDetailContent({
   const threadChannel = CHANNELS.thread(thread.id);
   const { memberCount: threadMemberCount } = usePresence(threadChannel, showUserCount);
 
-  // Anchor preview stack state
-  interface AnchorStackItem {
-    info: AnchorInfo;
-    responses: ResponseData[];
-    loading: boolean;
-  }
-  const [anchorStack, setAnchorStack] = useState<AnchorStackItem[]>([]);
+  // Anchor preview stack (using shared hook)
+  const {
+    anchorStack,
+    handleAnchorClick,
+    closeAnchorPreview,
+    anchorPrerenderedContents,
+  } = useAnchorStack();
 
   // Raw content toggle state
   const [rawContentIds, setRawContentIds] = useState<Set<string>>(new Set());
@@ -885,23 +841,6 @@ export function ThreadDetailContent({
       return next;
     });
   }, []);
-
-  // Handle anchor click - push to stack
-  const handleAnchorClick = (info: AnchorInfo) => {
-    setAnchorStack((prev) => [...prev, { info, responses: [], loading: true }]);
-  };
-
-  // Close specific anchor preview
-  const closeAnchorPreview = (sourceResponseId: string) => {
-    setAnchorStack((prev) => {
-      const index = prev.findIndex((item) => item.info.sourceResponseId === sourceResponseId);
-      if (index !== -1) {
-        // Remove this item and all items after it
-        return prev.slice(0, index);
-      }
-      return prev;
-    });
-  };
 
   // Manage modal state
   const [manageModalOpen, setManageModalOpen] = useState(false);
@@ -949,45 +888,6 @@ export function ThreadDetailContent({
     }
   }, [responseOptions.alwaysBottom, responseOptions.chatMode, responses]);
 
-  // Fetch anchor responses when a new item is added to the stack
-  useEffect(() => {
-    const lastItem = anchorStack[anchorStack.length - 1];
-    if (!lastItem || !lastItem.loading) return;
-
-    const fetchAnchorResponses = async () => {
-      try {
-        const { boardId: anchorBoardId, threadId: anchorThreadId, start, end } = lastItem.info;
-        const endSeq = end ?? start;
-        const res = await fetch(
-          `/api/boards/${anchorBoardId}/threads/${anchorThreadId}/responses?startSeq=${start}&endSeq=${endSeq}`
-        );
-        if (res.ok) {
-          const data = await res.json();
-          setAnchorStack((prev) => {
-            const newStack = [...prev];
-            const idx = newStack.findIndex((item) => item.info.sourceResponseId === lastItem.info.sourceResponseId);
-            if (idx !== -1) {
-              newStack[idx] = { ...newStack[idx], responses: data, loading: false };
-            }
-            return newStack;
-          });
-        }
-      } catch {
-        console.error("Failed to fetch anchor responses");
-        setAnchorStack((prev) => {
-          const newStack = [...prev];
-          const idx = newStack.findIndex((item) => item.info.sourceResponseId === lastItem.info.sourceResponseId);
-          if (idx !== -1) {
-            newStack[idx] = { ...newStack[idx], loading: false };
-          }
-          return newStack;
-        });
-      }
-    };
-
-    fetchAnchorResponses();
-  }, [anchorStack.length]);
-
   // Prerender TOM content for all responses
   const prerenderedContents = useMemo(() => {
     const map = new Map<string, PrerenderedRoot>();
@@ -998,21 +898,6 @@ export function ThreadDetailContent({
     }
     return map;
   }, [responses]);
-
-  // Prerender TOM content for all anchor stack responses
-  const anchorPrerenderedContents = useMemo(() => {
-    const map = new Map<string, PrerenderedRoot>();
-    for (const stackItem of anchorStack) {
-      for (const response of stackItem.responses) {
-        if (!map.has(response.id)) {
-          const parsed = parse(response.content);
-          const prerendered = prerender(parsed);
-          map.set(response.id, prerendered);
-        }
-      }
-    }
-    return map;
-  }, [anchorStack]);
 
   const t = useTranslations();
   const tThread = useTranslations("threadDetail");
@@ -1127,68 +1012,6 @@ export function ThreadDetailContent({
         handleSubmit(e as unknown as React.FormEvent);
       }
     }
-  };
-
-  // Render anchor stack recursively for a given source key
-  // sourceKey format: "main:{responseId}" for main responses, "anchor:{parentSourceKey}:{responseId}" for nested
-  const renderAnchorStack = (sourceKey: string): React.ReactNode => {
-    // Find the anchor stack item that has this sourceKey as sourceResponseId
-    const stackItem = anchorStack.find((item) => item.info.sourceResponseId === sourceKey);
-    if (!stackItem) return null;
-
-    const { info, responses: anchorResponses, loading } = stackItem;
-
-    return (
-      <AnchorPreviewSection key={`anchor-${sourceKey}`}>
-        <AnchorPreviewHeader>
-          <AnchorPreviewTitle>
-            &gt;{info.threadId}&gt;{info.start}
-            {info.end && info.end !== info.start && `-${info.end}`}
-          </AnchorPreviewTitle>
-          <AnchorCloseButton onClick={() => closeAnchorPreview(sourceKey)}>
-            {labels.close}
-          </AnchorCloseButton>
-        </AnchorPreviewHeader>
-        {loading ? (
-          <div style={{ textAlign: "center", padding: "1rem", color: "var(--text-secondary)" }}>
-            Loading...
-          </div>
-        ) : (
-          anchorResponses.filter((r) => r.seq !== 0).map((anchorResponse) => {
-            // Create unique key for nested anchor responses
-            const nestedKey = `anchor:${sourceKey}:${anchorResponse.id}`;
-            return (
-              <div key={anchorResponse.id}>
-                {/* Recursively render nested anchor previews */}
-                {renderAnchorStack(nestedKey)}
-                <AnchorResponseCard>
-                  <ResponseHeader>
-                    <ResponseInfo>
-                      <ResponseSeq>#{anchorResponse.seq}</ResponseSeq>
-                      <ResponseUsername>{anchorResponse.username}</ResponseUsername>
-                      <ResponseAuthorId>({anchorResponse.authorId})</ResponseAuthorId>
-                      <ResponseDate>{formatDateTime(anchorResponse.createdAt)}</ResponseDate>
-                    </ResponseInfo>
-                  </ResponseHeader>
-                  <ResponseContent>
-                    {anchorPrerenderedContents.has(anchorResponse.id)
-                      ? render(anchorPrerenderedContents.get(anchorResponse.id)!, {
-                          boardId: info.boardId,
-                          threadId: info.threadId,
-                          responseId: nestedKey,
-                          setAnchorInfo: handleAnchorClick,
-                          t,
-                          onCopy: () => showToast(labels.copied),
-                        })
-                      : anchorResponse.content}
-                  </ResponseContent>
-                </AnchorResponseCard>
-              </div>
-            );
-          })
-        )}
-      </AnchorPreviewSection>
-    );
   };
 
   // Manage modal handlers
@@ -1432,7 +1255,15 @@ export function ThreadDetailContent({
             return (
             <div key={response.id}>
               {/* Anchor Preview Stack - shown above the source response */}
-              {renderAnchorStack(mainKey)}
+              <AnchorPreview
+                anchorStack={anchorStack}
+                sourceKey={mainKey}
+                prerenderedContents={anchorPrerenderedContents}
+                onAnchorClick={handleAnchorClick}
+                onClose={closeAnchorPreview}
+                closeLabel={labels.close}
+                onCopy={() => showToast(labels.copied)}
+              />
               <ResponseCard>
                 <ResponseHeader>
                   <ResponseInfo>
@@ -1511,6 +1342,20 @@ export function ThreadDetailContent({
         )}
       </ResponsesSection>
 
+      {/* Preview - shown after responses like the next post */}
+      {!thread.ended && responseOptions.previewMode && (
+        <ResponsePreview
+          content={content}
+          boardId={thread.boardId}
+          threadId={thread.id}
+          lastSeq={currentLastSeq}
+          aaMode={responseOptions.aaMode}
+          username={username}
+          defaultUsername={defaultUsername}
+          tripcodeSalt={tripcodeSalt}
+        />
+      )}
+
       {thread.ended ? (
         <EndedNotice>{labels.threadEnded}</EndedNotice>
       ) : (
@@ -1523,17 +1368,6 @@ export function ThreadDetailContent({
             onResetThreadOptions={resetAllThreadOptions}
             realtimeEnabled={realtimeEnabled}
           />
-          {responseOptions.previewMode && (
-            <ResponsePreview
-              content={content}
-              boardId={thread.boardId}
-              threadId={thread.id}
-              aaMode={responseOptions.aaMode}
-              username={username}
-              defaultUsername={defaultUsername}
-              tripcodeSalt={tripcodeSalt}
-            />
-          )}
           <FormGroup style={{ marginBottom: "1.6rem" }}>
             <FormInput
               type="text"
