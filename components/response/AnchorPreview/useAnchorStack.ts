@@ -35,19 +35,17 @@ export function useAnchorStack(): UseAnchorStackReturn {
         const res = await fetch(
           `/api/boards/${boardId}/threads/${threadId}/responses?startSeq=${start}&endSeq=${endSeq}`
         );
-        if (res.ok) {
-          const data: AnchorResponseData[] = await res.json();
-          setAnchorStack((prev) => {
-            const newStack = [...prev];
-            const idx = newStack.findIndex(
-              (item) => item.info.sourceResponseId === lastItem.info.sourceResponseId
-            );
-            if (idx !== -1) {
-              newStack[idx] = { ...newStack[idx], responses: data, loading: false };
-            }
-            return newStack;
-          });
-        }
+        const data: AnchorResponseData[] = res.ok ? await res.json() : [];
+        setAnchorStack((prev) => {
+          const newStack = [...prev];
+          const idx = newStack.findIndex(
+            (item) => item.info.sourceResponseId === lastItem.info.sourceResponseId
+          );
+          if (idx !== -1) {
+            newStack[idx] = { ...newStack[idx], responses: data, loading: false };
+          }
+          return newStack;
+        });
       } catch {
         console.error("Failed to fetch anchor responses");
         setAnchorStack((prev) => {

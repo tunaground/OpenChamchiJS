@@ -37,6 +37,8 @@ export function AnchorPreview({
 
       {loading ? (
         <S.Loading>Loading...</S.Loading>
+      ) : anchorResponses.filter((r) => r.seq !== 0).length === 0 ? (
+        <S.Loading>{t("response.not_found")}</S.Loading>
       ) : (
         anchorResponses
           .filter((r) => r.seq !== 0)

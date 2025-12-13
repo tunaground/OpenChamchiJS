@@ -40,7 +40,8 @@ export interface ResponseService {
   ): Promise<ResponseData[]>;
   findByRange(
     threadId: number,
-    range: ResponseRangeType
+    range: ResponseRangeType,
+    boardId?: string
   ): Promise<ResponseData[]>;
   findById(id: string): Promise<ResponseData>;
   create(data: CreateResponseInput): Promise<ResponseData>;
@@ -109,10 +110,14 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
 
     async findByRange(
       threadId: number,
-      range: ResponseRangeType
+      range: ResponseRangeType,
+      boardId?: string
     ): Promise<ResponseData[]> {
       const thread = await threadRepository.findById(threadId);
-      if (!thread || thread.deleted) {
+      if (!thread || thread.deleted || !thread.published) {
+        throw new ResponseServiceError("Thread not found", "NOT_FOUND");
+      }
+      if (boardId && thread.boardId !== boardId) {
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 

@@ -6,6 +6,9 @@
     "boards": "Boards",
     "manual": "Manual"
   },
+  "response": {
+    "not_found": "Response not found."
+  },
   "login": {
     "title": "Login",
     "googleButton": "Login with Google"
