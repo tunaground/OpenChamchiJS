@@ -84,7 +84,7 @@ export async function GET(
           type: "range",
           startSeq,
           endSeq,
-        });
+        }, boardId);
       } else {
         responses = await responseService.findByThreadId(id, {
           limit,

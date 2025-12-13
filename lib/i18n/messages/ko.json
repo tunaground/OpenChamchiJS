@@ -6,6 +6,9 @@
     "boards": "게시판",
     "manual": "매뉴얼"
   },
+  "response": {
+    "not_found": "응답을 찾을 수 없습니다."
+  },
   "login": {
     "title": "로그인",
     "googleButton": "Google로 로그인"
