@@ -20,13 +20,15 @@ describe("ResponseService", () => {
   const mockBoard: BoardData = {
     id: "test-board",
     name: "Test Board",
-    description: null,
     threadsPerPage: 20,
     responsesPerPage: 50,
     maxResponsesPerThread: 1000,
     blockForeignIp: false,
     deleted: false,
-    defaultUsername: null,
+    defaultUsername: "anonymous",
+    showUserCount: false,
+    uploadMaxSize: 5242880,
+    uploadMimeTypes: "image/png,image/jpeg,image/gif,image/webp",
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -37,8 +39,10 @@ describe("ResponseService", () => {
     title: "Test Thread",
     password: "hashed_thread-password",
     username: "testuser",
+    userId: null,
     ended: false,
     deleted: false,
+    published: true,
     createdAt: new Date(),
     updatedAt: new Date(),
     top: false,
@@ -63,6 +67,8 @@ describe("ResponseService", () => {
     findByThreadId: jest.fn(),
     findById: jest.fn(),
     findByThreadIdAndSeq: jest.fn(),
+    findByThreadIdAndSeqRange: jest.fn(),
+    findRecentByThreadId: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -71,6 +77,8 @@ describe("ResponseService", () => {
 
   const createMockThreadRepo = (): jest.Mocked<ThreadRepository> => ({
     findByBoardId: jest.fn(),
+    findByBoardIdWithResponseCount: jest.fn(),
+    countByBoardId: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
@@ -88,6 +96,7 @@ describe("ResponseService", () => {
 
   const createMockBoardRepo = (): jest.Mocked<BoardRepository> => ({
     findAll: jest.fn(),
+    findAllWithThreadCount: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
@@ -150,6 +159,84 @@ describe("ResponseService", () => {
       await expect(service.findByThreadId(1)).rejects.toMatchObject({
         code: "NOT_FOUND",
       });
+    });
+  });
+
+  describe("findByRange", () => {
+    it("should return responses for a valid published thread", async () => {
+      const mockResponseRepo = createMockResponseRepo();
+      const mockThreadRepo = createMockThreadRepo();
+      const mockPermission = createMockPermission();
+
+      mockThreadRepo.findById.mockResolvedValue(mockThread);
+      mockResponseRepo.findByThreadIdAndSeqRange.mockResolvedValue([mockResponse]);
+
+      const service = createResponseService({
+        responseRepository: mockResponseRepo,
+        threadRepository: mockThreadRepo,
+        permissionService: mockPermission,
+      });
+
+      const result = await service.findByRange(1, { type: "range", startSeq: 1, endSeq: 5 });
+
+      expect(result).toEqual([mockResponse]);
+    });
+
+    it("should throw NOT_FOUND when thread is not published", async () => {
+      const mockResponseRepo = createMockResponseRepo();
+      const mockThreadRepo = createMockThreadRepo();
+      const mockPermission = createMockPermission();
+
+      mockThreadRepo.findById.mockResolvedValue({ ...mockThread, published: false });
+
+      const service = createResponseService({
+        responseRepository: mockResponseRepo,
+        threadRepository: mockThreadRepo,
+        permissionService: mockPermission,
+      });
+
+      await expect(service.findByRange(1, { type: "range", startSeq: 1, endSeq: 5 })).rejects.toMatchObject({
+        code: "NOT_FOUND",
+      });
+    });
+
+    it("should throw NOT_FOUND when boardId does not match", async () => {
+      const mockResponseRepo = createMockResponseRepo();
+      const mockThreadRepo = createMockThreadRepo();
+      const mockPermission = createMockPermission();
+
+      mockThreadRepo.findById.mockResolvedValue(mockThread); // boardId: "test-board"
+
+      const service = createResponseService({
+        responseRepository: mockResponseRepo,
+        threadRepository: mockThreadRepo,
+        permissionService: mockPermission,
+      });
+
+      // Pass a different boardId
+      await expect(service.findByRange(1, { type: "range", startSeq: 1, endSeq: 5 }, "wrong-board")).rejects.toMatchObject({
+        code: "NOT_FOUND",
+      });
+    });
+
+    it("should pass when boardId matches", async () => {
+      const mockResponseRepo = createMockResponseRepo();
+      const mockThreadRepo = createMockThreadRepo();
+      const mockPermission = createMockPermission();
+
+      mockThreadRepo.findById.mockResolvedValue(mockThread); // boardId: "test-board"
+      mockResponseRepo.findByThreadIdAndSeqRange.mockResolvedValue([mockResponse]);
+
+      const service = createResponseService({
+        responseRepository: mockResponseRepo,
+        threadRepository: mockThreadRepo,
+        permissionService: mockPermission,
+      });
+
+      // Pass matching boardId
+      const result = await service.findByRange(1, { type: "range", startSeq: 1, endSeq: 5 }, "test-board");
+
+      expect(result).toEqual([mockResponse]);
     });
   });
 
@@ -369,15 +456,18 @@ describe("ResponseService", () => {
   });
 
   describe("delete", () => {
+    // Response with seq > 0 for delete tests (seq 0 cannot be deleted)
+    const deletableResponse = { ...mockResponse, seq: 1 };
+
     it("should delete response when user has thread:delete permission", async () => {
       const mockResponseRepo = createMockResponseRepo();
       const mockThreadRepo = createMockThreadRepo();
       const mockPermission = createMockPermission();
 
-      mockResponseRepo.findById.mockResolvedValue(mockResponse);
+      mockResponseRepo.findById.mockResolvedValue(deletableResponse);
       mockThreadRepo.findById.mockResolvedValue(mockThread);
       mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockResponseRepo.delete.mockResolvedValue({ ...mockResponse, deleted: true });
+      mockResponseRepo.delete.mockResolvedValue({ ...deletableResponse, deleted: true });
 
       const service = createResponseService({
         responseRepository: mockResponseRepo,
@@ -395,10 +485,10 @@ describe("ResponseService", () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockPermission = createMockPermission();
 
-      mockResponseRepo.findById.mockResolvedValue(mockResponse);
+      mockResponseRepo.findById.mockResolvedValue(deletableResponse);
       mockThreadRepo.findById.mockResolvedValue(mockThread);
       mockPermission.checkUserPermissions.mockResolvedValue(false);
-      mockResponseRepo.delete.mockResolvedValue({ ...mockResponse, deleted: true });
+      mockResponseRepo.delete.mockResolvedValue({ ...deletableResponse, deleted: true });
 
       const service = createResponseService({
         responseRepository: mockResponseRepo,
@@ -416,7 +506,7 @@ describe("ResponseService", () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockPermission = createMockPermission();
 
-      mockResponseRepo.findById.mockResolvedValue(mockResponse);
+      mockResponseRepo.findById.mockResolvedValue(deletableResponse);
       mockThreadRepo.findById.mockResolvedValue(mockThread);
       mockPermission.checkUserPermissions.mockResolvedValue(false);
 
@@ -432,6 +522,25 @@ describe("ResponseService", () => {
         code: "FORBIDDEN",
       });
       expect(mockResponseRepo.delete).not.toHaveBeenCalled();
+    });
+
+    it("should throw BAD_REQUEST when trying to delete seq 0 response", async () => {
+      const mockResponseRepo = createMockResponseRepo();
+      const mockThreadRepo = createMockThreadRepo();
+      const mockPermission = createMockPermission();
+
+      mockResponseRepo.findById.mockResolvedValue(mockResponse); // seq: 0
+      mockPermission.checkUserPermissions.mockResolvedValue(true);
+
+      const service = createResponseService({
+        responseRepository: mockResponseRepo,
+        threadRepository: mockThreadRepo,
+        permissionService: mockPermission,
+      });
+
+      await expect(service.delete("user-1", "response-1")).rejects.toMatchObject({
+        code: "BAD_REQUEST",
+      });
     });
 
     it("should throw NOT_FOUND when response does not exist", async () => {
