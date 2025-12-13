@@ -7,9 +7,33 @@ import type { AnchorStackItem, AnchorResponseData, UseAnchorStackReturn } from "
 export function useAnchorStack(): UseAnchorStackReturn {
   const [anchorStack, setAnchorStack] = useState<AnchorStackItem[]>([]);
 
-  // Handle anchor click - push to stack
+  // Handle anchor click - toggle or replace existing, or push new
   const handleAnchorClick = useCallback((info: AnchorInfo) => {
-    setAnchorStack((prev) => [...prev, { info, responses: [], loading: true }]);
+    setAnchorStack((prev) => {
+      const existingIndex = prev.findIndex(
+        (item) => item.info.sourceResponseId === info.sourceResponseId
+      );
+
+      if (existingIndex !== -1) {
+        const existing = prev[existingIndex];
+        // 같은 앵커면 토글 (닫기)
+        if (
+          existing.info.boardId === info.boardId &&
+          existing.info.threadId === info.threadId &&
+          existing.info.start === info.start &&
+          existing.info.end === info.end
+        ) {
+          return prev.slice(0, existingIndex);
+        }
+        // 다른 앵커면 교체
+        const newStack = [...prev.slice(0, existingIndex + 1)];
+        newStack[existingIndex] = { info, responses: [], loading: true };
+        return newStack;
+      }
+
+      // 새 아이템 추가
+      return [...prev, { info, responses: [], loading: true }];
+    });
   }, []);
 
   // Close specific anchor preview (and all nested ones after it)
@@ -23,14 +47,14 @@ export function useAnchorStack(): UseAnchorStackReturn {
     });
   }, []);
 
-  // Fetch anchor responses when a new item is added to the stack
+  // Fetch anchor responses when a loading item exists
   useEffect(() => {
-    const lastItem = anchorStack[anchorStack.length - 1];
-    if (!lastItem || !lastItem.loading) return;
+    const loadingItem = anchorStack.find((item) => item.loading);
+    if (!loadingItem) return;
 
     const fetchAnchorResponses = async () => {
       try {
-        const { boardId, threadId, start, end } = lastItem.info;
+        const { boardId, threadId, start, end } = loadingItem.info;
         const endSeq = end ?? start;
         const res = await fetch(
           `/api/boards/${boardId}/threads/${threadId}/responses?startSeq=${start}&endSeq=${endSeq}`
@@ -39,7 +63,7 @@ export function useAnchorStack(): UseAnchorStackReturn {
         setAnchorStack((prev) => {
           const newStack = [...prev];
           const idx = newStack.findIndex(
-            (item) => item.info.sourceResponseId === lastItem.info.sourceResponseId
+            (item) => item.info.sourceResponseId === loadingItem.info.sourceResponseId
           );
           if (idx !== -1) {
             newStack[idx] = { ...newStack[idx], responses: data, loading: false };
@@ -51,7 +75,7 @@ export function useAnchorStack(): UseAnchorStackReturn {
         setAnchorStack((prev) => {
           const newStack = [...prev];
           const idx = newStack.findIndex(
-            (item) => item.info.sourceResponseId === lastItem.info.sourceResponseId
+            (item) => item.info.sourceResponseId === loadingItem.info.sourceResponseId
           );
           if (idx !== -1) {
             newStack[idx] = { ...newStack[idx], loading: false };
@@ -62,7 +86,7 @@ export function useAnchorStack(): UseAnchorStackReturn {
     };
 
     fetchAnchorResponses();
-  }, [anchorStack.length]);
+  }, [anchorStack]);
 
   // Prerender TOM content for all anchor stack responses
   const anchorPrerenderedContents = useMemo(() => {
