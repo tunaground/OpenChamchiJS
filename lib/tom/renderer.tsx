@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 import styled from "styled-components";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -23,6 +23,18 @@ import {
   TomCalcResult,
 } from "./prerenderer";
 
+// CSS color validation to prevent injection attacks
+const CSS_COLOR_REGEX =
+  /^(#[0-9a-fA-F]{3,8}|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)|rgba\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*[\d.]+\s*\)|hsl\(\s*\d{1,3}\s*,\s*[\d.]+%\s*,\s*[\d.]+%\s*\)|hsla\(\s*\d{1,3}\s*,\s*[\d.]+%\s*,\s*[\d.]+%\s*,\s*[\d.]+\s*\)|[a-zA-Z]+)$/;
+
+function sanitizeCssColor(value: string): string | null {
+  const trimmed = value.trim();
+  if (CSS_COLOR_REGEX.test(trimmed)) {
+    return trimmed;
+  }
+  return null;
+}
+
 // Styled Components
 const ColorSpan = styled.span<{ $color?: string; $textShadow?: string }>`
   color: ${(props) => props.$color};
@@ -39,7 +51,9 @@ const Spoiler = styled.span`
 `;
 
 const Sub = styled.sub`
-  font-size: 1.0rem;
+  font-size: 1rem;
+  vertical-align: text-bottom;
+    line-height: initial;
 `;
 
 const Calc = styled.span<{ $exp: string }>`
@@ -303,13 +317,15 @@ function flattenWithBreaks(node: PrerenderedNode, key: number): ReactNode {
   const result: ReactNode[] = [];
 
   lines.forEach((line, lineIdx) => {
-    result.push(line);
+    if (line) {
+      result.push(<span key={`line-${key}-${lineIdx}`}>{line}</span>);
+    }
     if (lineIdx < lines.length - 1) {
       result.push(<br key={`br-${key}-${lineIdx}`} />);
     }
   });
 
-  return <>{result}</>;
+  return <Fragment key={key}>{result}</Fragment>;
 }
 
 // Render a single node
@@ -401,10 +417,16 @@ function renderNode(node: PrerenderedNode, key: number, ctx: RenderContext): Rea
             return flattenWithBreaks(node, key);
           }
 
-          const color = elem.attributes[0].value;
+          const color = sanitizeCssColor(elem.attributes[0].value);
+          if (!color) {
+            return flattenWithBreaks(node, key);
+          }
 
           if (elem.attributes.length >= 2 && isTomText(elem.attributes[1])) {
-            const shadow = elem.attributes[1].value;
+            const shadow = sanitizeCssColor(elem.attributes[1].value);
+            if (!shadow) {
+              return flattenWithBreaks(node, key);
+            }
             return (
               <ColorSpan key={key} $color={color} $textShadow={shadow}>
                 {content}

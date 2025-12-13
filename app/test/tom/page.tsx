@@ -55,7 +55,7 @@ const TextArea = styled.textarea`
   min-height: 300px;
   padding: 12px;
   font-family: monospace;
-  font-size: 14px;
+  font-size: 14rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   resize: none;
@@ -93,7 +93,7 @@ const ThemeToggle = styled.button`
   background: ${(props) => props.theme.surface};
   color: ${(props) => props.theme.textPrimary};
   cursor: pointer;
-  font-size: 14px;
+  font-size: 14rem;
 
   &:hover {
     background: ${(props) => props.theme.surfaceHover};
@@ -114,7 +114,7 @@ const Tag = styled.code`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: 12px;
+  font-size: 12rem;
   cursor: pointer;
 
   &:hover {
