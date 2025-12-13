@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { Fragment, ReactNode } from "react";
 import styled from "styled-components";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -317,13 +317,15 @@ function flattenWithBreaks(node: PrerenderedNode, key: number): ReactNode {
   const result: ReactNode[] = [];
 
   lines.forEach((line, lineIdx) => {
-    result.push(line);
+    if (line) {
+      result.push(<span key={`line-${key}-${lineIdx}`}>{line}</span>);
+    }
     if (lineIdx < lines.length - 1) {
       result.push(<br key={`br-${key}-${lineIdx}`} />);
     }
   });
 
-  return <>{result}</>;
+  return <Fragment key={key}>{result}</Fragment>;
 }
 
 // Render a single node
