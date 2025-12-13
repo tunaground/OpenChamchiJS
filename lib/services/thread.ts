@@ -20,6 +20,7 @@ import {
   createPaginatedResult,
 } from "@/lib/types/pagination";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
+import { cached, invalidateCache, CACHE_TAGS } from "@/lib/cache";
 
 export class ThreadServiceError extends ServiceError {
   constructor(
@@ -100,7 +101,11 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
 
     async findById(id: number, options?: FindByIdOptions): Promise<ThreadData> {
       const includeDeleted = options?.includeDeleted ?? false;
-      const thread = await threadRepository.findById(id);
+      const thread = await cached(
+        () => threadRepository.findById(id),
+        ["thread", id.toString()],
+        [CACHE_TAGS.threads, CACHE_TAGS.thread(id)]
+      );
       if (!thread || (!includeDeleted && thread.deleted)) {
         throw new ThreadServiceError("Thread not found", "NOT_FOUND");
       }
@@ -114,10 +119,16 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
       }
 
       const hashedPassword = await bcrypt.hash(data.password, 10);
-      return threadRepository.create({
+      const thread = await threadRepository.create({
         ...data,
         password: hashedPassword,
       });
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.threads);
+      invalidateCache(CACHE_TAGS.threadsByBoard(data.boardId));
+
+      return thread;
     },
 
     async update(
@@ -140,7 +151,14 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
         throw new ThreadServiceError("Permission denied", "FORBIDDEN");
       }
 
-      return threadRepository.update(id, data);
+      const result = await threadRepository.update(id, data);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.threads);
+      invalidateCache(CACHE_TAGS.threadsByBoard(thread.boardId));
+      invalidateCache(CACHE_TAGS.thread(id));
+
+      return result;
     },
 
     async delete(userId: string, id: number): Promise<ThreadData> {
@@ -154,7 +172,14 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
         throw new ThreadServiceError("Permission denied", "FORBIDDEN");
       }
 
-      return threadRepository.delete(id);
+      const result = await threadRepository.delete(id);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.threads);
+      invalidateCache(CACHE_TAGS.threadsByBoard(thread.boardId));
+      invalidateCache(CACHE_TAGS.thread(id));
+
+      return result;
     },
   };
 }

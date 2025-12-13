@@ -248,7 +248,12 @@
     "linkUrl": "URL",
     "linkUrlPlaceholder": "https://example.com",
     "noLinks": "リンクがありません。",
-    "deleteLink": "削除"
+    "deleteLink": "削除",
+    "cacheManagement": "キャッシュ管理",
+    "cacheManagementDescription": "データベースクエリキャッシュを手動で無効化します。データが最新の変更を反映していない場合に使用してください。",
+    "invalidateAll": "すべてのキャッシュを無効化",
+    "invalidating": "無効化中...",
+    "invalidated": "キャッシュを無効化しました。"
   },
   "adminThreads": {
     "title": "スレッド管理",

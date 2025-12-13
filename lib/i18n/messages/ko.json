@@ -248,7 +248,12 @@
     "linkUrl": "URL",
     "linkUrlPlaceholder": "https://example.com",
     "noLinks": "등록된 링크가 없습니다.",
-    "deleteLink": "삭제"
+    "deleteLink": "삭제",
+    "cacheManagement": "캐시 관리",
+    "cacheManagementDescription": "데이터베이스 쿼리 캐시를 수동으로 무효화합니다. 데이터가 최신 상태로 반영되지 않을 때 사용하세요.",
+    "invalidateAll": "전체 캐시 무효화",
+    "invalidating": "무효화 중...",
+    "invalidated": "캐시가 무효화되었습니다."
   },
   "adminThreads": {
     "title": "주제글 관리",

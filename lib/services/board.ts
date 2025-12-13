@@ -14,6 +14,7 @@ import {
 } from "@/lib/repositories/interfaces/board";
 import { PermissionRepository } from "@/lib/repositories/interfaces/permission";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
+import { cached, invalidateCache, CACHE_TAGS } from "@/lib/cache";
 
 export class BoardServiceError extends ServiceError {
   constructor(
@@ -97,7 +98,11 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
 
   return {
     async findAll(): Promise<BoardData[]> {
-      return boardRepository.findAll();
+      return cached(
+        () => boardRepository.findAll(),
+        ["boards"],
+        [CACHE_TAGS.boards]
+      );
     },
 
     async findAllWithThreadCount(userId: string): Promise<BoardWithThreadCount[]> {
@@ -105,11 +110,19 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
       if (!hasPermission) {
         throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
-      return boardRepository.findAllWithThreadCount();
+      return cached(
+        () => boardRepository.findAllWithThreadCount(),
+        ["boards-with-count"],
+        [CACHE_TAGS.boards]
+      );
     },
 
     async findById(id: string): Promise<BoardData> {
-      const board = await boardRepository.findById(id);
+      const board = await cached(
+        () => boardRepository.findById(id),
+        ["board", id],
+        [CACHE_TAGS.boards, CACHE_TAGS.board(id)]
+      );
       if (!board || board.deleted) {
         throw new BoardServiceError("Board not found", "NOT_FOUND");
       }
@@ -129,6 +142,9 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
 
       const board = await boardRepository.create(data);
       await createBoardPermissions(board.id);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.boards);
 
       return board;
     },
@@ -151,7 +167,13 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
         throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
 
-      return boardRepository.update(id, data);
+      const result = await boardRepository.update(id, data);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.boards);
+      invalidateCache(CACHE_TAGS.board(id));
+
+      return result;
     },
 
     async updateConfig(
@@ -172,7 +194,13 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
         throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
 
-      return boardRepository.updateConfig(id, data);
+      const result = await boardRepository.updateConfig(id, data);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.boards);
+      invalidateCache(CACHE_TAGS.board(id));
+
+      return result;
     },
   };
 }

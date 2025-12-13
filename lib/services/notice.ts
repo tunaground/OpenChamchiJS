@@ -18,6 +18,7 @@ import {
   createPaginatedResult,
 } from "@/lib/types/pagination";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
+import { cached, invalidateCache, CACHE_TAGS } from "@/lib/cache";
 
 export class NoticeServiceError extends ServiceError {
   constructor(
@@ -102,7 +103,11 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
     },
 
     async findById(id: number): Promise<NoticeData> {
-      const notice = await noticeRepository.findById(id);
+      const notice = await cached(
+        () => noticeRepository.findById(id),
+        ["notice", id.toString()],
+        [CACHE_TAGS.notices, CACHE_TAGS.notice(id)]
+      );
       if (!notice || notice.deleted) {
         throw new NoticeServiceError("Notice not found", "NOT_FOUND");
       }
@@ -123,7 +128,13 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
         throw new NoticeServiceError("Permission denied", "FORBIDDEN");
       }
 
-      return noticeRepository.create(data);
+      const notice = await noticeRepository.create(data);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.notices);
+      invalidateCache(CACHE_TAGS.noticesByBoard(data.boardId));
+
+      return notice;
     },
 
     async update(
@@ -144,7 +155,14 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
         throw new NoticeServiceError("Permission denied", "FORBIDDEN");
       }
 
-      return noticeRepository.update(id, data);
+      const result = await noticeRepository.update(id, data);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.notices);
+      invalidateCache(CACHE_TAGS.noticesByBoard(notice.boardId));
+      invalidateCache(CACHE_TAGS.notice(id));
+
+      return result;
     },
 
     async delete(userId: string, id: number): Promise<NoticeData> {
@@ -161,7 +179,14 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
         throw new NoticeServiceError("Permission denied", "FORBIDDEN");
       }
 
-      return noticeRepository.delete(id);
+      const result = await noticeRepository.delete(id);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.notices);
+      invalidateCache(CACHE_TAGS.noticesByBoard(notice.boardId));
+      invalidateCache(CACHE_TAGS.notice(id));
+
+      return result;
     },
   };
 }

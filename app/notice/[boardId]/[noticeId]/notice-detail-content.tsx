@@ -2,12 +2,17 @@
 
 import Link from "next/link";
 import styled from "styled-components";
+import { PageLayout } from "@/components/layout";
+import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
-  min-height: 100vh;
   padding: 3.2rem;
-  max-width: 80rem;
+  max-width: 1000px;
   margin: 0 auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.6rem;
+  }
 `;
 
 const BackLink = styled(Link)`
@@ -94,17 +99,48 @@ interface Labels {
   updatedAt: string;
 }
 
+interface BoardData {
+  id: string;
+  name: string;
+}
+
+interface AuthLabels {
+  login: string;
+  logout: string;
+}
+
+interface CustomLink {
+  id: string;
+  label: string;
+  url: string;
+}
+
 interface NoticeDetailContentProps {
   boardId: string;
   boardName: string;
+  boards: BoardData[];
+  customLinks?: CustomLink[];
+  isLoggedIn: boolean;
+  canAccessAdmin: boolean;
+  authLabels: AuthLabels;
   notice: NoticeData;
   labels: Labels;
+  boardsTitle: string;
+  manualLabel: string;
 }
 
 export function NoticeDetailContent({
   boardId,
+  boardName,
+  boards,
+  customLinks,
+  isLoggedIn,
+  canAccessAdmin,
+  authLabels,
   notice,
   labels,
+  boardsTitle,
+  manualLabel,
 }: NoticeDetailContentProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -117,29 +153,39 @@ export function NoticeDetailContent({
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
-  return (
-    <Container>
-      <BackLink href={`/notice/${boardId}`}>&larr; {labels.backToList}</BackLink>
+  const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
 
-      <Article>
-        <Header>
-          <TitleRow>
-            {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
-            <Title>{notice.title}</Title>
-          </TitleRow>
-          <Meta>
-            <MetaItem>
-              {labels.createdAt}: {formatDate(notice.createdAt)}
-            </MetaItem>
-            {notice.updatedAt !== notice.createdAt && (
+  return (
+    <PageLayout
+      title={`${notice.title} - ${boardName}`}
+      sidebar={sidebar}
+      isLoggedIn={isLoggedIn}
+      canAccessAdmin={canAccessAdmin}
+      authLabels={authLabels}
+    >
+      <Container>
+        <BackLink href={`/notice/${boardId}`}>&larr; {labels.backToList}</BackLink>
+
+        <Article>
+          <Header>
+            <TitleRow>
+              {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
+              <Title>{notice.title}</Title>
+            </TitleRow>
+            <Meta>
               <MetaItem>
-                {labels.updatedAt}: {formatDate(notice.updatedAt)}
+                {labels.createdAt}: {formatDate(notice.createdAt)}
               </MetaItem>
-            )}
-          </Meta>
-        </Header>
-        <Content>{notice.content}</Content>
-      </Article>
-    </Container>
+              {notice.updatedAt !== notice.createdAt && (
+                <MetaItem>
+                  {labels.updatedAt}: {formatDate(notice.updatedAt)}
+                </MetaItem>
+              )}
+            </Meta>
+          </Header>
+          <Content>{notice.content}</Content>
+        </Article>
+      </Container>
+    </PageLayout>
   );
 }

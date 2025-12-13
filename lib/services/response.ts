@@ -15,6 +15,7 @@ import {
 import { ThreadRepository } from "@/lib/repositories/interfaces/thread";
 import { BoardRepository } from "@/lib/repositories/interfaces/board";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
+import { invalidateCache, CACHE_TAGS } from "@/lib/cache";
 
 export class ResponseServiceError extends ServiceError {
   constructor(
@@ -208,6 +209,10 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         await threadRepository.updateBumpTime(data.threadId);
       }
 
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.responses(data.threadId));
+      invalidateCache(CACHE_TAGS.thread(data.threadId));
+
       return response;
     },
 
@@ -241,7 +246,13 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Permission denied", "FORBIDDEN");
       }
 
-      return responseRepository.update(id, data);
+      const result = await responseRepository.update(id, data);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.responses(response.threadId));
+      invalidateCache(CACHE_TAGS.thread(response.threadId));
+
+      return result;
     },
 
     async updateWithPassword(
@@ -270,7 +281,12 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Invalid password", "FORBIDDEN");
       }
 
-      return responseRepository.update(id, { visible: data.visible });
+      const result = await responseRepository.update(id, { visible: data.visible });
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.responses(response.threadId));
+
+      return result;
     },
 
     async delete(
@@ -304,7 +320,13 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Permission denied", "FORBIDDEN");
       }
 
-      return responseRepository.delete(id);
+      const result = await responseRepository.delete(id);
+
+      // Invalidate cache
+      invalidateCache(CACHE_TAGS.responses(response.threadId));
+      invalidateCache(CACHE_TAGS.thread(response.threadId));
+
+      return result;
     },
   };
 }

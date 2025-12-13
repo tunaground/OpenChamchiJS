@@ -11,6 +11,7 @@ import { globalSettingsService } from "@/lib/services/global-settings";
 import { parseRangeParam } from "@/lib/types/response-range";
 import { isRealtimeEnabled } from "@/lib/realtime";
 import { isStorageEnabled } from "@/lib/storage";
+import { toISOString } from "@/lib/cache";
 import { ThreadDetailContent } from "./thread-detail-content";
 
 const ARCHIVE_REDIRECT_ENABLED = process.env.ARCHIVE_REDIRECT_ENABLED === "true";
@@ -108,8 +109,8 @@ export default async function ThreadDetailPage({ params }: Props) {
           username: thread.username,
           ended: thread.ended,
           top: thread.top,
-          createdAt: thread.createdAt.toISOString(),
-          updatedAt: thread.updatedAt.toISOString(),
+          createdAt: toISOString(thread.createdAt),
+          updatedAt: toISOString(thread.updatedAt),
         }}
         boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
         defaultUsername={board.defaultUsername}
