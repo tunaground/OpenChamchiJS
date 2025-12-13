@@ -307,7 +307,7 @@ const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
   resize: none;
   font-family: ${(props) => (props.$aaMode ? '"Saitamaar", sans-serif' : "inherit")};
   line-height: ${(props) => (props.$aaMode ? "1.8rem" : "1.5")};
-  white-space: ${(props) => (props.$aaMode ? "nowrap" : "pre-wrap")};
+  white-space: ${(props) => (props.$aaMode ? "pre" : "pre-wrap")};
   overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
   overflow-y: hidden;
 
