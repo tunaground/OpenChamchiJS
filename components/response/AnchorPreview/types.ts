@@ -6,6 +6,7 @@ export interface AnchorResponseData {
   username: string;
   authorId: string;
   content: string;
+  attachment: string | null;
   createdAt: string;
 }
 
