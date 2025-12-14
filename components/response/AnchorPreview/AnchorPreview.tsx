@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { render } from "@/lib/tom";
 import { ResponseCard } from "../ResponseCard";
+import { ImageAttachment } from "../ImageAttachment";
 import * as S from "./AnchorPreview.styles";
 import type { AnchorPreviewProps } from "./types";
 
@@ -63,6 +64,7 @@ export function AnchorPreview({
                   boardId={info.boardId}
                   threadId={info.threadId}
                   variant="anchor"
+                  attachmentRenderer={(src) => <ImageAttachment src={src} />}
                   prerenderedContent={
                     prerendered
                       ? render(prerendered, {
