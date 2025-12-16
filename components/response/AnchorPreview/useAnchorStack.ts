@@ -25,9 +25,9 @@ export function useAnchorStack(): UseAnchorStackReturn {
         ) {
           return prev.slice(0, existingIndex);
         }
-        // 다른 앵커면 교체
+        // 다른 앵커면 교체 (기존 responses 유지하여 loading 표시 방지)
         const newStack = [...prev.slice(0, existingIndex + 1)];
-        newStack[existingIndex] = { info, responses: [], loading: true };
+        newStack[existingIndex] = { info, responses: existing.responses, loading: true };
         return newStack;
       }
 
