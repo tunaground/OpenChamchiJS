@@ -1,8 +1,7 @@
 "use client";
 
-import type { RealtimeSubscriber } from "./interfaces";
-
-const REALTIME_PROVIDER = process.env.NEXT_PUBLIC_REALTIME_PROVIDER || "ably";
+import type { RealtimeSubscriber } from "./ports/realtime";
+import { getClientRealtimeProvider } from "./config";
 
 let subscriberInstance: RealtimeSubscriber | null = null;
 
@@ -15,19 +14,30 @@ export function getSubscriber(): RealtimeSubscriber {
     return subscriberInstance;
   }
 
+  const provider = getClientRealtimeProvider();
+
+  if (!provider) {
+    throw new Error(
+      "NEXT_PUBLIC_REALTIME_PROVIDER environment variable is not set"
+    );
+  }
+
   let instance: RealtimeSubscriber;
 
-  switch (REALTIME_PROVIDER) {
+  switch (provider) {
     case "ably": {
       const { AblySubscriber } = require("./adapters/ably/subscriber");
       instance = new AblySubscriber();
       break;
     }
-    // Future providers can be added here:
-    // case "pusher": { ... }
-    // case "socket-io": { ... }
+    case "pusher": {
+      throw new Error("Pusher subscriber not implemented");
+    }
+    case "socketio": {
+      throw new Error("Socket.io subscriber not implemented");
+    }
     default:
-      throw new Error(`Unknown realtime provider: ${REALTIME_PROVIDER}`);
+      throw new Error(`Unknown realtime provider: ${provider}`);
   }
 
   subscriberInstance = instance;

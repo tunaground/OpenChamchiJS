@@ -1,18 +1,6 @@
 import Ably from "ably";
 import crypto from "crypto";
-
-let ablyClient: Ably.Rest | null = null;
-
-function getAblyClient(): Ably.Rest {
-  if (!ablyClient) {
-    const apiKey = process.env.ABLY_API_KEY;
-    if (!apiKey) {
-      throw new Error("ABLY_API_KEY environment variable is not set");
-    }
-    ablyClient = new Ably.Rest({ key: apiKey });
-  }
-  return ablyClient;
-}
+import { getAblyRestClient } from "./client";
 
 /**
  * Generate a client ID based on IP address
@@ -27,8 +15,10 @@ function generateClientId(clientIp: string): string {
  * This is used by the token API endpoint
  * @param clientIp - Client IP address for presence deduplication
  */
-export async function createAblyTokenRequest(clientIp: string): Promise<Ably.TokenRequest> {
-  const client = getAblyClient();
+export async function createAblyTokenRequest(
+  clientIp: string
+): Promise<Ably.TokenRequest> {
+  const client = getAblyRestClient();
   const tokenRequest = await client.auth.createTokenRequest({
     clientId: generateClientId(clientIp),
     capability: {

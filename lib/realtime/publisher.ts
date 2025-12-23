@@ -1,6 +1,6 @@
-import type { RealtimePublisher } from "./interfaces";
-
-const REALTIME_PROVIDER = process.env.REALTIME_PROVIDER || "ably";
+import type { RealtimePublisher } from "./ports/realtime";
+import { getServerRealtimeProvider, isServerRealtimeEnabled } from "./config";
+import { RealtimeError } from "./errors";
 
 let publisherInstance: RealtimePublisher | null = null;
 
@@ -13,20 +13,38 @@ export function getPublisher(): RealtimePublisher {
     return publisherInstance;
   }
 
+  const provider = getServerRealtimeProvider();
+
+  if (!provider) {
+    throw new RealtimeError(
+      "REALTIME_PROVIDER environment variable is not set",
+      "NOT_CONFIGURED"
+    );
+  }
+
   let instance: RealtimePublisher;
 
-  switch (REALTIME_PROVIDER) {
+  switch (provider) {
     case "ably": {
       // Dynamic import to avoid bundling unused adapters
       const { AblyPublisher } = require("./adapters/ably/publisher");
       instance = new AblyPublisher();
       break;
     }
-    // Future providers can be added here:
-    // case "pusher": { ... }
-    // case "socket-io": { ... }
+    case "pusher": {
+      throw new RealtimeError("Pusher adapter not implemented", "NOT_CONFIGURED");
+    }
+    case "socketio": {
+      throw new RealtimeError(
+        "Socket.io adapter not implemented",
+        "NOT_CONFIGURED"
+      );
+    }
     default:
-      throw new Error(`Unknown realtime provider: ${REALTIME_PROVIDER}`);
+      throw new RealtimeError(
+        `Unknown realtime provider: ${provider}`,
+        "UNKNOWN_PROVIDER"
+      );
   }
 
   publisherInstance = instance;
@@ -35,13 +53,13 @@ export function getPublisher(): RealtimePublisher {
 
 /**
  * Check if realtime publishing is enabled
- * Returns false if no API key is configured
+ * Re-export from config for backward compatibility
  */
-export function isRealtimeEnabled(): boolean {
-  switch (REALTIME_PROVIDER) {
-    case "ably":
-      return !!process.env.ABLY_API_KEY;
-    default:
-      return false;
-  }
+export { isServerRealtimeEnabled as isRealtimeEnabled };
+
+/**
+ * Reset the publisher instance (for testing)
+ */
+export function resetPublisher(): void {
+  publisherInstance = null;
 }

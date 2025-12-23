@@ -73,6 +73,8 @@ Vercel 프로젝트 Settings → Environment Variables에서 다음 변수 추�
 
 | 변수명 | 설명 |
 |--------|------|
+| `REALTIME_PROVIDER` | 실시간 기능 Provider (`ably`) |
+| `NEXT_PUBLIC_REALTIME_PROVIDER` | 클라이언트용 실시간 Provider (`ably`) |
 | `ABLY_API_KEY` | 실시간 기능용 Ably API 키 ([무료 발급](https://ably.com/)) |
 | `MAXMIND_LICENSE_KEY` | 해외 IP 차단용 GeoIP 라이센스 키 ([무료 발급](https://www.maxmind.com/en/geolite2/signup)) |
 | `STORAGE_PROVIDER` | 이미지 업로드 스토리지 (`supabase`) |
@@ -173,7 +175,12 @@ npx prisma studio      # Prisma Studio GUI
 1. [Ably](https://ably.com/)에서 무료 계정 생성
 2. 새 앱 생성 후 API Keys 탭으로 이동
 3. API 키 생성 (필요 권한: Publish, Subscribe, Presence)
-4. 환경 변수에 `ABLY_API_KEY` 추가
+4. 환경 변수 설정:
+   ```env
+   REALTIME_PROVIDER=ably
+   NEXT_PUBLIC_REALTIME_PROVIDER=ably
+   ABLY_API_KEY=your-ably-api-key
+   ```
 5. 재배포
 
 ### 기능
