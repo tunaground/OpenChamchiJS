@@ -29,6 +29,9 @@ export const CACHE_TAGS = {
 
   // Global settings
   settings: "settings",
+
+  // User permissions
+  userPermissions: (userId: string) => `permissions-${userId}`,
 } as const;
 
 // All top-level cache tags for bulk invalidation

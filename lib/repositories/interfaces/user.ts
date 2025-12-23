@@ -20,6 +20,7 @@ export interface UserRepository {
     search?: string;
   }): Promise<UserWithRoles[]>;
   findById(id: string): Promise<UserWithRoles | null>;
+  findUserIdsByRoleId(roleId: string): Promise<string[]>;
   count(search?: string): Promise<number>;
   addRole(userId: string, roleId: string): Promise<void>;
   removeRole(userId: string, roleId: string): Promise<void>;

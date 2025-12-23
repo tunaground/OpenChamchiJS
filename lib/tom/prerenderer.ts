@@ -3,6 +3,37 @@
 
 import { evaluate } from "mathjs";
 
+// Security limits for calcn expressions
+const CALCN_LIMITS = {
+  MAX_EXPRESSION_LENGTH: 1000, // Max characters in expression
+  MAX_RESULT: 1e15, // Max absolute value of result
+} as const;
+
+// Safe evaluate function with input validation and result limits
+function safeEvaluate(expression: string): number {
+  // Check expression length to prevent DoS
+  if (expression.length > CALCN_LIMITS.MAX_EXPRESSION_LENGTH) {
+    throw new Error(
+      `Expression too long: ${expression.length} chars (max: ${CALCN_LIMITS.MAX_EXPRESSION_LENGTH})`
+    );
+  }
+
+  // Evaluate with empty scope - no variables allowed
+  const result = evaluate(expression, {});
+
+  if (typeof result !== "number" || !isFinite(result)) {
+    throw new Error("Expression did not evaluate to a finite number");
+  }
+
+  if (Math.abs(result) > CALCN_LIMITS.MAX_RESULT) {
+    throw new Error(
+      `Result too large: ${result} (max: ±${CALCN_LIMITS.MAX_RESULT})`
+    );
+  }
+
+  return result;
+}
+
 import {
   TomRoot,
   TomNode,
@@ -264,9 +295,8 @@ function processCalcn(node: TomElement, random: RandomFn): TomCalcResult {
   const evalExpression = evalParts.join("");
   const originalExpression = originalParts.join("");
 
-  // Evaluate using mathjs
-  const evaluated = evaluate(evalExpression);
-  const result = typeof evaluated === "number" ? evaluated : NaN;
+  // Evaluate using mathjs (with security limits)
+  const result = safeEvaluate(evalExpression);
 
   return {
     type: "element",

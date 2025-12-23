@@ -68,6 +68,7 @@ model Permission {
   id          String           @id @default(cuid())
   name        String           @unique // e.g., "user:read", "user:write", "admin:manage"
   description String?
+  deleted     Boolean          @default(false)
   roles       RolePermission[]
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt

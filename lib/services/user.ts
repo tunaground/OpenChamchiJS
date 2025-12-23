@@ -8,6 +8,7 @@ import { UserRepository, UserWithRoles } from "@/lib/repositories/interfaces/use
 import { RoleRepository, RoleData } from "@/lib/repositories/interfaces/role";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
 import { DEFAULT_USER_LIMIT } from "@/lib/types/pagination";
+import { invalidateCache, CACHE_TAGS } from "@/lib/cache";
 
 export class UserServiceError extends ServiceError {
   constructor(
@@ -126,6 +127,9 @@ export function createUserService(deps: UserServiceDeps): UserService {
       }
 
       await userRepository.addRole(userId, roleId);
+
+      // Invalidate permission cache for this user
+      invalidateCache(CACHE_TAGS.userPermissions(userId));
     },
 
     async removeRole(
@@ -146,6 +150,9 @@ export function createUserService(deps: UserServiceDeps): UserService {
       }
 
       await userRepository.removeRole(userId, roleId);
+
+      // Invalidate permission cache for this user
+      invalidateCache(CACHE_TAGS.userPermissions(userId));
     },
 
     async delete(requesterId: string, userId: string): Promise<void> {
@@ -162,6 +169,9 @@ export function createUserService(deps: UserServiceDeps): UserService {
       }
 
       await userRepository.delete(userId);
+
+      // Invalidate permission cache for deleted user
+      invalidateCache(CACHE_TAGS.userPermissions(userId));
     },
 
     async deleteSelf(userId: string): Promise<void> {
@@ -171,6 +181,9 @@ export function createUserService(deps: UserServiceDeps): UserService {
       }
 
       await userRepository.delete(userId);
+
+      // Invalidate permission cache for deleted user
+      invalidateCache(CACHE_TAGS.userPermissions(userId));
     },
   };
 }

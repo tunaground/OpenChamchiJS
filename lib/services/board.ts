@@ -169,6 +169,14 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
 
       const result = await boardRepository.update(id, data);
 
+      // Soft delete/restore board-specific permissions
+      if (data.deleted === true) {
+        await permissionRepository.softDeleteByBoardId(id);
+      } else if (data.deleted === false && board.deleted === true) {
+        // Restoring a deleted board - also restore its permissions
+        await permissionRepository.restoreByBoardId(id);
+      }
+
       // Invalidate cache
       invalidateCache(CACHE_TAGS.boards);
       invalidateCache(CACHE_TAGS.board(id));

@@ -21,6 +21,9 @@ export const roleRepository: RoleRepository = {
           include: {
             permission: true,
           },
+          where: {
+            permission: { deleted: false },
+          },
         },
       },
       orderBy: { name: "asc" },
@@ -53,6 +56,9 @@ export const roleRepository: RoleRepository = {
         permissions: {
           include: {
             permission: true,
+          },
+          where: {
+            permission: { deleted: false },
           },
         },
       },
@@ -126,19 +132,20 @@ export const roleRepository: RoleRepository = {
 export const permissionRepository: PermissionRepository = {
   async findAll(): Promise<PermissionData[]> {
     return prisma.permission.findMany({
+      where: { deleted: false },
       orderBy: { name: "asc" },
     });
   },
 
   async findById(id: string): Promise<PermissionData | null> {
     return prisma.permission.findUnique({
-      where: { id },
+      where: { id, deleted: false },
     });
   },
 
   async findByName(name: string): Promise<PermissionData | null> {
     return prisma.permission.findUnique({
-      where: { name },
+      where: { name, deleted: false },
     });
   },
 

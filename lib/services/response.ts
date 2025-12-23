@@ -217,6 +217,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
       // Invalidate cache
       invalidateCache(CACHE_TAGS.responses(data.threadId));
       invalidateCache(CACHE_TAGS.thread(data.threadId));
+      invalidateCache(CACHE_TAGS.threadsByBoard(thread.boardId));
 
       return response;
     },
