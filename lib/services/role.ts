@@ -1,4 +1,5 @@
 import { roleRepository, permissionRepository } from "@/lib/repositories/prisma/role";
+import { userRepository } from "@/lib/repositories/prisma/user";
 import { permissionService } from "./permission";
 import {
   RoleData,
@@ -6,6 +7,7 @@ import {
   PermissionData,
 } from "@/lib/repositories/interfaces/role";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
+import { invalidateCache, CACHE_TAGS } from "@/lib/cache";
 
 export class RoleServiceError extends ServiceError {
   constructor(
@@ -135,7 +137,15 @@ export const roleService: RoleService = {
       throw new RoleServiceError("Role not found", "NOT_FOUND");
     }
 
+    // Get all users with this role before deleting
+    const userIds = await userRepository.findUserIdsByRoleId(roleId);
+
     await roleRepository.delete(roleId);
+
+    // Invalidate permission cache for all affected users
+    for (const userId of userIds) {
+      invalidateCache(CACHE_TAGS.userPermissions(userId));
+    }
   },
 
   async addPermission(
@@ -162,6 +172,12 @@ export const roleService: RoleService = {
     }
 
     await roleRepository.addPermission(roleId, permissionId);
+
+    // Invalidate permission cache for all users with this role
+    const userIds = await userRepository.findUserIdsByRoleId(roleId);
+    for (const userId of userIds) {
+      invalidateCache(CACHE_TAGS.userPermissions(userId));
+    }
   },
 
   async removePermission(
@@ -183,6 +199,12 @@ export const roleService: RoleService = {
     }
 
     await roleRepository.removePermission(roleId, permissionId);
+
+    // Invalidate permission cache for all users with this role
+    const userIds = await userRepository.findUserIdsByRoleId(roleId);
+    for (const userId of userIds) {
+      invalidateCache(CACHE_TAGS.userPermissions(userId));
+    }
   },
 
   async getAllPermissions(requesterId: string): Promise<PermissionData[]> {

@@ -74,6 +74,14 @@ export const userRepository: UserRepository = {
     };
   },
 
+  async findUserIdsByRoleId(roleId: string): Promise<string[]> {
+    const userRoles = await prisma.userRole.findMany({
+      where: { roleId },
+      select: { userId: true },
+    });
+    return userRoles.map((ur) => ur.userId);
+  },
+
   async count(search?: string): Promise<number> {
     return prisma.user.count({
       where: search

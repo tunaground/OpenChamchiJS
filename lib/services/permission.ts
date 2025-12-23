@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { prisma as defaultPrisma } from "@/lib/prisma";
+import { cached, CACHE_TAGS } from "@/lib/cache";
 
 export interface PermissionService {
   getUserPermissions(userId: string): Promise<string[]>;
@@ -10,36 +11,47 @@ export interface PermissionService {
 }
 
 export function createPermissionService(prisma: PrismaClient): PermissionService {
-  return {
-    async getUserPermissions(userId: string): Promise<string[]> {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        include: {
-          userRoles: {
-            include: {
-              role: {
-                include: {
-                  permissions: {
-                    include: { permission: true },
+  async function fetchUserPermissions(userId: string): Promise<string[]> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        userRoles: {
+          include: {
+            role: {
+              include: {
+                permissions: {
+                  include: { permission: true },
+                  where: {
+                    permission: { deleted: false },
                   },
                 },
               },
             },
           },
         },
-      });
+      },
+    });
 
-      if (!user) return [];
+    if (!user) return [];
 
-      const permissions = new Set<string>();
+    const permissions = new Set<string>();
 
-      for (const userRole of user.userRoles) {
-        for (const rolePermission of userRole.role.permissions) {
-          permissions.add(rolePermission.permission.name);
-        }
+    for (const userRole of user.userRoles) {
+      for (const rolePermission of userRole.role.permissions) {
+        permissions.add(rolePermission.permission.name);
       }
+    }
 
-      return Array.from(permissions);
+    return Array.from(permissions);
+  }
+
+  return {
+    async getUserPermissions(userId: string): Promise<string[]> {
+      return cached(
+        () => fetchUserPermissions(userId),
+        ["permissions", userId],
+        [CACHE_TAGS.userPermissions(userId)]
+      );
     },
 
     hasPermission(userPermissions: string[], requiredPermission: string): boolean {

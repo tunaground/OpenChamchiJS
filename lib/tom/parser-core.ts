@@ -86,6 +86,20 @@ export interface ParserConfig {
   selfClosingTags: readonly string[];
 }
 
+// Security limits to prevent DoS attacks
+export const PARSER_LIMITS = {
+  MAX_INPUT_LENGTH: 100000, // 100KB max input
+  MAX_STACK_DEPTH: 50, // Max nesting depth
+  MAX_TOKENS: 50000, // Max number of tokens
+} as const;
+
+export class ParserLimitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ParserLimitError";
+  }
+}
+
 // Tokenizer
 type Token =
   | { type: "open_bracket" }
@@ -194,7 +208,22 @@ function stringifyNodesWithConfig(nodes: TomNode[], config: ParserConfig): strin
 
 // Core parse function with configurable self-closing tags
 export function parseWithConfig(input: string, config: ParserConfig): TomRoot {
+  // Security: Check input length
+  if (input.length > PARSER_LIMITS.MAX_INPUT_LENGTH) {
+    throw new ParserLimitError(
+      `Input too long: ${input.length} chars (max: ${PARSER_LIMITS.MAX_INPUT_LENGTH})`
+    );
+  }
+
   const tokens = tokenize(input);
+
+  // Security: Check token count
+  if (tokens.length > PARSER_LIMITS.MAX_TOKENS) {
+    throw new ParserLimitError(
+      `Too many tokens: ${tokens.length} (max: ${PARSER_LIMITS.MAX_TOKENS})`
+    );
+  }
+
   const root: TomRoot = { type: "root", children: [] };
 
   const isSelfClosing = (name: string) => config.selfClosingTags.includes(name);
@@ -240,6 +269,13 @@ export function parseWithConfig(input: string, config: ParserConfig): TomRoot {
             children: [],
           };
           current().nodes.push(element);
+
+          // Security: Check stack depth before pushing
+          if (stack.length + 2 > PARSER_LIMITS.MAX_STACK_DEPTH) {
+            throw new ParserLimitError(
+              `Nesting too deep: ${stack.length} (max: ${PARSER_LIMITS.MAX_STACK_DEPTH})`
+            );
+          }
 
           // Push children frame first (will be used after attributes)
           stack.push({
@@ -315,6 +351,12 @@ export function parseWithConfig(input: string, config: ParserConfig): TomRoot {
 
       case "open_paren":
         if (current().context === "attribute" || current().context === "nested") {
+          // Security: Check stack depth before pushing
+          if (stack.length + 1 > PARSER_LIMITS.MAX_STACK_DEPTH) {
+            throw new ParserLimitError(
+              `Nesting too deep: ${stack.length} (max: ${PARSER_LIMITS.MAX_STACK_DEPTH})`
+            );
+          }
           const nested: TomNested = { type: "nested", children: [] };
           current().nodes.push(nested);
           stack.push({
