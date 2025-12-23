@@ -1,7 +1,7 @@
 "use client";
 
 import Ably from "ably";
-import type { RealtimeSubscriber, PresenceMember } from "../../interfaces";
+import type { RealtimeSubscriber, PresenceMember } from "../../ports/realtime";
 
 export class AblySubscriber implements RealtimeSubscriber {
   private client: Ably.Realtime | null = null;
