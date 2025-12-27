@@ -6,18 +6,26 @@ import type { ResponseCardProps } from "./types";
 
 export function ResponseCard({
   response,
+  boardId,
+  threadId,
   prerenderedContent,
   headerActions,
   attachmentRenderer,
   showRawContent = false,
   rawContent,
   variant = "main",
+  onCopy,
 }: ResponseCardProps) {
+  const handleSeqClick = () => {
+    navigator.clipboard.writeText(`${boardId}>${threadId}>${response.seq}`);
+    onCopy?.();
+  };
+
   return (
     <S.Card $variant={variant}>
       <S.Header>
         <S.Info>
-          <S.Seq>#{response.seq}</S.Seq>
+          <S.Seq onClick={handleSeqClick}>#{response.seq}</S.Seq>
           <S.Username>{response.username}</S.Username>
           <S.AuthorId>({response.authorId})</S.AuthorId>
           <S.Date>{formatDateTime(response.createdAt)}</S.Date>

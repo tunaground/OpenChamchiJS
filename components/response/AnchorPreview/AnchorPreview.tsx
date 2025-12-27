@@ -65,6 +65,7 @@ export function AnchorPreview({
                   threadId={info.threadId}
                   variant="anchor"
                   attachmentRenderer={(src) => <ImageAttachment src={src} />}
+                  onCopy={onCopy}
                   prerenderedContent={
                     prerendered
                       ? render(prerendered, {

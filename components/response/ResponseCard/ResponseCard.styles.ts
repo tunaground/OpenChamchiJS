@@ -28,6 +28,11 @@ export const Info = styled.div`
 export const Seq = styled.span`
   color: ${(props) => props.theme.textSecondary};
   font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    color: ${(props) => props.theme.textPrimary};
+  }
 `;
 
 export const Username = styled.span`

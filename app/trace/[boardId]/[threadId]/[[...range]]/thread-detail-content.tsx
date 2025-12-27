@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
-import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
+import { ResponseOptionButtons, ResponsePreview, ResponseCard } from "@/components/response";
 import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
 import { ImageUpload } from "@/components/response/ImageUpload";
 import { ImageAttachment } from "@/components/response/ImageAttachment";
@@ -102,50 +102,6 @@ const ResponsesSection = styled.section`
   gap: 1.6rem;
 `;
 
-const ResponseCard = styled.div`
-  background: ${(props) => props.theme.responseCard};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  overflow: hidden;
-`;
-
-const ResponseHeader = styled.div`
-  padding: 1.2rem 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const ResponseInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  font-size: 1.4rem;
-  flex-wrap: wrap;
-  flex: 1;
-  min-width: 0;
-`;
-
-const ResponseSeq = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-weight: 500;
-`;
-
-const ResponseUsername = styled.span`
-  color: ${(props) => props.theme.textPrimary};
-  font-weight: 500;
-  word-break: break-all;
-`;
-
-const ResponseAuthorId = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-size: 1.2rem;
-`;
-
-const ResponseDate = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-size: 1.2rem;
-  margin-left: auto;
-`;
 
 const RawContentButton = styled.button<{ $active: boolean }>`
   display: flex;
@@ -168,29 +124,6 @@ const RawContentButton = styled.button<{ $active: boolean }>`
       props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
     opacity: ${(props) => (props.$active ? 0.9 : 1)};
   }
-`;
-
-const ResponseContent = styled.div`
-  padding: 1.6rem;
-  font-size: 1.5rem;
-  line-height: 1.6;
-  color: ${(props) => props.theme.textPrimary};
-  word-break: break-word;
-
-  /* TOM styles */
-  hr {
-    border: none;
-    border-top: 1px solid ${(props) => props.theme.surfaceBorder};
-    margin: 1.6rem 0;
-  }
-`;
-
-const RawContentDisplay = styled.span`
-  white-space: pre-wrap;
-`;
-
-const ResponseAttachment = styled.div`
-  padding: 1.6rem 1.6rem 0;
 `;
 
 const AttachmentLink = styled.a`
@@ -1264,57 +1197,49 @@ export function ThreadDetailContent({
                 closeLabel={labels.close}
                 onCopy={() => showToast(labels.copied)}
               />
-              <ResponseCard>
-                <ResponseHeader>
-                  <ResponseInfo>
-                    <ResponseSeq>#{response.seq}</ResponseSeq>
-                    <ResponseUsername>{response.username}</ResponseUsername>
-                    <ResponseAuthorId>({response.authorId})</ResponseAuthorId>
-                    <ResponseDate>{formatDateTime(response.createdAt)}</ResponseDate>
-                    <RawContentButton
-                      $active={rawContentIds.has(response.id)}
-                      onClick={() => toggleRawContent(response.id)}
-                      title={labels.viewSource}
-                    >
-                      <FontAwesomeIcon icon={faCode} />
-                    </RawContentButton>
-                  </ResponseInfo>
-                </ResponseHeader>
-                {response.attachment && (
-                  <ResponseAttachment>
-                    {response.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
-                    response.attachment.includes("/storage/") ? (
-                      <ImageAttachment src={response.attachment} />
-                    ) : (
-                      <AttachmentLink
-                        href={response.attachment}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        📎 Attachment
-                      </AttachmentLink>
-                    )}
-                  </ResponseAttachment>
-                )}
-                <ResponseContent>
-                  {rawContentIds.has(response.id) ? (
-                    <RawContentDisplay>
-                      {toOriginalFormat(response.content)}
-                    </RawContentDisplay>
-                  ) : prerenderedContents.has(response.id) ? (
-                    render(prerenderedContents.get(response.id)!, {
-                      boardId: thread.boardId,
-                      threadId: thread.id,
-                      responseId: mainKey,
-                      setAnchorInfo: handleAnchorClick,
-                      t,
-                      onCopy: () => showToast(labels.copied),
-                    })
+              <ResponseCard
+                response={response}
+                boardId={thread.boardId}
+                threadId={thread.id}
+                onCopy={() => showToast(labels.copied)}
+                showRawContent={rawContentIds.has(response.id)}
+                rawContent={toOriginalFormat(response.content)}
+                headerActions={
+                  <RawContentButton
+                    $active={rawContentIds.has(response.id)}
+                    onClick={() => toggleRawContent(response.id)}
+                    title={labels.viewSource}
+                  >
+                    <FontAwesomeIcon icon={faCode} />
+                  </RawContentButton>
+                }
+                attachmentRenderer={(src) =>
+                  src.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                  src.includes("/storage/") ? (
+                    <ImageAttachment src={src} />
                   ) : (
-                    response.content
-                  )}
-                </ResponseContent>
-              </ResponseCard>
+                    <AttachmentLink
+                      href={src}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      📎 Attachment
+                    </AttachmentLink>
+                  )
+                }
+                prerenderedContent={
+                  prerenderedContents.has(response.id)
+                    ? render(prerenderedContents.get(response.id)!, {
+                        boardId: thread.boardId,
+                        threadId: thread.id,
+                        responseId: mainKey,
+                        setAnchorInfo: handleAnchorClick,
+                        t,
+                        onCopy: () => showToast(labels.copied),
+                      })
+                    : undefined
+                }
+              />
               {/* Load More button - shown after seq 0 */}
               {response.seq === 0 && hasMoreToLoad && (
                 <LoadMoreSection>
