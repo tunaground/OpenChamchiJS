@@ -227,7 +227,7 @@ function applyAnchor(
         const anchorEnd = parseInt(p4);
 
         const href = isNaN(anchorStart)
-          ? `/trace/${anchorBoardId}/${anchorThreadId}/recent`
+          ? `/trace/${anchorBoardId}/${anchorThreadId}`
           : isNaN(anchorEnd)
             ? `/trace/${anchorBoardId}/${anchorThreadId}/${anchorStart}`
             : `/trace/${anchorBoardId}/${anchorThreadId}/${anchorStart}/${anchorEnd}`;
