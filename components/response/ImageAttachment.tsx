@@ -8,7 +8,7 @@ const Container = styled.div`
 `;
 
 const Thumbnail = styled.img<{ $expanded: boolean }>`
-  max-width: ${(props) => (props.$expanded ? "100%" : "400px")};
+  max-width: ${(props) => (props.$expanded ? "100%" : "min(400px, 100%)")};
   max-height: ${(props) => (props.$expanded ? "none" : "400px")};
   cursor: pointer;
   border-radius: 4px;
