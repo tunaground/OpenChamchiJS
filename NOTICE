@@ -1,0 +1,51 @@
+OpenChamchiJS
+Copyright 2025 tunarider
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+================================================================================
+THIRD-PARTY NOTICES
+================================================================================
+
+This software includes the following third-party components:
+
+--------------------------------------------------------------------------------
+MaxMind GeoLite2
+--------------------------------------------------------------------------------
+
+This product includes GeoLite2 data created by MaxMind, available from
+https://www.maxmind.com.
+
+License: Creative Commons Attribution-ShareAlike 4.0 International (CC BY-SA 4.0)
+https://creativecommons.org/licenses/by-sa/4.0/
+
+--------------------------------------------------------------------------------
+Font Awesome Free
+--------------------------------------------------------------------------------
+
+Font Awesome Free is used in this project.
+
+Icons: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+
+Fonts: SIL Open Font License 1.1 (OFL-1.1)
+https://scripts.sil.org/OFL
+
+Code: MIT License
+https://opensource.org/licenses/MIT
+
+Copyright (c) Fonticons, Inc. (https://fontawesome.com)
+https://fontawesome.com/license/free
+
+--------------------------------------------------------------------------------
+Other Dependencies
+--------------------------------------------------------------------------------
+
+This project uses various open-source libraries. Most are licensed under
+MIT, Apache-2.0, ISC, or BSD licenses. For a complete list, run:
+
+  npx license-checker --production --summary
+
+Or generate a detailed report:
+
+  npx license-checker --production --json > licenses.json
