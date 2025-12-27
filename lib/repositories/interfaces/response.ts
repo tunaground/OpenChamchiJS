@@ -42,20 +42,25 @@ export interface FindRecentOptions {
   includeDeleted?: boolean;
 }
 
+export interface ResponseFilter {
+  usernames?: string[];
+  authorIds?: string[];
+}
+
 export interface ResponseRepository {
   findByThreadId(
     threadId: number,
-    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean }
+    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean; filter?: ResponseFilter }
   ): Promise<ResponseData[]>;
   findById(id: string): Promise<ResponseData | null>;
   findByThreadIdAndSeq(threadId: number, seq: number): Promise<ResponseData | null>;
   findByThreadIdAndSeqRange(
     threadId: number,
-    options: FindBySeqRangeOptions
+    options: FindBySeqRangeOptions & { filter?: ResponseFilter }
   ): Promise<ResponseData[]>;
   findRecentByThreadId(
     threadId: number,
-    options: FindRecentOptions
+    options: FindRecentOptions & { filter?: ResponseFilter }
   ): Promise<ResponseData[]>;
   create(data: CreateResponseInput): Promise<ResponseData>;
   update(id: string, data: UpdateResponseInput): Promise<ResponseData>;

@@ -29,4 +29,10 @@ export interface ResponseCardProps {
   rawContent?: string;
   /** Card variant - "main" for thread detail, "anchor" for anchor preview */
   variant?: "main" | "anchor";
+  /** Callback when anchor text is copied */
+  onCopy?: () => void;
+  /** Callback when username is clicked */
+  onUsernameClick?: (username: string) => void;
+  /** Callback when authorId is clicked */
+  onAuthorIdClick?: (authorId: string) => void;
 }

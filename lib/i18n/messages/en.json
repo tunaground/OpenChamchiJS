@@ -214,7 +214,11 @@
     "next": "Next",
     "scrollUp": "Scroll Up",
     "scrollDown": "Scroll Down",
-    "boards": "Boards"
+    "boards": "Boards",
+    "filter": "Filter",
+    "filterByUsername": "Username",
+    "filterByAuthorId": "Author ID",
+    "clearFilter": "Clear Filter"
   },
   "adminSidebar": {
     "admin": "Admin",

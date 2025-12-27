@@ -214,7 +214,11 @@
     "next": "다음",
     "scrollUp": "위로",
     "scrollDown": "아래로",
-    "boards": "게시판"
+    "boards": "게시판",
+    "filter": "필터",
+    "filterByUsername": "사용자명",
+    "filterByAuthorId": "작성자 ID",
+    "clearFilter": "필터 해제"
   },
   "adminSidebar": {
     "admin": "관리",

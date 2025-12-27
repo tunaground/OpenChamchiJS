@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
-import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
+import { ResponseOptionButtons, ResponsePreview, ResponseCard } from "@/components/response";
 import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
 import { ImageUpload } from "@/components/response/ImageUpload";
 import { ImageAttachment } from "@/components/response/ImageAttachment";
@@ -102,50 +102,6 @@ const ResponsesSection = styled.section`
   gap: 1.6rem;
 `;
 
-const ResponseCard = styled.div`
-  background: ${(props) => props.theme.responseCard};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  overflow: hidden;
-`;
-
-const ResponseHeader = styled.div`
-  padding: 1.2rem 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const ResponseInfo = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  font-size: 1.4rem;
-  flex-wrap: wrap;
-  flex: 1;
-  min-width: 0;
-`;
-
-const ResponseSeq = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-weight: 500;
-`;
-
-const ResponseUsername = styled.span`
-  color: ${(props) => props.theme.textPrimary};
-  font-weight: 500;
-  word-break: break-all;
-`;
-
-const ResponseAuthorId = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-size: 1.2rem;
-`;
-
-const ResponseDate = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-size: 1.2rem;
-  margin-left: auto;
-`;
 
 const RawContentButton = styled.button<{ $active: boolean }>`
   display: flex;
@@ -168,29 +124,6 @@ const RawContentButton = styled.button<{ $active: boolean }>`
       props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
     opacity: ${(props) => (props.$active ? 0.9 : 1)};
   }
-`;
-
-const ResponseContent = styled.div`
-  padding: 1.6rem;
-  font-size: 1.5rem;
-  line-height: 1.6;
-  color: ${(props) => props.theme.textPrimary};
-  word-break: break-word;
-
-  /* TOM styles */
-  hr {
-    border: none;
-    border-top: 1px solid ${(props) => props.theme.surfaceBorder};
-    margin: 1.6rem 0;
-  }
-`;
-
-const RawContentDisplay = styled.span`
-  white-space: pre-wrap;
-`;
-
-const ResponseAttachment = styled.div`
-  padding: 1.6rem 1.6rem 0;
 `;
 
 const AttachmentLink = styled.a`
@@ -625,6 +558,12 @@ interface SidebarLabels {
   scrollUp: string;
   scrollDown: string;
   boards: string;
+  filter: string;
+}
+
+interface ResponseFilter {
+  usernames?: string[];
+  authorIds?: string[];
 }
 
 interface CustomLink {
@@ -653,6 +592,8 @@ interface ThreadDetailContentProps {
   labels: Labels;
   sidebarLabels: SidebarLabels;
   customLinks?: CustomLink[];
+  filter?: ResponseFilter;
+  filterActive?: boolean;
 }
 
 export function ThreadDetailContent({
@@ -675,6 +616,8 @@ export function ThreadDetailContent({
   labels,
   sidebarLabels,
   customLinks,
+  filter,
+  filterActive = true,
 }: ThreadDetailContentProps) {
   const router = useRouter();
   const [responses, setResponses] = useState(initialResponses);
@@ -777,6 +720,96 @@ export function ThreadDetailContent({
   // Anonymous ID for identifying own messages in chat mode
   const anonId = useMemo(() => getAnonId(), []);
 
+  // Filter navigation handlers
+  const handleUsernameFilter = useCallback((username: string) => {
+    const params = new URLSearchParams();
+    // Keep existing usernames and add new one if not already present
+    const existingUsernames = filter?.usernames || [];
+    const newUsernames = existingUsernames.includes(username)
+      ? existingUsernames
+      : [...existingUsernames, username];
+    newUsernames.forEach(u => params.append("username", u));
+    // Keep existing authorIds
+    filter?.authorIds?.forEach(a => params.append("authorId", a));
+    // Keep filterActive state
+    if (!filterActive) {
+      params.set("filterActive", "false");
+    }
+    router.push(`/trace/${thread.boardId}/${thread.id}/recent?${params.toString()}`);
+  }, [router, thread.boardId, thread.id, filter, filterActive]);
+
+  const handleAuthorIdFilter = useCallback((authorId: string) => {
+    const params = new URLSearchParams();
+    // Keep existing usernames
+    filter?.usernames?.forEach(u => params.append("username", u));
+    // Keep existing authorIds and add new one if not already present
+    const existingAuthorIds = filter?.authorIds || [];
+    const newAuthorIds = existingAuthorIds.includes(authorId)
+      ? existingAuthorIds
+      : [...existingAuthorIds, authorId];
+    newAuthorIds.forEach(a => params.append("authorId", a));
+    // Keep filterActive state
+    if (!filterActive) {
+      params.set("filterActive", "false");
+    }
+    router.push(`/trace/${thread.boardId}/${thread.id}/recent?${params.toString()}`);
+  }, [router, thread.boardId, thread.id, filter, filterActive]);
+
+  // Filter removal handlers
+  const handleRemoveUsernameFilter = useCallback((usernameToRemove: string) => {
+    const params = new URLSearchParams();
+    // Keep other usernames
+    filter?.usernames?.filter(u => u !== usernameToRemove).forEach(u => params.append("username", u));
+    // Keep all authorIds
+    filter?.authorIds?.forEach(a => params.append("authorId", a));
+    // Keep filterActive state
+    if (!filterActive) {
+      params.set("filterActive", "false");
+    }
+
+    const queryString = params.toString();
+    if (queryString) {
+      router.push(`/trace/${thread.boardId}/${thread.id}/recent?${queryString}`);
+    } else {
+      router.push(`/trace/${thread.boardId}/${thread.id}/recent`);
+    }
+  }, [router, thread.boardId, thread.id, filter, filterActive]);
+
+  const handleRemoveAuthorIdFilter = useCallback((authorIdToRemove: string) => {
+    const params = new URLSearchParams();
+    // Keep all usernames
+    filter?.usernames?.forEach(u => params.append("username", u));
+    // Keep other authorIds
+    filter?.authorIds?.filter(a => a !== authorIdToRemove).forEach(a => params.append("authorId", a));
+    // Keep filterActive state
+    if (!filterActive) {
+      params.set("filterActive", "false");
+    }
+
+    const queryString = params.toString();
+    if (queryString) {
+      router.push(`/trace/${thread.boardId}/${thread.id}/recent?${queryString}`);
+    } else {
+      router.push(`/trace/${thread.boardId}/${thread.id}/recent`);
+    }
+  }, [router, thread.boardId, thread.id, filter, filterActive]);
+
+  // Toggle filter active state
+  const handleToggleFilterActive = useCallback(() => {
+    const params = new URLSearchParams();
+    // Keep all filter values
+    filter?.usernames?.forEach(u => params.append("username", u));
+    filter?.authorIds?.forEach(a => params.append("authorId", a));
+    // Toggle filterActive
+    if (filterActive) {
+      params.set("filterActive", "false");
+    }
+    // When re-activating, don't add filterActive param (default is true)
+
+    const queryString = params.toString();
+    router.push(`/trace/${thread.boardId}/${thread.id}/recent?${queryString}`);
+  }, [router, thread.boardId, thread.id, filter, filterActive]);
+
   // Request notification permission when chat mode is enabled
   useEffect(() => {
     if (responseOptions.chatMode) {
@@ -786,6 +819,15 @@ export function ThreadDetailContent({
 
   // Chat mode: handle new responses from realtime
   const handleNewResponse = useCallback((newResponse: ResponseData & { anonId?: string }) => {
+    // Apply filter for chat mode if active (only when filterActive is true)
+    if (filterActive && filter) {
+      const matchesUsername = filter.usernames?.includes(newResponse.username);
+      const matchesAuthorId = filter.authorIds?.includes(newResponse.authorId);
+      if (!matchesUsername && !matchesAuthorId) {
+        return; // Skip responses that don't match filter
+      }
+    }
+
     setResponses((prev) => {
       // Avoid duplicates
       if (prev.some((r) => r.id === newResponse.id)) {
@@ -802,7 +844,7 @@ export function ThreadDetailContent({
     // Browser notification
     const body = `${newResponse.username}: ${newResponse.content}`;
     throttledNotify(thread.title, body);
-  }, [throttledNotify, thread.title, anonId]);
+  }, [throttledNotify, thread.title, anonId, filter, filterActive]);
 
   // Chat mode hook
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1203,6 +1245,11 @@ export function ThreadDetailContent({
       customLinks={customLinks}
       labels={sidebarLabels}
       onManageClick={openManageModal}
+      filter={filter}
+      filterActive={filterActive}
+      onRemoveUsernameFilter={handleRemoveUsernameFilter}
+      onRemoveAuthorIdFilter={handleRemoveAuthorIdFilter}
+      onToggleFilterActive={handleToggleFilterActive}
     />
   );
 
@@ -1264,57 +1311,51 @@ export function ThreadDetailContent({
                 closeLabel={labels.close}
                 onCopy={() => showToast(labels.copied)}
               />
-              <ResponseCard>
-                <ResponseHeader>
-                  <ResponseInfo>
-                    <ResponseSeq>#{response.seq}</ResponseSeq>
-                    <ResponseUsername>{response.username}</ResponseUsername>
-                    <ResponseAuthorId>({response.authorId})</ResponseAuthorId>
-                    <ResponseDate>{formatDateTime(response.createdAt)}</ResponseDate>
-                    <RawContentButton
-                      $active={rawContentIds.has(response.id)}
-                      onClick={() => toggleRawContent(response.id)}
-                      title={labels.viewSource}
-                    >
-                      <FontAwesomeIcon icon={faCode} />
-                    </RawContentButton>
-                  </ResponseInfo>
-                </ResponseHeader>
-                {response.attachment && (
-                  <ResponseAttachment>
-                    {response.attachment.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
-                    response.attachment.includes("/storage/") ? (
-                      <ImageAttachment src={response.attachment} />
-                    ) : (
-                      <AttachmentLink
-                        href={response.attachment}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        📎 Attachment
-                      </AttachmentLink>
-                    )}
-                  </ResponseAttachment>
-                )}
-                <ResponseContent>
-                  {rawContentIds.has(response.id) ? (
-                    <RawContentDisplay>
-                      {toOriginalFormat(response.content)}
-                    </RawContentDisplay>
-                  ) : prerenderedContents.has(response.id) ? (
-                    render(prerenderedContents.get(response.id)!, {
-                      boardId: thread.boardId,
-                      threadId: thread.id,
-                      responseId: mainKey,
-                      setAnchorInfo: handleAnchorClick,
-                      t,
-                      onCopy: () => showToast(labels.copied),
-                    })
+              <ResponseCard
+                response={response}
+                boardId={thread.boardId}
+                threadId={thread.id}
+                onCopy={() => showToast(labels.copied)}
+                onUsernameClick={handleUsernameFilter}
+                onAuthorIdClick={handleAuthorIdFilter}
+                showRawContent={rawContentIds.has(response.id)}
+                rawContent={toOriginalFormat(response.content)}
+                headerActions={
+                  <RawContentButton
+                    $active={rawContentIds.has(response.id)}
+                    onClick={() => toggleRawContent(response.id)}
+                    title={labels.viewSource}
+                  >
+                    <FontAwesomeIcon icon={faCode} />
+                  </RawContentButton>
+                }
+                attachmentRenderer={(src) =>
+                  src.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+                  src.includes("/storage/") ? (
+                    <ImageAttachment src={src} />
                   ) : (
-                    response.content
-                  )}
-                </ResponseContent>
-              </ResponseCard>
+                    <AttachmentLink
+                      href={src}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      📎 Attachment
+                    </AttachmentLink>
+                  )
+                }
+                prerenderedContent={
+                  prerenderedContents.has(response.id)
+                    ? render(prerenderedContents.get(response.id)!, {
+                        boardId: thread.boardId,
+                        threadId: thread.id,
+                        responseId: mainKey,
+                        setAnchorInfo: handleAnchorClick,
+                        t,
+                        onCopy: () => showToast(labels.copied),
+                      })
+                    : undefined
+                }
+              />
               {/* Load More button - shown after seq 0 */}
               {response.seq === 0 && hasMoreToLoad && (
                 <LoadMoreSection>

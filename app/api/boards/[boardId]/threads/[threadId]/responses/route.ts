@@ -4,6 +4,7 @@ import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { authOptions } from "@/lib/auth";
 import { responseService, ResponseServiceError } from "@/lib/services/response";
+import { ResponseFilter } from "@/lib/repositories/interfaces/response";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { permissionService } from "@/lib/services/permission";
 import { globalSettingsService } from "@/lib/services/global-settings";
@@ -38,6 +39,17 @@ export async function GET(
   const password = request.headers.get("X-Thread-Password");
   const startSeqParam = searchParams.get("startSeq");
   const endSeqParam = searchParams.get("endSeq");
+
+  // Parse filter params (supports multiple values: ?username=a&username=b)
+  const usernames = searchParams.getAll("username").filter(Boolean);
+  const authorIds = searchParams.getAll("authorId").filter(Boolean);
+  const filter: ResponseFilter | undefined =
+    usernames.length > 0 || authorIds.length > 0
+      ? {
+          usernames: usernames.length > 0 ? usernames : undefined,
+          authorIds: authorIds.length > 0 ? authorIds : undefined,
+        }
+      : undefined;
 
   try {
     // Check if user has admin permission
@@ -84,13 +96,14 @@ export async function GET(
           type: "range",
           startSeq,
           endSeq,
-        }, boardId);
+        }, boardId, filter);
       } else {
         responses = await responseService.findByThreadId(id, {
           limit,
           offset,
           includeDeleted: includeDeleted && isAdmin,
           includeHidden: includeHidden && canSeeHidden,
+          filter,
         });
       }
     } else {
@@ -99,6 +112,7 @@ export async function GET(
         offset,
         includeDeleted: includeDeleted && isAdmin,
         includeHidden: includeHidden && canSeeHidden,
+        filter,
       });
     }
 
