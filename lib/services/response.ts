@@ -11,6 +11,7 @@ import {
   ResponseData,
   CreateResponseInput,
   UpdateResponseInput,
+  ResponseFilter,
 } from "@/lib/repositories/interfaces/response";
 import { ThreadRepository } from "@/lib/repositories/interfaces/thread";
 import { BoardRepository } from "@/lib/repositories/interfaces/board";
@@ -36,12 +37,13 @@ export type ResponseRangeType =
 export interface ResponseService {
   findByThreadId(
     threadId: number,
-    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean }
+    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean; filter?: ResponseFilter }
   ): Promise<ResponseData[]>;
   findByRange(
     threadId: number,
     range: ResponseRangeType,
-    boardId?: string
+    boardId?: string,
+    filter?: ResponseFilter
   ): Promise<ResponseData[]>;
   findById(id: string): Promise<ResponseData>;
   create(data: CreateResponseInput): Promise<ResponseData>;
@@ -98,7 +100,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
   return {
     async findByThreadId(
       threadId: number,
-      options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean }
+      options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean; filter?: ResponseFilter }
     ): Promise<ResponseData[]> {
       const thread = await threadRepository.findById(threadId);
       if (!thread || thread.deleted) {
@@ -111,7 +113,8 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
     async findByRange(
       threadId: number,
       range: ResponseRangeType,
-      boardId?: string
+      boardId?: string,
+      filter?: ResponseFilter
     ): Promise<ResponseData[]> {
       const thread = await threadRepository.findById(threadId);
       if (!thread || thread.deleted || !thread.published) {
@@ -123,13 +126,15 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
 
       switch (range.type) {
         case "all":
-          return responseRepository.findByThreadId(threadId, { limit: 10000 });
+          return responseRepository.findByThreadId(threadId, { limit: 10000, filter });
         case "recent":
           return responseRepository.findRecentByThreadId(threadId, {
             limit: range.limit,
+            filter,
           });
         case "single": {
           // Always include seq 0 (thread body) plus the requested seq
+          // Note: single mode doesn't apply filter (always shows specific seq)
           const responses: ResponseData[] = [];
           const [firstResponse, singleResponse] = await Promise.all([
             responseRepository.findByThreadIdAndSeq(threadId, 0),
@@ -153,6 +158,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
               responseRepository.findByThreadIdAndSeqRange(threadId, {
                 startSeq: range.startSeq,
                 endSeq: range.endSeq,
+                filter,
               }),
             ]);
             const responses: ResponseData[] = [];
@@ -165,6 +171,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
           return responseRepository.findByThreadIdAndSeqRange(threadId, {
             startSeq: range.startSeq,
             endSeq: range.endSeq,
+            filter,
           });
         }
       }

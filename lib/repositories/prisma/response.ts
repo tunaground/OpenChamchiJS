@@ -6,14 +6,35 @@ import {
   UpdateResponseInput,
   FindBySeqRangeOptions,
   FindRecentOptions,
+  ResponseFilter,
 } from "@/lib/repositories/interfaces/response";
+
+function buildUserFilter(filter?: ResponseFilter) {
+  if (!filter) return {};
+
+  const conditions = [];
+
+  if (filter.usernames && filter.usernames.length > 0) {
+    conditions.push({ username: { in: filter.usernames } });
+  }
+
+  if (filter.authorIds && filter.authorIds.length > 0) {
+    conditions.push({ authorId: { in: filter.authorIds } });
+  }
+
+  if (conditions.length === 0) return {};
+  if (conditions.length === 1) return conditions[0];
+
+  // OR condition for multiple filters
+  return { OR: conditions };
+}
 
 export const responseRepository: ResponseRepository = {
   async findByThreadId(
     threadId: number,
-    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean }
+    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean; filter?: ResponseFilter }
   ): Promise<ResponseData[]> {
-    const { limit = 50, offset = 0, includeDeleted = false, includeHidden = false } = options ?? {};
+    const { limit = 50, offset = 0, includeDeleted = false, includeHidden = false, filter } = options ?? {};
 
     // Build visibility filter
     // includeDeleted: include deleted=true (admin only)
@@ -37,6 +58,7 @@ export const responseRepository: ResponseRepository = {
       where: {
         threadId,
         ...visibilityFilter,
+        ...buildUserFilter(filter),
       },
       orderBy: { seq: "asc" },
       take: limit,
@@ -59,9 +81,9 @@ export const responseRepository: ResponseRepository = {
 
   async findByThreadIdAndSeqRange(
     threadId: number,
-    options: FindBySeqRangeOptions
+    options: FindBySeqRangeOptions & { filter?: ResponseFilter }
   ): Promise<ResponseData[]> {
-    const { startSeq, endSeq, includeDeleted = false } = options;
+    const { startSeq, endSeq, includeDeleted = false, filter } = options;
 
     return prisma.response.findMany({
       where: {
@@ -71,6 +93,7 @@ export const responseRepository: ResponseRepository = {
           lte: endSeq,
         },
         ...(includeDeleted ? {} : { deleted: false, visible: true }),
+        ...buildUserFilter(filter),
       },
       orderBy: { seq: "asc" },
     });
@@ -78,9 +101,11 @@ export const responseRepository: ResponseRepository = {
 
   async findRecentByThreadId(
     threadId: number,
-    options: FindRecentOptions
+    options: FindRecentOptions & { filter?: ResponseFilter }
   ): Promise<ResponseData[]> {
-    const { limit, includeDeleted = false } = options;
+    const { limit, includeDeleted = false, filter } = options;
+
+    const userFilter = buildUserFilter(filter);
 
     // Get seq 0 (thread body) and latest responses
     const [firstResponse, recentResponses] = await Promise.all([
@@ -89,6 +114,7 @@ export const responseRepository: ResponseRepository = {
           threadId,
           seq: 0,
           ...(includeDeleted ? {} : { deleted: false, visible: true }),
+          ...userFilter,
         },
       }),
       prisma.response.findMany({
@@ -96,6 +122,7 @@ export const responseRepository: ResponseRepository = {
           threadId,
           seq: { gt: 0 },
           ...(includeDeleted ? {} : { deleted: false, visible: true }),
+          ...userFilter,
         },
         orderBy: { seq: "desc" },
         take: limit,

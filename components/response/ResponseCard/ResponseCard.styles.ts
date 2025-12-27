@@ -35,15 +35,25 @@ export const Seq = styled.span`
   }
 `;
 
-export const Username = styled.span`
+export const Username = styled.span<{ $clickable?: boolean }>`
   color: ${(props) => props.theme.textPrimary};
   font-weight: 500;
   word-break: break-all;
+  cursor: ${(props) => (props.$clickable ? "pointer" : "default")};
+
+  &:hover {
+    text-decoration: ${(props) => (props.$clickable ? "underline" : "none")};
+  }
 `;
 
-export const AuthorId = styled.span`
+export const AuthorId = styled.span<{ $clickable?: boolean }>`
   color: ${(props) => props.theme.textSecondary};
   font-size: 1.2rem;
+  cursor: ${(props) => (props.$clickable ? "pointer" : "default")};
+
+  &:hover {
+    text-decoration: ${(props) => (props.$clickable ? "underline" : "none")};
+  }
 `;
 
 export const Date = styled.span`

@@ -31,10 +31,19 @@ async function checkArchiveExists(boardId: string, threadId: number): Promise<bo
 
 interface Props {
   params: Promise<{ boardId: string; threadId: string; range?: string[] }>;
+  searchParams: Promise<{ username?: string | string[]; authorId?: string | string[]; filterActive?: string }>;
 }
 
-export default async function ThreadDetailPage({ params }: Props) {
+export default async function ThreadDetailPage({ params, searchParams }: Props) {
   const { boardId, threadId, range: rangeParam } = await params;
+  const { username, authorId, filterActive: filterActiveParam } = await searchParams;
+
+  // Build filter from search params
+  const usernames = username ? (Array.isArray(username) ? username : [username]) : undefined;
+  const authorIds = authorId ? (Array.isArray(authorId) ? authorId : [authorId]) : undefined;
+  const filter = usernames || authorIds ? { usernames, authorIds } : undefined;
+  // filterActive defaults to true, only false when explicitly set to "false"
+  const filterActive = filterActiveParam !== "false";
   const threadIdNum = parseInt(threadId, 10);
 
   if (isNaN(threadIdNum)) {
@@ -63,7 +72,8 @@ export default async function ThreadDetailPage({ params }: Props) {
     }
 
     const [responses, responseCount] = await Promise.all([
-      responseService.findByRange(threadIdNum, parsedRange.range),
+      // Only apply filter when filterActive is true
+      responseService.findByRange(threadIdNum, parsedRange.range, undefined, filterActive ? filter : undefined),
       responseRepository.countByThreadId(threadIdNum),
     ]);
 
@@ -189,7 +199,10 @@ export default async function ThreadDetailPage({ params }: Props) {
           scrollUp: tSidebar("scrollUp"),
           scrollDown: tSidebar("scrollDown"),
           boards: tSidebar("boards"),
+          filter: tSidebar("filter"),
         }}
+        filter={filter}
+        filterActive={filterActive}
         customLinks={settings.customLinks}
       />
     );

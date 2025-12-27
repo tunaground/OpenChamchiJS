@@ -31,4 +31,8 @@ export interface ResponseCardProps {
   variant?: "main" | "anchor";
   /** Callback when anchor text is copied */
   onCopy?: () => void;
+  /** Callback when username is clicked */
+  onUsernameClick?: (username: string) => void;
+  /** Callback when authorId is clicked */
+  onAuthorIdClick?: (authorId: string) => void;
 }

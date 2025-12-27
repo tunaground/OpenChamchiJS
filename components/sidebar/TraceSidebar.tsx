@@ -13,6 +13,9 @@ import {
   faChevronRight,
   faChevronUp,
   faChevronDown,
+  faXmark,
+  faEye,
+  faEyeSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -125,6 +128,11 @@ interface CustomLink {
   url: string;
 }
 
+interface ResponseFilter {
+  usernames?: string[];
+  authorIds?: string[];
+}
+
 interface TraceSidebarProps {
   threadId: number;
   boardId: string;
@@ -144,8 +152,14 @@ interface TraceSidebarProps {
     scrollUp: string;
     scrollDown: string;
     boards: string;
+    filter: string;
   };
   onManageClick?: () => void;
+  filter?: ResponseFilter;
+  filterActive?: boolean;
+  onRemoveUsernameFilter?: (username: string) => void;
+  onRemoveAuthorIdFilter?: (authorId: string) => void;
+  onToggleFilterActive?: () => void;
 }
 
 const NavButton = styled.button<{ $active?: boolean }>`
@@ -228,6 +242,75 @@ const ExternalNavLink = styled.a`
   }
 `;
 
+const FilterSection = styled.div`
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
+`;
+
+const FilterChip = styled.div<{ $disabled?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.2rem;
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  color: ${(props) => props.theme.textSecondary};
+  background: ${(props) => props.theme.surfaceHover};
+  opacity: ${(props) => (props.$disabled ? 0.5 : 1)};
+`;
+
+const FilterToggleButton = styled.button<{ $active?: boolean }>`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  background: ${(props) => props.$active ? props.theme.buttonPrimary : "transparent"};
+  border: 1px solid ${(props) => props.$active ? "transparent" : props.theme.surfaceBorder};
+  border-radius: 0.4rem;
+  cursor: pointer;
+  color: ${(props) => props.$active ? props.theme.buttonPrimaryText : props.theme.textSecondary};
+  font-size: 1.2rem;
+  transition: all 0.15s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+`;
+
+const FilterChipLabel = styled.span`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.6rem;
+  font-size: 1.4rem;
+  color: ${(props) => props.theme.textSecondary};
+`;
+
+const FilterChipValue = styled.span`
+  flex: 1;
+  word-break: break-all;
+`;
+
+const FilterChipRemove = styled.button`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: ${(props) => props.theme.textSecondary};
+  font-size: 1.2rem;
+  border-radius: 0.4rem;
+  transition: color 0.15s, background 0.15s;
+
+  &:hover {
+    color: ${(props) => props.theme.textPrimary};
+    background: ${(props) => props.theme.surface};
+  }
+`;
+
 export function TraceSidebar({
   threadId,
   boardId,
@@ -238,6 +321,11 @@ export function TraceSidebar({
   customLinks,
   labels,
   onManageClick,
+  filter,
+  filterActive = true,
+  onRemoveUsernameFilter,
+  onRemoveAuthorIdFilter,
+  onToggleFilterActive,
 }: TraceSidebarProps) {
   const pathname = usePathname();
   // Parse current range from currentView
@@ -374,6 +462,54 @@ export function TraceSidebar({
           onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: "smooth" })}
         />
       </NavList>
+
+      {filter && (filter.usernames?.length || filter.authorIds?.length) && (
+        <FilterSection>
+          <SidebarDivider />
+          <SidebarTitle style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            {labels.filter}
+            {onToggleFilterActive && (
+              <FilterToggleButton
+                $active={filterActive}
+                onClick={onToggleFilterActive}
+                aria-label={filterActive ? "Disable filter" : "Enable filter"}
+              >
+                <FontAwesomeIcon icon={filterActive ? faEye : faEyeSlash} />
+              </FilterToggleButton>
+            )}
+          </SidebarTitle>
+          <NavList>
+            {filter.usernames?.map((username) => (
+              <FilterChip key={`u-${username}`} $disabled={!filterActive}>
+                <FilterChipLabel>U</FilterChipLabel>
+                <FilterChipValue>{username}</FilterChipValue>
+                {onRemoveUsernameFilter && (
+                  <FilterChipRemove
+                    onClick={() => onRemoveUsernameFilter(username)}
+                    aria-label={`Remove ${username} filter`}
+                  >
+                    <FontAwesomeIcon icon={faXmark} />
+                  </FilterChipRemove>
+                )}
+              </FilterChip>
+            ))}
+            {filter.authorIds?.map((authorId) => (
+              <FilterChip key={`a-${authorId}`} $disabled={!filterActive}>
+                <FilterChipLabel>A</FilterChipLabel>
+                <FilterChipValue>{authorId}</FilterChipValue>
+                {onRemoveAuthorIdFilter && (
+                  <FilterChipRemove
+                    onClick={() => onRemoveAuthorIdFilter(authorId)}
+                    aria-label={`Remove ${authorId} filter`}
+                  >
+                    <FontAwesomeIcon icon={faXmark} />
+                  </FilterChipRemove>
+                )}
+              </FilterChip>
+            ))}
+          </NavList>
+        </FilterSection>
+      )}
 
       <BoardsSection>
         <SidebarDivider />

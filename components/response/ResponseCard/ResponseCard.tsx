@@ -15,6 +15,8 @@ export function ResponseCard({
   rawContent,
   variant = "main",
   onCopy,
+  onUsernameClick,
+  onAuthorIdClick,
 }: ResponseCardProps) {
   const handleSeqClick = () => {
     navigator.clipboard.writeText(`${boardId}>${threadId}>${response.seq}`);
@@ -26,8 +28,18 @@ export function ResponseCard({
       <S.Header>
         <S.Info>
           <S.Seq onClick={handleSeqClick}>#{response.seq}</S.Seq>
-          <S.Username>{response.username}</S.Username>
-          <S.AuthorId>({response.authorId})</S.AuthorId>
+          <S.Username
+            $clickable={!!onUsernameClick}
+            onClick={onUsernameClick ? () => onUsernameClick(response.username) : undefined}
+          >
+            {response.username}
+          </S.Username>
+          <S.AuthorId
+            $clickable={!!onAuthorIdClick}
+            onClick={onAuthorIdClick ? () => onAuthorIdClick(response.authorId) : undefined}
+          >
+            ({response.authorId})
+          </S.AuthorId>
           <S.Date>{formatDateTime(response.createdAt)}</S.Date>
           {headerActions}
         </S.Info>
