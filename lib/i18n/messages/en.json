@@ -388,6 +388,18 @@
       "authorIdTitle": "Author ID",
       "authorIdDescription": "An identifier generated based on IP and date to distinguish users on anonymous boards. The ID changes when the date changes."
     },
+    "responseInteraction": {
+      "title": "Response Interaction",
+      "description": "Interactive features available on response cards.",
+      "seqCopyTitle": "Copy Response Number",
+      "seqCopyDescription": "Click a response number (#1, #2, etc.) to copy the anchor text (e.g., board>123>5) to clipboard. Use this to reference the response elsewhere.",
+      "filterTitle": "Author Filter",
+      "filterDescription": "Click a username or author ID to filter responses by that author. Selecting multiple authors filters with OR condition.",
+      "filterToggleTitle": "Pause Filter",
+      "filterToggleDescription": "Click the eye icon in the filter section of the sidebar to temporarily disable the filter. Filter selections are preserved, and clicking again reactivates the filter.",
+      "filterRemoveTitle": "Remove Filter",
+      "filterRemoveDescription": "Click the X button on each filter chip to remove that specific filter."
+    },
     "threadSettings": {
       "title": "Thread Settings",
       "description": "Settings and status related to threads.",

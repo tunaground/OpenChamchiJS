@@ -388,6 +388,18 @@
       "authorIdTitle": "작성자 ID",
       "authorIdDescription": "익명 게시판에서 같은 사람을 구분하기 위해 IP와 날짜 기반으로 생성되는 식별자입니다. 날짜가 바뀌면 ID도 변경됩니다."
     },
+    "responseInteraction": {
+      "title": "답글 상호작용",
+      "description": "답글 카드에서 사용할 수 있는 상호작용 기능입니다.",
+      "seqCopyTitle": "답글 번호 복사",
+      "seqCopyDescription": "답글의 번호(#1, #2 등)를 클릭하면 앵커 텍스트(예: board>123>5)가 클립보드에 복사됩니다. 다른 곳에서 이 답글을 참조할 때 사용할 수 있습니다.",
+      "filterTitle": "작성자 필터",
+      "filterDescription": "답글의 작성자명 또는 작성자 ID를 클릭하면 해당 작성자의 답글만 필터링하여 볼 수 있습니다. 여러 작성자를 선택하면 OR 조건으로 필터링됩니다.",
+      "filterToggleTitle": "필터 일시정지",
+      "filterToggleDescription": "사이드바의 필터 섹션에서 눈 아이콘을 클릭하면 필터를 일시적으로 비활성화할 수 있습니다. 필터 선택은 유지되며, 다시 클릭하면 필터가 다시 적용됩니다.",
+      "filterRemoveTitle": "필터 제거",
+      "filterRemoveDescription": "각 필터 칩의 X 버튼을 클릭하면 해당 필터만 제거됩니다."
+    },
     "threadSettings": {
       "title": "주제글 설정",
       "description": "주제글과 관련된 설정 및 상태입니다.",

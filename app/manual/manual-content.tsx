@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faFont,
   faEye,
+  faEyeSlash,
   faArrowUp,
   faArrowDown,
   faKeyboard,
@@ -23,6 +24,9 @@ import {
   faComments,
   faFingerprint,
   faCommentDots,
+  faCopy,
+  faFilter,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { PageLayout } from "@/components/layout";
@@ -155,6 +159,18 @@ interface Labels {
     responseDescription: string;
     authorIdTitle: string;
     authorIdDescription: string;
+  };
+  responseInteraction: {
+    title: string;
+    description: string;
+    seqCopyTitle: string;
+    seqCopyDescription: string;
+    filterTitle: string;
+    filterDescription: string;
+    filterToggleTitle: string;
+    filterToggleDescription: string;
+    filterRemoveTitle: string;
+    filterRemoveDescription: string;
   };
   threadSettings: {
     title: string;
@@ -339,6 +355,34 @@ export function ManualContent({
               </ItemHeader>
               <ItemDescription>{labels.basics.authorIdDescription}</ItemDescription>
             </Item>
+          </ItemList>
+        </Section>
+
+        {/* Response Interaction */}
+        <Section>
+          <SectionTitle>{labels.responseInteraction.title}</SectionTitle>
+          <SectionDescription>{labels.responseInteraction.description}</SectionDescription>
+          <ItemList>
+            <SettingItem
+              icon={faCopy}
+              title={labels.responseInteraction.seqCopyTitle}
+              description={labels.responseInteraction.seqCopyDescription}
+            />
+            <SettingItem
+              icon={faFilter}
+              title={labels.responseInteraction.filterTitle}
+              description={labels.responseInteraction.filterDescription}
+            />
+            <SettingItem
+              icon={faEyeSlash}
+              title={labels.responseInteraction.filterToggleTitle}
+              description={labels.responseInteraction.filterToggleDescription}
+            />
+            <SettingItem
+              icon={faXmark}
+              title={labels.responseInteraction.filterRemoveTitle}
+              description={labels.responseInteraction.filterRemoveDescription}
+            />
           </ItemList>
         </Section>
 

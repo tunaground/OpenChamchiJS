@@ -43,6 +43,18 @@ export default async function ManualPage() {
           authorIdTitle: t("basics.authorIdTitle"),
           authorIdDescription: t("basics.authorIdDescription"),
         },
+        responseInteraction: {
+          title: t("responseInteraction.title"),
+          description: t("responseInteraction.description"),
+          seqCopyTitle: t("responseInteraction.seqCopyTitle"),
+          seqCopyDescription: t("responseInteraction.seqCopyDescription"),
+          filterTitle: t("responseInteraction.filterTitle"),
+          filterDescription: t("responseInteraction.filterDescription"),
+          filterToggleTitle: t("responseInteraction.filterToggleTitle"),
+          filterToggleDescription: t("responseInteraction.filterToggleDescription"),
+          filterRemoveTitle: t("responseInteraction.filterRemoveTitle"),
+          filterRemoveDescription: t("responseInteraction.filterRemoveDescription"),
+        },
         threadSettings: {
           title: t("threadSettings.title"),
           description: t("threadSettings.description"),
