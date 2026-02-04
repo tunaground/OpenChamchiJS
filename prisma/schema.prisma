@@ -172,6 +172,8 @@ model Thread {
 
   @@index([boardId, published, deleted, top(sort: Desc), updatedAt(sort: Desc)])
   @@index([userId])
+  @@index([title(ops: raw("gin_trgm_ops"))], type: Gin)
+  @@index([username(ops: raw("gin_trgm_ops"))], type: Gin)
 }
 
 model Response {
