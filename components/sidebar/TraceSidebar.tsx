@@ -350,7 +350,18 @@ export function TraceSidebar({
   // Calculate prev/next ranges (format: start/end)
   const getPrevRange = (): string | null => {
     if (!currentRange) {
-      // If viewing all or recent, prev goes to first page
+      if (currentView === "recent") {
+        // Recent shows last page, so prev should go to the page before that
+        const lastPageStart = Math.max(1, lastSeq - responsesPerPage + 1);
+        const newStart = Math.max(1, lastPageStart - responsesPerPage);
+        const newEnd = newStart + responsesPerPage - 1;
+        // If we're already at the beginning, disable prev
+        if (lastPageStart <= 1) {
+          return null;
+        }
+        return `${newStart}/${newEnd}`;
+      }
+      // If viewing all, prev goes to first page
       return `1/${responsesPerPage}`;
     }
 
