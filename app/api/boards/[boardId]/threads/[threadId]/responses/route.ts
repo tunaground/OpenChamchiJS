@@ -227,7 +227,7 @@ export async function POST(
       const result = await storage.upload(buffer, file.name, file.type, {
         maxSizeBytes: board.uploadMaxSize,
         allowedMimeTypes,
-        folder: `boards/${boardId}`,
+        folder: `${boardId}`,
       });
 
       uploadedKey = result.key;
