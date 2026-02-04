@@ -30,6 +30,7 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
@@ -38,6 +39,8 @@ model Session {
   userId       String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model User {
@@ -83,6 +86,7 @@ model UserRole {
   createdAt DateTime @default(now())
 
   @@unique([userId, roleId])
+  @@index([roleId])
 }
 
 model RolePermission {
@@ -94,6 +98,7 @@ model RolePermission {
   createdAt    DateTime   @default(now())
 
   @@unique([roleId, permissionId])
+  @@index([permissionId])
 }
 
 model VerificationToken {
@@ -143,7 +148,7 @@ model Notice {
   updatedAt DateTime @updatedAt
   board     Board    @relation(fields: [boardId], references: [id])
 
-  @@index([boardId])
+  @@index([boardId, deleted, pinned, createdAt(sort: Desc)])
 }
 
 model Thread {
@@ -163,7 +168,7 @@ model Thread {
   board     Board      @relation(fields: [boardId], references: [id])
   user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
-  @@index([boardId])
+  @@index([boardId, published, deleted, top(sort: Desc), updatedAt(sort: Desc)])
   @@index([userId])
 }
 
@@ -184,5 +189,6 @@ model Response {
   user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([threadId, seq])
+  @@index([threadId, deleted, visible, seq])
   @@index([userId])
 }

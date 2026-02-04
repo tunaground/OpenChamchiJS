@@ -36,17 +36,19 @@ npx prisma studio      # Open Prisma Studio GUI
 - `app/trace/[boardId]/[threadId]/` - Thread detail page
 - `app/notice/[boardId]/` - Notice list/detail pages
 - `lib/services/` - Business logic (board, thread, response, permission, notice)
-- `lib/repositories/` - Data access layer (Repository Pattern)
 - `lib/tom/` - TOM (Tunaground Object Markup) parser/renderer
 - `lib/theme/` - Zustand theme store and theme definitions
-- `lib/i18n/messages/` - Translation files (ko.json, en.json)
+- `lib/i18n/messages/` - Translation files (ko.json, en.json, ja.json)
+- `lib/storage/` - File upload with Ports/Adapters pattern (Supabase adapter)
+- `lib/realtime/` - Realtime messaging with Ports/Adapters pattern (Ably adapter)
 - `components/layout/` - PageLayout, TopBar, Sidebar, buttons
 - `components/sidebar/` - AdminSidebar, BoardListSidebar, TraceSidebar
+- `__tests__/` - Jest unit tests (mirrors lib/ structure)
 - `proxy.ts` - Next.js 16 middleware (setup check, auth redirects)
 
 ### Conventions
 - **Server Components by default** - Add `'use client'` directive only when needed
-- **Repository Pattern** - Services (`lib/services/`) use repositories (`lib/repositories/`) for data access
+- **Hexagonal Architecture** - External integrations (storage, realtime) use Ports/Adapters pattern (`lib/*/ports/` for interfaces, `lib/*/adapters/` for implementations)
 - **Path alias** - Use `@/*` for imports from root directory
 - **Image optimization** - Use `next/image` component with `priority` for above-the-fold images
 - **Fonts** - Geist Sans and Geist Mono loaded via `next/font/google`, available as CSS variables
@@ -65,7 +67,7 @@ npx prisma studio      # Open Prisma Studio GUI
 
 ### Internationalization (i18n)
 - **next-intl** with browser language detection (no URL prefix)
-- Supported locales: `ko` (default), `en`, `ja`
+- Supported locales: `ko` (default), `en`, `ja` (defined in `lib/i18n/routing.ts`)
 - Locale detected from: cookie (`NEXT_LOCALE`) → `Accept-Language` header → default
 - Server: `import { getTranslations } from 'next-intl/server'`
 - Client: `import { useTranslations } from 'next-intl'`
@@ -145,9 +147,9 @@ npx prisma studio      # Open Prisma Studio GUI
 - 환경변수: `ABLY_API_KEY`, `NEXT_PUBLIC_ABLY_SUBSCRIBE_KEY`
 
 ### Storage (File Upload)
-- S3-compatible storage (`lib/storage/`)
+- Supabase Storage (`lib/storage/`) - only implemented adapter
 - Board별 업로드 설정: `uploadMaxSize`, `uploadMimeTypes`
-- 환경변수: `S3_ENDPOINT`, `S3_ACCESS_KEY_ID`, `S3_SECRET_ACCESS_KEY`, `S3_BUCKET_NAME`, `S3_PUBLIC_URL`
+- 환경변수: `STORAGE_PROVIDER=supabase`, `SUPABASE_URL`, `SUPABASE_SERVICE_KEY`, `SUPABASE_STORAGE_BUCKET`
 
 ### Page Layout Pattern
 - Use `PageLayout` component with `sidebar` and `rightContent` props
