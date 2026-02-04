@@ -17,22 +17,9 @@ export const boardRepository: BoardRepository = {
   },
 
   async findAllWithThreadCount(): Promise<BoardWithThreadCount[]> {
-    const boards = await prisma.board.findMany({
+    return prisma.board.findMany({
       orderBy: { createdAt: "desc" },
-      include: {
-        _count: {
-          select: {
-            threads: {
-              where: { published: true },
-            },
-          },
-        },
-      },
     });
-    return boards.map((board) => ({
-      ...board,
-      threadCount: board._count.threads,
-    }));
   },
 
   async findById(id: string): Promise<BoardData | null> {

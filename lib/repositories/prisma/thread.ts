@@ -42,7 +42,7 @@ export const threadRepository: ThreadRepository = {
   ): Promise<ThreadWithResponseCount[]> {
     const { limit = DEFAULT_LIMIT, offset = 0, includeDeleted = false, search } = options ?? {};
 
-    const threads = await prisma.thread.findMany({
+    return prisma.thread.findMany({
       where: {
         boardId,
         published: true,
@@ -59,17 +59,7 @@ export const threadRepository: ThreadRepository = {
       orderBy: [{ top: "desc" }, { updatedAt: "desc" }],
       take: limit,
       skip: offset,
-      include: {
-        _count: {
-          select: { responses: true },
-        },
-      },
     });
-
-    return threads.map((thread) => ({
-      ...thread,
-      responseCount: thread._count.responses,
-    }));
   },
 
   async countByBoardId(
@@ -109,9 +99,21 @@ export const threadRepository: ThreadRepository = {
   },
 
   async delete(id: number): Promise<ThreadData> {
-    return prisma.thread.update({
-      where: { id },
-      data: { deleted: true },
+    return prisma.$transaction(async (tx) => {
+      const thread = await tx.thread.findUnique({ where: { id } });
+
+      // Decrement board counter only if thread was published and not already deleted
+      if (thread && thread.published && !thread.deleted) {
+        await tx.board.update({
+          where: { id: thread.boardId },
+          data: { threadCount: { decrement: 1 } },
+        });
+      }
+
+      return tx.thread.update({
+        where: { id },
+        data: { deleted: true },
+      });
     });
   },
 

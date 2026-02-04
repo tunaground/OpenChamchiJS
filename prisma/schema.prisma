@@ -131,6 +131,7 @@ model Board {
   threadsPerPage        Int      @default(20)
   uploadMaxSize         Int      @default(5242880) // 5MB
   uploadMimeTypes       String   @default("image/png,image/jpeg,image/gif,image/webp")
+  threadCount           Int      @default(0) // Counter cache: active threads (published && !deleted)
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt
   threads               Thread[]
@@ -152,21 +153,22 @@ model Notice {
 }
 
 model Thread {
-  id        Int        @id @default(autoincrement())
-  boardId   String
-  title     String
-  password  String
-  username  String
-  userId    String?
-  ended     Boolean    @default(false)
-  deleted   Boolean    @default(false)
-  published Boolean    @default(false)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @default(now())
-  top       Boolean    @default(false)
-  responses Response[]
-  board     Board      @relation(fields: [boardId], references: [id])
-  user      User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  id            Int        @id @default(autoincrement())
+  boardId       String
+  title         String
+  password      String
+  username      String
+  userId        String?
+  ended         Boolean    @default(false)
+  deleted       Boolean    @default(false)
+  published     Boolean    @default(false)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now())
+  top           Boolean    @default(false)
+  responseCount Int        @default(0) // Counter cache: total responses (including deleted)
+  responses     Response[]
+  board         Board      @relation(fields: [boardId], references: [id])
+  user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@index([boardId, published, deleted, top(sort: Desc), updatedAt(sort: Desc)])
   @@index([userId])

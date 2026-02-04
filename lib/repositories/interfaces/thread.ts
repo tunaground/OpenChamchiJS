@@ -11,11 +11,10 @@ export interface ThreadData {
   createdAt: Date;
   updatedAt: Date;
   top: boolean;
-}
-
-export interface ThreadWithResponseCount extends ThreadData {
   responseCount: number;
 }
+
+export type ThreadWithResponseCount = ThreadData;
 
 export interface CreateThreadInput {
   boardId: string;

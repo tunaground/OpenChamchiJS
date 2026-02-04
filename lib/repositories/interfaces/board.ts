@@ -10,6 +10,7 @@ export interface BoardData {
   threadsPerPage: number;
   uploadMaxSize: number;
   uploadMimeTypes: string;
+  threadCount: number;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,9 +50,7 @@ export interface ConfigBoardInput {
   threadsPerPage?: number;
 }
 
-export interface BoardWithThreadCount extends BoardData {
-  threadCount: number;
-}
+export type BoardWithThreadCount = BoardData;
 
 export interface BoardRepository {
   findAll(): Promise<BoardData[]>;

@@ -140,34 +140,38 @@ export const responseRepository: ResponseRepository = {
   },
 
   async create(data: CreateResponseInput): Promise<ResponseData> {
-    const count = await prisma.response.count({
-      where: { threadId: data.threadId },
-    });
+    return prisma.$transaction(async (tx) => {
+      // 1. Atomically increment Thread.responseCount (row-level lock)
+      const updatedThread = await tx.thread.update({
+        where: { id: data.threadId },
+        data: { responseCount: { increment: 1 } },
+        select: { responseCount: true, boardId: true, published: true },
+      });
 
-    const seq = count;
+      // 2. seq = incremented value - 1
+      const seq = updatedThread.responseCount - 1;
 
-    // If this is the first response (seq 0), also publish the thread
-    if (seq === 0) {
-      const [response] = await prisma.$transaction([
-        prisma.response.create({
-          data: {
-            ...data,
-            seq,
-          },
-        }),
-        prisma.thread.update({
+      // 3. Create response
+      const response = await tx.response.create({
+        data: {
+          ...data,
+          seq,
+        },
+      });
+
+      // 4. First response (seq=0): publish thread + increment board counter
+      if (seq === 0) {
+        await tx.thread.update({
           where: { id: data.threadId },
           data: { published: true },
-        }),
-      ]);
-      return response;
-    }
+        });
+        await tx.board.update({
+          where: { id: updatedThread.boardId },
+          data: { threadCount: { increment: 1 } },
+        });
+      }
 
-    return prisma.response.create({
-      data: {
-        ...data,
-        seq,
-      },
+      return response;
     });
   },
 
