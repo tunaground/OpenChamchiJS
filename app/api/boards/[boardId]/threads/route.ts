@@ -23,20 +23,15 @@ export async function GET(
   const includeDeleted = searchParams.get("includeDeleted") === "true";
 
   try {
-    // Check if user has admin permission for includeDeleted
+    // Check if user has admin permission for includeDeleted (single query)
     let canViewDeleted = false;
     if (includeDeleted) {
       const session = await getServerSession(authOptions);
       if (session?.user?.id) {
-        const hasGlobalPermission = await permissionService.checkUserPermission(
-          session.user.id,
-          "thread:delete"
-        );
-        const hasBoardPermission = await permissionService.checkUserPermission(
-          session.user.id,
-          `thread:${boardId}:delete`
-        );
-        canViewDeleted = hasGlobalPermission || hasBoardPermission;
+        canViewDeleted = await permissionService.checkUserPermissions(session.user.id, [
+          "thread:delete",
+          `thread:${boardId}:delete`,
+        ]);
       }
     }
 

@@ -25,6 +25,7 @@ describe("ThreadService", () => {
     responsesPerPage: 50,
     showUserCount: false,
     threadsPerPage: 20,
+    threadCount: 10,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -45,6 +46,7 @@ describe("ThreadService", () => {
   const createMockThreadRepo = (): jest.Mocked<ThreadRepository> => ({
     findByBoardId: jest.fn(),
     findByBoardIdWithResponseCount: jest.fn(),
+    findByBoardIdWithCount: jest.fn(),
     countByBoardId: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
@@ -76,8 +78,10 @@ describe("ThreadService", () => {
       const mockPermission = createMockPermission();
 
       mockBoardRepo.findById.mockResolvedValue(mockBoard);
-      mockThreadRepo.findByBoardIdWithResponseCount.mockResolvedValue([{ ...mockThread, responseCount: 0 }]);
-      mockThreadRepo.countByBoardId.mockResolvedValue(1);
+      mockThreadRepo.findByBoardIdWithCount.mockResolvedValue({
+        data: [{ ...mockThread, responseCount: 0 }],
+        total: 1,
+      });
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,

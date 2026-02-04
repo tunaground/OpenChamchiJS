@@ -30,8 +30,14 @@ export interface FindNoticeOptions extends PaginationParams {
   search?: string;
 }
 
+export interface FindByBoardIdWithCountResult {
+  data: NoticeData[];
+  total: number;
+}
+
 export interface NoticeRepository {
   findByBoardId(boardId: string, options?: FindNoticeOptions): Promise<NoticeData[]>;
+  findByBoardIdWithCount(boardId: string, options?: FindNoticeOptions): Promise<FindByBoardIdWithCountResult>;
   countByBoardId(boardId: string, options?: { includeDeleted?: boolean; search?: string }): Promise<number>;
   findById(id: number): Promise<NoticeData | null>;
   create(data: CreateNoticeInput): Promise<NoticeData>;

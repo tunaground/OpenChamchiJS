@@ -38,9 +38,15 @@ export interface FindThreadOptions {
   search?: string;
 }
 
+export interface FindByBoardIdWithCountResult {
+  data: ThreadWithResponseCount[];
+  total: number;
+}
+
 export interface ThreadRepository {
   findByBoardId(boardId: string, options?: FindThreadOptions): Promise<ThreadData[]>;
   findByBoardIdWithResponseCount(boardId: string, options?: FindThreadOptions): Promise<ThreadWithResponseCount[]>;
+  findByBoardIdWithCount(boardId: string, boardThreadCount: number, options?: FindThreadOptions): Promise<FindByBoardIdWithCountResult>;
   countByBoardId(boardId: string, options?: { includeDeleted?: boolean; search?: string }): Promise<number>;
   findById(id: number): Promise<ThreadData | null>;
   create(data: CreateThreadInput): Promise<ThreadData>;

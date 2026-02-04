@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   ResponseRepository,
@@ -105,36 +106,43 @@ export const responseRepository: ResponseRepository = {
   ): Promise<ResponseData[]> {
     const { limit, includeDeleted = false, filter } = options;
 
-    const userFilter = buildUserFilter(filter);
+    // Build filter conditions for raw query
+    const visibilityFilter = includeDeleted
+      ? Prisma.sql``
+      : Prisma.sql`AND "deleted" = false AND "visible" = true`;
 
-    // Get seq 0 (thread body) and latest responses
-    const [firstResponse, recentResponses] = await Promise.all([
-      prisma.response.findFirst({
-        where: {
-          threadId,
-          seq: 0,
-          ...(includeDeleted ? {} : { deleted: false, visible: true }),
-          ...userFilter,
-        },
-      }),
-      prisma.response.findMany({
-        where: {
-          threadId,
-          seq: { gt: 0 },
-          ...(includeDeleted ? {} : { deleted: false, visible: true }),
-          ...userFilter,
-        },
-        orderBy: { seq: "desc" },
-        take: limit,
-      }),
-    ]);
-
-    const responses: ResponseData[] = [];
-    if (firstResponse) {
-      responses.push(firstResponse);
+    // Build user filter for raw query
+    let userFilterSql = Prisma.sql``;
+    if (filter?.usernames && filter.usernames.length > 0) {
+      userFilterSql = Prisma.sql`AND "username" = ANY(${filter.usernames})`;
+    } else if (filter?.authorIds && filter.authorIds.length > 0) {
+      userFilterSql = Prisma.sql`AND "authorId" = ANY(${filter.authorIds})`;
     }
-    // Reverse to get ascending order
-    responses.push(...recentResponses.reverse());
+
+    // Single UNION ALL query: seq=0 (thread body) + latest N responses, ordered by seq
+    const responses = await prisma.$queryRaw<ResponseData[]>`
+      (
+        SELECT * FROM "Response"
+        WHERE "threadId" = ${threadId}
+          AND "seq" = 0
+          ${visibilityFilter}
+          ${userFilterSql}
+        LIMIT 1
+      )
+      UNION ALL
+      (
+        SELECT * FROM (
+          SELECT * FROM "Response"
+          WHERE "threadId" = ${threadId}
+            AND "seq" > 0
+            ${visibilityFilter}
+            ${userFilterSql}
+          ORDER BY "seq" DESC
+          LIMIT ${limit}
+        ) sub
+      )
+      ORDER BY "seq" ASC
+    `;
 
     return responses;
   },

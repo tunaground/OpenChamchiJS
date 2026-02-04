@@ -74,10 +74,12 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
 
       const { page, limit } = normalizePaginationParams(options ?? {});
       const search = options?.search;
-      const [data, total] = await Promise.all([
-        noticeRepository.findByBoardId(boardId, { page, limit, search }),
-        noticeRepository.countByBoardId(boardId, { search }),
-      ]);
+
+      // Single query optimization with window function
+      const { data, total } = await noticeRepository.findByBoardIdWithCount(
+        boardId,
+        { page, limit, search }
+      );
 
       return createPaginatedResult(data, total, page, limit);
     },

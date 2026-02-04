@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import {
   UserRepository,
   UserWithRoles,
+  FindAllWithCountResult,
 } from "@/lib/repositories/interfaces/user";
 import { DEFAULT_USER_LIMIT } from "@/lib/types/pagination";
 
@@ -80,6 +81,57 @@ export const userRepository: UserRepository = {
       select: { userId: true },
     });
     return userRoles.map((ur) => ur.userId);
+  },
+
+  async findAllWithCount(options?: {
+    limit?: number;
+    offset?: number;
+    search?: string;
+  }): Promise<FindAllWithCountResult> {
+    const { limit = DEFAULT_USER_LIMIT, offset = 0, search } = options || {};
+
+    const whereClause = search
+      ? {
+          OR: [
+            { name: { contains: search, mode: "insensitive" as const } },
+            { email: { contains: search, mode: "insensitive" as const } },
+          ],
+        }
+      : undefined;
+
+    // Single transaction for both queries (reduces round trips)
+    const [users, total] = await prisma.$transaction([
+      prisma.user.findMany({
+        where: whereClause,
+        include: {
+          userRoles: {
+            include: {
+              role: {
+                select: { id: true, name: true },
+              },
+            },
+          },
+        },
+        orderBy: { id: "asc" },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.user.count({ where: whereClause }),
+    ]);
+
+    const data = users.map((user) => ({
+      id: user.id,
+      name: user.name,
+      email: user.email,
+      image: user.image,
+      emailVerified: user.emailVerified,
+      roles: user.userRoles.map((ur) => ({
+        id: ur.role.id,
+        name: ur.role.name,
+      })),
+    }));
+
+    return { data, total };
   },
 
   async count(search?: string): Promise<number> {

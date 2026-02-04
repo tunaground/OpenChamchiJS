@@ -3,10 +3,20 @@ import { PermissionService } from "@/lib/services/permission";
 import { UserRepository, UserWithRoles } from "@/lib/repositories/interfaces/user";
 import { RoleRepository, RoleData } from "@/lib/repositories/interfaces/role";
 
+// Mock the cache module
+jest.mock("@/lib/cache", () => ({
+  invalidateCache: jest.fn(),
+  CACHE_TAGS: {
+    userPermissions: (userId: string) => `permissions-${userId}`,
+  },
+}));
+
 function createMockUserRepo(): jest.Mocked<UserRepository> {
   return {
     findAll: jest.fn(),
+    findAllWithCount: jest.fn(),
     findById: jest.fn(),
+    findUserIdsByRoleId: jest.fn(),
     count: jest.fn(),
     addRole: jest.fn(),
     removeRole: jest.fn(),
@@ -83,8 +93,7 @@ describe("UserService", () => {
     it("returns paginated users when requester has permission", async () => {
       const users = [createMockUser(), createMockUser({ id: "user-2" })];
       permissionService.checkUserPermission.mockResolvedValue(true);
-      userRepo.findAll.mockResolvedValue(users);
-      userRepo.count.mockResolvedValue(2);
+      userRepo.findAllWithCount.mockResolvedValue({ data: users, total: 2 });
 
       const result = await service.findAll("requester-id");
 
@@ -103,25 +112,22 @@ describe("UserService", () => {
 
     it("applies search filter", async () => {
       permissionService.checkUserPermission.mockResolvedValue(true);
-      userRepo.findAll.mockResolvedValue([]);
-      userRepo.count.mockResolvedValue(0);
+      userRepo.findAllWithCount.mockResolvedValue({ data: [], total: 0 });
 
       await service.findAll("requester-id", { search: "test" });
 
-      expect(userRepo.findAll).toHaveBeenCalledWith(
+      expect(userRepo.findAllWithCount).toHaveBeenCalledWith(
         expect.objectContaining({ search: "test" })
       );
-      expect(userRepo.count).toHaveBeenCalledWith("test");
     });
 
     it("applies pagination options", async () => {
       permissionService.checkUserPermission.mockResolvedValue(true);
-      userRepo.findAll.mockResolvedValue([]);
-      userRepo.count.mockResolvedValue(0);
+      userRepo.findAllWithCount.mockResolvedValue({ data: [], total: 0 });
 
       await service.findAll("requester-id", { page: 3, limit: 10 });
 
-      expect(userRepo.findAll).toHaveBeenCalledWith(
+      expect(userRepo.findAllWithCount).toHaveBeenCalledWith(
         expect.objectContaining({ limit: 10, offset: 20 })
       );
     });

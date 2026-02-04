@@ -91,10 +91,13 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
       const { page, limit, offset } = normalizePaginationParams(options ?? {});
       const search = options?.search;
       const includeDeleted = options?.includeDeleted ?? false;
-      const [data, total] = await Promise.all([
-        threadRepository.findByBoardIdWithResponseCount(boardId, { limit, offset, search, includeDeleted }),
-        threadRepository.countByBoardId(boardId, { search, includeDeleted }),
-      ]);
+
+      // Single query optimization: use counter cache when no search, window function with search
+      const { data, total } = await threadRepository.findByBoardIdWithCount(
+        boardId,
+        board.threadCount,
+        { limit, offset, search, includeDeleted }
+      );
 
       return createPaginatedResult(data, total, page, limit);
     },

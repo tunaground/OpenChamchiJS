@@ -6,6 +6,7 @@ import { BoardRepository, BoardData } from "@/lib/repositories/interfaces/board"
 function createMockNoticeRepo(): jest.Mocked<NoticeRepository> {
   return {
     findByBoardId: jest.fn(),
+    findByBoardIdWithCount: jest.fn(),
     countByBoardId: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
@@ -86,8 +87,7 @@ describe("NoticeService", () => {
     it("returns paginated notices for existing board", async () => {
       const notices = [createMockNotice(), createMockNotice({ id: 2 })];
       boardRepo.findById.mockResolvedValue(createMockBoard());
-      noticeRepo.findByBoardId.mockResolvedValue(notices);
-      noticeRepo.countByBoardId.mockResolvedValue(2);
+      noticeRepo.findByBoardIdWithCount.mockResolvedValue({ data: notices, total: 2 });
 
       const result = await service.findByBoardId("test-board");
 
@@ -114,12 +114,11 @@ describe("NoticeService", () => {
 
     it("passes pagination options to repository", async () => {
       boardRepo.findById.mockResolvedValue(createMockBoard());
-      noticeRepo.findByBoardId.mockResolvedValue([]);
-      noticeRepo.countByBoardId.mockResolvedValue(0);
+      noticeRepo.findByBoardIdWithCount.mockResolvedValue({ data: [], total: 0 });
 
       await service.findByBoardId("test-board", { page: 2, limit: 10, search: "test" });
 
-      expect(noticeRepo.findByBoardId).toHaveBeenCalledWith(
+      expect(noticeRepo.findByBoardIdWithCount).toHaveBeenCalledWith(
         "test-board",
         expect.objectContaining({ page: 2, limit: 10, search: "test" })
       );

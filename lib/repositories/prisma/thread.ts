@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import {
   ThreadRepository,
@@ -6,6 +7,7 @@ import {
   CreateThreadInput,
   UpdateThreadInput,
   FindThreadOptions,
+  FindByBoardIdWithCountResult,
 } from "@/lib/repositories/interfaces/thread";
 import { DEFAULT_LIMIT } from "@/lib/types/pagination";
 
@@ -60,6 +62,51 @@ export const threadRepository: ThreadRepository = {
       take: limit,
       skip: offset,
     });
+  },
+
+  async findByBoardIdWithCount(
+    boardId: string,
+    boardThreadCount: number,
+    options?: FindThreadOptions
+  ): Promise<FindByBoardIdWithCountResult> {
+    const { limit = DEFAULT_LIMIT, offset = 0, includeDeleted = false, search } = options ?? {};
+
+    // If no search filter, use counter cache for total
+    if (!search) {
+      const data = await prisma.thread.findMany({
+        where: {
+          boardId,
+          published: true,
+          ...(includeDeleted ? {} : { deleted: false }),
+        },
+        orderBy: [{ top: "desc" }, { updatedAt: "desc" }],
+        take: limit,
+        skip: offset,
+      });
+      return { data, total: boardThreadCount };
+    }
+
+    // With search: use window function COUNT(*) OVER() in raw query
+    const searchPattern = `%${search}%`;
+    const deletedFilter = includeDeleted ? Prisma.sql`` : Prisma.sql`AND "deleted" = false`;
+    const rows = await prisma.$queryRaw<(ThreadWithResponseCount & { _total: bigint })[]>`
+      SELECT *, COUNT(*) OVER() as "_total"
+      FROM "Thread"
+      WHERE "boardId" = ${boardId}
+        AND "published" = true
+        ${deletedFilter}
+        AND (
+          "title" ILIKE ${searchPattern}
+          OR "username" ILIKE ${searchPattern}
+        )
+      ORDER BY "top" DESC, "updatedAt" DESC
+      LIMIT ${limit} OFFSET ${offset}
+    `;
+
+    const total = rows.length > 0 ? Number(rows[0]._total) : 0;
+    const data = rows.map(({ _total, ...rest }) => rest);
+
+    return { data, total };
   },
 
   async countByBoardId(

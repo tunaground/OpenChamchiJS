@@ -13,12 +13,22 @@ export interface UserWithRoles extends UserData {
   }[];
 }
 
+export interface FindAllWithCountResult {
+  data: UserWithRoles[];
+  total: number;
+}
+
 export interface UserRepository {
   findAll(options?: {
     limit?: number;
     offset?: number;
     search?: string;
   }): Promise<UserWithRoles[]>;
+  findAllWithCount(options?: {
+    limit?: number;
+    offset?: number;
+    search?: string;
+  }): Promise<FindAllWithCountResult>;
   findById(id: string): Promise<UserWithRoles | null>;
   findUserIdsByRoleId(roleId: string): Promise<string[]>;
   count(search?: string): Promise<number>;

@@ -73,13 +73,11 @@ export function createUserService(deps: UserServiceDeps): UserService {
       const { page = 1, search, limit = DEFAULT_USER_LIMIT } = options || {};
       const offset = (page - 1) * limit;
 
-      const [users, total] = await Promise.all([
-        userRepository.findAll({ limit, offset, search }),
-        userRepository.count(search),
-      ]);
+      // Single transaction optimization
+      const { data, total } = await userRepository.findAllWithCount({ limit, offset, search });
 
       return {
-        data: users,
+        data,
         pagination: {
           page,
           limit,

@@ -52,19 +52,14 @@ export async function GET(
       : undefined;
 
   try {
-    // Check if user has admin permission
+    // Check if user has admin permission (single query for both permissions)
     let isAdmin = false;
     const session = await getServerSession(authOptions);
     if (session?.user?.id) {
-      const hasGlobalPermission = await permissionService.checkUserPermission(
-        session.user.id,
-        "response:delete"
-      );
-      const hasBoardPermission = await permissionService.checkUserPermission(
-        session.user.id,
-        `response:${boardId}:delete`
-      );
-      isAdmin = hasGlobalPermission || hasBoardPermission;
+      isAdmin = await permissionService.checkUserPermissions(session.user.id, [
+        "response:delete",
+        `response:${boardId}:delete`,
+      ]);
     }
 
     // Check password for includeHidden
