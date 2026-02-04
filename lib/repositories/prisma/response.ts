@@ -157,15 +157,45 @@ export const responseRepository: ResponseRepository = {
       });
 
       // 2. seq = incremented value - 1
-      const seq = updatedThread.responseCount - 1;
+      let seq = updatedThread.responseCount - 1;
 
-      // 3. Create response
-      const response = await tx.response.create({
-        data: {
-          ...data,
-          seq,
-        },
-      });
+      // 3. Create response (with fallback to MAX(seq)+1 on conflict)
+      let response;
+      try {
+        response = await tx.response.create({
+          data: {
+            ...data,
+            seq,
+          },
+        });
+      } catch (e) {
+        // seq conflict: fallback to MAX(seq)+1
+        if (e instanceof Error && e.message.includes("Unique constraint")) {
+          const maxSeqResult = await tx.response.aggregate({
+            where: { threadId: data.threadId },
+            _max: { seq: true },
+          });
+          seq = (maxSeqResult._max.seq ?? -1) + 1;
+
+          response = await tx.response.create({
+            data: {
+              ...data,
+              seq,
+            },
+          });
+
+          // Fix responseCount to match actual count
+          const actualCount = await tx.response.count({
+            where: { threadId: data.threadId },
+          });
+          await tx.thread.update({
+            where: { id: data.threadId },
+            data: { responseCount: actualCount },
+          });
+        } else {
+          throw e;
+        }
+      }
 
       // 4. First response (seq=0): publish thread + increment board counter
       if (seq === 0) {
