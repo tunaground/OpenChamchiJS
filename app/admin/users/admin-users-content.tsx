@@ -523,7 +523,6 @@ export function AdminUsersContent({
                     </Avatar>
                     <UserInfo>
                       <UserName>{user.name || "Unknown"}</UserName>
-                      <UserEmail>{user.email}</UserEmail>
                     </UserInfo>
                   </CardUserInfo>
                   <CardRoles>
@@ -617,7 +616,7 @@ export function AdminUsersContent({
               <ModalTitle>{labels.delete}</ModalTitle>
               <p>{labels.confirmDelete}</p>
               <p style={{ marginTop: "0.8rem", fontWeight: 500 }}>
-                {selectedUser.name} ({selectedUser.email})
+                {selectedUser.name}
               </p>
               <ModalActions>
                 <SecondaryButton onClick={closeModal} disabled={loading}>
