@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
@@ -11,6 +12,22 @@ import { NoticeListContent } from "./notice-list-content";
 interface Props {
   params: Promise<{ boardId: string }>;
   searchParams: Promise<{ page?: string; search?: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { boardId } = await params;
+  try {
+    const [board, settings] = await Promise.all([
+      boardService.findById(boardId),
+      globalSettingsService.get(),
+    ]);
+    const t = await getTranslations("noticeList");
+    return {
+      title: `${settings.siteTitle} - ${board.name} ${t("title")}`,
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function NoticeListPage({ params, searchParams }: Props) {

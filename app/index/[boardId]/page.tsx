@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
@@ -13,6 +14,21 @@ import { BoardIndexContent } from "./board-index-content";
 interface Props {
   params: Promise<{ boardId: string }>;
   searchParams: Promise<{ page?: string; search?: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { boardId } = await params;
+  try {
+    const [board, settings] = await Promise.all([
+      boardService.findById(boardId),
+      globalSettingsService.get(),
+    ]);
+    return {
+      title: `${settings.siteTitle} - ${board.name}`,
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function BoardIndexPage({ params, searchParams }: Props) {

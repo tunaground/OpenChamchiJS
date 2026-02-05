@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
@@ -11,6 +12,25 @@ import { NoticeDetailContent } from "./notice-detail-content";
 
 interface Props {
   params: Promise<{ boardId: string; noticeId: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { noticeId } = await params;
+  const noticeIdNum = parseInt(noticeId, 10);
+  if (isNaN(noticeIdNum)) {
+    return {};
+  }
+  try {
+    const [notice, settings] = await Promise.all([
+      noticeService.findById(noticeIdNum),
+      globalSettingsService.get(),
+    ]);
+    return {
+      title: `${settings.siteTitle} - ${notice.title}`,
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function NoticeDetailPage({ params }: Props) {

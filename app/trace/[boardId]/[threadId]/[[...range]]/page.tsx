@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
@@ -32,6 +33,25 @@ async function checkArchiveExists(boardId: string, threadId: number): Promise<bo
 interface Props {
   params: Promise<{ boardId: string; threadId: string; range?: string[] }>;
   searchParams: Promise<{ username?: string | string[]; authorId?: string | string[]; filterActive?: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { threadId } = await params;
+  const threadIdNum = parseInt(threadId, 10);
+  if (isNaN(threadIdNum)) {
+    return {};
+  }
+  try {
+    const [thread, settings] = await Promise.all([
+      threadService.findById(threadIdNum),
+      globalSettingsService.get(),
+    ]);
+    return {
+      title: `${settings.siteTitle} - ${thread.title}`,
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default async function ThreadDetailPage({ params, searchParams }: Props) {
