@@ -146,6 +146,8 @@ const customLinkSchema = z.object({
 });
 
 export const updateSettingsSchema = z.object({
+  siteTitle: z.string().min(1).max(100).optional(),
+  siteDescription: z.string().max(500).optional().nullable(),
   countryCode: z.string().length(2).toUpperCase().optional(),
   homepageContent: z.string().max(50000).optional().nullable(),
   customLinks: z.array(customLinkSchema).max(20).optional(),

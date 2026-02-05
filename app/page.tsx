@@ -19,8 +19,6 @@ export default async function HomePage() {
     ? await permissionService.checkUserPermission(session.user.id, "admin:read")
     : false;
 
-  const siteName = process.env.NEXT_PUBLIC_SITE_NAME || "OpenChamchiJS";
-
   return (
     <HomeContent
       boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
@@ -28,7 +26,7 @@ export default async function HomePage() {
       canAccessAdmin={canAccessAdmin}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
       boardsTitle={tCommon("boards")}
-      siteName={siteName}
+      siteName={settings.siteTitle}
       manualLabel={tCommon("manual")}
       homepageContent={settings.homepageContent}
       customLinks={settings.customLinks}

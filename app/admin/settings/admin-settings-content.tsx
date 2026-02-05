@@ -61,6 +61,22 @@ const Input = styled.input`
   }
 `;
 
+const TitleInput = styled.input`
+  width: 100%;
+  max-width: 40rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  font-size: 1.4rem;
+  background: ${(props) => props.theme.background};
+  color: ${(props) => props.theme.textPrimary};
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.textSecondary};
+  }
+`;
+
 const SaltInput = styled.input`
   width: 100%;
   max-width: 40rem;
@@ -309,6 +325,12 @@ interface SidebarLabels {
 
 interface Labels {
   title: string;
+  siteTitle: string;
+  siteTitlePlaceholder: string;
+  siteTitleDescription: string;
+  siteDescription: string;
+  siteDescriptionPlaceholder: string;
+  siteDescriptionDescription: string;
   countryCode: string;
   countryCodePlaceholder: string;
   countryCodeDescription: string;
@@ -342,6 +364,8 @@ interface Labels {
 
 interface AdminSettingsContentProps {
   initialSettings: {
+    siteTitle: string;
+    siteDescription: string;
     countryCode: string;
     homepageContent: string | null;
     customLinks: CustomLink[];
@@ -362,6 +386,8 @@ export function AdminSettingsContent({
   labels,
   canUpdate,
 }: AdminSettingsContentProps) {
+  const [siteTitle, setSiteTitle] = useState(initialSettings.siteTitle);
+  const [siteDescription, setSiteDescription] = useState(initialSettings.siteDescription);
   const [countryCode, setCountryCode] = useState(initialSettings.countryCode);
   const [homepageContent, setHomepageContent] = useState(initialSettings.homepageContent ?? "");
   const [tripcodeSalt, setTripcodeSalt] = useState(initialSettings.tripcodeSalt ?? "");
@@ -398,6 +424,8 @@ export function AdminSettingsContent({
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          siteTitle,
+          siteDescription: siteDescription || null,
           countryCode: countryCode.toUpperCase(),
           homepageContent: homepageContent || null,
           tripcodeSalt: tripcodeSalt || null,
@@ -449,6 +477,36 @@ export function AdminSettingsContent({
         <Header>
           <Title>{labels.title}</Title>
         </Header>
+
+        <FormGroup>
+          <Label htmlFor="siteTitle">{labels.siteTitle}</Label>
+          <TitleInput
+            id="siteTitle"
+            type="text"
+            value={siteTitle}
+            onChange={(e) => setSiteTitle(e.target.value)}
+            placeholder={labels.siteTitlePlaceholder}
+            maxLength={100}
+            disabled={!canUpdate}
+          />
+          <Description>{labels.siteTitleDescription}</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="siteDescription">{labels.siteDescription}</Label>
+          <TitleInput
+            id="siteDescription"
+            type="text"
+            value={siteDescription}
+            onChange={(e) => setSiteDescription(e.target.value)}
+            placeholder={labels.siteDescriptionPlaceholder}
+            maxLength={500}
+            disabled={!canUpdate}
+          />
+          <Description>{labels.siteDescriptionDescription}</Description>
+        </FormGroup>
+
+        <Divider />
 
         <StatusBox $available={geoIpAvailable}>
           <StatusTitle $available={geoIpAvailable}>
@@ -573,7 +631,7 @@ export function AdminSettingsContent({
 
         {canUpdate && (
           <div>
-            <Button onClick={handleSave} disabled={loading || countryCode.length !== 2}>
+            <Button onClick={handleSave} disabled={loading || countryCode.length !== 2 || !siteTitle.trim()}>
               {labels.save}
             </Button>
             {saved && <SuccessMessage>{labels.saved}</SuccessMessage>}

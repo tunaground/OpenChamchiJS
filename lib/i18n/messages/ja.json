@@ -228,6 +228,12 @@
   },
   "adminSettings": {
     "title": "グローバル設定",
+    "siteTitle": "サイトタイトル",
+    "siteTitlePlaceholder": "例: 私の掲示板",
+    "siteTitleDescription": "ブラウザタブとSEOに表示されるサイトタイトル",
+    "siteDescription": "サイト説明",
+    "siteDescriptionPlaceholder": "例: 自由にコミュニケーションする場所",
+    "siteDescriptionDescription": "検索エンジンに表示されるサイト説明",
     "countryCode": "許可する国コード",
     "countryCodePlaceholder": "例: KR, US, JP",
     "countryCodeDescription": "外国IPブロック時に許可する国コード (ISO 3166-1 alpha-2)",

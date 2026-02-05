@@ -3,15 +3,19 @@ import {NextIntlClientProvider} from "next-intl";
 import {getLocale, getMessages} from "next-intl/server";
 import {Providers} from "./providers";
 import StyledComponentsRegistry from "@/lib/registry";
+import {globalSettingsService} from "@/lib/services/global-settings";
 
-export const metadata: Metadata = {
-  title: "OpenChamchiJS",
-  description: "OpenChamchiJS - Open Source Forum",
-  icons: {
-    icon: "/icon.png",
-    apple: "/apple-icon.png",
-  },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const settings = await globalSettingsService.get();
+  return {
+    title: settings.siteTitle,
+    description: settings.siteDescription,
+    icons: {
+      icon: "/icon.png",
+      apple: "/apple-icon.png",
+    },
+  };
+}
 
 export const viewport: Viewport = {
   width: "device-width",

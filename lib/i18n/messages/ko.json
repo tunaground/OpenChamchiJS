@@ -232,6 +232,12 @@
   },
   "adminSettings": {
     "title": "전역 설정",
+    "siteTitle": "사이트 제목",
+    "siteTitlePlaceholder": "예: 나의 게시판",
+    "siteTitleDescription": "브라우저 탭과 SEO에 표시되는 사이트 제목",
+    "siteDescription": "사이트 설명",
+    "siteDescriptionPlaceholder": "예: 자유롭게 소통하는 공간",
+    "siteDescriptionDescription": "검색 엔진에 표시되는 사이트 설명",
     "countryCode": "허용 국가 코드",
     "countryCodePlaceholder": "예: KR, US, JP",
     "countryCodeDescription": "해외 IP 차단 시 허용할 국가 코드 (ISO 3166-1 alpha-2)",

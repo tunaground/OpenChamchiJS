@@ -22,6 +22,8 @@ export default async function AdminSettingsPage() {
   return (
     <AdminSettingsContent
       initialSettings={{
+        siteTitle: settings.siteTitle,
+        siteDescription: settings.siteDescription,
         countryCode: settings.countryCode,
         homepageContent: settings.homepageContent,
         customLinks: settings.customLinks,
@@ -40,6 +42,12 @@ export default async function AdminSettingsPage() {
       canUpdate={canUpdate}
       labels={{
         title: t("title"),
+        siteTitle: t("siteTitle"),
+        siteTitlePlaceholder: t("siteTitlePlaceholder"),
+        siteTitleDescription: t("siteTitleDescription"),
+        siteDescription: t("siteDescription"),
+        siteDescriptionPlaceholder: t("siteDescriptionPlaceholder"),
+        siteDescriptionDescription: t("siteDescriptionDescription"),
         countryCode: t("countryCode"),
         countryCodePlaceholder: t("countryCodePlaceholder"),
         countryCodeDescription: t("countryCodeDescription"),

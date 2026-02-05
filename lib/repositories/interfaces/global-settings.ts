@@ -6,6 +6,8 @@ export interface CustomLink {
 
 export interface GlobalSettingsData {
   id: string;
+  siteTitle: string;
+  siteDescription: string;
   countryCode: string;
   homepageContent: string | null;
   customLinks: CustomLink[];
@@ -15,6 +17,8 @@ export interface GlobalSettingsData {
 }
 
 export interface UpdateGlobalSettingsInput {
+  siteTitle?: string;
+  siteDescription?: string | null;
   countryCode?: string;
   homepageContent?: string | null;
   customLinks?: CustomLink[];

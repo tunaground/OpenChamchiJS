@@ -111,6 +111,8 @@ model VerificationToken {
 
 model GlobalSettings {
   id              String   @id @default("default")
+  siteTitle       String   @default("OpenChamchiJS")
+  siteDescription String   @default("OpenChamchiJS - Open Source Forum")
   countryCode     String   @default("KR") // ISO 3166-1 alpha-2 country code
   homepageContent String?  @db.Text
   customLinks     String?  @db.Text // JSON array of {id, label, url}

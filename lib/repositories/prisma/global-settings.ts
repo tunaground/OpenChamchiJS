@@ -21,6 +21,8 @@ function parseCustomLinks(json: string | null): CustomLink[] {
 
 function toGlobalSettingsData(settings: {
   id: string;
+  siteTitle: string;
+  siteDescription: string;
   countryCode: string;
   homepageContent: string | null;
   customLinks: string | null;
@@ -43,7 +45,14 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     if (!settings) {
       // Create default settings if not exists
       const created = await prisma.globalSettings.create({
-        data: { id: DEFAULT_ID, countryCode: "KR", homepageContent: null, customLinks: null },
+        data: {
+          id: DEFAULT_ID,
+          siteTitle: "OpenChamchiJS",
+          siteDescription: "OpenChamchiJS - Open Source Forum",
+          countryCode: "KR",
+          homepageContent: null,
+          customLinks: null,
+        },
       });
       return toGlobalSettingsData(created);
     }
@@ -53,12 +62,20 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
 
   async update(data: UpdateGlobalSettingsInput): Promise<GlobalSettingsData> {
     const updateData: {
+      siteTitle?: string;
+      siteDescription?: string;
       countryCode?: string;
       homepageContent?: string | null;
       customLinks?: string | null;
       tripcodeSalt?: string | null;
     } = {};
 
+    if (data.siteTitle !== undefined) {
+      updateData.siteTitle = data.siteTitle;
+    }
+    if (data.siteDescription !== undefined) {
+      updateData.siteDescription = data.siteDescription ?? "";
+    }
     if (data.countryCode !== undefined) {
       updateData.countryCode = data.countryCode;
     }

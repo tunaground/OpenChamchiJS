@@ -232,6 +232,12 @@
   },
   "adminSettings": {
     "title": "Global Settings",
+    "siteTitle": "Site Title",
+    "siteTitlePlaceholder": "e.g. My Forum",
+    "siteTitleDescription": "Site title displayed in browser tab and SEO",
+    "siteDescription": "Site Description",
+    "siteDescriptionPlaceholder": "e.g. A place to freely communicate",
+    "siteDescriptionDescription": "Site description displayed in search engines",
     "countryCode": "Allowed Country Code",
     "countryCodePlaceholder": "e.g. KR, US, JP",
     "countryCodeDescription": "Country code to allow when blocking foreign IPs (ISO 3166-1 alpha-2)",
