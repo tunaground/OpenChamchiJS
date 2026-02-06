@@ -81,7 +81,7 @@ const AA = styled.div.attrs({
   color: black;
   width: 100%;
   background: rgba(255, 255, 255);
-  line-height: 1.8rem;
+  line-height: 1.6rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     font-size: 1.2rem;
