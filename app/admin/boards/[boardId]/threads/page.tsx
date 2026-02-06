@@ -49,6 +49,7 @@ export default async function AdminThreadsPage({ params, searchParams }: Props) 
           roles: tSidebar("roles"),
           settings: tSidebar("settings"),
           threads: tSidebar("threads"),
+          responses: tSidebar("responses"),
           notices: tSidebar("notices"),
         }}
         threads={result.data.map((thread) => ({

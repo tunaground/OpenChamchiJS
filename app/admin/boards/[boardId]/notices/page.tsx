@@ -53,6 +53,7 @@ export default async function AdminNoticesPage({ params, searchParams }: Props) 
           roles: tSidebar("roles"),
           settings: tSidebar("settings"),
           threads: tSidebar("threads"),
+          responses: tSidebar("responses"),
           notices: tSidebar("notices"),
         }}
         notices={result.data.map((notice) => ({

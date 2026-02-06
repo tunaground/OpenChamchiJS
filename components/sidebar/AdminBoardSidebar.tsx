@@ -26,6 +26,7 @@ export function AdminBoardSidebar({
 
   const boardNavItems = [
     { href: `/admin/boards/${boardId}/threads`, label: labels.threads },
+    { href: `/admin/boards/${boardId}/responses`, label: labels.responses },
     { href: `/admin/boards/${boardId}/notices`, label: labels.notices },
   ];
 

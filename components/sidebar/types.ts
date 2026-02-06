@@ -9,5 +9,6 @@ export interface AdminSidebarLabels {
 
 export interface AdminBoardSidebarLabels extends AdminSidebarLabels {
   threads: string;
+  responses: string;
   notices: string;
 }

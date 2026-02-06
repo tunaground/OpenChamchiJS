@@ -3,11 +3,16 @@ import { prisma } from "@/lib/prisma";
 import {
   ResponseRepository,
   ResponseData,
+  ResponseWithUser,
   CreateResponseInput,
   UpdateResponseInput,
   FindBySeqRangeOptions,
   FindRecentOptions,
+  FindByBoardIdOptions,
   ResponseFilter,
+  AdminResponseFilter,
+  ContentSearchCursor,
+  ContentSearchResult,
 } from "@/lib/repositories/interfaces/response";
 
 function buildUserFilter(filter?: ResponseFilter) {
@@ -28,6 +33,26 @@ function buildUserFilter(filter?: ResponseFilter) {
 
   // OR condition for multiple filters
   return { OR: conditions };
+}
+
+function buildAdminFilter(filter?: AdminResponseFilter) {
+  if (!filter) return {};
+
+  const conditions: Prisma.ResponseWhereInput = {};
+
+  if (filter.username) {
+    conditions.username = { contains: filter.username, mode: "insensitive" };
+  }
+
+  if (filter.authorId) {
+    conditions.authorId = { contains: filter.authorId, mode: "insensitive" };
+  }
+
+  if (filter.email) {
+    conditions.user = { email: { contains: filter.email, mode: "insensitive" } };
+  }
+
+  return conditions;
 }
 
 export const responseRepository: ResponseRepository = {
@@ -226,5 +251,191 @@ export const responseRepository: ResponseRepository = {
 
   async countByThreadId(threadId: number): Promise<number> {
     return prisma.response.count({ where: { threadId, deleted: false } });
+  },
+
+  async findByBoardIdWithCount(
+    boardId: string,
+    options?: FindByBoardIdOptions
+  ): Promise<{ data: ResponseWithUser[]; total: number }> {
+    const { limit = 20, offset = 0, includeDeleted = false, filter } = options ?? {};
+
+    const whereClause: Prisma.ResponseWhereInput = {
+      thread: { boardId },
+      ...(includeDeleted ? {} : { deleted: false }),
+      ...buildAdminFilter(filter),
+    };
+
+    const [data, total] = await Promise.all([
+      prisma.response.findMany({
+        where: whereClause,
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          thread: { select: { id: true, title: true } },
+        },
+        orderBy: { createdAt: "desc" },
+        take: limit,
+        skip: offset,
+      }),
+      prisma.response.count({ where: whereClause }),
+    ]);
+
+    return { data, total };
+  },
+
+  async findByBoardIdChunked(
+    boardId: string,
+    contentSearch: string,
+    options?: {
+      limit?: number;
+      cursor?: ContentSearchCursor | null;
+      includeDeleted?: boolean;
+    }
+  ): Promise<ContentSearchResult> {
+    const { limit = 20, cursor, includeDeleted = false } = options ?? {};
+    const chunkSize = 5000;
+    const searchPattern = `%${contentSearch}%`;
+    const previousScanned = cursor?.scanned ?? 0;
+
+    // Raw query with CTE: 1000-row window + ILIKE filtering
+    // Uses (createdAt, id) cursor for stable pagination even with realtime data
+    const cursorCreatedAt = cursor?.createdAt ? new Date(cursor.createdAt) : null;
+    const cursorId = cursor?.id ?? null;
+
+    interface RawResponse {
+      id: string;
+      threadId: number;
+      seq: number;
+      username: string;
+      authorId: string;
+      userId: string | null;
+      ip: string;
+      content: string;
+      attachment: string | null;
+      visible: boolean;
+      deleted: boolean;
+      createdAt: Date;
+      user_id: string | null;
+      user_name: string | null;
+      user_email: string | null;
+      thread_id: number;
+      thread_title: string;
+      window_last_created_at: Date | null;
+      window_last_id: string | null;
+      window_count: bigint;
+    }
+
+    const results = await prisma.$queryRaw<RawResponse[]>`
+      WITH search_window AS (
+        SELECT r.*
+        FROM "Response" r
+        JOIN "Thread" t ON r."threadId" = t.id
+        WHERE t."boardId" = ${boardId}
+          AND (
+            ${cursorCreatedAt}::timestamp IS NULL
+            OR r."createdAt" < ${cursorCreatedAt}
+            OR (r."createdAt" = ${cursorCreatedAt} AND r.id < ${cursorId})
+          )
+          AND (${includeDeleted} = true OR r.deleted = false)
+        ORDER BY r."createdAt" DESC, r.id DESC
+        LIMIT ${chunkSize}
+      ),
+      window_meta AS (
+        SELECT
+          MIN(w."createdAt") as last_created_at,
+          (SELECT id FROM search_window ORDER BY "createdAt" ASC, id ASC LIMIT 1) as last_id,
+          COUNT(*) as total_count
+        FROM search_window w
+      ),
+      filtered_results AS (
+        SELECT
+          w.id,
+          w."threadId",
+          w.seq,
+          w.username,
+          w."authorId",
+          w."userId",
+          w.ip,
+          w.content,
+          w.attachment,
+          w.visible,
+          w.deleted,
+          w."createdAt",
+          u.id as user_id,
+          u.name as user_name,
+          u.email as user_email,
+          t.id as thread_id,
+          t.title as thread_title
+        FROM search_window w
+        LEFT JOIN "User" u ON w."userId" = u.id
+        JOIN "Thread" t ON w."threadId" = t.id
+        WHERE w.content ILIKE ${searchPattern}
+        ORDER BY w."createdAt" DESC, w.id DESC
+        LIMIT ${limit}
+      )
+      SELECT
+        r.id,
+        r."threadId",
+        r.seq,
+        r.username,
+        r."authorId",
+        r."userId",
+        r.ip,
+        r.content,
+        r.attachment,
+        r.visible,
+        r.deleted,
+        r."createdAt",
+        r.user_id,
+        r.user_name,
+        r.user_email,
+        r.thread_id,
+        r.thread_title,
+        wm.last_created_at as window_last_created_at,
+        wm.last_id as window_last_id,
+        wm.total_count as window_count
+      FROM window_meta wm
+      LEFT JOIN filtered_results r ON true
+      ORDER BY r."createdAt" DESC NULLS LAST, r.id DESC NULLS LAST
+    `;
+
+    // First row always contains window_meta (even if no search results)
+    const windowCount = results.length > 0 ? Number(results[0].window_count) : 0;
+    const windowLastCreatedAt = results.length > 0 ? results[0].window_last_created_at : null;
+    const windowLastId = results.length > 0 ? results[0].window_last_id : null;
+
+    // Map raw results to ResponseWithUser format (filter out NULL rows from LEFT JOIN)
+    const data: ResponseWithUser[] = results
+      .filter((row) => row.id !== null)
+      .map((row) => ({
+        id: row.id,
+        threadId: row.threadId,
+        seq: row.seq,
+        username: row.username,
+        authorId: row.authorId,
+        userId: row.userId,
+        ip: row.ip,
+        content: row.content,
+        attachment: row.attachment,
+        visible: row.visible,
+        deleted: row.deleted,
+        createdAt: row.createdAt,
+        user: row.user_id ? { id: row.user_id, name: row.user_name, email: row.user_email } : null,
+        thread: { id: row.thread_id, title: row.thread_title },
+      }));
+
+    // hasMore: true if we scanned full 1000 rows (more data may exist)
+    const hasMore = windowCount === chunkSize;
+    const totalScanned = previousScanned + windowCount;
+
+    // Build next cursor from window's last row
+    const nextCursor: ContentSearchCursor | null = hasMore && windowLastCreatedAt && windowLastId
+      ? {
+          createdAt: windowLastCreatedAt.toISOString(),
+          id: windowLastId,
+          scanned: totalScanned,
+        }
+      : null;
+
+    return { data, nextCursor, hasMore, scanned: totalScanned };
   },
 };

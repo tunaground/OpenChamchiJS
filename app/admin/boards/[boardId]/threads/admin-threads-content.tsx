@@ -459,6 +459,7 @@ interface SidebarLabels {
   roles?: string;
   settings?: string;
   threads: string;
+  responses: string;
   notices: string;
 }
 

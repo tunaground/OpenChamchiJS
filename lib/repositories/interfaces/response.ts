@@ -13,6 +13,24 @@ export interface ResponseData {
   createdAt: Date;
 }
 
+export interface ResponseWithUser extends ResponseData {
+  user?: { id: string; name: string | null; email?: string | null } | null;
+  thread?: { id: number; title: string };
+}
+
+export interface AdminResponseFilter {
+  username?: string;
+  authorId?: string;
+  email?: string;
+}
+
+export interface FindByBoardIdOptions {
+  limit?: number;
+  offset?: number;
+  includeDeleted?: boolean;
+  filter?: AdminResponseFilter;
+}
+
 export interface CreateResponseInput {
   threadId: number;
   username: string;
@@ -47,6 +65,19 @@ export interface ResponseFilter {
   authorIds?: string[];
 }
 
+export interface ContentSearchCursor {
+  createdAt: string;  // ISO string for serialization
+  id: string;
+  scanned: number;    // total responses scanned so far
+}
+
+export interface ContentSearchResult {
+  data: ResponseWithUser[];
+  nextCursor: ContentSearchCursor | null;
+  hasMore: boolean;
+  scanned: number;  // total responses scanned so far (always available)
+}
+
 export interface ResponseRepository {
   findByThreadId(
     threadId: number,
@@ -62,6 +93,19 @@ export interface ResponseRepository {
     threadId: number,
     options: FindRecentOptions & { filter?: ResponseFilter }
   ): Promise<ResponseData[]>;
+  findByBoardIdWithCount(
+    boardId: string,
+    options?: FindByBoardIdOptions
+  ): Promise<{ data: ResponseWithUser[]; total: number }>;
+  findByBoardIdChunked(
+    boardId: string,
+    contentSearch: string,
+    options?: {
+      limit?: number;
+      cursor?: ContentSearchCursor | null;
+      includeDeleted?: boolean;
+    }
+  ): Promise<ContentSearchResult>;
   create(data: CreateResponseInput): Promise<ResponseData>;
   update(id: string, data: UpdateResponseInput): Promise<ResponseData>;
   delete(id: string): Promise<ResponseData>;

@@ -9,9 +9,11 @@ import { boardRepository as defaultBoardRepository } from "@/lib/repositories/pr
 import {
   ResponseRepository,
   ResponseData,
+  ResponseWithUser,
   CreateResponseInput,
   UpdateResponseInput,
   ResponseFilter,
+  ContentSearchCursor,
 } from "@/lib/repositories/interfaces/response";
 import { ThreadRepository } from "@/lib/repositories/interfaces/thread";
 import { BoardRepository } from "@/lib/repositories/interfaces/board";
@@ -34,6 +36,23 @@ export type ResponseRangeType =
   | { type: "single"; seq: number }
   | { type: "range"; startSeq: number; endSeq: number };
 
+export type SearchType = "username" | "authorId" | "email" | "content";
+
+export interface FindByBoardIdResult {
+  data: ResponseWithUser[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  cursor?: {
+    nextCursor: ContentSearchCursor | null;
+    hasMore: boolean;
+    scanned: number;
+  };
+}
+
 export interface ResponseService {
   findByThreadId(
     threadId: number,
@@ -46,6 +65,17 @@ export interface ResponseService {
     filter?: ResponseFilter
   ): Promise<ResponseData[]>;
   findById(id: string): Promise<ResponseData>;
+  findByBoardId(
+    boardId: string,
+    options?: {
+      page?: number;
+      limit?: number;
+      searchType?: SearchType;
+      search?: string;
+      cursor?: ContentSearchCursor | null;
+      includeDeleted?: boolean;
+    }
+  ): Promise<FindByBoardIdResult>;
   create(data: CreateResponseInput): Promise<ResponseData>;
   update(
     userId: string,
@@ -183,6 +213,54 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Response not found", "NOT_FOUND");
       }
       return response;
+    },
+
+    async findByBoardId(
+      boardId: string,
+      options?: {
+        page?: number;
+        limit?: number;
+        searchType?: SearchType;
+        search?: string;
+        cursor?: ContentSearchCursor | null;
+        includeDeleted?: boolean;
+      }
+    ): Promise<FindByBoardIdResult> {
+      const { page = 1, limit = 20, searchType, search, cursor, includeDeleted = false } = options ?? {};
+
+      // Content search uses chunked cursor-based search
+      if (searchType === "content" && search) {
+        const result = await responseRepository.findByBoardIdChunked(
+          boardId,
+          search,
+          { limit, cursor, includeDeleted }
+        );
+        return {
+          data: result.data,
+          cursor: { nextCursor: result.nextCursor, hasMore: result.hasMore, scanned: result.scanned },
+        };
+      }
+
+      // Other searches use standard pagination
+      const filter = searchType && search ? { [searchType]: search } : undefined;
+      const offset = (page - 1) * limit;
+
+      const result = await responseRepository.findByBoardIdWithCount(boardId, {
+        limit,
+        offset,
+        includeDeleted,
+        filter,
+      });
+
+      return {
+        data: result.data,
+        pagination: {
+          page,
+          limit,
+          total: result.total,
+          totalPages: Math.ceil(result.total / limit),
+        },
+      };
     },
 
     async create(data: CreateResponseInput): Promise<ResponseData> {
