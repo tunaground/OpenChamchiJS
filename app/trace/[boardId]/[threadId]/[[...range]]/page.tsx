@@ -36,18 +36,18 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { threadId } = await params;
+  const { boardId, threadId } = await params;
   const threadIdNum = parseInt(threadId, 10);
   if (isNaN(threadIdNum)) {
     return {};
   }
   try {
-    const [thread, settings] = await Promise.all([
+    const [thread, board] = await Promise.all([
       threadService.findById(threadIdNum),
-      globalSettingsService.get(),
+      boardService.findById(boardId),
     ]);
     return {
-      title: `${settings.siteTitle} - ${thread.title}`,
+      title: `${board.name} - ${thread.title}`,
     };
   } catch {
     return {};
