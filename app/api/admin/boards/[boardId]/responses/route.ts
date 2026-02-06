@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { responseService, SearchType } from "@/lib/services/response";
-import { ContentSearchCursor } from "@/lib/repositories/interfaces/response";
+import { AdminResponseCursor } from "@/lib/repositories/interfaces/response";
 
 interface Params {
   params: Promise<{ boardId: string }>;
@@ -30,10 +30,9 @@ export async function GET(request: NextRequest, { params }: Params) {
   const searchType = searchParams.get("searchType") as SearchType | null;
   const search = searchParams.get("search") ?? undefined;
   const cursorParam = searchParams.get("cursor");
-  const page = parseInt(searchParams.get("page") ?? "1", 10);
 
   // Parse cursor from JSON string
-  let cursor: ContentSearchCursor | null = null;
+  let cursor: AdminResponseCursor | null = null;
   if (cursorParam) {
     try {
       cursor = JSON.parse(cursorParam);
@@ -43,7 +42,6 @@ export async function GET(request: NextRequest, { params }: Params) {
   }
 
   const result = await responseService.findByBoardId(boardId, {
-    page,
     searchType: searchType ?? undefined,
     search,
     cursor,
@@ -65,7 +63,8 @@ export async function GET(request: NextRequest, { params }: Params) {
       deleted: response.deleted,
       createdAt: response.createdAt.toISOString(),
     })),
-    pagination: result.pagination,
-    cursor: result.cursor,
+    hasMore: result.hasMore,
+    nextCursor: result.nextCursor,
+    scanned: result.scanned,
   });
 }

@@ -13,6 +13,7 @@ import {
   CreateResponseInput,
   UpdateResponseInput,
   ResponseFilter,
+  AdminResponseCursor,
   ContentSearchCursor,
 } from "@/lib/repositories/interfaces/response";
 import { ThreadRepository } from "@/lib/repositories/interfaces/thread";
@@ -40,17 +41,9 @@ export type SearchType = "username" | "authorId" | "email" | "content";
 
 export interface FindByBoardIdResult {
   data: ResponseWithUser[];
-  pagination?: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-  };
-  cursor?: {
-    nextCursor: ContentSearchCursor | null;
-    hasMore: boolean;
-    scanned: number;
-  };
+  hasMore: boolean;
+  nextCursor: AdminResponseCursor | null;
+  scanned?: number;  // Only for content search
 }
 
 export interface ResponseService {
@@ -68,11 +61,10 @@ export interface ResponseService {
   findByBoardId(
     boardId: string,
     options?: {
-      page?: number;
       limit?: number;
       searchType?: SearchType;
       search?: string;
-      cursor?: ContentSearchCursor | null;
+      cursor?: AdminResponseCursor | null;
       includeDeleted?: boolean;
     }
   ): Promise<FindByBoardIdResult>;
@@ -218,48 +210,50 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
     async findByBoardId(
       boardId: string,
       options?: {
-        page?: number;
         limit?: number;
         searchType?: SearchType;
         search?: string;
-        cursor?: ContentSearchCursor | null;
+        cursor?: AdminResponseCursor | null;
         includeDeleted?: boolean;
       }
     ): Promise<FindByBoardIdResult> {
-      const { page = 1, limit = 20, searchType, search, cursor, includeDeleted = false } = options ?? {};
+      const { limit = 100, searchType, search, cursor, includeDeleted = false } = options ?? {};
 
-      // Content search uses chunked cursor-based search
+      // Content search uses chunked cursor-based search (with scanned count)
       if (searchType === "content" && search) {
+        // Convert AdminResponseCursor to ContentSearchCursor if present
+        const contentCursor: ContentSearchCursor | null = cursor
+          ? { createdAt: cursor.createdAt, id: cursor.id, scanned: 0 }
+          : null;
         const result = await responseRepository.findByBoardIdChunked(
           boardId,
           search,
-          { limit, cursor, includeDeleted }
+          { limit, cursor: contentCursor, includeDeleted }
         );
         return {
           data: result.data,
-          cursor: { nextCursor: result.nextCursor, hasMore: result.hasMore, scanned: result.scanned },
+          hasMore: result.hasMore,
+          nextCursor: result.nextCursor
+            ? { createdAt: result.nextCursor.createdAt, id: result.nextCursor.id }
+            : null,
+          scanned: result.scanned,
         };
       }
 
-      // Other searches use standard pagination
+      // Other searches use cursor-based pagination
       const filter = searchType && search ? { [searchType]: search } : undefined;
-      const offset = (page - 1) * limit;
 
-      const result = await responseRepository.findByBoardIdWithCount(boardId, {
+      const result = await responseRepository.findByBoardIdCursor(boardId, {
         limit,
-        offset,
+        cursor,
         includeDeleted,
         filter,
       });
 
       return {
         data: result.data,
-        pagination: {
-          page,
-          limit,
-          total: result.total,
-          totalPages: Math.ceil(result.total / limit),
-        },
+        hasMore: result.hasMore,
+        nextCursor: result.nextCursor,
       };
     },
 

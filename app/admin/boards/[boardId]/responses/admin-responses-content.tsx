@@ -4,7 +4,6 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styled from "styled-components";
-import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
 import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
@@ -197,14 +196,30 @@ const ClickableUserBadge = styled(UserBadge)`
   }
 `;
 
-const CardContent = styled.div`
+const CardContent = styled.div<{ $expanded?: boolean }>`
   font-size: 1.3rem;
   color: ${(props) => props.theme.textPrimary};
   margin-bottom: 0.8rem;
   word-break: break-word;
   white-space: pre-wrap;
-  max-height: 8rem;
-  overflow: hidden;
+  ${(props) => !props.$expanded && `
+    max-height: 8rem;
+    overflow: hidden;
+  `}
+`;
+
+const ExpandButton = styled.button`
+  background: none;
+  border: none;
+  color: ${(props) => props.theme.textSecondary};
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 0.8rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
 `;
 
 const CardActions = styled.div`
@@ -338,23 +353,9 @@ interface Labels {
   searchComplete: string;
 }
 
-interface PaginationData {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-}
-
-interface ContentSearchCursor {
+interface AdminResponseCursor {
   createdAt: string;
   id: string;
-  scanned: number;
-}
-
-interface CursorData {
-  nextCursor: ContentSearchCursor | null;
-  hasMore: boolean;
-  scanned: number;
 }
 
 interface AuthLabels {
@@ -380,8 +381,9 @@ interface AdminResponsesContentProps {
   authLabels: AuthLabels;
   sidebarLabels: SidebarLabels;
   responses: ResponseData[];
-  pagination?: PaginationData;
-  cursor?: CursorData;
+  hasMore: boolean;
+  nextCursor: AdminResponseCursor | null;
+  scanned?: number;
   searchType: string;
   search: string;
   canEdit: boolean;
@@ -395,8 +397,9 @@ export function AdminResponsesContent({
   authLabels,
   sidebarLabels,
   responses: initialResponses,
-  pagination,
-  cursor: initialCursor,
+  hasMore: initialHasMore,
+  nextCursor: initialNextCursor,
+  scanned: initialScanned,
   searchType: initialSearchType,
   search: initialSearch,
   canEdit,
@@ -408,15 +411,32 @@ export function AdminResponsesContent({
   const [loading, setLoading] = useState(false);
   const [searchType, setSearchType] = useState(initialSearchType || "username");
   const [search, setSearch] = useState(initialSearch);
-  const [cursor, setCursor] = useState(initialCursor);
+  const [hasMore, setHasMore] = useState(initialHasMore);
+  const [nextCursor, setNextCursor] = useState(initialNextCursor);
+  const [scanned, setScanned] = useState(initialScanned);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+
+  const toggleExpand = (id: string) => {
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     setResponses(initialResponses);
-    setCursor(initialCursor);
+    setHasMore(initialHasMore);
+    setNextCursor(initialNextCursor);
+    setScanned(initialScanned);
     setSearchType(initialSearchType || "username");
     setSearch(initialSearch);
-  }, [initialResponses, initialCursor, initialSearchType, initialSearch]);
+  }, [initialResponses, initialHasMore, initialNextCursor, initialScanned, initialSearchType, initialSearch]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -434,26 +454,18 @@ export function AdminResponsesContent({
     router.push(`/admin/boards/${boardId}/responses?searchType=${type}&search=${encodeURIComponent(value)}`);
   };
 
-  const getBaseUrl = () => {
-    const params = new URLSearchParams();
-    if (initialSearchType) {
-      params.set("searchType", initialSearchType);
-    }
-    if (initialSearch) {
-      params.set("search", initialSearch);
-    }
-    const queryString = params.toString();
-    return `/admin/boards/${boardId}/responses${queryString ? `?${queryString}` : ""}`;
-  };
-
   const handleLoadMore = async () => {
-    if (!cursor?.nextCursor || loadingMore) return;
+    if (!nextCursor || loadingMore) return;
     setLoadingMore(true);
     try {
       const params = new URLSearchParams();
-      params.set("searchType", "content");
-      params.set("search", initialSearch);
-      params.set("cursor", JSON.stringify(cursor.nextCursor));
+      if (initialSearchType) {
+        params.set("searchType", initialSearchType);
+      }
+      if (initialSearch) {
+        params.set("search", initialSearch);
+      }
+      params.set("cursor", JSON.stringify(nextCursor));
 
       const res = await fetch(
         `/api/admin/boards/${boardId}/responses?${params.toString()}`
@@ -461,7 +473,11 @@ export function AdminResponsesContent({
       if (res.ok) {
         const data = await res.json();
         setResponses([...responses, ...data.data]);
-        setCursor(data.cursor);
+        setHasMore(data.hasMore);
+        setNextCursor(data.nextCursor);
+        if (data.scanned !== undefined) {
+          setScanned(data.scanned);
+        }
       }
     } finally {
       setLoadingMore(false);
@@ -524,7 +540,7 @@ export function AdminResponsesContent({
     />
   );
 
-  const isContentSearch = initialSearchType === "content";
+  const showScanned = initialSearchType === "content" && scanned !== undefined;
 
   return (
     <PageLayout
@@ -564,7 +580,7 @@ export function AdminResponsesContent({
           </SearchForm>
         </ActionsBar>
 
-        {responses.length === 0 ? (
+        {responses.length === 0 && !hasMore ? (
           <EmptyState>
             {initialSearch ? labels.noResults : labels.noResponses}
           </EmptyState>
@@ -613,10 +629,17 @@ export function AdminResponsesContent({
                   <CardMeta>
                     <span>{formatDateTime(response.createdAt)}</span>
                   </CardMeta>
-                  <CardContent>
-                    {response.content.substring(0, 300)}
-                    {response.content.length > 300 && "..."}
+                  <CardContent $expanded={expandedIds.has(response.id)}>
+                    {expandedIds.has(response.id)
+                      ? response.content
+                      : response.content.substring(0, 300)}
+                    {!expandedIds.has(response.id) && response.content.length > 300 && "..."}
                   </CardContent>
+                  {response.content.length > 300 && (
+                    <ExpandButton onClick={() => toggleExpand(response.id)}>
+                      {expandedIds.has(response.id) ? "▲ 접기" : "▼ 펼치기"}
+                    </ExpandButton>
+                  )}
                   <CardActions>
                     {canEdit && !response.deleted && response.seq !== 0 && (
                       <SmallButton
@@ -639,27 +662,21 @@ export function AdminResponsesContent({
               ))}
             </ResponseCards>
 
-            {isContentSearch && cursor ? (
-              <LoadMoreContainer>
+            <LoadMoreContainer>
+              {showScanned && (
                 <SearchProgress>
-                  {labels.scannedCount.replace("__COUNT__", String(cursor.scanned))}
+                  {labels.scannedCount.replace("__COUNT__", String(scanned))}
                   {" | "}
                   {labels.resultCount.replace("__COUNT__", String(responses.length))}
-                  {!cursor.hasMore && ` | ${labels.searchComplete}`}
+                  {!hasMore && ` | ${labels.searchComplete}`}
                 </SearchProgress>
-                {cursor.hasMore && (
-                  <Button onClick={handleLoadMore} disabled={loadingMore}>
-                    {loadingMore ? labels.loading : labels.loadMore}
-                  </Button>
-                )}
-              </LoadMoreContainer>
-            ) : pagination ? (
-              <Pagination
-                currentPage={pagination.page}
-                totalPages={pagination.totalPages}
-                baseUrl={getBaseUrl()}
-              />
-            ) : null}
+              )}
+              {hasMore && (
+                <Button onClick={handleLoadMore} disabled={loadingMore}>
+                  {loadingMore ? labels.loading : labels.loadMore}
+                </Button>
+              )}
+            </LoadMoreContainer>
           </>
         )}
       </Container>

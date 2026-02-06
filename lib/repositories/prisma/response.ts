@@ -9,8 +9,10 @@ import {
   FindBySeqRangeOptions,
   FindRecentOptions,
   FindByBoardIdOptions,
+  FindByBoardIdResult,
   ResponseFilter,
   AdminResponseFilter,
+  AdminResponseCursor,
   ContentSearchCursor,
   ContentSearchResult,
 } from "@/lib/repositories/interfaces/response";
@@ -251,33 +253,122 @@ export const responseRepository: ResponseRepository = {
     return prisma.response.count({ where: { threadId, deleted: false } });
   },
 
-  async findByBoardIdWithCount(
+  async findByBoardIdCursor(
     boardId: string,
     options?: FindByBoardIdOptions
-  ): Promise<{ data: ResponseWithUser[]; total: number }> {
-    const { limit = 20, offset = 0, includeDeleted = false, filter } = options ?? {};
+  ): Promise<FindByBoardIdResult> {
+    const { limit = 100, cursor, includeDeleted = false, filter } = options ?? {};
 
-    const whereClause: Prisma.ResponseWhereInput = {
-      boardId,
-      ...(includeDeleted ? {} : { deleted: false }),
-      ...buildAdminFilter(filter),
-    };
+    // Build filter conditions
+    const deletedFilter = includeDeleted ? Prisma.sql`` : Prisma.sql`AND r.deleted = false`;
 
-    const [data, total] = await Promise.all([
-      prisma.response.findMany({
-        where: whereClause,
-        include: {
-          user: { select: { id: true, name: true, email: true } },
-          thread: { select: { id: true, title: true } },
-        },
-        orderBy: { createdAt: "desc" },
-        take: limit,
-        skip: offset,
-      }),
-      prisma.response.count({ where: whereClause }),
-    ]);
+    // Build admin filter (username, authorId, email search)
+    let adminFilter = Prisma.sql``;
+    if (filter?.username) {
+      adminFilter = Prisma.sql`${adminFilter} AND r.username ILIKE ${`%${filter.username}%`}`;
+    }
+    if (filter?.authorId) {
+      adminFilter = Prisma.sql`${adminFilter} AND r."authorId" ILIKE ${`%${filter.authorId}%`}`;
+    }
+    if (filter?.email) {
+      adminFilter = Prisma.sql`${adminFilter} AND u.email ILIKE ${`%${filter.email}%`}`;
+    }
 
-    return { data, total };
+    // Build cursor condition using ROW comparison (efficient for composite key)
+    const cursorFilter = cursor
+      ? Prisma.sql`AND (r."createdAt", r.id) < (${new Date(cursor.createdAt)}::timestamp, ${cursor.id})`
+      : Prisma.sql``;
+
+    // Use JOIN for email filter, LEFT JOIN otherwise
+    const userJoin = filter?.email
+      ? Prisma.sql`JOIN "User" u ON r."userId" = u.id`
+      : Prisma.sql`LEFT JOIN "User" u ON r."userId" = u.id`;
+
+    interface RawRow {
+      id: string;
+      threadId: number;
+      boardId: string;
+      seq: number;
+      username: string;
+      authorId: string;
+      userId: string | null;
+      ip: string;
+      content: string;
+      attachment: string | null;
+      visible: boolean;
+      deleted: boolean;
+      createdAt: Date;
+      user_id: string | null;
+      user_name: string | null;
+      user_email: string | null;
+      thread_id: number;
+      thread_title: string;
+    }
+
+    const rows = await prisma.$queryRaw<RawRow[]>`
+      SELECT
+        r.id,
+        r."threadId",
+        r."boardId",
+        r.seq,
+        r.username,
+        r."authorId",
+        r."userId",
+        r.ip,
+        r.content,
+        r.attachment,
+        r.visible,
+        r.deleted,
+        r."createdAt",
+        u.id as user_id,
+        u.name as user_name,
+        u.email as user_email,
+        t.id as thread_id,
+        t.title as thread_title
+      FROM "Response" r
+      ${userJoin}
+      JOIN "Thread" t ON r."threadId" = t.id
+      WHERE r."boardId" = ${boardId}
+        ${deletedFilter}
+        ${adminFilter}
+        ${cursorFilter}
+      ORDER BY r."createdAt" DESC, r.id DESC
+      LIMIT ${limit + 1}
+    `;
+
+    const hasMore = rows.length > limit;
+    const dataRows = hasMore ? rows.slice(0, limit) : rows;
+
+    // Map to ResponseWithUser format
+    const data: ResponseWithUser[] = dataRows.map((row) => ({
+      id: row.id,
+      threadId: row.threadId,
+      boardId: row.boardId,
+      seq: row.seq,
+      username: row.username,
+      authorId: row.authorId,
+      userId: row.userId,
+      ip: row.ip,
+      content: row.content,
+      attachment: row.attachment,
+      visible: row.visible,
+      deleted: row.deleted,
+      createdAt: row.createdAt,
+      user: row.user_id ? { id: row.user_id, name: row.user_name, email: row.user_email } : null,
+      thread: { id: row.thread_id, title: row.thread_title },
+    }));
+
+    // Build next cursor from last item
+    let nextCursor: AdminResponseCursor | null = null;
+    if (hasMore && data.length > 0) {
+      const lastItem = data[data.length - 1];
+      nextCursor = {
+        createdAt: lastItem.createdAt.toISOString(),
+        id: lastItem.id,
+      };
+    }
+
+    return { data, hasMore, nextCursor };
   },
 
   async findByBoardIdChunked(
@@ -289,7 +380,7 @@ export const responseRepository: ResponseRepository = {
       includeDeleted?: boolean;
     }
   ): Promise<ContentSearchResult> {
-    const { limit = 20, cursor, includeDeleted = false } = options ?? {};
+    const { limit = 100, cursor, includeDeleted = false } = options ?? {};
     const chunkSize = 5000;
     const searchPattern = `%${contentSearch}%`;
     const previousScanned = cursor?.scanned ?? 0;
@@ -369,7 +460,6 @@ export const responseRepository: ResponseRepository = {
         JOIN "Thread" t ON w."threadId" = t.id
         WHERE w.content ILIKE ${searchPattern}
         ORDER BY w."createdAt" DESC, w.id DESC
-        LIMIT ${limit}
       )
       SELECT
         r.id,

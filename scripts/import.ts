@@ -26,6 +26,7 @@ interface CliArgs {
   skipExisting: boolean;
   dryRun: boolean;
   noAttachments: boolean;
+  threads: number;
 }
 
 // Export data types
@@ -138,6 +139,7 @@ function parseArgs(): CliArgs {
     skipExisting: false,
     dryRun: false,
     noAttachments: false,
+    threads: CONCURRENT_THREADS,
   };
 
   for (let i = 0; i < args.length; i++) {
@@ -148,6 +150,8 @@ function parseArgs(): CliArgs {
       result.dryRun = true;
     } else if (arg === "--no-attachments") {
       result.noAttachments = true;
+    } else if (arg === "--threads" && args[i + 1]) {
+      result.threads = parseInt(args[++i], 10) || CONCURRENT_THREADS;
     } else if (arg === "--env") {
       i++; // Skip next arg (env file path)
     } else if (!arg.startsWith("-")) {
@@ -175,10 +179,11 @@ Options:
   --skip-existing    Skip threads that already exist in the database
   --dry-run          Test run without making changes
   --no-attachments   Skip uploading attachments to Supabase
+  --threads <n>      Number of concurrent threads to process (default: ${CONCURRENT_THREADS})
 
 Examples:
   npx tsx scripts/import.ts /path/to/export tuna --dry-run
-  npx tsx scripts/import.ts /path/to/export anchor situplay tuna --env .env.prod
+  npx tsx scripts/import.ts /path/to/export anchor situplay tuna --threads 5
 `);
 }
 
@@ -546,7 +551,7 @@ async function importBoard(
   // Process threads concurrently
   await processWithConcurrency(
     threadDirs,
-    CONCURRENT_THREADS,
+    args.threads,
     (threadId) => importThread(prisma, supabase, bucket, exportDir, boardId, threadId, args),
     (threadResult, threadId, processed) => {
       if (threadResult.error) {
@@ -613,6 +618,7 @@ async function main(): Promise<void> {
   if (args.skipExisting) console.log("Option: --skip-existing");
   if (args.dryRun) console.log("Option: --dry-run");
   if (args.noAttachments) console.log("Option: --no-attachments");
+  console.log(`Concurrent threads: ${args.threads}`);
 
   // Initialize Prisma (use DIRECT_URL for full permissions if available)
   const databaseUrl = process.env.DIRECT_URL || process.env.DATABASE_URL;

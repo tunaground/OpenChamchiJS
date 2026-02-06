@@ -70,6 +70,8 @@ describe("ResponseService", () => {
     findByThreadIdAndSeq: jest.fn(),
     findByThreadIdAndSeqRange: jest.fn(),
     findRecentByThreadId: jest.fn(),
+    findByBoardIdCursor: jest.fn(),
+    findByBoardIdChunked: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),

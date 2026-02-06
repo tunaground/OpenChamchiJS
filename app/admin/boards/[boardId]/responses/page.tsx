@@ -5,13 +5,12 @@ import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { responseService, SearchType } from "@/lib/services/response";
-import { ContentSearchCursor } from "@/lib/repositories/interfaces/response";
+import { AdminResponseCursor } from "@/lib/repositories/interfaces/response";
 import { AdminResponsesContent } from "./admin-responses-content";
 
 interface Props {
   params: Promise<{ boardId: string }>;
   searchParams: Promise<{
-    page?: string;
     searchType?: string;
     search?: string;
     cursor?: string;
@@ -20,13 +19,12 @@ interface Props {
 
 export default async function AdminResponsesPage({ params, searchParams }: Props) {
   const { boardId } = await params;
-  const { page: pageParam, searchType, search, cursor: cursorParam } = await searchParams;
-  const page = parseInt(pageParam ?? "1", 10);
+  const { searchType, search, cursor: cursorParam } = await searchParams;
   const session = (await getServerSession(authOptions))!;
   const userId = session.user.id;
 
   // Parse cursor from JSON string
-  let cursor: ContentSearchCursor | null = null;
+  let cursor: AdminResponseCursor | null = null;
   if (cursorParam) {
     try {
       cursor = JSON.parse(cursorParam);
@@ -47,7 +45,6 @@ export default async function AdminResponsesPage({ params, searchParams }: Props
   try {
     const board = await boardService.findById(boardId);
     const result = await responseService.findByBoardId(boardId, {
-      page,
       searchType: searchType as SearchType | undefined,
       search,
       cursor,
@@ -89,8 +86,9 @@ export default async function AdminResponsesPage({ params, searchParams }: Props
           deleted: response.deleted,
           createdAt: response.createdAt.toISOString(),
         }))}
-        pagination={result.pagination}
-        cursor={result.cursor}
+        hasMore={result.hasMore}
+        nextCursor={result.nextCursor}
+        scanned={result.scanned}
         searchType={searchType ?? ""}
         search={search ?? ""}
         canEdit={canEdit}

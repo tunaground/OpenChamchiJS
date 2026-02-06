@@ -25,11 +25,22 @@ export interface AdminResponseFilter {
   email?: string;
 }
 
+export interface AdminResponseCursor {
+  createdAt: string;  // ISO string
+  id: string;
+}
+
 export interface FindByBoardIdOptions {
   limit?: number;
-  offset?: number;
+  cursor?: AdminResponseCursor | null;
   includeDeleted?: boolean;
   filter?: AdminResponseFilter;
+}
+
+export interface FindByBoardIdResult {
+  data: ResponseWithUser[];
+  hasMore: boolean;
+  nextCursor: AdminResponseCursor | null;
 }
 
 export interface CreateResponseInput {
@@ -95,10 +106,10 @@ export interface ResponseRepository {
     threadId: number,
     options: FindRecentOptions & { filter?: ResponseFilter }
   ): Promise<ResponseData[]>;
-  findByBoardIdWithCount(
+  findByBoardIdCursor(
     boardId: string,
     options?: FindByBoardIdOptions
-  ): Promise<{ data: ResponseWithUser[]; total: number }>;
+  ): Promise<FindByBoardIdResult>;
   findByBoardIdChunked(
     boardId: string,
     contentSearch: string,

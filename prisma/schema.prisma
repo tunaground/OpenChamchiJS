@@ -200,5 +200,6 @@ model Response {
   @@unique([threadId, seq])
   @@index([threadId, deleted, visible, seq])
   @@index([boardId, deleted, createdAt(sort: Desc)])
+  @@index([boardId, createdAt(sort: Desc), id(sort: Desc)])  // Admin responses (includeDeleted)
   @@index([userId])
 }
