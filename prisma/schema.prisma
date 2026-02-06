@@ -122,22 +122,23 @@ model GlobalSettings {
 }
 
 model Board {
-  id                    String   @id
+  id                    String     @id
   name                  String
   defaultUsername       String
-  deleted               Boolean  @default(false)
-  maxResponsesPerThread Int      @default(1000)
-  blockForeignIp        Boolean  @default(false)
-  responsesPerPage      Int      @default(50)
-  showUserCount         Boolean  @default(false)
-  threadsPerPage        Int      @default(20)
-  uploadMaxSize         Int      @default(5242880) // 5MB
-  uploadMimeTypes       String   @default("image/png,image/jpeg,image/gif,image/webp")
-  threadCount           Int      @default(0) // Counter cache: active threads (published && !deleted)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  deleted               Boolean    @default(false)
+  maxResponsesPerThread Int        @default(1000)
+  blockForeignIp        Boolean    @default(false)
+  responsesPerPage      Int        @default(50)
+  showUserCount         Boolean    @default(false)
+  threadsPerPage        Int        @default(20)
+  uploadMaxSize         Int        @default(5242880) // 5MB
+  uploadMimeTypes       String     @default("image/png,image/jpeg,image/gif,image/webp")
+  threadCount           Int        @default(0) // Counter cache: active threads (published && !deleted)
+  createdAt             DateTime   @default(now())
+  updatedAt             DateTime   @updatedAt
   threads               Thread[]
   notices               Notice[]
+  responses             Response[]
 }
 
 model Notice {
@@ -181,6 +182,7 @@ model Thread {
 model Response {
   id         String   @id @default(cuid())
   threadId   Int
+  boardId    String
   seq        Int
   username   String
   authorId   String
@@ -192,9 +194,11 @@ model Response {
   deleted    Boolean  @default(false)
   createdAt  DateTime @default(now())
   thread     Thread   @relation(fields: [threadId], references: [id])
+  board      Board    @relation(fields: [boardId], references: [id])
   user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   @@unique([threadId, seq])
   @@index([threadId, deleted, visible, seq])
+  @@index([boardId, deleted, createdAt(sort: Desc)])
   @@index([userId])
 }

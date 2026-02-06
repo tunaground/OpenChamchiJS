@@ -288,7 +288,10 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
 
       // Extract noup flag before passing to repository (repository doesn't need it)
       const { noup, ...repoData } = data;
-      const response = await responseRepository.create(repoData);
+      const response = await responseRepository.create({
+        ...repoData,
+        boardId: thread.boardId,
+      });
 
       // If this response reaches the max limit, end the thread
       // seq starts from 0, so seq == maxResponsesPerThread means we have maxResponsesPerThread + 1 responses

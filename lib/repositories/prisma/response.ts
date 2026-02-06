@@ -184,14 +184,15 @@ export const responseRepository: ResponseRepository = {
       // 2. seq = incremented value - 1
       let seq = updatedThread.responseCount - 1;
 
+      // Use provided boardId or get from thread
+      const boardId = data.boardId ?? updatedThread.boardId;
+      const responseData = { ...data, boardId, seq };
+
       // 3. Create response (with fallback to MAX(seq)+1 on conflict)
       let response;
       try {
         response = await tx.response.create({
-          data: {
-            ...data,
-            seq,
-          },
+          data: responseData,
         });
       } catch (e) {
         // seq conflict: fallback to MAX(seq)+1
@@ -203,10 +204,7 @@ export const responseRepository: ResponseRepository = {
           seq = (maxSeqResult._max.seq ?? -1) + 1;
 
           response = await tx.response.create({
-            data: {
-              ...data,
-              seq,
-            },
+            data: { ...responseData, seq },
           });
 
           // Fix responseCount to match actual count
@@ -260,7 +258,7 @@ export const responseRepository: ResponseRepository = {
     const { limit = 20, offset = 0, includeDeleted = false, filter } = options ?? {};
 
     const whereClause: Prisma.ResponseWhereInput = {
-      thread: { boardId },
+      boardId,
       ...(includeDeleted ? {} : { deleted: false }),
       ...buildAdminFilter(filter),
     };
@@ -304,6 +302,7 @@ export const responseRepository: ResponseRepository = {
     interface RawResponse {
       id: string;
       threadId: number;
+      boardId: string;
       seq: number;
       username: string;
       authorId: string;
@@ -328,8 +327,7 @@ export const responseRepository: ResponseRepository = {
       WITH search_window AS (
         SELECT r.*
         FROM "Response" r
-        JOIN "Thread" t ON r."threadId" = t.id
-        WHERE t."boardId" = ${boardId}
+        WHERE r."boardId" = ${boardId}
           AND (
             ${cursorCreatedAt}::timestamp IS NULL
             OR r."createdAt" < ${cursorCreatedAt}
@@ -350,6 +348,7 @@ export const responseRepository: ResponseRepository = {
         SELECT
           w.id,
           w."threadId",
+          w."boardId",
           w.seq,
           w.username,
           w."authorId",
@@ -375,6 +374,7 @@ export const responseRepository: ResponseRepository = {
       SELECT
         r.id,
         r."threadId",
+        r."boardId",
         r.seq,
         r.username,
         r."authorId",
@@ -409,6 +409,7 @@ export const responseRepository: ResponseRepository = {
       .map((row) => ({
         id: row.id,
         threadId: row.threadId,
+        boardId: row.boardId,
         seq: row.seq,
         username: row.username,
         authorId: row.authorId,

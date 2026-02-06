@@ -1,6 +1,7 @@
 export interface ResponseData {
   id: string;
   threadId: number;
+  boardId: string;
   seq: number;
   username: string;
   authorId: string;
@@ -33,6 +34,7 @@ export interface FindByBoardIdOptions {
 
 export interface CreateResponseInput {
   threadId: number;
+  boardId?: string;  // Optional: service fills from thread, repository requires it
   username: string;
   authorId: string;
   userId?: string;

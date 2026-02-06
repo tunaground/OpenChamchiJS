@@ -51,6 +51,7 @@ describe("ResponseService", () => {
   const mockResponse: ResponseData = {
     id: "response-1",
     threadId: 1,
+    boardId: "test-board",
     seq: 0,
     username: "testuser",
     authorId: "author-123",
@@ -327,7 +328,10 @@ describe("ResponseService", () => {
       const result = await service.create(createInput);
 
       expect(result.content).toBe("New response");
-      expect(mockResponseRepo.create).toHaveBeenCalledWith(createInput);
+      expect(mockResponseRepo.create).toHaveBeenCalledWith({
+        ...createInput,
+        boardId: mockThread.boardId,
+      });
       expect(mockThreadRepo.updateBumpTime).toHaveBeenCalledWith(1);
     });
 
