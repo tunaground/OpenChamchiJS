@@ -12,7 +12,8 @@ Next.js 기반의 오픈소스 익명 게시판 시스템입니다.
 - **이미지 업로드** - 응답에 이미지 첨부 (Supabase Storage)
 - **관리자 페이지** - 사용자, 역할, 보드, 스레드, 공지사항 관리
 - **권한 시스템** - 역할 기반 접근 제어 (RBAC)
-- **다국어 지원** - 한국어, 영어
+- **다국어 지원** - 한국어, 영어, 일본어
+- **아카이브** - 레거시 스레드 정적 뷰어 (선택 사항)
 - **다크 모드** - 라이트/다크 테마 전환
 - **해외 IP 차단** - 보드별 외국 IP 작성 제한 (선택 사항)
 
@@ -64,6 +65,7 @@ Vercel 프로젝트 Settings → Environment Variables에서 다음 변수 추�
 | 변수명 | 설명 | 예시 |
 |--------|------|------|
 | `DATABASE_URL` | PostgreSQL 연결 URL | `postgresql://user:pass@host:5432/db` |
+| `DIRECT_URL` | PostgreSQL 직접 연결 URL (Prisma 7) | `postgresql://user:pass@host:5432/db` |
 | `NEXTAUTH_URL` | 사이트 URL | `https://your-domain.vercel.app` |
 | `NEXTAUTH_SECRET` | 세션 암호화 키 | `openssl rand -base64 32`로 생성 |
 | `GOOGLE_CLIENT_ID` | Google OAuth Client ID | `xxx.apps.googleusercontent.com` |
@@ -81,6 +83,9 @@ Vercel 프로젝트 Settings → Environment Variables에서 다음 변수 추�
 | `SUPABASE_URL` | Supabase 프로젝트 URL |
 | `SUPABASE_SERVICE_KEY` | Supabase service_role 키 |
 | `SUPABASE_STORAGE_BUCKET` | 스토리지 버킷 이름 |
+| `ARCHIVE_REDIRECT_ENABLED` | 아카이브 리다이렉트 활성화 (`true`) |
+| `NEXT_PUBLIC_ARCHIVE_BASE_URL` | 아카이브 데이터 URL |
+| `NEXT_PUBLIC_ARCHIVE_BOARDS` | 아카이브 보드 목록 (JSON) |
 
 ### 6. 배포
 
@@ -120,7 +125,8 @@ npm run dev
 ### 환경 변수 (.env)
 
 ```env
-DATABASE_URL="postgresql://user:password@localhost:5432/chamchi"
+DATABASE_URL="postgresql://user:password@localhost:5432/chamchi?schema=public"
+DIRECT_URL="postgresql://user:password@localhost:5432/chamchi?schema=public"
 NEXTAUTH_URL="http://localhost:3000"
 NEXTAUTH_SECRET="your-secret-key"
 GOOGLE_CLIENT_ID="your-google-client-id"
@@ -234,6 +240,33 @@ SUPABASE_STORAGE_BUCKET=attachments
 - 글 작성 실패 시 업로드된 이미지 자동 정리
 
 > 환경 변수가 설정되지 않으면 이미지 업로드 버튼이 표시되지 않습니다.
+
+## 아카이브 설정 (선택 사항)
+
+레거시 스레드를 정적 JSON 파일로 제공하는 아카이브 뷰어입니다.
+
+### 환경 변수 설정
+
+```env
+ARCHIVE_REDIRECT_ENABLED=true
+NEXT_PUBLIC_ARCHIVE_BASE_URL=https://your-archive-data-url/data
+NEXT_PUBLIC_ARCHIVE_BOARDS='[{"id":"board1","name":"Board 1"},{"id":"board2","name":"Board 2"}]'
+```
+
+### 데이터 구조
+
+아카이브 데이터는 다음 구조로 제공되어야 합니다:
+
+```
+{baseUrl}/
+  {boardId}/
+    index.json          # 스레드 목록
+    {threadId}.json     # 스레드 상세
+    attachment/         # 첨부파일
+      {filename}
+```
+
+환경 변수가 설정되지 않으면 `/archive` 페이지는 404를 반환합니다.
 
 ## 해외 IP 차단 설정
 
