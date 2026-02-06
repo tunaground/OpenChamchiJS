@@ -183,6 +183,15 @@ const CardMetaItem = styled.span`
   gap: 0.4rem;
 `;
 
+const ResponseCountLink = styled(Link)`
+  color: ${(props) => props.theme.textSecondary};
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+`;
+
 const EmptyState = styled.div`
   text-align: center;
   padding: 4.8rem;
@@ -422,7 +431,10 @@ export function BoardIndexContent({
                   <Link href={`/trace/${boardId}/${thread.id}/recent`}>
                     {thread.title}
                   </Link>
-                  <span> ({Math.max(0, thread.responseCount - 1)})</span>
+                  {" "}
+                  <ResponseCountLink href={`/trace/${boardId}/${thread.id}/`}>
+                    ({Math.max(0, thread.responseCount - 1)})
+                  </ResponseCountLink>
                 </CardTitle>
                 <CardMeta>
                   <CardMetaItem>{thread.username}</CardMetaItem>
