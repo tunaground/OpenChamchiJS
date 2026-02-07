@@ -19,25 +19,6 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Check if this is a setup path
-  const isSetupPath =
-    pathname === "/setup" || pathname.startsWith("/setup/");
-
-  if (!isSetupPath) {
-    // Check if setup is needed
-    const setupCheckUrl = new URL("/api/setup-check", request.url);
-    try {
-      const response = await fetch(setupCheckUrl);
-      const { needsSetup } = await response.json();
-
-      if (needsSetup) {
-        return NextResponse.redirect(new URL("/setup", request.url));
-      }
-    } catch {
-      // If check fails, continue normally
-    }
-  }
-
   // Check if route requires authentication
   const isProtectedRoute = protectedRoutes.some(
     (route) => pathname === route || pathname.startsWith(`${route}/`)
