@@ -34,6 +34,7 @@ interface ExportThread {
   id: number;
   title: string | null;
   username: string | null;
+  password: string | null;
   ended: boolean;
   deleted: boolean;
   createdAt: string;
@@ -398,8 +399,8 @@ async function importThread(
     attachmentsFailed = uploadResult.failed;
   }
 
-  // Prepare thread data
-  const hashedPassword = await bcrypt.hash(DEFAULT_PASSWORD, 10);
+  // Prepare thread password (use original if available, otherwise hash default)
+  const hashedPassword = threadData.password || await bcrypt.hash(DEFAULT_PASSWORD, 10);
 
   // Prepare responses data
   const responses = responsesData.map((resp) => {
