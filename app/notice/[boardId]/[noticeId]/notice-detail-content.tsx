@@ -1,17 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
+import { formatDateTime } from "@/lib/utils/date-formatter";
 
 const Container = styled.div`
-  padding: 3.2rem;
-  max-width: 1000px;
+  padding: ${(props) => props.theme.containerPadding};
+  max-width: ${(props) => props.theme.contentMaxWidth};
   margin: 0 auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: ${(props) => props.theme.containerPadding};
   }
 `;
 
@@ -37,7 +39,8 @@ const Article = styled.article`
 `;
 
 const Header = styled.header`
-  padding: 2.4rem;
+  padding: 1.2rem 1.6rem;
+  background: ${(props) => props.theme.surfaceHover};
   border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
 `;
 
@@ -45,11 +48,11 @@ const TitleRow = styled.div`
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  margin-bottom: 1.2rem;
+  margin-bottom: 0.4rem;
 `;
 
 const Title = styled.h1`
-  font-size: 2.4rem;
+  font-size: 1.6rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
   margin: 0;
@@ -57,7 +60,7 @@ const Title = styled.h1`
 
 const PinnedBadge = styled.span`
   display: inline-block;
-  padding: 0.4rem 0.8rem;
+  padding: 0.2rem 0.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border-radius: 0.4rem;
@@ -67,17 +70,17 @@ const PinnedBadge = styled.span`
 
 const Meta = styled.div`
   display: flex;
-  gap: 2.4rem;
-  font-size: 1.4rem;
+  gap: 1.2rem;
+  font-size: 1.2rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
 const MetaItem = styled.span``;
 
 const Content = styled.div`
-  padding: 2.4rem;
-  font-size: 1.6rem;
-  line-height: 1.75;
+  padding: 1.6rem;
+  font-size: 1.5rem;
+  line-height: 1.6;
   color: ${(props) => props.theme.textPrimary};
   white-space: pre-wrap;
   word-break: break-word;
@@ -142,16 +145,7 @@ export function NoticeDetailContent({
   boardsTitle,
   manualLabel,
 }: NoticeDetailContentProps) {
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  };
+  const locale = useLocale();
 
   const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
 
@@ -174,11 +168,11 @@ export function NoticeDetailContent({
             </TitleRow>
             <Meta>
               <MetaItem>
-                {labels.createdAt}: {formatDate(notice.createdAt)}
+                {labels.createdAt}: {formatDateTime(notice.createdAt, locale)}
               </MetaItem>
               {notice.updatedAt !== notice.createdAt && (
                 <MetaItem>
-                  {labels.updatedAt}: {formatDate(notice.updatedAt)}
+                  {labels.updatedAt}: {formatDateTime(notice.updatedAt, locale)}
                 </MetaItem>
               )}
             </Meta>

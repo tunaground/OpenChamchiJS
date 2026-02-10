@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
@@ -10,12 +11,12 @@ import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 
 const Container = styled.div`
-  padding: 3.2rem;
-  max-width: 120rem;
+  padding: ${(props) => props.theme.containerPadding};
+  max-width: ${(props) => props.theme.adminMaxWidth};
   margin: 0 auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: ${(props) => props.theme.containerPadding};
   }
 `;
 
@@ -509,6 +510,7 @@ export function AdminThreadsContent({
   labels,
 }: AdminThreadsContentProps) {
   const router = useRouter();
+  const locale = useLocale();
   const [threads, setThreads] = useState(initialThreads);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedThread, setSelectedThread] = useState<ThreadData | null>(null);
@@ -860,7 +862,7 @@ export function AdminThreadsContent({
                   <span>{thread.username}</span>
                 </CardMeta>
                 <CardMeta>
-                  <span>{formatDateTime(thread.createdAt)} - {formatDateTime(thread.updatedAt)}</span>
+                  <span>{formatDateTime(thread.createdAt, locale)} - {formatDateTime(thread.updatedAt, locale)}</span>
                 </CardMeta>
                 <CardActions>
                   {!thread.deleted && (
@@ -1071,7 +1073,7 @@ export function AdminThreadsContent({
                         </ResponseCardMeta>
                       )}
                       <ResponseCardMeta>
-                        <span>{formatDateTime(response.createdAt)}</span>
+                        <span>{formatDateTime(response.createdAt, locale)}</span>
                       </ResponseCardMeta>
                       <ResponseCardContent>
                         {response.content.substring(0, 200)}

@@ -3,47 +3,61 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
+import { formatDateTime } from "@/lib/utils/date-formatter";
 
 const Container = styled.div`
-  padding: 3.2rem;
-  max-width: 1000px;
+  padding: ${(props) => props.theme.containerPadding};
+  max-width: ${(props) => props.theme.contentMaxWidth};
   margin: 0 auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: ${(props) => props.theme.containerPadding};
   }
 `;
 
-const Header = styled.div`
-  margin-bottom: 2.4rem;
+const BoardLink = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: ${(props) => props.theme.textSecondary};
+  text-decoration: none;
+  font-size: 1.4rem;
+  margin-bottom: 1.6rem;
+
+  &:hover {
+    color: ${(props) => props.theme.textPrimary};
+  }
 `;
 
-const Title = styled.h1`
-  font-size: 2.4rem;
+const ActionsBar = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1.6rem;
+  margin-bottom: 1.6rem;
+  flex-wrap: wrap;
+`;
+
+const PageTitle = styled.span`
+  font-size: 1.6rem;
   font-weight: 600;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.4rem;
-`;
-
-const BoardName = styled.span`
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
 `;
 
 const SearchForm = styled.form`
   display: flex;
   gap: 0.8rem;
-  margin-bottom: 2.4rem;
 `;
 
 const SearchInput = styled.input`
-  width: 100%;
-  max-width: 400px;
-  padding: 1.2rem;
+  flex: 1;
+  max-width: 300px;
+  padding: 0.8rem 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   font-size: 1.4rem;
@@ -61,16 +75,13 @@ const SearchInput = styled.input`
 `;
 
 const SearchButton = styled.button`
-  height: 3.5rem;
-  padding: 0 1.6rem;
+  padding: 0.8rem 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
   border-radius: 4px;
   font-size: 1.4rem;
   cursor: pointer;
-  flex-shrink: 0;
-  white-space: nowrap;
 
   &:hover {
     opacity: 0.9;
@@ -147,6 +158,7 @@ interface Labels {
   noticeTitle: string;
   pinned: string;
   createdAt: string;
+  goToBoard: string;
 }
 
 interface PaginationData {
@@ -204,6 +216,7 @@ export function NoticeListContent({
   manualLabel,
 }: NoticeListContentProps) {
   const router = useRouter();
+  const locale = useLocale();
   const [search, setSearch] = useState(initialSearch);
 
   const handleSearch = (e: React.FormEvent) => {
@@ -213,17 +226,6 @@ export function NoticeListContent({
       params.set("search", search.trim());
     }
     router.push(`/notice/${boardId}?${params.toString()}`);
-  };
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    const seconds = String(date.getSeconds()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   };
 
   const getBaseUrl = () => {
@@ -246,20 +248,20 @@ export function NoticeListContent({
       authLabels={authLabels}
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-          <BoardName>{boardName}</BoardName>
-        </Header>
+        <BoardLink href={`/index/${boardId}`}>&larr; {labels.goToBoard}</BoardLink>
 
-        <SearchForm onSubmit={handleSearch}>
-          <SearchInput
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={labels.searchPlaceholder}
-          />
-          <SearchButton type="submit">{labels.searchButton}</SearchButton>
-        </SearchForm>
+        <ActionsBar>
+          <PageTitle>{labels.title} : {boardName}</PageTitle>
+          <SearchForm onSubmit={handleSearch}>
+            <SearchInput
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder={labels.searchPlaceholder}
+            />
+            <SearchButton type="submit">{labels.searchButton}</SearchButton>
+          </SearchForm>
+        </ActionsBar>
 
         {notices.length === 0 ? (
           <EmptyState>
@@ -276,7 +278,7 @@ export function NoticeListContent({
                       {notice.title}
                     </Link>
                   </CardTitle>
-                  <CardMeta>{formatDate(notice.createdAt)}</CardMeta>
+                  <CardMeta>{formatDateTime(notice.createdAt, locale)}</CardMeta>
                 </NoticeCard>
               ))}
             </NoticeCards>

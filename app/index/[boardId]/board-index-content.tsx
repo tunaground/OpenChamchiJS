@@ -3,18 +3,22 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { usePresence } from "@/lib/hooks/usePresence";
 import { CHANNELS } from "@/lib/realtime";
+import { formatDateTime } from "@/lib/utils/date-formatter";
 
 const Container = styled.div`
-  padding: 3.2rem;
+  padding: ${(props) => props.theme.containerPadding};
+  max-width: ${(props) => props.theme.contentMaxWidth};
+  margin: 0 auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: ${(props) => props.theme.containerPadding};
   }
 `;
 
@@ -213,7 +217,7 @@ const SearchInput = styled.input`
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
   font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
+  background: ${(props) => props.theme.surface};
   color: ${(props) => props.theme.textPrimary};
 
   &:focus {
@@ -335,6 +339,7 @@ export function BoardIndexContent({
   customLinks,
 }: BoardIndexContentProps) {
   const router = useRouter();
+  const locale = useLocale();
   const [search, setSearch] = useState(initialSearch);
 
   // Presence tracking for user counter (board level for /index page)
@@ -358,16 +363,6 @@ export function BoardIndexContent({
     }
     const queryString = params.toString();
     return `/index/${boardId}${queryString ? `?${queryString}` : ""}`;
-  };
-
-  const formatDateTime = (dateString: string) => {
-    const date = new Date(dateString);
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-    return `${year}-${month}-${day} ${hours}:${minutes}`;
   };
 
   const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
@@ -395,7 +390,7 @@ export function BoardIndexContent({
                 <Link href={`/notice/${boardId}/${notice.id}`}>
                   {notice.title}
                 </Link>
-                <NoticeDate>{formatDateTime(notice.createdAt)}</NoticeDate>
+                <NoticeDate>{formatDateTime(notice.createdAt, locale)}</NoticeDate>
               </NoticeItem>
             ))}
           </NoticeList>
@@ -440,7 +435,7 @@ export function BoardIndexContent({
                   <CardMetaItem>{thread.username}</CardMetaItem>
                 </CardMeta>
                 <CardMeta>
-                  <CardMetaItem>{formatDateTime(thread.createdAt)} - {formatDateTime(thread.updatedAt)}</CardMetaItem>
+                  <CardMetaItem>{formatDateTime(thread.createdAt, locale)} - {formatDateTime(thread.updatedAt, locale)}</CardMetaItem>
                 </CardMeta>
               </ThreadCard>
             ))}

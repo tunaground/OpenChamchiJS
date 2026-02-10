@@ -2,6 +2,7 @@
 
 import { forwardRef, useMemo } from "react";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { extractYoutubeId, formatDate } from "../_lib/utils";
 import { getAttachmentUrl } from "../_lib/api";
@@ -163,6 +164,7 @@ interface ArchiveResponseCardProps {
 
 export const ArchiveResponseCard = forwardRef<HTMLDivElement, ArchiveResponseCardProps>(
   function ArchiveResponseCard({ boardId, threadId, response, highlighted }, ref) {
+    const locale = useLocale();
     const hasAttachment = response.attachment && response.attachment.length > 0;
     const youtubeId = extractYoutubeId(response.youtube);
     const hasYoutube = !!youtubeId;
@@ -187,7 +189,7 @@ export const ArchiveResponseCard = forwardRef<HTMLDivElement, ArchiveResponseCar
           </ResponseSeq>
           <Username dangerouslySetInnerHTML={{ __html: response.username }} />
           <AuthorId>({response.userId})</AuthorId>
-          <ResponseDate>{formatDate(response.createdAt)}</ResponseDate>
+          <ResponseDate>{formatDate(response.createdAt, locale)}</ResponseDate>
         </Header>
 
         {hasAttachment && (

@@ -3,18 +3,19 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 
 const Container = styled.div`
-  padding: 3.2rem;
-  max-width: 120rem;
+  padding: ${(props) => props.theme.containerPadding};
+  max-width: ${(props) => props.theme.adminMaxWidth};
   margin: 0 auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: ${(props) => props.theme.containerPadding};
   }
 `;
 
@@ -407,6 +408,7 @@ export function AdminResponsesContent({
   labels,
 }: AdminResponsesContentProps) {
   const router = useRouter();
+  const locale = useLocale();
   const [responses, setResponses] = useState(initialResponses);
   const [loading, setLoading] = useState(false);
   const [searchType, setSearchType] = useState(initialSearchType || "username");
@@ -627,7 +629,7 @@ export function AdminResponsesContent({
                     )}
                   </CardMeta>
                   <CardMeta>
-                    <span>{formatDateTime(response.createdAt)}</span>
+                    <span>{formatDateTime(response.createdAt, locale)}</span>
                   </CardMeta>
                   <CardContent $expanded={expandedIds.has(response.id)}>
                     {expandedIds.has(response.id)

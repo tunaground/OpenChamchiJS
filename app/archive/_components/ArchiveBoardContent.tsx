@@ -3,12 +3,13 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { formatDate } from "../_lib/utils";
 import type { ArchiveThreadIndex } from "../_lib/types";
 
 const Container = styled.div`
-  padding: 3.2rem;
+  padding: 1.6rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     padding: 1.6rem;
@@ -170,6 +171,7 @@ export function ArchiveBoardContent({
 }: ArchiveBoardContentProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const locale = useLocale();
   const [search, setSearch] = useState(initialSearch);
   const [currentPage, setCurrentPage] = useState(initialPage);
 
@@ -309,7 +311,7 @@ export function ArchiveBoardContent({
                 </ThreadMeta>
                 <ThreadMeta>
                   <span>
-                    {formatDate(thread.createdAt)} - {formatDate(thread.updatedAt)}
+                    {formatDate(thread.createdAt, locale)} - {formatDate(thread.updatedAt, locale)}
                   </span>
                 </ThreadMeta>
               </ThreadCard>

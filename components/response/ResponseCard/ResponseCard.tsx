@@ -1,5 +1,6 @@
 "use client";
 
+import { useLocale } from "next-intl";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 import * as S from "./ResponseCard.styles";
 import type { ResponseCardProps } from "./types";
@@ -18,6 +19,8 @@ export function ResponseCard({
   onUsernameClick,
   onAuthorIdClick,
 }: ResponseCardProps) {
+  const locale = useLocale();
+
   const handleSeqClick = () => {
     navigator.clipboard.writeText(`${boardId}>${threadId}>${response.seq}`);
     onCopy?.();
@@ -40,7 +43,7 @@ export function ResponseCard({
           >
             ({response.authorId})
           </S.AuthorId>
-          <S.Date>{formatDateTime(response.createdAt)}</S.Date>
+          <S.Date>{formatDateTime(response.createdAt, locale)}</S.Date>
           {headerActions}
         </S.Info>
       </S.Header>

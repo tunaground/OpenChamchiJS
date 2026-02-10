@@ -2,13 +2,14 @@
 
 import { useEffect, useRef } from "react";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { ArchiveResponseCard } from "./ArchiveResponseCard";
 import { formatDate } from "../_lib/utils";
 import type { ArchiveThread } from "../_lib/types";
 
 const Container = styled.div`
-  padding: 3.2rem;
+  padding: 1.6rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     padding: 1.6rem;
@@ -90,6 +91,7 @@ export function ArchiveThreadContent({
   thread,
   highlightSeqs,
 }: ArchiveThreadContentProps) {
+  const locale = useLocale();
   const firstHighlightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -132,11 +134,11 @@ export function ArchiveThreadContent({
           </MetaItem>
           <MetaItem>
             <MetaLabel>Created:</MetaLabel>
-            <MetaValue>{formatDate(thread.createdAt)}</MetaValue>
+            <MetaValue>{formatDate(thread.createdAt, locale)}</MetaValue>
           </MetaItem>
           <MetaItem>
             <MetaLabel>Updated:</MetaLabel>
-            <MetaValue>{formatDate(thread.updatedAt)}</MetaValue>
+            <MetaValue>{formatDate(thread.updatedAt, locale)}</MetaValue>
           </MetaItem>
         </ThreadMeta>
       </ThreadHeader>
