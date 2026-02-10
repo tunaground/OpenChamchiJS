@@ -108,7 +108,8 @@
     "noResults": "検索結果がありません。",
     "noticeTitle": "タイトル",
     "pinned": "固定",
-    "createdAt": "作成日"
+    "createdAt": "作成日",
+    "goToBoard": "掲示板へ"
   },
   "noticeDetail": {
     "backToList": "一覧に戻る",

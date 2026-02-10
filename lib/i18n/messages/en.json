@@ -108,7 +108,8 @@
     "noResults": "No results found.",
     "noticeTitle": "Title",
     "pinned": "Pinned",
-    "createdAt": "Date"
+    "createdAt": "Date",
+    "goToBoard": "Go to Board"
   },
   "noticeDetail": {
     "backToList": "Back to list",

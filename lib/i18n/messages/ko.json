@@ -108,7 +108,8 @@
     "noResults": "검색 결과가 없습니다.",
     "noticeTitle": "제목",
     "pinned": "고정",
-    "createdAt": "작성일"
+    "createdAt": "작성일",
+    "goToBoard": "게시판으로"
   },
   "noticeDetail": {
     "backToList": "목록으로",

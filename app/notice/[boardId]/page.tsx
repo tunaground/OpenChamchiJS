@@ -80,6 +80,7 @@ export default async function NoticeListPage({ params, searchParams }: Props) {
           noticeTitle: t("noticeTitle"),
           pinned: t("pinned"),
           createdAt: t("createdAt"),
+          goToBoard: t("goToBoard"),
         }}
         boardsTitle={tCommon("boards")}
         manualLabel={tCommon("manual")}
