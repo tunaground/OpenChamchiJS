@@ -8,12 +8,12 @@ import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { preparse, prerender, render } from "@/lib/tom";
 
 const Container = styled.div`
-  padding: 3.2rem;
-  max-width: 1000px;
+  padding: ${(props) => props.theme.containerPadding};
+  max-width: ${(props) => props.theme.contentMaxWidth};
   margin: 0 auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: ${(props) => props.theme.containerPadding};
   }
 `;
 

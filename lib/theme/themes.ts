@@ -1,5 +1,13 @@
 // Theme definitions for light and dark modes
 
+// Layout constants (shared across all themes)
+const layout = {
+  breakpoint: "768px",
+  contentMaxWidth: "80rem",
+  adminMaxWidth: "80rem",
+  containerPadding: "1.6rem",
+};
+
 export const lightTheme = {
   mode: "light" as const,
 
@@ -50,7 +58,7 @@ export const lightTheme = {
   toastText: "#ffffff",
 
   // Layout
-  breakpoint: "768px",
+  ...layout,
 };
 
 export const darkTheme = {
@@ -103,7 +111,7 @@ export const darkTheme = {
   toastText: "#ffffff",
 
   // Layout
-  breakpoint: "768px",
+  ...layout,
 };
 
 export const greyTheme = {
@@ -157,7 +165,7 @@ export const greyTheme = {
   toastText: "#e0e0e0",
 
   // Layout
-  breakpoint: "768px",
+  ...layout,
 };
 
 export type ThemeMode = "light" | "dark" | "grey";

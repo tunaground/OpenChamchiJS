@@ -15,7 +15,7 @@ const Card = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-  padding: 3.2rem;
+  padding: 1.6rem;
   width: 100%;
   max-width: 50rem;
   text-align: center;

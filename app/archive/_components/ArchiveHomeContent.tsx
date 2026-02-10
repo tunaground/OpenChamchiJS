@@ -3,7 +3,7 @@
 import styled from "styled-components";
 
 const Container = styled.div`
-  padding: 3.2rem;
+  padding: 1.6rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     padding: 1.6rem;

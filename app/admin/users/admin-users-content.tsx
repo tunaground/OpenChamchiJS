@@ -9,12 +9,12 @@ import { PageLayout } from "@/components/layout";
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 
 const Container = styled.div`
-  padding: 3.2rem;
-  max-width: 120rem;
+  padding: ${(props) => props.theme.containerPadding};
+  max-width: ${(props) => props.theme.adminMaxWidth};
   margin: 0 auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: ${(props) => props.theme.containerPadding};
   }
 `;
 
