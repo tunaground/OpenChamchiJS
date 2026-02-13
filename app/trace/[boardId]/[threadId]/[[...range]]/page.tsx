@@ -200,6 +200,7 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
           close: t("close"),
           unlock: t("unlock"),
           foreignIpBlocked: t("foreignIpBlocked"),
+          writeLocked: t("writeLocked"),
           unknownError: t("unknownError"),
           selectImage: t("selectImage"),
           removeImage: t("removeImage"),

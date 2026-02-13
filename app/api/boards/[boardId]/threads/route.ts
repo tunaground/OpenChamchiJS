@@ -6,6 +6,7 @@ import { boardService, BoardServiceError } from "@/lib/services/board";
 import { permissionService } from "@/lib/services/permission";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { checkForeignIpBlocked } from "@/lib/api/foreign-ip-check";
+import { checkWriteLocked } from "@/lib/api/write-lock-check";
 import { handleServiceError } from "@/lib/api/error-handler";
 import { parsePaginationQuery } from "@/lib/types/pagination";
 import { createThreadSchema } from "@/lib/schemas";
@@ -72,6 +73,10 @@ export async function POST(
     if (foreignIpBlocked) {
       return foreignIpBlocked;
     }
+
+    // Check write lock
+    const writeLocked = await checkWriteLocked(request, board);
+    if (writeLocked) return writeLocked;
 
     // Get userId from session if logged in
     const session = await getServerSession(authOptions);

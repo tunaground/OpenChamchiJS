@@ -5,6 +5,7 @@ export interface BoardData {
   deleted: boolean;
   maxResponsesPerThread: number;
   blockForeignIp: boolean;
+  writeLocked: boolean;
   responsesPerPage: number;
   showUserCount: boolean;
   threadsPerPage: number;
@@ -21,6 +22,7 @@ export interface CreateBoardInput {
   defaultUsername: string;
   maxResponsesPerThread?: number;
   blockForeignIp?: boolean;
+  writeLocked?: boolean;
   responsesPerPage?: number;
   showUserCount?: boolean;
   threadsPerPage?: number;
@@ -34,6 +36,7 @@ export interface UpdateBoardInput {
   deleted?: boolean;
   maxResponsesPerThread?: number;
   blockForeignIp?: boolean;
+  writeLocked?: boolean;
   responsesPerPage?: number;
   showUserCount?: boolean;
   threadsPerPage?: number;
@@ -45,6 +48,7 @@ export interface ConfigBoardInput {
   defaultUsername?: string;
   maxResponsesPerThread?: number;
   blockForeignIp?: boolean;
+  writeLocked?: boolean;
   responsesPerPage?: number;
   showUserCount?: boolean;
   threadsPerPage?: number;

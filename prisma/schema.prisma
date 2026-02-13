@@ -128,6 +128,7 @@ model Board {
   deleted               Boolean    @default(false)
   maxResponsesPerThread Int        @default(1000)
   blockForeignIp        Boolean    @default(false)
+  writeLocked           Boolean    @default(false)
   responsesPerPage      Int        @default(50)
   showUserCount         Boolean    @default(false)
   threadsPerPage        Int        @default(20)

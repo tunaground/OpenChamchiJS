@@ -177,6 +177,7 @@ interface Labels {
   cancel: string;
   creating: string;
   foreignIpBlocked: string;
+  writeLocked: string;
   unknownError: string;
   aaMode: string;
   previewMode: string;
@@ -290,6 +291,9 @@ export function CreateThreadContent({
         }
         if (data.error === "FOREIGN_IP_BLOCKED") {
           return labels.foreignIpBlocked;
+        }
+        if (data.error === "WRITE_LOCKED") {
+          return labels.writeLocked;
         }
         return data.error;
       }

@@ -245,6 +245,7 @@ interface BoardData {
   responsesPerPage: number;
   maxResponsesPerThread: number;
   blockForeignIp: boolean;
+  writeLocked: boolean;
   showUserCount: boolean;
   uploadMaxSize: number;
   uploadMimeTypes: string;
@@ -279,6 +280,7 @@ interface Labels {
   responsesPerPage: string;
   maxResponsesPerThread: string;
   blockForeignIp: string;
+  writeLocked: string;
   showUserCount: string;
   uploadMaxSize: string;
   uploadMaxSizePlaceholder: string;
@@ -328,6 +330,7 @@ interface FormData {
   responsesPerPage: number;
   maxResponsesPerThread: number;
   blockForeignIp: boolean;
+  writeLocked: boolean;
   showUserCount: boolean;
   uploadMaxSize: number;
   uploadMimeTypes: string;
@@ -341,6 +344,7 @@ const defaultFormData: FormData = {
   responsesPerPage: 50,
   maxResponsesPerThread: 1000,
   blockForeignIp: false,
+  writeLocked: false,
   showUserCount: false,
   uploadMaxSize: 5,
   uploadMimeTypes: "image/png,image/jpeg,image/gif,image/webp",
@@ -370,6 +374,7 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
       responsesPerPage: board.responsesPerPage,
       maxResponsesPerThread: board.maxResponsesPerThread,
       blockForeignIp: board.blockForeignIp,
+      writeLocked: board.writeLocked,
       showUserCount: board.showUserCount,
       uploadMaxSize: Math.round(board.uploadMaxSize / (1024 * 1024)),
       uploadMimeTypes: board.uploadMimeTypes,
@@ -439,6 +444,7 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
           responsesPerPage: formData.responsesPerPage,
           maxResponsesPerThread: formData.maxResponsesPerThread,
           blockForeignIp: formData.blockForeignIp,
+          writeLocked: formData.writeLocked,
           showUserCount: formData.showUserCount,
           uploadMaxSize: formData.uploadMaxSize * 1024 * 1024,
           uploadMimeTypes: formData.uploadMimeTypes,
@@ -681,6 +687,24 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
                 />
                 <Label style={{ marginBottom: 0 }}>
                   {labels.blockForeignIp}
+                </Label>
+              </Checkbox>
+            </FormGroup>
+
+            <FormGroup>
+              <Checkbox>
+                <input
+                  type="checkbox"
+                  checked={formData.writeLocked}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      writeLocked: e.target.checked,
+                    })
+                  }
+                />
+                <Label style={{ marginBottom: 0 }}>
+                  {labels.writeLocked}
                 </Label>
               </Checkbox>
             </FormGroup>

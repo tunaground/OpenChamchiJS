@@ -62,6 +62,7 @@ export default async function CreateThreadPage({ params }: Props) {
           cancel: t("cancel"),
           creating: t("creating"),
           foreignIpBlocked: t("foreignIpBlocked"),
+          writeLocked: t("writeLocked"),
           unknownError: t("unknownError"),
           aaMode: t("aaMode"),
           previewMode: t("previewMode"),

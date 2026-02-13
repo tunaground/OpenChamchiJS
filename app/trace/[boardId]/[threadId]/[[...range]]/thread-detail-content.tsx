@@ -533,6 +533,7 @@ interface Labels {
   close: string;
   unlock: string;
   foreignIpBlocked: string;
+  writeLocked: string;
   unknownError: string;
   selectImage: string;
   removeImage: string;
@@ -950,6 +951,9 @@ export function ThreadDetailContent({
     if (typeof data.error === "string") {
       if (data.error === "FOREIGN_IP_BLOCKED") {
         return labels.foreignIpBlocked;
+      }
+      if (data.error === "WRITE_LOCKED") {
+        return labels.writeLocked;
       }
       return data.error;
     }
