@@ -49,7 +49,7 @@ export const lightTheme = {
   info: "#00b4d8",
 
   // TOM specific
-  calcExpColor: "#5a8a9a",
+  calcExpColor: "#d64545",
   anchorALinkColor: "#0077b6",
   spoilerBackground: "rgba(0, 0, 0, 0.8)",
 
@@ -102,7 +102,7 @@ export const darkTheme = {
   info: "#5ac8fa",
 
   // TOM specific
-  calcExpColor: "#aaaaaa",
+  calcExpColor: "#e57373",
   anchorALinkColor: "#4da6ff",
   spoilerBackground: "rgba(255, 255, 255, 0.8)",
 
@@ -156,7 +156,7 @@ export const greyTheme = {
   info: "#0088a8",
 
   // TOM specific
-  calcExpColor: "#505050",
+  calcExpColor: "#c42020",
   anchorALinkColor: "#0055aa",
   spoilerBackground: "rgba(0, 0, 0, 0.8)",
 
