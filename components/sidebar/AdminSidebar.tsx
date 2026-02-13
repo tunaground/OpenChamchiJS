@@ -49,6 +49,16 @@ export function AdminSidebar({ labels, children }: AdminSidebarProps) {
             </NavLink>
           </NavItem>
         )}
+        {labels.globalNotices && (
+          <NavItem>
+            <NavLink
+              href="/admin/notices"
+              $active={pathname.startsWith("/admin/notices")}
+            >
+              {labels.globalNotices}
+            </NavLink>
+          </NavItem>
+        )}
         {labels.settings && (
           <NavItem>
             <NavLink

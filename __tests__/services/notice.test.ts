@@ -8,6 +8,8 @@ function createMockNoticeRepo(): jest.Mocked<NoticeRepository> {
     findByBoardId: jest.fn(),
     findByBoardIdWithCount: jest.fn(),
     countByBoardId: jest.fn(),
+    findGlobal: jest.fn(),
+    findGlobalWithCount: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
@@ -310,6 +312,116 @@ describe("NoticeService", () => {
 
       await expect(service.delete("user-1", 1)).rejects.toThrow(
         "Permission denied"
+      );
+    });
+  });
+
+  describe("findPinnedAndRecent (global notices)", () => {
+    it("includes global notices in results", async () => {
+      const notices = [
+        createMockNotice({ id: 1, pinned: true, boardId: null }),
+        createMockNotice({ id: 2, pinned: false, boardId: "test-board" }),
+      ];
+      boardRepo.findById.mockResolvedValue(createMockBoard());
+      noticeRepo.findByBoardId.mockResolvedValue(notices);
+
+      const result = await service.findPinnedAndRecent("test-board", 3);
+
+      expect(result).toHaveLength(2);
+      expect(noticeRepo.findByBoardId).toHaveBeenCalledWith(
+        "test-board",
+        expect.objectContaining({ includeGlobal: true })
+      );
+    });
+  });
+
+  describe("findGlobal", () => {
+    it("returns paginated global notices", async () => {
+      const notices = [
+        createMockNotice({ id: 1, boardId: null }),
+        createMockNotice({ id: 2, boardId: null }),
+      ];
+      noticeRepo.findGlobalWithCount.mockResolvedValue({ data: notices, total: 2 });
+
+      const result = await service.findGlobal();
+
+      expect(result.data).toHaveLength(2);
+      expect(result.pagination.total).toBe(2);
+    });
+  });
+
+  describe("createGlobal", () => {
+    it("creates global notice with boardId null", async () => {
+      const notice = createMockNotice({ boardId: null });
+      permissionService.checkUserPermissions.mockResolvedValue(true);
+      noticeRepo.create.mockResolvedValue(notice);
+
+      const result = await service.createGlobal("user-1", {
+        title: "Global Notice",
+        content: "Content",
+      });
+
+      expect(result.boardId).toBeNull();
+      expect(noticeRepo.create).toHaveBeenCalledWith(
+        expect.objectContaining({ boardId: null })
+      );
+    });
+
+    it("checks only global notice:create permission", async () => {
+      permissionService.checkUserPermissions.mockResolvedValue(true);
+      noticeRepo.create.mockResolvedValue(createMockNotice({ boardId: null }));
+
+      await service.createGlobal("user-1", {
+        title: "Global Notice",
+        content: "Content",
+      });
+
+      expect(permissionService.checkUserPermissions).toHaveBeenCalledWith(
+        "user-1",
+        ["notice:create"]
+      );
+    });
+
+    it("throws FORBIDDEN when user lacks permission", async () => {
+      permissionService.checkUserPermissions.mockResolvedValue(false);
+
+      await expect(
+        service.createGlobal("user-1", {
+          title: "Global Notice",
+          content: "Content",
+        })
+      ).rejects.toThrow("Permission denied");
+    });
+  });
+
+  describe("update (global notice)", () => {
+    it("checks only global permission for global notices", async () => {
+      const notice = createMockNotice({ boardId: null });
+      noticeRepo.findById.mockResolvedValue(notice);
+      permissionService.checkUserPermissions.mockResolvedValue(true);
+      noticeRepo.update.mockResolvedValue({ ...notice, title: "Updated" });
+
+      await service.update("user-1", 1, { title: "Updated" });
+
+      expect(permissionService.checkUserPermissions).toHaveBeenCalledWith(
+        "user-1",
+        ["notice:update"]
+      );
+    });
+  });
+
+  describe("delete (global notice)", () => {
+    it("checks only global permission for global notices", async () => {
+      const notice = createMockNotice({ boardId: null });
+      noticeRepo.findById.mockResolvedValue(notice);
+      permissionService.checkUserPermissions.mockResolvedValue(true);
+      noticeRepo.delete.mockResolvedValue({ ...notice, deleted: true });
+
+      await service.delete("user-1", 1);
+
+      expect(permissionService.checkUserPermissions).toHaveBeenCalledWith(
+        "user-1",
+        ["notice:delete"]
       );
     });
   });

@@ -55,8 +55,8 @@ export default async function NoticeDetailPage({ params }: Props) {
       globalSettingsService.get(),
     ]);
 
-    // Ensure notice belongs to this board
-    if (notice.boardId !== boardId) {
+    // Ensure notice belongs to this board or is global
+    if (notice.boardId !== null && notice.boardId !== boardId) {
       notFound();
     }
 

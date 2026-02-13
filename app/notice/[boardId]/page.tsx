@@ -46,7 +46,7 @@ export default async function NoticeListPage({ params, searchParams }: Props) {
       boardService.findById(boardId),
       boardService.findAll(),
       globalSettingsService.get(),
-      noticeService.findByBoardId(boardId, { page, search }),
+      noticeService.findByBoardId(boardId, { page, search, includeGlobal: true }),
     ]);
     const boards = allBoards.filter((b) => !b.deleted);
 
@@ -66,6 +66,7 @@ export default async function NoticeListPage({ params, searchParams }: Props) {
           id: notice.id,
           title: notice.title,
           pinned: notice.pinned,
+          isGlobal: notice.boardId === null,
           createdAt: notice.createdAt.toISOString(),
           updatedAt: notice.updatedAt.toISOString(),
         }))}
@@ -81,6 +82,7 @@ export default async function NoticeListPage({ params, searchParams }: Props) {
           pinned: t("pinned"),
           createdAt: t("createdAt"),
           goToBoard: t("goToBoard"),
+          globalNotice: t("globalNotice"),
         }}
         boardsTitle={tCommon("boards")}
         manualLabel={tCommon("manual")}

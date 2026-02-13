@@ -53,6 +53,29 @@
     "searchPlaceholder": "제목으로 검색",
     "searchButton": "검색"
   },
+  "adminGlobalNotices": {
+    "title": "전체 공지 관리",
+    "createNotice": "전체 공지 작성",
+    "noticeTitle": "제목",
+    "content": "내용",
+    "pinned": "고정",
+    "createdAt": "작성일",
+    "actions": "작업",
+    "edit": "수정",
+    "delete": "삭제",
+    "noNotices": "등록된 전체 공지가 없습니다.",
+    "noResults": "검색 결과가 없습니다.",
+    "save": "저장",
+    "cancel": "취소",
+    "create": "생성",
+    "createTitle": "새 전체 공지 작성",
+    "editTitle": "전체 공지 수정",
+    "confirmDelete": "이 전체 공지를 삭제하시겠습니까?",
+    "titlePlaceholder": "전체 공지 제목을 입력하세요",
+    "contentPlaceholder": "전체 공지 내용을 입력하세요",
+    "searchPlaceholder": "제목으로 검색",
+    "searchButton": "검색"
+  },
   "adminBoards": {
     "title": "게시판 관리",
     "createBoard": "게시판 생성",
@@ -109,7 +132,8 @@
     "noticeTitle": "제목",
     "pinned": "고정",
     "createdAt": "작성일",
-    "goToBoard": "게시판으로"
+    "goToBoard": "게시판으로",
+    "globalNotice": "전체"
   },
   "noticeDetail": {
     "backToList": "목록으로",
@@ -154,7 +178,8 @@
     "ended": "종료",
     "top": "상단",
     "searchPlaceholder": "제목 또는 작성자로 검색",
-    "searchButton": "검색"
+    "searchButton": "검색",
+    "globalNotice": "전체"
   },
   "threadDetail": {
     "backToList": "목록으로",
@@ -230,6 +255,7 @@
     "threads": "주제글 관리",
     "responses": "답글 관리",
     "notices": "공지사항 관리",
+    "globalNotices": "전체 공지",
     "settings": "전역 설정"
   },
   "adminSettings": {

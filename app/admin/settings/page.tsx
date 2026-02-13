@@ -38,6 +38,7 @@ export default async function AdminSettingsPage() {
         users: tSidebar("users"),
         roles: tSidebar("roles"),
         settings: tSidebar("settings"),
+        globalNotices: tSidebar("globalNotices"),
       }}
       canUpdate={canUpdate}
       labels={{

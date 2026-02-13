@@ -53,6 +53,29 @@
     "searchPlaceholder": "タイトルで検索",
     "searchButton": "検索"
   },
+  "adminGlobalNotices": {
+    "title": "全体お知らせ管理",
+    "createNotice": "全体お知らせ作成",
+    "noticeTitle": "タイトル",
+    "content": "内容",
+    "pinned": "固定",
+    "createdAt": "作成日",
+    "actions": "操作",
+    "edit": "編集",
+    "delete": "削除",
+    "noNotices": "全体お知らせがありません。",
+    "noResults": "検索結果がありません。",
+    "save": "保存",
+    "cancel": "キャンセル",
+    "create": "作成",
+    "createTitle": "新規全体お知らせ作成",
+    "editTitle": "全体お知らせ編集",
+    "confirmDelete": "この全体お知らせを削除しますか？",
+    "titlePlaceholder": "全体お知らせタイトルを入力",
+    "contentPlaceholder": "全体お知らせ内容を入力",
+    "searchPlaceholder": "タイトルで検索",
+    "searchButton": "検索"
+  },
   "adminBoards": {
     "title": "掲示板管理",
     "createBoard": "掲示板作成",
@@ -109,7 +132,8 @@
     "noticeTitle": "タイトル",
     "pinned": "固定",
     "createdAt": "作成日",
-    "goToBoard": "掲示板へ"
+    "goToBoard": "掲示板へ",
+    "globalNotice": "全体"
   },
   "noticeDetail": {
     "backToList": "一覧に戻る",
@@ -154,7 +178,8 @@
     "ended": "終了",
     "top": "トップ",
     "searchPlaceholder": "タイトルまたは投稿者で検索",
-    "searchButton": "検索"
+    "searchButton": "検索",
+    "globalNotice": "全体"
   },
   "threadDetail": {
     "backToList": "一覧に戻る",
@@ -226,6 +251,7 @@
     "threads": "スレッド管理",
     "responses": "レス管理",
     "notices": "お知らせ管理",
+    "globalNotices": "全体お知らせ",
     "settings": "グローバル設定"
   },
   "adminSettings": {

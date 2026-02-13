@@ -5,6 +5,7 @@ export interface AdminSidebarLabels {
   users: string;
   roles?: string;
   settings?: string;
+  globalNotices?: string;
 }
 
 export interface AdminBoardSidebarLabels extends AdminSidebarLabels {

@@ -26,6 +26,7 @@ export const CACHE_TAGS = {
   notices: "notices",
   noticesByBoard: (boardId: string) => `notices-${boardId}`,
   notice: (id: number) => `notice-${id}`,
+  globalNotices: "notices-global",
 
   // Global settings
   settings: "settings",

@@ -47,6 +47,7 @@ export default async function AdminRolesPage() {
         users: tSidebar("users"),
         roles: tSidebar("roles"),
         settings: tSidebar("settings"),
+        globalNotices: tSidebar("globalNotices"),
       }}
       canCreate={canCreate}
       canUpdate={canUpdate}

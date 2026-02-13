@@ -45,7 +45,7 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
     ]);
     const [threadResult, notices] = await Promise.all([
       threadService.findByBoardId(boardId, { page, search }),
-      noticeService.findPinnedAndRecent(boardId, 3),
+      noticeService.findPinnedAndRecent(boardId, 5),
     ]);
 
     const t = await getTranslations("boardIndex");
@@ -80,6 +80,7 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
           id: notice.id,
           title: notice.title,
           pinned: notice.pinned,
+          isGlobal: notice.boardId === null,
           createdAt: notice.createdAt.toISOString(),
         }))}
         labels={{
@@ -98,6 +99,7 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
           top: t("top"),
           searchPlaceholder: t("searchPlaceholder"),
           searchButton: t("searchButton"),
+          globalNotice: t("globalNotice"),
         }}
         boardsTitle={tCommon("boards")}
         manualLabel={tCommon("manual")}

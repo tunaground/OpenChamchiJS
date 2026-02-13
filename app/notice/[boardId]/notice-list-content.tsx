@@ -99,6 +99,17 @@ const PinnedBadge = styled.span`
   margin-right: 0.8rem;
 `;
 
+const GlobalBadge = styled.span`
+  display: inline-block;
+  padding: 0.2rem 0.8rem;
+  background: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.background};
+  border-radius: 4px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-right: 0.8rem;
+`;
+
 const NoticeCards = styled.div`
   display: flex;
   flex-direction: column;
@@ -145,6 +156,7 @@ interface NoticeData {
   id: number;
   title: string;
   pinned: boolean;
+  isGlobal: boolean;
   createdAt: string;
   updatedAt: string;
 }
@@ -159,6 +171,7 @@ interface Labels {
   pinned: string;
   createdAt: string;
   goToBoard: string;
+  globalNotice: string;
 }
 
 interface PaginationData {
@@ -273,6 +286,7 @@ export function NoticeListContent({
               {notices.map((notice) => (
                 <NoticeCard key={notice.id} $pinned={notice.pinned}>
                   <CardTitle>
+                    {notice.isGlobal && <GlobalBadge>{labels.globalNotice}</GlobalBadge>}
                     {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
                     <Link href={`/notice/${boardId}/${notice.id}`}>
                       {notice.title}

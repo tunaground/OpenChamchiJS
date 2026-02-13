@@ -99,6 +99,17 @@ const PinnedBadge = styled.span`
   flex-shrink: 0;
 `;
 
+const GlobalBadge = styled.span`
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  background: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.background};
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 500;
+  flex-shrink: 0;
+`;
+
 const NoticeDate = styled.span`
   color: ${(props) => props.theme.textSecondary};
   font-size: 1.2rem;
@@ -259,6 +270,7 @@ interface NoticeData {
   id: number;
   title: string;
   pinned: boolean;
+  isGlobal: boolean;
   createdAt: string;
 }
 
@@ -285,6 +297,7 @@ interface Labels {
   top: string;
   searchPlaceholder: string;
   searchButton: string;
+  globalNotice: string;
 }
 
 interface BoardData {
@@ -386,6 +399,7 @@ export function BoardIndexContent({
           <NoticeList>
             {notices.map((notice) => (
               <NoticeItem key={notice.id}>
+                {notice.isGlobal && <GlobalBadge>{labels.globalNotice}</GlobalBadge>}
                 {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
                 <Link href={`/notice/${boardId}/${notice.id}`}>
                   {notice.title}

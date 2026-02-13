@@ -306,6 +306,7 @@ interface SidebarLabels {
   users: string;
   roles?: string;
   settings?: string;
+  globalNotices?: string;
 }
 
 interface BoardsContentProps {
