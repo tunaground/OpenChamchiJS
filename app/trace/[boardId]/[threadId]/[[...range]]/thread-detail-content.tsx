@@ -1151,7 +1151,7 @@ export function ThreadDetailContent({
         `/api/boards/${thread.boardId}/threads/${thread.id}/responses?includeHidden=true&limit=10000`,
         {
           headers: {
-            "X-Thread-Password": managePassword,
+            "X-Thread-Password": btoa(encodeURIComponent(managePassword)),
           },
         }
       );

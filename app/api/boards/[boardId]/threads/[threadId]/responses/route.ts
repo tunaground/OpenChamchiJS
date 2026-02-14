@@ -38,7 +38,8 @@ export async function GET(
   const includeIp = searchParams.get("includeIp") === "true";
   const includeDeleted = searchParams.get("includeDeleted") === "true";
   const includeHidden = searchParams.get("includeHidden") === "true";
-  const password = request.headers.get("X-Thread-Password");
+  const rawPassword = request.headers.get("X-Thread-Password");
+  const password = rawPassword ? decodeURIComponent(atob(rawPassword)) : null;
   const startSeqParam = searchParams.get("startSeq");
   const endSeqParam = searchParams.get("endSeq");
 
