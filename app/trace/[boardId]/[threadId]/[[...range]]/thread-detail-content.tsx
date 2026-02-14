@@ -1117,8 +1117,8 @@ export function ThreadDetailContent({
           bans.forEach((b: { id: string; authorId: string }) => map.set(b.authorId, b.id));
           setBannedAuthorIds(map);
         }
-      } catch {
-        setManageError("Network error");
+      } catch (e) {
+        setManageError(`Network error: ${e instanceof Error ? e.message : String(e)}`);
       } finally {
         setLoadingResponses(false);
       }
@@ -1165,8 +1165,8 @@ export function ThreadDetailContent({
       } else {
         setManageError(labels.invalidPassword);
       }
-    } catch {
-      setManageError("Network error");
+    } catch (e) {
+      setManageError(`Network error: ${e instanceof Error ? e.message : String(e)}`);
     } finally {
       setLoadingResponses(false);
     }
