@@ -99,8 +99,8 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
       // Get all notices including global (limited), already ordered by pinned desc, createdAt desc
       const notices = await noticeRepository.findByBoardId(boardId, { limit: 100, includeGlobal: true });
 
-      // Separate pinned and non-pinned
-      const pinned = notices.filter((n) => n.pinned);
+      // Separate pinned (oldest first) and non-pinned (newest first)
+      const pinned = notices.filter((n) => n.pinned).reverse();
       const nonPinned = notices.filter((n) => !n.pinned).slice(0, recentCount);
 
       // Combine: all pinned + recent non-pinned (up to recentCount)
