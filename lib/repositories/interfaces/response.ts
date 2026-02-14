@@ -23,6 +23,7 @@ export interface AdminResponseFilter {
   username?: string;
   authorId?: string;
   email?: string;
+  ip?: string;
 }
 
 export interface AdminResponseCursor {

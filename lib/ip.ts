@@ -2,22 +2,26 @@ import fs from "fs";
 import path from "path";
 import { Reader } from "@maxmind/geoip2-node";
 
-type ReaderModel = Awaited<ReturnType<typeof Reader.open>>;
+type ReaderModel = ReturnType<typeof Reader.openBuffer>;
 
 const MMDB_PATH = path.join(process.cwd(), "lib/GeoLite2-Country.mmdb");
 
-let readerPromise: Promise<ReaderModel | null> | null = null;
+let reader: ReaderModel | null = null;
 
-function getReader(): Promise<ReaderModel | null> {
-  if (!readerPromise) {
-    // Check if mmdb file exists
+function getReader(): ReaderModel | null {
+  if (!reader) {
     if (!fs.existsSync(MMDB_PATH)) {
-      readerPromise = Promise.resolve(null);
-    } else {
-      readerPromise = Reader.open(MMDB_PATH).catch(() => null);
+      return null;
+    }
+    try {
+      const buffer = fs.readFileSync(MMDB_PATH);
+      reader = Reader.openBuffer(buffer);
+    } catch (err) {
+      console.error("Failed to open GeoIP database:", err);
+      return null;
     }
   }
-  return readerPromise;
+  return reader;
 }
 
 /**
@@ -27,7 +31,7 @@ export function isGeoIpAvailable(): boolean {
   return fs.existsSync(MMDB_PATH);
 }
 
-export async function getCountryCode(ip: string): Promise<string | null> {
+export function getCountryCode(ip: string): string | null {
   // Skip for localhost/private IPs
   if (
     ip === "127.0.0.1" ||
@@ -55,24 +59,22 @@ export async function getCountryCode(ip: string): Promise<string | null> {
   }
 
   try {
-    const reader = await getReader();
-    if (!reader) {
-      // No mmdb file available, allow all
+    const r = getReader();
+    if (!r) {
       return null;
     }
-    const response = reader.country(ip);
+    const response = r.country(ip);
     return response.country?.isoCode || null;
   } catch {
-    // If lookup fails, allow the request
     return null;
   }
 }
 
-export async function isForeignIp(
+export function isForeignIp(
   ip: string,
   allowedCountryCode: string
-): Promise<boolean> {
-  const countryCode = await getCountryCode(ip);
+): boolean {
+  const countryCode = getCountryCode(ip);
 
   // If we couldn't determine country, allow
   if (!countryCode) {

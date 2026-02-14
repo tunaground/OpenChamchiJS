@@ -29,7 +29,7 @@ export async function checkForeignIpBlocked(
 
   const ip = getClientIp(request);
   const countryCode = await globalSettingsService.getCountryCode();
-  const isForeign = await isForeignIp(ip, countryCode);
+  const isForeign = isForeignIp(ip, countryCode);
 
   // If not foreign, allow
   if (!isForeign) {

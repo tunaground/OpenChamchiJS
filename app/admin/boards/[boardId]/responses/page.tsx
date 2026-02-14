@@ -6,6 +6,7 @@ import { permissionService } from "@/lib/services/permission";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { responseService, SearchType } from "@/lib/services/response";
 import { AdminResponseCursor } from "@/lib/repositories/interfaces/response";
+import { getCountryCode } from "@/lib/ip";
 import { AdminResponsesContent } from "./admin-responses-content";
 
 interface Props {
@@ -55,6 +56,24 @@ export default async function AdminResponsesPage({ params, searchParams }: Props
     const tCommon = await getTranslations("common");
     const tSidebar = await getTranslations("adminSidebar");
 
+    const responsesWithCountry = result.data.map((response) => ({
+      id: response.id,
+      threadId: response.threadId,
+      threadTitle: response.thread?.title ?? "",
+      seq: response.seq,
+      username: response.username,
+      authorId: response.authorId,
+      userId: response.userId,
+      userName: response.user?.name ?? null,
+      userEmail: response.user?.email ?? null,
+      ip: response.ip,
+      country: getCountryCode(response.ip),
+      content: response.content,
+      visible: response.visible,
+      deleted: response.deleted,
+      createdAt: response.createdAt.toISOString(),
+    }));
+
     return (
       <AdminResponsesContent
         boardId={boardId}
@@ -71,21 +90,7 @@ export default async function AdminResponsesPage({ params, searchParams }: Props
           responses: tSidebar("responses"),
           notices: tSidebar("notices"),
         }}
-        responses={result.data.map((response) => ({
-          id: response.id,
-          threadId: response.threadId,
-          threadTitle: response.thread?.title ?? "",
-          seq: response.seq,
-          username: response.username,
-          authorId: response.authorId,
-          userId: response.userId,
-          userName: response.user?.name ?? null,
-          userEmail: response.user?.email ?? null,
-          content: response.content,
-          visible: response.visible,
-          deleted: response.deleted,
-          createdAt: response.createdAt.toISOString(),
-        }))}
+        responses={responsesWithCountry}
         hasMore={result.hasMore}
         nextCursor={result.nextCursor}
         scanned={result.scanned}
@@ -100,6 +105,8 @@ export default async function AdminResponsesPage({ params, searchParams }: Props
           searchByAuthorId: t("searchByAuthorId"),
           searchByEmail: t("searchByEmail"),
           searchByContent: t("searchByContent"),
+          searchByIp: t("searchByIp"),
+          ip: t("ip"),
           searchPlaceholder: t("searchPlaceholder"),
           searchButton: t("searchButton"),
           thread: t("thread"),

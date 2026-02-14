@@ -61,6 +61,7 @@ export default async function AdminBoardsPage() {
         threads: t("threads"),
         manageThreads: t("manageThreads"),
         manageNotices: t("manageNotices"),
+        manageResponses: t("manageResponses"),
         status: t("status"),
         actions: t("actions"),
         active: t("active"),

@@ -54,6 +54,10 @@ function buildAdminFilter(filter?: AdminResponseFilter) {
     conditions.user = { email: { contains: filter.email, mode: "insensitive" } };
   }
 
+  if (filter.ip) {
+    conditions.ip = { contains: filter.ip, mode: "insensitive" };
+  }
+
   return conditions;
 }
 
@@ -272,6 +276,9 @@ export const responseRepository: ResponseRepository = {
     }
     if (filter?.email) {
       adminFilter = Prisma.sql`${adminFilter} AND u.email ILIKE ${`%${filter.email}%`}`;
+    }
+    if (filter?.ip) {
+      adminFilter = Prisma.sql`${adminFilter} AND r.ip ILIKE ${`%${filter.ip}%`}`;
     }
 
     // Build cursor condition using ROW comparison (efficient for composite key)

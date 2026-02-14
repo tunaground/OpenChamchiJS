@@ -264,6 +264,7 @@ interface Labels {
   threads: string;
   manageThreads: string;
   manageNotices: string;
+  manageResponses: string;
   status: string;
   actions: string;
   active: string;
@@ -555,6 +556,9 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
               <CardActions>
                 <Link href={`/admin/boards/${board.id}/threads`}>
                   <SmallButton>{labels.manageThreads}</SmallButton>
+                </Link>
+                <Link href={`/admin/boards/${board.id}/responses`}>
+                  <SmallButton>{labels.manageResponses}</SmallButton>
                 </Link>
                 <Link href={`/admin/boards/${board.id}/notices`}>
                   <SmallButton>{labels.manageNotices}</SmallButton>

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { responseService, SearchType } from "@/lib/services/response";
 import { AdminResponseCursor } from "@/lib/repositories/interfaces/response";
+import { getCountryCode } from "@/lib/ip";
 
 interface Params {
   params: Promise<{ boardId: string }>;
@@ -48,21 +49,25 @@ export async function GET(request: NextRequest, { params }: Params) {
     includeDeleted: true,
   });
 
+  const data = result.data.map((response) => ({
+    id: response.id,
+    threadId: response.threadId,
+    threadTitle: response.thread?.title ?? "",
+    seq: response.seq,
+    username: response.username,
+    authorId: response.authorId,
+    userId: response.userId,
+    userName: response.user?.name ?? null,
+    ip: response.ip,
+    country: getCountryCode(response.ip),
+    content: response.content,
+    visible: response.visible,
+    deleted: response.deleted,
+    createdAt: response.createdAt.toISOString(),
+  }));
+
   return NextResponse.json({
-    data: result.data.map((response) => ({
-      id: response.id,
-      threadId: response.threadId,
-      threadTitle: response.thread?.title ?? "",
-      seq: response.seq,
-      username: response.username,
-      authorId: response.authorId,
-      userId: response.userId,
-      userName: response.user?.name ?? null,
-      content: response.content,
-      visible: response.visible,
-      deleted: response.deleted,
-      createdAt: response.createdAt.toISOString(),
-    })),
+    data,
     hasMore: result.hasMore,
     nextCursor: result.nextCursor,
     scanned: result.scanned,

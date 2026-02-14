@@ -37,7 +37,7 @@ export type ResponseRangeType =
   | { type: "single"; seq: number }
   | { type: "range"; startSeq: number; endSeq: number };
 
-export type SearchType = "username" | "authorId" | "email" | "content";
+export type SearchType = "username" | "authorId" | "email" | "content" | "ip";
 
 export interface FindByBoardIdResult {
   data: ResponseWithUser[];

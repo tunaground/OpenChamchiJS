@@ -313,6 +313,8 @@ interface ResponseData {
   userId: string | null;
   userName: string | null;
   userEmail: string | null;
+  ip: string;
+  country: string | null;
   content: string;
   visible: boolean;
   deleted: boolean;
@@ -326,6 +328,8 @@ interface Labels {
   searchByAuthorId: string;
   searchByEmail: string;
   searchByContent: string;
+  searchByIp: string;
+  ip: string;
   searchPlaceholder: string;
   searchButton: string;
   thread: string;
@@ -571,6 +575,7 @@ export function AdminResponsesContent({
               <option value="authorId">{labels.searchByAuthorId}</option>
               <option value="email">{labels.searchByEmail}</option>
               <option value="content">{labels.searchByContent}</option>
+              <option value="ip">{labels.searchByIp}</option>
             </SearchSelect>
             <SearchInput
               type="text"
@@ -615,6 +620,12 @@ export function AdminResponsesContent({
                       onClick={() => handleSearchBy("authorId", response.authorId)}
                     >
                       ({response.authorId})
+                    </ClickableText>
+                    <ClickableText
+                      style={{ fontFamily: "monospace", fontSize: "1.1rem" }}
+                      onClick={() => handleSearchBy("ip", response.ip)}
+                    >
+                      {response.ip}{response.country ? ` [${response.country}]` : ""}
                     </ClickableText>
                     {response.userId && response.userEmail ? (
                       <ClickableUserBadge onClick={() => handleSearchBy("email", response.userEmail!)}>
