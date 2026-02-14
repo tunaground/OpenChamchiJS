@@ -633,14 +633,19 @@ export function ThreadDetailContent({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
+  const initialScrollDone = useRef(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { showToast } = useToast();
 
+  const alwaysBottomRef = useRef(false);
   const autoResize = useCallback(() => {
     const textarea = textareaRef.current;
     if (textarea) {
       textarea.style.height = "auto";
       textarea.style.height = `${textarea.scrollHeight + 4}px`;
+    }
+    if (alwaysBottomRef.current && isAtBottomRef.current && pageEndRef.current) {
+      pageEndRef.current.scrollIntoView({ behavior: "instant" });
     }
   }, []);
 
@@ -712,6 +717,9 @@ export function ThreadDetailContent({
     hasThreadOverride,
     resetAllThreadOptions,
   } = useResponseOptions(thread.boardId, thread.id);
+
+  // Sync alwaysBottom ref for autoResize callback
+  alwaysBottomRef.current = responseOptions.alwaysBottom;
 
   // Track the current last seq for chat mode
   const currentLastSeq = useMemo(() => {
@@ -926,6 +934,14 @@ export function ThreadDetailContent({
       window.removeEventListener("scroll", handleScroll);
     };
   }, []);
+
+  // alwaysBottom: scroll to bottom on initial page load
+  useEffect(() => {
+    if (!initialScrollDone.current && responseOptions.alwaysBottom && pageEndRef.current) {
+      initialScrollDone.current = true;
+      pageEndRef.current.scrollIntoView({ behavior: "instant" });
+    }
+  }, [responseOptions.alwaysBottom]);
 
   // Always-on-Bottom mode: scroll to bottom only when user is already at bottom
   useEffect(() => {
