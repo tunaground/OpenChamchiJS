@@ -295,6 +295,7 @@ interface Labels {
   yes: string;
   no: string;
   required: string;
+  fixThreadCount: string;
 }
 
 interface AuthLabels {
@@ -563,6 +564,25 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
                 <Link href={`/admin/boards/${board.id}/notices`}>
                   <SmallButton>{labels.manageNotices}</SmallButton>
                 </Link>
+                {canUpdate && (
+                  <SmallButton
+                    onClick={async () => {
+                      const res = await fetch(`/api/boards/${board.id}/fix-count`, {
+                        method: "POST",
+                      });
+                      if (res.ok) {
+                        const { actual } = await res.json();
+                        setBoards((prev) =>
+                          prev.map((b) =>
+                            b.id === board.id ? { ...b, threadCount: actual } : b
+                          )
+                        );
+                      }
+                    }}
+                  >
+                    {labels.fixThreadCount}
+                  </SmallButton>
+                )}
                 {canUpdate && (
                   <SmallButton onClick={() => openEditModal(board)}>
                     {labels.edit}

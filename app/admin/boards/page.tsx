@@ -92,6 +92,7 @@ export default async function AdminBoardsPage() {
         yes: t("yes"),
         no: t("no"),
         required: t("required"),
+        fixThreadCount: t("fixThreadCount"),
       }}
     />
   );

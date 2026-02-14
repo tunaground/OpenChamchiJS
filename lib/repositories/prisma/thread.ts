@@ -147,7 +147,28 @@ export const threadRepository: ThreadRepository = {
   },
 
   async update(id: number, data: UpdateThreadInput): Promise<ThreadData> {
-    return prisma.thread.update({ where: { id }, data });
+    if (data.deleted === undefined) {
+      return prisma.thread.update({ where: { id }, data });
+    }
+
+    return prisma.$transaction(async (tx) => {
+      const thread = await tx.thread.findUniqueOrThrow({ where: { id } });
+      const result = await tx.thread.update({ where: { id }, data });
+
+      // Adjust threadCount when deleted flag changes on a published thread
+      if (thread.published && thread.deleted !== data.deleted) {
+        await tx.board.update({
+          where: { id: thread.boardId },
+          data: {
+            threadCount: data.deleted
+              ? { decrement: 1 }
+              : { increment: 1 },
+          },
+        });
+      }
+
+      return result;
+    });
   },
 
   async delete(id: number): Promise<ThreadData> {

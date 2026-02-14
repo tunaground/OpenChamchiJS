@@ -118,7 +118,8 @@
     "editTitle": "掲示板編集",
     "yes": "はい",
     "no": "いいえ",
-    "required": "必須項目です。"
+    "required": "必須項目です。",
+    "fixThreadCount": "カウンター校正"
   },
   "notFound": {
     "code": "404",

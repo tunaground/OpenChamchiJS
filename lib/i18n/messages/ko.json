@@ -118,7 +118,8 @@
     "editTitle": "게시판 수정",
     "yes": "예",
     "no": "아니오",
-    "required": "필수 입력 항목입니다."
+    "required": "필수 입력 항목입니다.",
+    "fixThreadCount": "카운터 교정"
   },
   "notFound": {
     "code": "404",

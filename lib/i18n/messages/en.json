@@ -118,7 +118,8 @@
     "editTitle": "Edit Board",
     "yes": "Yes",
     "no": "No",
-    "required": "This field is required."
+    "required": "This field is required.",
+    "fixThreadCount": "Calibrate Count"
   },
   "notFound": {
     "code": "404",
