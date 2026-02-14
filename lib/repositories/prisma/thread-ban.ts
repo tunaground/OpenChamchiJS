@@ -8,7 +8,7 @@ import {
 export const threadBanRepository: ThreadBanRepository = {
   async findByThreadId(threadId: number): Promise<ThreadBanData[]> {
     return prisma.threadBan.findMany({
-      where: { threadId },
+      where: { threadId, active: true },
       orderBy: { createdAt: "desc" },
     });
   },
@@ -21,31 +21,26 @@ export const threadBanRepository: ThreadBanRepository = {
     const ban = await prisma.threadBan.findUnique({
       where: { threadId_authorId: { threadId, authorId } },
     });
-    return ban !== null;
+    return ban !== null && ban.active;
   },
 
   async createMany(data: CreateThreadBanInput[]): Promise<ThreadBanData[]> {
     const results: ThreadBanData[] = [];
     for (const item of data) {
-      try {
-        const ban = await prisma.threadBan.create({ data: item });
-        results.push(ban);
-      } catch (error: unknown) {
-        // Skip duplicate (unique constraint violation)
-        if (
-          error instanceof Error &&
-          "code" in error &&
-          (error as { code: string }).code === "P2002"
-        ) {
-          continue;
-        }
-        throw error;
-      }
+      const ban = await prisma.threadBan.upsert({
+        where: { threadId_authorId: { threadId: item.threadId, authorId: item.authorId } },
+        update: { active: true },
+        create: item,
+      });
+      results.push(ban);
     }
     return results;
   },
 
   async delete(id: string): Promise<ThreadBanData> {
-    return prisma.threadBan.delete({ where: { id } });
+    return prisma.threadBan.update({
+      where: { id },
+      data: { active: false },
+    });
   },
 };
