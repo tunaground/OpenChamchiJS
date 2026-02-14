@@ -7,6 +7,20 @@ const nextConfig: NextConfig = {
   compiler: {
     styledComponents: true,
   },
+  async redirects() {
+    return [
+      {
+        source: "/index.php/:boardId",
+        destination: "/archive/:boardId",
+        permanent: false,
+      },
+      {
+        source: "/trace.php/:boardId/:threadId/:slug*",
+        destination: "/archive/:boardId/:threadId/:slug*",
+        permanent: false,
+      }
+    ]
+  },
   images: {
     remotePatterns: [
       {
