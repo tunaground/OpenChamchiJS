@@ -23,6 +23,14 @@ export const Info = styled.div`
   flex-wrap: wrap;
   flex: 1;
   min-width: 0;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    gap: 0.2rem;
+
+    > :last-child {
+      margin-left: auto;
+    }
+  }
 `;
 
 export const Seq = styled.span`
@@ -60,6 +68,12 @@ export const Date = styled.span`
   color: ${(props) => props.theme.textSecondary};
   font-size: 1.2rem;
   margin-left: auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    margin-left: 0;
+    flex-basis: 100%;
+    order: 1;
+  }
 `;
 
 export const Content = styled.div`
