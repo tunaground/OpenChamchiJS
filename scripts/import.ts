@@ -13,8 +13,8 @@ const envFile = envIndex !== -1 && process.argv[envIndex + 1] ? process.argv[env
 dotenv.config({ path: envFile });
 
 // Constants
-const CONCURRENT_UPLOADS = 20;
-const CONCURRENT_THREADS = 10;
+const CONCURRENT_UPLOADS = 100;
+const CONCURRENT_THREADS = 5;
 const MAX_RETRIES = 3;
 const RETRY_DELAY = 2000;
 const DEFAULT_PASSWORD = "import";
@@ -26,6 +26,8 @@ interface CliArgs {
   skipExisting: boolean;
   dryRun: boolean;
   noAttachments: boolean;
+  attachmentsOnly: boolean;
+  threadIds: string[];
   threads: number;
 }
 
@@ -140,6 +142,8 @@ function parseArgs(): CliArgs {
     skipExisting: false,
     dryRun: false,
     noAttachments: false,
+    attachmentsOnly: false,
+    threadIds: [],
     threads: CONCURRENT_THREADS,
   };
 
@@ -151,6 +155,10 @@ function parseArgs(): CliArgs {
       result.dryRun = true;
     } else if (arg === "--no-attachments") {
       result.noAttachments = true;
+    } else if (arg === "--attachments-only") {
+      result.attachmentsOnly = true;
+    } else if (arg === "--thread-ids" && args[i + 1]) {
+      result.threadIds = args[++i].split(",").map((s) => s.trim()).filter(Boolean);
     } else if (arg === "--threads" && args[i + 1]) {
       result.threads = parseInt(args[++i], 10) || CONCURRENT_THREADS;
     } else if (arg === "--env") {
@@ -180,6 +188,8 @@ Options:
   --skip-existing    Skip threads that already exist in the database
   --dry-run          Test run without making changes
   --no-attachments   Skip uploading attachments to Supabase
+  --attachments-only Upload attachments only (skip DB import)
+  --thread-ids <ids> Import only specific thread IDs (comma-separated, e.g. 1595,1629)
   --threads <n>      Number of concurrent threads to process (default: ${CONCURRENT_THREADS})
 
 Examples:
@@ -436,6 +446,18 @@ async function importThread(
     };
   }
 
+  // Attachments-only mode: skip DB import
+  if (args.attachmentsOnly) {
+    return {
+      imported: true,
+      skipped: false,
+      responseCount: 0,
+      attachmentsUploaded,
+      attachmentsSkipped,
+      attachmentsFailed,
+    };
+  }
+
   // Create thread and responses in transaction
   try {
     await prisma.$transaction(
@@ -538,10 +560,15 @@ async function importBoard(
   }
 
   const entries = await fs.readdir(boardDir, { withFileTypes: true });
-  const threadDirs = entries
+  let threadDirs = entries
     .filter((e) => e.isDirectory() && /^\d+$/.test(e.name))
     .map((e) => e.name)
     .sort((a, b) => parseInt(a) - parseInt(b));
+
+  if (args.threadIds.length > 0) {
+    const idSet = new Set(args.threadIds);
+    threadDirs = threadDirs.filter((d) => idSet.has(d));
+  }
 
   console.log(`Found ${threadDirs.length} threads to import`);
 
@@ -612,6 +639,11 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  if (args.noAttachments && args.attachmentsOnly) {
+    console.error("Error: --no-attachments and --attachments-only cannot be used together.");
+    process.exit(1);
+  }
+
   console.log("=== OpenChamchiJS Data Import ===");
   console.log(`Env file: ${envFile}`);
   console.log(`Export directory: ${args.exportDir}`);
@@ -619,6 +651,8 @@ async function main(): Promise<void> {
   if (args.skipExisting) console.log("Option: --skip-existing");
   if (args.dryRun) console.log("Option: --dry-run");
   if (args.noAttachments) console.log("Option: --no-attachments");
+  if (args.attachmentsOnly) console.log("Option: --attachments-only");
+  if (args.threadIds.length > 0) console.log(`Option: --thread-ids ${args.threadIds.join(",")}`);
   console.log(`Concurrent threads: ${args.threads}`);
 
   // Initialize Prisma (use DIRECT_URL for full permissions if available)
