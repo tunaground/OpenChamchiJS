@@ -64,7 +64,7 @@ const Calc = styled.span<{ $exp: string }>`
   &::before {
     content: ${(props) => `"${props.$exp}"`};
     color: ${(props) => props.theme.calcExpColor};
-    vertical-align: super;
+    vertical-align: text-top;
     font-size: 1.2rem;
     margin-right: 0.4rem;
   }
