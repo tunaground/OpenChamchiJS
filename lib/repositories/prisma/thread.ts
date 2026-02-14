@@ -71,19 +71,24 @@ export const threadRepository: ThreadRepository = {
   ): Promise<FindByBoardIdWithCountResult> {
     const { limit = DEFAULT_LIMIT, offset = 0, includeDeleted = false, search } = options ?? {};
 
-    // If no search filter, use counter cache for total
+    // If no search filter, use counter cache for total (only when not including deleted)
     if (!search) {
+      const where = {
+        boardId,
+        published: true,
+        ...(includeDeleted ? {} : { deleted: false }),
+      };
       const data = await prisma.thread.findMany({
-        where: {
-          boardId,
-          published: true,
-          ...(includeDeleted ? {} : { deleted: false }),
-        },
+        where,
         orderBy: [{ top: "desc" }, { updatedAt: "desc" }],
         take: limit,
         skip: offset,
       });
-      return { data, total: boardThreadCount };
+      // Counter cache only tracks non-deleted threads, so use actual count when including deleted
+      const total = includeDeleted
+        ? await prisma.thread.count({ where })
+        : boardThreadCount;
+      return { data, total };
     }
 
     // With search: use window function COUNT(*) OVER() in raw query
