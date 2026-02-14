@@ -231,7 +231,11 @@
     "viewSource": "View Source",
     "copied": "Copied to clipboard",
     "loadMore": "Load more",
-    "loadingMore": "Loading..."
+    "loadingMore": "Loading...",
+    "ban": "Ban",
+    "unban": "Unban",
+    "threadBanned": "You are banned from this thread.",
+    "banned": "Banned"
   },
   "traceSidebar": {
     "navigation": "Navigation",

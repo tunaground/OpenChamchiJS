@@ -171,6 +171,7 @@ model Thread {
   top           Boolean    @default(false)
   responseCount Int        @default(0) // Counter cache: total responses (including deleted)
   responses     Response[]
+  bans          ThreadBan[]
   board         Board      @relation(fields: [boardId], references: [id])
   user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
@@ -203,4 +204,15 @@ model Response {
   @@index([boardId, deleted, createdAt(sort: Desc)])
   @@index([boardId, createdAt(sort: Desc), id(sort: Desc)])  // Admin responses (includeDeleted)
   @@index([userId])
+}
+
+model ThreadBan {
+  id        String   @id @default(cuid())
+  threadId  Int
+  authorId  String
+  createdAt DateTime @default(now())
+  thread    Thread   @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([threadId, authorId])
+  @@index([threadId])
 }

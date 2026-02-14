@@ -541,6 +541,10 @@ interface Labels {
   copied: string;
   loadMore: string;
   loadingMore: string;
+  ban: string;
+  unban: string;
+  threadBanned: string;
+  banned: string;
 }
 
 interface AuthLabels {
@@ -897,6 +901,8 @@ export function ThreadDetailContent({
   const [selectedResponseIds, setSelectedResponseIds] = useState<Set<string>>(new Set());
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkBanning, setBulkBanning] = useState(false);
+  const [bannedAuthorIds, setBannedAuthorIds] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
     setResponses(initialResponses);
@@ -954,6 +960,9 @@ export function ThreadDetailContent({
       }
       if (data.error === "WRITE_LOCKED") {
         return labels.writeLocked;
+      }
+      if (data.error === "THREAD_BANNED") {
+        return labels.threadBanned;
       }
       return data.error;
     }
@@ -1074,12 +1083,23 @@ export function ThreadDetailContent({
       setLoadingResponses(true);
 
       try {
-        const res = await fetch(
-          `/api/boards/${thread.boardId}/threads/${thread.id}/responses?includeHidden=true&limit=10000`
-        );
+        const [res, bansRes] = await Promise.all([
+          fetch(
+            `/api/boards/${thread.boardId}/threads/${thread.id}/responses?includeHidden=true&limit=10000`
+          ),
+          fetch(
+            `/api/boards/${thread.boardId}/threads/${thread.id}/bans`
+          ),
+        ]);
         if (res.ok) {
           const data = await res.json();
           setAllResponses(data.filter((r: ResponseData & { visible: boolean }) => r.seq !== 0));
+        }
+        if (bansRes.ok) {
+          const bans = await bansRes.json();
+          const map = new Map<string, string>();
+          bans.forEach((b: { id: string; authorId: string }) => map.set(b.authorId, b.id));
+          setBannedAuthorIds(map);
         }
       } catch {
         setManageError("Network error");
@@ -1235,6 +1255,77 @@ export function ThreadDetailContent({
       router.refresh();
     } finally {
       setBulkDeleting(false);
+    }
+  };
+
+  const handleBulkBan = async () => {
+    if (selectedResponseIds.size === 0) return;
+    setBulkBanning(true);
+    try {
+      const authorIdSet = new Set<string>();
+      for (const id of selectedResponseIds) {
+        const response = allResponses.find((r) => r.id === id);
+        if (response) authorIdSet.add(response.authorId);
+      }
+      const res = await fetch(
+        `/api/boards/${thread.boardId}/threads/${thread.id}/bans`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ authorIds: [...authorIdSet] }),
+        }
+      );
+      if (res.ok) {
+        const bans = await res.json();
+        setBannedAuthorIds((prev) => {
+          const map = new Map(prev);
+          for (const ban of bans as { id: string; authorId: string }[]) {
+            map.set(ban.authorId, ban.id);
+          }
+          return map;
+        });
+        setSelectedResponseIds(new Set());
+        showToast(labels.ban);
+      }
+    } finally {
+      setBulkBanning(false);
+    }
+  };
+
+  const handleSingleBan = async (authorId: string) => {
+    const res = await fetch(
+      `/api/boards/${thread.boardId}/threads/${thread.id}/bans`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ authorIds: [authorId] }),
+      }
+    );
+    if (res.ok) {
+      const bans = await res.json();
+      setBannedAuthorIds((prev) => {
+        const map = new Map(prev);
+        for (const ban of bans as { id: string; authorId: string }[]) {
+          map.set(ban.authorId, ban.id);
+        }
+        return map;
+      });
+    }
+  };
+
+  const handleUnban = async (authorId: string) => {
+    const banId = bannedAuthorIds.get(authorId);
+    if (!banId) return;
+    const res = await fetch(
+      `/api/boards/${thread.boardId}/threads/${thread.id}/bans/${banId}`,
+      { method: "DELETE" }
+    );
+    if (res.ok) {
+      setBannedAuthorIds((prev) => {
+        const map = new Map(prev);
+        map.delete(authorId);
+        return map;
+      });
     }
   };
 
@@ -1507,9 +1598,16 @@ export function ThreadDetailContent({
                         <span style={{ fontSize: "1.2rem" }}>전체 선택</span>
                       </label>
                       {selectedResponseIds.size > 0 && (
-                        <ConfirmButton onClick={handleBulkHide} disabled={bulkDeleting}>
-                          {labels.hide} ({selectedResponseIds.size})
-                        </ConfirmButton>
+                        <>
+                          <ConfirmButton onClick={handleBulkHide} disabled={bulkDeleting}>
+                            {labels.hide} ({selectedResponseIds.size})
+                          </ConfirmButton>
+                          {manageUnlockedByAdmin && (
+                            <ConfirmButton onClick={handleBulkBan} disabled={bulkBanning}>
+                              {labels.ban} ({selectedResponseIds.size})
+                            </ConfirmButton>
+                          )}
+                        </>
                       )}
                     </div>
                     <ManageResponseCards>
@@ -1529,6 +1627,11 @@ export function ThreadDetailContent({
                             <StatusBadge $visible={response.visible}>
                               {response.visible ? labels.visible : labels.hidden}
                             </StatusBadge>
+                            {manageUnlockedByAdmin && bannedAuthorIds.has(response.authorId) && (
+                              <StatusBadge $visible={false}>
+                                {labels.banned}
+                              </StatusBadge>
+                            )}
                           </ManageResponseCardHeader>
                           <ManageResponseCardContent>
                             {response.content.substring(0, 200)}
@@ -1541,6 +1644,17 @@ export function ThreadDetailContent({
                             >
                               {response.visible ? labels.hide : labels.restore}
                             </ActionButton>
+                            {manageUnlockedByAdmin && (
+                              bannedAuthorIds.has(response.authorId) ? (
+                                <ActionButton onClick={() => handleUnban(response.authorId)}>
+                                  {labels.unban}
+                                </ActionButton>
+                              ) : (
+                                <ActionButton onClick={() => handleSingleBan(response.authorId)}>
+                                  {labels.ban}
+                                </ActionButton>
+                              )
+                            )}
                           </ManageResponseCardActions>
                         </ManageResponseCard>
                       ))}

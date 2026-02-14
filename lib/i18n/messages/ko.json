@@ -231,7 +231,11 @@
     "viewSource": "원본 보기",
     "copied": "클립보드에 복사됨",
     "loadMore": "더 보기",
-    "loadingMore": "로딩 중..."
+    "loadingMore": "로딩 중...",
+    "ban": "차단",
+    "unban": "차단해제",
+    "threadBanned": "이 주제글에서 차단되었습니다.",
+    "banned": "차단됨"
   },
   "traceSidebar": {
     "navigation": "네비게이션",

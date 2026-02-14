@@ -18,6 +18,7 @@ import { createResponseSchema } from "@/lib/schemas";
 import { getPublisher, isRealtimeEnabled, CHANNELS, EVENTS } from "@/lib/realtime";
 import { getStorage, isStorageEnabled, StorageError } from "@/lib/storage";
 import { generateTripcode } from "@/lib/utils/tripcode";
+import { threadBanService } from "@/lib/services/thread-ban";
 
 // GET /api/boards/[boardId]/threads/[threadId]/responses - 응답 목록 조회
 export async function GET(
@@ -203,6 +204,12 @@ export async function POST(
     // Check write lock
     const writeLocked = await checkWriteLocked(request, board);
     if (writeLocked) return writeLocked;
+
+    // Check thread ban
+    const isBanned = await threadBanService.isBanned(id, authorId);
+    if (isBanned) {
+      return NextResponse.json({ error: "THREAD_BANNED" }, { status: 403 });
+    }
 
     // Get userId from session if logged in
     const session = await getServerSession(authOptions);

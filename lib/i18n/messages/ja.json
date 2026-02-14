@@ -231,7 +231,11 @@
     "viewSource": "ソースを表示",
     "copied": "クリップボードにコピーしました",
     "loadMore": "もっと見る",
-    "loadingMore": "読み込み中..."
+    "loadingMore": "読み込み中...",
+    "ban": "BAN",
+    "unban": "BAN解除",
+    "threadBanned": "このスレッドでBANされています。",
+    "banned": "BAN済"
   },
   "traceSidebar": {
     "navigation": "ナビゲーション",

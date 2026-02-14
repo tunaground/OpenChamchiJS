@@ -208,6 +208,10 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
           copied: t("copied"),
           loadMore: t("loadMore"),
           loadingMore: t("loadingMore"),
+          ban: t("ban"),
+          unban: t("unban"),
+          threadBanned: t("threadBanned"),
+          banned: t("banned"),
         }}
         sidebarLabels={{
           navigation: tSidebar("navigation"),
