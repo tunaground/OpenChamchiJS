@@ -29,6 +29,7 @@ export default async function AdminUsersPage({ searchParams }: Props) {
 
   return (
     <AdminUsersContent
+      key={`${page}-${search ?? ""}`}
       users={result.data.map((user) => ({
         id: user.id,
         name: user.name,
