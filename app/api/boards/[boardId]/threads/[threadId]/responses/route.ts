@@ -133,14 +133,14 @@ export async function GET(
   }
 }
 
-function generateAuthorId(ip: string): string {
+function generateAuthorId(ip: string, boardId: string): string {
   // Use KST (UTC+9) for date calculation
   const now = new Date();
   const kstDate = new Date(now.getTime() + 9 * 60 * 60 * 1000);
   const today = kstDate.toISOString().split("T")[0];
   const hash = crypto
     .createHash("sha256")
-    .update(`${ip}:${today}`)
+    .update(`${ip}:${boardId}:${today}`)
     .digest("hex")
     .slice(0, 8);
   return hash;
@@ -187,7 +187,7 @@ export async function POST(
   }
 
   const ip = getClientIp(request);
-  const authorId = generateAuthorId(ip);
+  const authorId = generateAuthorId(ip, boardId);
 
   let uploadedKey: string | null = null;
   let attachmentUrl: string | null = null;
