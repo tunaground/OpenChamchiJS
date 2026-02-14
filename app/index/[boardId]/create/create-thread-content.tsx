@@ -410,6 +410,8 @@ export function CreateThreadContent({
               <Label>{labels.username}</Label>
               <Input
                 type="text"
+                name="username"
+                autoComplete="username"
                 value={formData.username}
                 onChange={(e) =>
                   setFormData({ ...formData, username: e.target.value })

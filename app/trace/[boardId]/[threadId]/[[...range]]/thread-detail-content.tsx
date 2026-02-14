@@ -1523,6 +1523,8 @@ export function ThreadDetailContent({
           <FormGroup style={{ marginBottom: "1.6rem" }}>
             <FormInput
               type="text"
+              name="username"
+              autoComplete="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder={labels.usernamePlaceholder}
