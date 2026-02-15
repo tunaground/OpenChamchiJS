@@ -874,6 +874,10 @@ export function ThreadDetailContent({
   const threadChannel = CHANNELS.thread(thread.id);
   const { memberCount: threadMemberCount } = usePresence(threadChannel, showUserCount);
 
+  // Also enter board-level presence so index page aggregates trace users
+  const boardChannel = CHANNELS.board(thread.boardId);
+  usePresence(boardChannel, showUserCount);
+
   // Anchor preview stack (using shared hook)
   const {
     anchorStack,
