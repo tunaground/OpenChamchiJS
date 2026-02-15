@@ -10,10 +10,6 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title: settings.siteTitle,
     description: settings.siteDescription,
-    icons: {
-      icon: "/icon.png",
-      apple: "/apple-icon.png",
-    },
   };
 }
 
