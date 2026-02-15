@@ -249,7 +249,11 @@
     "next": "次へ",
     "scrollUp": "上にスクロール",
     "scrollDown": "下にスクロール",
-    "boards": "掲示板"
+    "boards": "掲示板",
+    "filter": "フィルター",
+    "filterByUsername": "ユーザー名",
+    "filterByAuthorId": "作成者ID",
+    "clearFilter": "フィルター解除"
   },
   "adminSidebar": {
     "admin": "管理",
