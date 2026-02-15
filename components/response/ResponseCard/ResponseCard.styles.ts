@@ -18,7 +18,7 @@ export const Header = styled.div`
 export const Info = styled.div`
   display: flex;
   align-items: center;
-  gap: 1.2rem;
+  gap: 0.4rem;
   font-size: 1.4rem;
   flex-wrap: wrap;
   flex: 1;
@@ -26,10 +26,6 @@ export const Info = styled.div`
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     gap: 0.2rem;
-
-    > :last-child {
-      margin-left: auto;
-    }
   }
 `;
 
@@ -56,7 +52,6 @@ export const Username = styled.span<{ $clickable?: boolean }>`
 
 export const AuthorId = styled.span<{ $clickable?: boolean }>`
   color: ${(props) => props.theme.textSecondary};
-  font-size: 1.2rem;
   cursor: ${(props) => (props.$clickable ? "pointer" : "default")};
 
   &:hover {
@@ -67,13 +62,8 @@ export const AuthorId = styled.span<{ $clickable?: boolean }>`
 export const Date = styled.span`
   color: ${(props) => props.theme.textSecondary};
   font-size: 1.2rem;
-  margin-left: auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    margin-left: 0;
-    flex-basis: 100%;
-    order: 1;
-  }
+  flex-basis: 100%;
+  order: 1;
 `;
 
 export const Content = styled.div`
