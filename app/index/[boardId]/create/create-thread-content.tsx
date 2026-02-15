@@ -400,6 +400,7 @@ export function CreateThreadContent({
                 setFormData({ ...formData, title: e.target.value })
               }
               placeholder={labels.threadTitlePlaceholder}
+              spellCheck={false}
               required
               maxLength={200}
             />
@@ -417,6 +418,7 @@ export function CreateThreadContent({
                   setFormData({ ...formData, username: e.target.value })
                 }
                 placeholder={labels.usernamePlaceholder}
+                spellCheck={false}
                 maxLength={50}
               />
             </FormGroup>
@@ -464,6 +466,7 @@ export function CreateThreadContent({
                 setFormData({ ...formData, content: applyShortcuts(e.target.value) })
               }
               placeholder={labels.contentPlaceholder}
+              spellCheck={false}
               required
             />
           </FormGroup>

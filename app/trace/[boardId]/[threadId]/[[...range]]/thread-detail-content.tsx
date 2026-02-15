@@ -1528,6 +1528,7 @@ export function ThreadDetailContent({
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               placeholder={labels.usernamePlaceholder}
+              spellCheck={false}
             />
           </FormGroup>
           <FormGroup style={{ marginBottom: "1.6rem" }}>
@@ -1538,6 +1539,7 @@ export function ThreadDetailContent({
               onKeyDown={handleKeyDown}
               placeholder={labels.contentPlaceholder}
               $aaMode={responseOptions.aaMode}
+              spellCheck={false}
               required
             />
           </FormGroup>
