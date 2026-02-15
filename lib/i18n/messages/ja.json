@@ -280,7 +280,7 @@
     "countryCodeDescription": "外国IPブロック時に許可する国コード (ISO 3166-1 alpha-2)",
     "homepageContent": "ホームページコンテンツ",
     "homepageContentPlaceholder": "ホームページに表示するコンテンツを入力...",
-    "homepageContentDescription": "TOMマークアップが使用可能です。([bld], [itl], [clr], [hr] など)",
+    "homepageContentDescription": "HTMLが使用可能です。",
     "tripcodeSalt": "トリップコードSalt",
     "tripcodeSaltPlaceholder": "bcrypt salt (例: $2a$10$...)",
     "tripcodeSaltDescription": "名前#パスワード形式でトリップコード(◆)を生成します。空の場合は無効になります。",

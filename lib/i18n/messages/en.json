@@ -280,7 +280,7 @@
     "countryCodeDescription": "Country code to allow when blocking foreign IPs (ISO 3166-1 alpha-2)",
     "homepageContent": "Homepage Content",
     "homepageContentPlaceholder": "Enter content to display on the homepage...",
-    "homepageContentDescription": "TOM markup is available. ([bld], [itl], [clr], [hr], etc.)",
+    "homepageContentDescription": "HTML is available.",
     "tripcodeSalt": "Tripcode Salt",
     "tripcodeSaltPlaceholder": "bcrypt salt (e.g. $2a$10$...)",
     "tripcodeSaltDescription": "Generates tripcode (◆) when username contains #. Empty to disable.",

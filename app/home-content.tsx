@@ -1,28 +1,16 @@
 "use client";
 
-import { useMemo } from "react";
 import styled from "styled-components";
-import { useTranslations } from "next-intl";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
-import { preparse, prerender, render } from "@/lib/tom";
 
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.contentMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
+const Container = styled.div``;
 
 const ContentWrapper = styled.div`
   font-size: 1.5rem;
   line-height: 1.8;
   color: ${(props) => props.theme.textPrimary};
   word-break: break-word;
-  white-space: pre-wrap;
 `;
 
 interface BoardData {
@@ -64,27 +52,7 @@ export function HomeContent({
   homepageContent,
   customLinks,
 }: HomeContentProps) {
-  const t = useTranslations();
   const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
-
-  const rendered = useMemo(() => {
-    if (!homepageContent?.trim()) {
-      return null;
-    }
-
-    try {
-      const preparsed = preparse(homepageContent);
-      const prerendered = prerender(preparsed);
-      return render(prerendered, {
-        boardId: "",
-        threadId: 0,
-        setAnchorInfo: () => {},
-        t,
-      });
-    } catch {
-      return homepageContent;
-    }
-  }, [homepageContent, t]);
 
   return (
     <PageLayout
@@ -96,7 +64,9 @@ export function HomeContent({
       isHomePage
     >
       <Container>
-        {rendered && <ContentWrapper>{rendered}</ContentWrapper>}
+        {homepageContent?.trim() && (
+          <ContentWrapper dangerouslySetInnerHTML={{ __html: homepageContent }} />
+        )}
       </Container>
     </PageLayout>
   );
