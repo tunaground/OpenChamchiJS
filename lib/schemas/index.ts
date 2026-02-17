@@ -154,6 +154,8 @@ export const updateSettingsSchema = z.object({
   countryCode: z.string().length(2).toUpperCase().optional(),
   homepageContent: z.string().max(50000).optional().nullable(),
   customLinks: z.array(customLinkSchema).max(20).optional(),
+  indexCustomHtml: z.string().max(50000).optional().nullable(),
+  threadCustomHtml: z.string().max(50000).optional().nullable(),
   tripcodeSalt: z.string().max(100).optional().nullable(),
 });
 

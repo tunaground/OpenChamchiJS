@@ -114,9 +114,11 @@ model GlobalSettings {
   siteTitle       String   @default("OpenChamchiJS")
   siteDescription String   @default("OpenChamchiJS - Open Source Forum")
   countryCode     String   @default("KR") // ISO 3166-1 alpha-2 country code
-  homepageContent String?  @db.Text
-  customLinks     String?  @db.Text // JSON array of {id, label, url}
-  tripcodeSalt    String?  // bcrypt salt for tripcode generation
+  homepageContent  String?  @db.Text
+  customLinks      String?  @db.Text // JSON array of {id, label, url}
+  indexCustomHtml  String?  @db.Text // Custom HTML for board index pages (below notices)
+  threadCustomHtml String?  @db.Text // Custom HTML for thread pages (above load more)
+  tripcodeSalt     String?  // bcrypt salt for tripcode generation
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

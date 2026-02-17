@@ -11,6 +11,8 @@ export interface GlobalSettingsData {
   countryCode: string;
   homepageContent: string | null;
   customLinks: CustomLink[];
+  indexCustomHtml: string | null;
+  threadCustomHtml: string | null;
   tripcodeSalt: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -22,6 +24,8 @@ export interface UpdateGlobalSettingsInput {
   countryCode?: string;
   homepageContent?: string | null;
   customLinks?: CustomLink[];
+  indexCustomHtml?: string | null;
+  threadCustomHtml?: string | null;
   tripcodeSalt?: string | null;
 }
 

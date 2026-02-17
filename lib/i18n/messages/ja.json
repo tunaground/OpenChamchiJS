@@ -303,6 +303,12 @@
     "cacheManagementDescription": "データベースクエリキャッシュを手動で無効化します。データが最新の変更を反映していない場合に使用してください。",
     "invalidateAll": "すべてのキャッシュを無効化",
     "invalidating": "無効化中...",
+    "indexCustomHtml": "掲示板カスタムHTML",
+    "indexCustomHtmlPlaceholder": "掲示板一覧ページに表示するHTMLを入力してください",
+    "indexCustomHtmlDescription": "掲示板一覧ページのお知らせの下に表示されるカスタムHTMLです。広告やお知らせなどに活用できます。",
+    "threadCustomHtml": "スレッドカスタムHTML",
+    "threadCustomHtmlPlaceholder": "スレッドページに表示するHTMLを入力してください",
+    "threadCustomHtmlDescription": "スレッドページの本文の下に表示されるカスタムHTMLです。広告やお知らせなどに活用できます。",
     "invalidated": "キャッシュを無効化しました。"
   },
   "adminResponses": {

@@ -427,6 +427,15 @@ const UnlockButton = styled(ConfirmButton)`
   background: ${(props) => props.theme.buttonPrimary};
 `;
 
+const CustomHtmlContainer = styled.div`
+  background: ${(props) => props.theme.responseCard};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+  padding: 1.6rem;
+  margin-top: 1.6rem;
+  overflow: hidden;
+`;
+
 const LoadMoreSection = styled.div`
   display: flex;
   align-items: stretch;
@@ -597,6 +606,7 @@ interface ThreadDetailContentProps {
   labels: Labels;
   sidebarLabels: SidebarLabels;
   customLinks?: CustomLink[];
+  threadCustomHtml?: string | null;
   filter?: ResponseFilter;
   filterActive?: boolean;
 }
@@ -621,6 +631,7 @@ export function ThreadDetailContent({
   labels,
   sidebarLabels,
   customLinks,
+  threadCustomHtml,
   filter,
   filterActive = true,
 }: ThreadDetailContentProps) {
@@ -1471,6 +1482,12 @@ export function ThreadDetailContent({
                     : undefined
                 }
               />
+              {/* Custom HTML slot - shown after seq 0 */}
+              {response.seq === 0 && threadCustomHtml && (
+                <CustomHtmlContainer
+                  dangerouslySetInnerHTML={{ __html: threadCustomHtml }}
+                />
+              )}
               {/* Load More button - shown after seq 0 */}
               {response.seq === 0 && hasMoreToLoad && (
                 <LoadMoreSection>

@@ -27,6 +27,8 @@ export default async function AdminSettingsPage() {
         countryCode: settings.countryCode,
         homepageContent: settings.homepageContent,
         customLinks: settings.customLinks,
+        indexCustomHtml: settings.indexCustomHtml,
+        threadCustomHtml: settings.threadCustomHtml,
         tripcodeSalt: settings.tripcodeSalt,
       }}
       geoIpAvailable={geoIpAvailable}
@@ -73,6 +75,12 @@ export default async function AdminSettingsPage() {
         linkUrlPlaceholder: t("linkUrlPlaceholder"),
         noLinks: t("noLinks"),
         deleteLink: t("deleteLink"),
+        indexCustomHtml: t("indexCustomHtml"),
+        indexCustomHtmlPlaceholder: t("indexCustomHtmlPlaceholder"),
+        indexCustomHtmlDescription: t("indexCustomHtmlDescription"),
+        threadCustomHtml: t("threadCustomHtml"),
+        threadCustomHtmlPlaceholder: t("threadCustomHtmlPlaceholder"),
+        threadCustomHtmlDescription: t("threadCustomHtmlDescription"),
         cacheManagement: t("cacheManagement"),
         cacheManagementDescription: t("cacheManagementDescription"),
         invalidateAll: t("invalidateAll"),

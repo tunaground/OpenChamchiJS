@@ -105,6 +105,7 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
         boardsTitle={tCommon("boards")}
         manualLabel={tCommon("manual")}
         customLinks={settings.customLinks}
+        indexCustomHtml={settings.indexCustomHtml}
       />
     );
   } catch (error) {

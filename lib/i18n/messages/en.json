@@ -303,6 +303,12 @@
     "cacheManagementDescription": "Manually invalidate database query caches. Use when data is not reflecting the latest changes.",
     "invalidateAll": "Invalidate All Caches",
     "invalidating": "Invalidating...",
+    "indexCustomHtml": "Board Index Custom HTML",
+    "indexCustomHtmlPlaceholder": "Enter HTML to display on board index pages",
+    "indexCustomHtmlDescription": "Custom HTML displayed below notices on board index pages. Can be used for ads, announcements, widgets, etc.",
+    "threadCustomHtml": "Thread Custom HTML",
+    "threadCustomHtmlPlaceholder": "Enter HTML to display on thread pages",
+    "threadCustomHtmlDescription": "Custom HTML displayed below the thread body on thread pages. Can be used for ads, announcements, widgets, etc.",
     "invalidated": "Cache invalidated successfully."
   },
   "adminResponses": {

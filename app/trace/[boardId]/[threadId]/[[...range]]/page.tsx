@@ -228,6 +228,7 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
         filter={filter}
         filterActive={filterActive}
         customLinks={settings.customLinks}
+        threadCustomHtml={settings.threadCustomHtml}
       />
     );
   } catch (error) {

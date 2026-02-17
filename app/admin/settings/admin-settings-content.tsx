@@ -356,6 +356,12 @@ interface Labels {
   linkUrlPlaceholder: string;
   noLinks: string;
   deleteLink: string;
+  indexCustomHtml: string;
+  indexCustomHtmlPlaceholder: string;
+  indexCustomHtmlDescription: string;
+  threadCustomHtml: string;
+  threadCustomHtmlPlaceholder: string;
+  threadCustomHtmlDescription: string;
   cacheManagement: string;
   cacheManagementDescription: string;
   invalidateAll: string;
@@ -370,6 +376,8 @@ interface AdminSettingsContentProps {
     countryCode: string;
     homepageContent: string | null;
     customLinks: CustomLink[];
+    indexCustomHtml: string | null;
+    threadCustomHtml: string | null;
     tripcodeSalt: string | null;
   };
   geoIpAvailable: boolean;
@@ -391,6 +399,8 @@ export function AdminSettingsContent({
   const [siteDescription, setSiteDescription] = useState(initialSettings.siteDescription);
   const [countryCode, setCountryCode] = useState(initialSettings.countryCode);
   const [homepageContent, setHomepageContent] = useState(initialSettings.homepageContent ?? "");
+  const [indexCustomHtml, setIndexCustomHtml] = useState(initialSettings.indexCustomHtml ?? "");
+  const [threadCustomHtml, setThreadCustomHtml] = useState(initialSettings.threadCustomHtml ?? "");
   const [tripcodeSalt, setTripcodeSalt] = useState(initialSettings.tripcodeSalt ?? "");
   const [customLinks, setCustomLinks] = useState<CustomLink[]>(initialSettings.customLinks);
   const [newLinkLabel, setNewLinkLabel] = useState("");
@@ -429,6 +439,8 @@ export function AdminSettingsContent({
           siteDescription: siteDescription || null,
           countryCode: countryCode.toUpperCase(),
           homepageContent: homepageContent || null,
+          indexCustomHtml: indexCustomHtml || null,
+          threadCustomHtml: threadCustomHtml || null,
           tripcodeSalt: tripcodeSalt || null,
           customLinks,
         }),
@@ -542,6 +554,30 @@ export function AdminSettingsContent({
             disabled={!canUpdate}
           />
           <Description>{labels.homepageContentDescription}</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="indexCustomHtml">{labels.indexCustomHtml}</Label>
+          <TextArea
+            id="indexCustomHtml"
+            value={indexCustomHtml}
+            onChange={(e) => setIndexCustomHtml(e.target.value)}
+            placeholder={labels.indexCustomHtmlPlaceholder}
+            disabled={!canUpdate}
+          />
+          <Description>{labels.indexCustomHtmlDescription}</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="threadCustomHtml">{labels.threadCustomHtml}</Label>
+          <TextArea
+            id="threadCustomHtml"
+            value={threadCustomHtml}
+            onChange={(e) => setThreadCustomHtml(e.target.value)}
+            placeholder={labels.threadCustomHtmlPlaceholder}
+            disabled={!canUpdate}
+          />
+          <Description>{labels.threadCustomHtmlDescription}</Description>
         </FormGroup>
 
         <FormGroup>

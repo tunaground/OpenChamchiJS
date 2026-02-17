@@ -26,6 +26,8 @@ function toGlobalSettingsData(settings: {
   countryCode: string;
   homepageContent: string | null;
   customLinks: string | null;
+  indexCustomHtml: string | null;
+  threadCustomHtml: string | null;
   tripcodeSalt: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -67,6 +69,8 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       countryCode?: string;
       homepageContent?: string | null;
       customLinks?: string | null;
+      indexCustomHtml?: string | null;
+      threadCustomHtml?: string | null;
       tripcodeSalt?: string | null;
     } = {};
 
@@ -84,6 +88,12 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.customLinks !== undefined) {
       updateData.customLinks = JSON.stringify(data.customLinks);
+    }
+    if (data.indexCustomHtml !== undefined) {
+      updateData.indexCustomHtml = data.indexCustomHtml;
+    }
+    if (data.threadCustomHtml !== undefined) {
+      updateData.threadCustomHtml = data.threadCustomHtml;
     }
     if (data.tripcodeSalt !== undefined) {
       updateData.tripcodeSalt = data.tripcodeSalt;

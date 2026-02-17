@@ -116,6 +116,15 @@ const NoticeDate = styled.span`
   flex-shrink: 0;
 `;
 
+const CustomHtmlContainer = styled.div`
+  background: ${(props) => props.theme.responseCard};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+  padding: 1.6rem;
+  margin-bottom: 2.4rem;
+  overflow: hidden;
+`;
+
 const ActionsBar = styled.div`
   display: flex;
   justify-content: space-between;
@@ -332,6 +341,7 @@ interface BoardIndexContentProps {
   boardsTitle: string;
   manualLabel: string;
   customLinks?: CustomLink[];
+  indexCustomHtml?: string | null;
 }
 
 export function BoardIndexContent({
@@ -350,6 +360,7 @@ export function BoardIndexContent({
   boardsTitle,
   manualLabel,
   customLinks,
+  indexCustomHtml,
 }: BoardIndexContentProps) {
   const router = useRouter();
   const locale = useLocale();
@@ -409,6 +420,12 @@ export function BoardIndexContent({
             ))}
           </NoticeList>
         </NoticesSection>
+      )}
+
+      {indexCustomHtml && (
+        <CustomHtmlContainer
+          dangerouslySetInnerHTML={{ __html: indexCustomHtml }}
+        />
       )}
 
       <ActionsBar>
