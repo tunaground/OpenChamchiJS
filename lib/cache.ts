@@ -28,6 +28,9 @@ export const CACHE_TAGS = {
   notice: (id: number) => `notice-${id}`,
   globalNotices: "notices-global",
 
+  // Thread ban tags
+  bans: (threadId: number) => `bans-${threadId}`,
+
   // Global settings
   settings: "settings",
 

@@ -93,10 +93,14 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
       const includeDeleted = options?.includeDeleted ?? false;
 
       // Single query optimization: use counter cache when no search, window function with search
-      const { data, total } = await threadRepository.findByBoardIdWithCount(
-        boardId,
-        board.threadCount,
-        { limit, offset, search, includeDeleted }
+      const { data, total } = await cached(
+        () => threadRepository.findByBoardIdWithCount(
+          boardId,
+          board.threadCount,
+          { limit, offset, search, includeDeleted }
+        ),
+        ["threads-by-board", boardId, page.toString(), limit.toString(), search ?? "", includeDeleted.toString()],
+        [CACHE_TAGS.threads, CACHE_TAGS.threadsByBoard(boardId)]
       );
 
       return createPaginatedResult(data, total, page, limit);

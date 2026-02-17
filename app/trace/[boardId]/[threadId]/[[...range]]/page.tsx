@@ -7,7 +7,6 @@ import { permissionService } from "@/lib/services/permission";
 import { boardService } from "@/lib/services/board";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { responseService } from "@/lib/services/response";
-import { responseRepository } from "@/lib/repositories/prisma/response";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { parseRangeParam } from "@/lib/types/response-range";
 import { isRealtimeEnabled } from "@/lib/realtime";
@@ -94,7 +93,7 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
     const [responses, responseCount] = await Promise.all([
       // Only apply filter when filterActive is true
       responseService.findByRange(threadIdNum, parsedRange.range, undefined, filterActive ? filter : undefined),
-      responseRepository.countByThreadId(threadIdNum),
+      responseService.countByThreadId(threadIdNum),
     ]);
 
     // lastSeq is count - 1 (since seq starts from 0)

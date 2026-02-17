@@ -10,6 +10,7 @@ import {
 } from "@/lib/repositories/interfaces/thread-ban";
 import { ThreadRepository } from "@/lib/repositories/interfaces/thread";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
+import { cached, invalidateCache, CACHE_TAGS } from "@/lib/cache";
 
 export class ThreadBanServiceError extends ServiceError {
   constructor(message: string, code: ServiceErrorCode) {
@@ -72,7 +73,11 @@ export function createThreadBanService(
     },
 
     async isBanned(threadId: number, authorId: string): Promise<boolean> {
-      return threadBanRepository.isBanned(threadId, authorId);
+      return cached(
+        () => threadBanRepository.isBanned(threadId, authorId),
+        ["thread-ban", threadId.toString(), authorId],
+        [CACHE_TAGS.bans(threadId)]
+      );
     },
 
     async createBans(
@@ -91,9 +96,13 @@ export function createThreadBanService(
       await checkPermissions(adminUserId, thread.boardId);
 
       const uniqueAuthorIds = [...new Set(authorIds)];
-      return threadBanRepository.createMany(
+      const bans = await threadBanRepository.createMany(
         uniqueAuthorIds.map((authorId) => ({ threadId, authorId }))
       );
+
+      invalidateCache(CACHE_TAGS.bans(threadId));
+
+      return bans;
     },
 
     async deleteBan(
@@ -108,7 +117,11 @@ export function createThreadBanService(
       const thread = await getThread(ban.threadId);
       await checkPermissions(adminUserId, thread.boardId);
 
-      return threadBanRepository.delete(banId);
+      const result = await threadBanRepository.delete(banId);
+
+      invalidateCache(CACHE_TAGS.bans(ban.threadId));
+
+      return result;
     },
   };
 }

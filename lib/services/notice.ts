@@ -96,15 +96,21 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
         throw new NoticeServiceError("Board not found", "NOT_FOUND");
       }
 
-      // Get all notices including global (limited), already ordered by pinned desc, createdAt desc
-      const notices = await noticeRepository.findByBoardId(boardId, { limit: 100, includeGlobal: true });
+      return cached(
+        async () => {
+          // Get all notices including global (limited), already ordered by pinned desc, createdAt desc
+          const notices = await noticeRepository.findByBoardId(boardId, { limit: 100, includeGlobal: true });
 
-      // Separate pinned (oldest first) and non-pinned (newest first)
-      const pinned = notices.filter((n) => n.pinned).reverse();
-      const nonPinned = notices.filter((n) => !n.pinned).slice(0, recentCount);
+          // Separate pinned (oldest first) and non-pinned (newest first)
+          const pinned = notices.filter((n) => n.pinned).reverse();
+          const nonPinned = notices.filter((n) => !n.pinned).slice(0, recentCount);
 
-      // Combine: all pinned + recent non-pinned (up to recentCount)
-      return [...pinned, ...nonPinned];
+          // Combine: all pinned + recent non-pinned (up to recentCount)
+          return [...pinned, ...nonPinned];
+        },
+        ["notices-pinned-recent", boardId, recentCount.toString()],
+        [CACHE_TAGS.notices, CACHE_TAGS.noticesByBoard(boardId), CACHE_TAGS.globalNotices]
+      );
     },
 
     async findGlobal(

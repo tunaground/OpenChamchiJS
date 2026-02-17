@@ -19,7 +19,7 @@ import {
 import { ThreadRepository } from "@/lib/repositories/interfaces/thread";
 import { BoardRepository } from "@/lib/repositories/interfaces/board";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
-import { invalidateCache, CACHE_TAGS } from "@/lib/cache";
+import { cached, invalidateCache, CACHE_TAGS } from "@/lib/cache";
 
 export class ResponseServiceError extends ServiceError {
   constructor(
@@ -57,6 +57,7 @@ export interface ResponseService {
     boardId?: string,
     filter?: ResponseFilter
   ): Promise<ResponseData[]>;
+  countByThreadId(threadId: number): Promise<number>;
   findById(id: string): Promise<ResponseData>;
   findByBoardId(
     boardId: string,
@@ -146,57 +147,86 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 
+      // Build range key parts for cache key
+      const rangeKeyParts = [threadId.toString(), range.type];
       switch (range.type) {
-        case "all":
-          return responseRepository.findByThreadId(threadId, { limit: 10000, filter });
-        case "recent":
-          return responseRepository.findRecentByThreadId(threadId, {
-            limit: range.limit,
-            filter,
-          });
-        case "single": {
-          // Always include seq 0 (thread body) plus the requested seq
-          // Note: single mode doesn't apply filter (always shows specific seq)
-          const responses: ResponseData[] = [];
-          const [firstResponse, singleResponse] = await Promise.all([
-            responseRepository.findByThreadIdAndSeq(threadId, 0),
-            range.seq === 0
-              ? Promise.resolve(null)
-              : responseRepository.findByThreadIdAndSeq(threadId, range.seq),
-          ]);
-          if (firstResponse && !firstResponse.deleted) {
-            responses.push(firstResponse);
-          }
-          if (singleResponse && !singleResponse.deleted) {
-            responses.push(singleResponse);
-          }
-          return responses;
-        }
-        case "range": {
-          // If range doesn't include 0, we need to fetch it separately
-          if (range.startSeq > 0) {
-            const [firstResponse, rangeResponses] = await Promise.all([
-              responseRepository.findByThreadIdAndSeq(threadId, 0),
-              responseRepository.findByThreadIdAndSeqRange(threadId, {
-                startSeq: range.startSeq,
-                endSeq: range.endSeq,
-                filter,
-              }),
-            ]);
+        case "recent": rangeKeyParts.push(range.limit.toString()); break;
+        case "single": rangeKeyParts.push(range.seq.toString()); break;
+        case "range": rangeKeyParts.push(range.startSeq.toString(), range.endSeq.toString()); break;
+      }
+
+      const fetchResponses = async () => {
+        switch (range.type) {
+          case "all":
+            return responseRepository.findByThreadId(threadId, { limit: 10000, filter });
+          case "recent":
+            return responseRepository.findRecentByThreadId(threadId, {
+              limit: range.limit,
+              filter,
+            });
+          case "single": {
+            // Always include seq 0 (thread body) plus the requested seq
+            // Note: single mode doesn't apply filter (always shows specific seq)
             const responses: ResponseData[] = [];
+            const [firstResponse, singleResponse] = await Promise.all([
+              responseRepository.findByThreadIdAndSeq(threadId, 0),
+              range.seq === 0
+                ? Promise.resolve(null)
+                : responseRepository.findByThreadIdAndSeq(threadId, range.seq),
+            ]);
             if (firstResponse && !firstResponse.deleted) {
               responses.push(firstResponse);
             }
-            responses.push(...rangeResponses);
+            if (singleResponse && !singleResponse.deleted) {
+              responses.push(singleResponse);
+            }
             return responses;
           }
-          return responseRepository.findByThreadIdAndSeqRange(threadId, {
-            startSeq: range.startSeq,
-            endSeq: range.endSeq,
-            filter,
-          });
+          case "range": {
+            // If range doesn't include 0, we need to fetch it separately
+            if (range.startSeq > 0) {
+              const [firstResponse, rangeResponses] = await Promise.all([
+                responseRepository.findByThreadIdAndSeq(threadId, 0),
+                responseRepository.findByThreadIdAndSeqRange(threadId, {
+                  startSeq: range.startSeq,
+                  endSeq: range.endSeq,
+                  filter,
+                }),
+              ]);
+              const responses: ResponseData[] = [];
+              if (firstResponse && !firstResponse.deleted) {
+                responses.push(firstResponse);
+              }
+              responses.push(...rangeResponses);
+              return responses;
+            }
+            return responseRepository.findByThreadIdAndSeqRange(threadId, {
+              startSeq: range.startSeq,
+              endSeq: range.endSeq,
+              filter,
+            });
+          }
         }
+      };
+
+      // Only cache when no filter is applied
+      if (filter) {
+        return fetchResponses();
       }
+
+      return cached(
+        fetchResponses,
+        ["responses-by-range", ...rangeKeyParts],
+        [CACHE_TAGS.responses(threadId)]
+      );
+    },
+
+    async countByThreadId(threadId: number): Promise<number> {
+      return cached(
+        () => responseRepository.countByThreadId(threadId),
+        ["response-count", threadId.toString()],
+        [CACHE_TAGS.responses(threadId)]
+      );
     },
 
     async findById(id: string): Promise<ResponseData> {
