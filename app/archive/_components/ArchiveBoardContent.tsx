@@ -6,6 +6,8 @@ import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { formatDate } from "../_lib/utils";
+import { fetchArchiveIndex } from "../_lib/api";
+import { ARCHIVE_CONFIG } from "../_lib/config";
 import type { ArchiveThreadIndex } from "../_lib/types";
 
 const Container = styled.div`
@@ -154,26 +156,64 @@ const ResultCount = styled.div`
   margin-bottom: 1.2rem;
 `;
 
+const LoadingState = styled.div`
+  text-align: center;
+  padding: 4.8rem;
+  color: ${(props) => props.theme.textSecondary};
+`;
+
 interface ArchiveBoardContentProps {
   boardId: string;
-  threads: ArchiveThreadIndex[];
-  initialPage: number;
-  initialSearch: string;
-  threadsPerPage: number;
 }
 
-export function ArchiveBoardContent({
-  boardId,
-  threads,
-  initialPage,
-  initialSearch,
-  threadsPerPage,
-}: ArchiveBoardContentProps) {
+export function ArchiveBoardContent({ boardId }: ArchiveBoardContentProps) {
   const router = useRouter();
   const pathname = usePathname();
   const locale = useLocale();
-  const [search, setSearch] = useState(initialSearch);
-  const [currentPage, setCurrentPage] = useState(initialPage);
+  const [threads, setThreads] = useState<ArchiveThreadIndex[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+  const [search, setSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const threadsPerPage = ARCHIVE_CONFIG.threadsPerPage;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setLoading(true);
+    setError(false);
+
+    fetchArchiveIndex(boardId)
+      .then((data) => {
+        if (cancelled) return;
+        data.sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+        setThreads(data);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setError(true);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [boardId]);
+
+  // Read initial search/page from URL
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlSearch = params.get("search") || "";
+    const urlPage = parseInt(params.get("page") || "1", 10) || 1;
+    setSearch(urlSearch);
+    setCurrentPage(urlPage);
+  }, []);
 
   // Filter threads based on search
   const filteredThreads = useMemo(() => {
@@ -211,11 +251,12 @@ export function ArchiveBoardContent({
 
   // Debounced URL update for search
   useEffect(() => {
+    if (loading) return;
     const timer = setTimeout(() => {
       updateUrl(search, currentPage);
     }, 300);
     return () => clearTimeout(timer);
-  }, [search, currentPage, updateUrl]);
+  }, [search, currentPage, updateUrl, loading]);
 
   // Reset to page 1 when search changes
   useEffect(() => {
@@ -272,6 +313,22 @@ export function ArchiveBoardContent({
       </Pagination>
     );
   };
+
+  if (loading) {
+    return (
+      <Container>
+        <LoadingState>Loading...</LoadingState>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container>
+        <EmptyState>Failed to load archive data.</EmptyState>
+      </Container>
+    );
+  }
 
   return (
     <Container>

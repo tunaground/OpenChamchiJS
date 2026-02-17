@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { ArchiveResponseCard } from "./ArchiveResponseCard";
 import { formatDate } from "../_lib/utils";
+import { fetchArchiveThread } from "../_lib/api";
 import type { ArchiveThread } from "../_lib/types";
 
 const Container = styled.div`
@@ -78,21 +79,64 @@ const ResponseList = styled.div`
   gap: 1.6rem;
 `;
 
+const LoadingState = styled.div`
+  text-align: center;
+  padding: 4.8rem;
+  color: ${(props) => props.theme.textSecondary};
+`;
+
+const ErrorState = styled.div`
+  text-align: center;
+  padding: 4.8rem;
+  color: ${(props) => props.theme.textSecondary};
+  background: ${(props) => props.theme.surface};
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 8px;
+`;
+
 interface ArchiveThreadContentProps {
   boardId: string;
   boardName: string;
-  thread: ArchiveThread;
+  threadId: number;
   highlightSeqs: number[];
 }
 
 export function ArchiveThreadContent({
   boardId,
   boardName,
-  thread,
+  threadId,
   highlightSeqs,
 }: ArchiveThreadContentProps) {
   const locale = useLocale();
   const firstHighlightRef = useRef<HTMLDivElement>(null);
+  const [thread, setThread] = useState<ArchiveThread | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    setLoading(true);
+    setError(false);
+
+    fetchArchiveThread(boardId, threadId)
+      .then((data) => {
+        if (cancelled) return;
+        setThread(data);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setError(true);
+      })
+      .finally(() => {
+        if (cancelled) return;
+        setLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [boardId, threadId]);
 
   useEffect(() => {
     if (highlightSeqs.length > 0 && firstHighlightRef.current) {
@@ -103,7 +147,49 @@ export function ArchiveThreadContent({
         });
       }, 100);
     }
-  }, [highlightSeqs]);
+  }, [highlightSeqs, thread]);
+
+  if (loading) {
+    return (
+      <Container>
+        <BackLink href={`/archive/${boardId}`}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Back to {boardName}
+        </BackLink>
+        <LoadingState>Loading...</LoadingState>
+      </Container>
+    );
+  }
+
+  if (error || !thread) {
+    return (
+      <Container>
+        <BackLink href={`/archive/${boardId}`}>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7" />
+          </svg>
+          Back to {boardName}
+        </BackLink>
+        <ErrorState>Failed to load thread.</ErrorState>
+      </Container>
+    );
+  }
 
   return (
     <Container>

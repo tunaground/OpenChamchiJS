@@ -8,7 +8,7 @@ export async function fetchArchiveIndex(
   boardId: string
 ): Promise<ArchiveThreadIndex[]> {
   const url = `${ARCHIVE_CONFIG.baseUrl}/${boardId}/index.json`;
-  const res = await fetch(url, { next: { revalidate: 3600 } }); // Cache 1 hour
+  const res = await fetch(url);
 
   if (!res.ok) {
     throw new Error(`Failed to fetch archive index: ${res.status}`);
@@ -25,7 +25,7 @@ export async function fetchArchiveThread(
   threadId: number
 ): Promise<ArchiveThread> {
   const url = `${ARCHIVE_CONFIG.baseUrl}/${boardId}/${threadId}.json`;
-  const res = await fetch(url, { next: { revalidate: 3600 } });
+  const res = await fetch(url);
 
   if (!res.ok) {
     throw new Error(`Failed to fetch archive thread: ${res.status}`);
