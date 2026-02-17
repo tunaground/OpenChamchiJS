@@ -1,12 +1,21 @@
 import { roleService, RoleServiceError } from "@/lib/services/role";
 import { roleRepository, permissionRepository } from "@/lib/repositories/prisma/role";
+import { userRepository } from "@/lib/repositories/prisma/user";
 import { permissionService } from "@/lib/services/permission";
 
 jest.mock("@/lib/repositories/prisma/role");
+jest.mock("@/lib/repositories/prisma/user");
 jest.mock("@/lib/services/permission");
+jest.mock("@/lib/cache", () => ({
+  invalidateCache: jest.fn(),
+  CACHE_TAGS: {
+    userPermissions: (userId: string) => `user-permissions:${userId}`,
+  },
+}));
 
 const mockedRoleRepo = roleRepository as jest.Mocked<typeof roleRepository>;
 const mockedPermissionRepo = permissionRepository as jest.Mocked<typeof permissionRepository>;
+const mockedUserRepo = userRepository as jest.Mocked<typeof userRepository>;
 const mockedPermissionService = permissionService as jest.Mocked<typeof permissionService>;
 
 describe("RoleService", () => {
@@ -173,6 +182,7 @@ describe("RoleService", () => {
     it("deletes role when user has permission", async () => {
       mockedPermissionService.checkUserPermission.mockResolvedValue(true);
       mockedRoleRepo.findById.mockResolvedValue(mockRole);
+      mockedUserRepo.findUserIdsByRoleId.mockResolvedValue(["user-2"]);
 
       await roleService.delete("user-1", "role-1");
 
@@ -202,6 +212,7 @@ describe("RoleService", () => {
       mockedPermissionService.checkUserPermission.mockResolvedValue(true);
       mockedRoleRepo.findById.mockResolvedValue(mockRole);
       mockedPermissionRepo.findById.mockResolvedValue(mockPermission);
+      mockedUserRepo.findUserIdsByRoleId.mockResolvedValue(["user-2"]);
 
       await roleService.addPermission("user-1", "role-1", "perm-1");
 
@@ -240,6 +251,7 @@ describe("RoleService", () => {
     it("removes permission from role when user has permission", async () => {
       mockedPermissionService.checkUserPermission.mockResolvedValue(true);
       mockedRoleRepo.findById.mockResolvedValue(mockRole);
+      mockedUserRepo.findUserIdsByRoleId.mockResolvedValue(["user-2"]);
 
       await roleService.removePermission("user-1", "role-1", "perm-1");
 
