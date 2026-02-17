@@ -9,6 +9,7 @@ import { threadService } from "@/lib/services/thread";
 import { noticeService } from "@/lib/services/notice";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { isRealtimeEnabled } from "@/lib/realtime";
+import { toISOString } from "@/lib/cache";
 import { BoardIndexContent } from "./board-index-content";
 
 interface Props {
@@ -71,8 +72,8 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
           ended: thread.ended,
           top: thread.top,
           responseCount: thread.responseCount,
-          createdAt: thread.createdAt.toISOString(),
-          updatedAt: thread.updatedAt.toISOString(),
+          createdAt: toISOString(thread.createdAt),
+          updatedAt: toISOString(thread.updatedAt),
         }))}
         pagination={threadResult.pagination}
         search={search ?? ""}
@@ -81,7 +82,7 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
           title: notice.title,
           pinned: notice.pinned,
           isGlobal: notice.boardId === null,
-          createdAt: notice.createdAt.toISOString(),
+          createdAt: toISOString(notice.createdAt),
         }))}
         labels={{
           notices: t("notices"),

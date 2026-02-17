@@ -159,7 +159,7 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
           authorId: response.authorId,
           content: response.content,
           attachment: response.attachment,
-          createdAt: response.createdAt.toISOString(),
+          createdAt: toISOString(response.createdAt),
         }))}
         currentView={currentView}
         lastSeq={lastSeq}
