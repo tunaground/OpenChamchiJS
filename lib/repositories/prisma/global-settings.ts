@@ -29,6 +29,7 @@ function toGlobalSettingsData(settings: {
   indexCustomHtml: string | null;
   threadCustomHtml: string | null;
   tripcodeSalt: string | null;
+  gaTrackingId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): GlobalSettingsData {
@@ -72,6 +73,7 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       indexCustomHtml?: string | null;
       threadCustomHtml?: string | null;
       tripcodeSalt?: string | null;
+      gaTrackingId?: string | null;
     } = {};
 
     if (data.siteTitle !== undefined) {
@@ -97,6 +99,9 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.tripcodeSalt !== undefined) {
       updateData.tripcodeSalt = data.tripcodeSalt;
+    }
+    if (data.gaTrackingId !== undefined) {
+      updateData.gaTrackingId = data.gaTrackingId;
     }
 
     const updated = await prisma.globalSettings.upsert({

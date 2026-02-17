@@ -309,7 +309,10 @@
     "threadCustomHtml": "スレッドカスタムHTML",
     "threadCustomHtmlPlaceholder": "スレッドページに表示するHTMLを入力してください",
     "threadCustomHtmlDescription": "スレッドページの本文の下に表示されるカスタムHTMLです。広告やお知らせなどに活用できます。",
-    "invalidated": "キャッシュを無効化しました。"
+    "invalidated": "キャッシュを無効化しました。",
+    "gaTrackingId": "Google Analytics ID",
+    "gaTrackingIdPlaceholder": "G-XXXXXXXXXX",
+    "gaTrackingIdDescription": "Google Analytics Measurement IDを入力すると、サイト全体にGAスクリプトが挿入されます。空の場合は挿入されません。"
   },
   "adminResponses": {
     "title": "レス管理",

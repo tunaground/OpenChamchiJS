@@ -1,4 +1,5 @@
 import type {Metadata, Viewport} from "next";
+import Script from "next/script";
 import {NextIntlClientProvider} from "next-intl";
 import {getLocale, getMessages} from "next-intl/server";
 import {Providers} from "./providers";
@@ -27,6 +28,7 @@ export default async function RootLayout({
 }>) {
   const locale = await getLocale();
   const messages = await getMessages();
+  const settings = await globalSettingsService.get();
 
   return (
     <html lang={locale}>
@@ -42,6 +44,23 @@ export default async function RootLayout({
             <Providers>{children}</Providers>
           </NextIntlClientProvider>
         </StyledComponentsRegistry>
+        {settings.gaTrackingId && (
+          <>
+            <Script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${settings.gaTrackingId}`}
+              strategy="afterInteractive"
+            />
+            <Script id="google-analytics" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${settings.gaTrackingId}');
+              `}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );

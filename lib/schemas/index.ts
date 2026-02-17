@@ -157,6 +157,7 @@ export const updateSettingsSchema = z.object({
   indexCustomHtml: z.string().max(50000).optional().nullable(),
   threadCustomHtml: z.string().max(50000).optional().nullable(),
   tripcodeSalt: z.string().max(100).optional().nullable(),
+  gaTrackingId: z.string().max(50).optional().nullable(),
 });
 
 export type CustomLinkInput = z.infer<typeof customLinkSchema>;

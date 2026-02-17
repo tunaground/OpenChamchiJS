@@ -309,7 +309,10 @@
     "threadCustomHtml": "Thread Custom HTML",
     "threadCustomHtmlPlaceholder": "Enter HTML to display on thread pages",
     "threadCustomHtmlDescription": "Custom HTML displayed below the thread body on thread pages. Can be used for ads, announcements, widgets, etc.",
-    "invalidated": "Cache invalidated successfully."
+    "invalidated": "Cache invalidated successfully.",
+    "gaTrackingId": "Google Analytics ID",
+    "gaTrackingIdPlaceholder": "G-XXXXXXXXXX",
+    "gaTrackingIdDescription": "Enter a Google Analytics Measurement ID to inject GA scripts across the entire site. Leave empty to disable."
   },
   "adminResponses": {
     "title": "Response Management",

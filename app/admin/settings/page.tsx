@@ -30,6 +30,7 @@ export default async function AdminSettingsPage() {
         indexCustomHtml: settings.indexCustomHtml,
         threadCustomHtml: settings.threadCustomHtml,
         tripcodeSalt: settings.tripcodeSalt,
+        gaTrackingId: settings.gaTrackingId,
       }}
       geoIpAvailable={geoIpAvailable}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
@@ -81,6 +82,9 @@ export default async function AdminSettingsPage() {
         threadCustomHtml: t("threadCustomHtml"),
         threadCustomHtmlPlaceholder: t("threadCustomHtmlPlaceholder"),
         threadCustomHtmlDescription: t("threadCustomHtmlDescription"),
+        gaTrackingId: t("gaTrackingId"),
+        gaTrackingIdPlaceholder: t("gaTrackingIdPlaceholder"),
+        gaTrackingIdDescription: t("gaTrackingIdDescription"),
         cacheManagement: t("cacheManagement"),
         cacheManagementDescription: t("cacheManagementDescription"),
         invalidateAll: t("invalidateAll"),

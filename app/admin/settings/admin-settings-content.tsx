@@ -362,6 +362,9 @@ interface Labels {
   threadCustomHtml: string;
   threadCustomHtmlPlaceholder: string;
   threadCustomHtmlDescription: string;
+  gaTrackingId: string;
+  gaTrackingIdPlaceholder: string;
+  gaTrackingIdDescription: string;
   cacheManagement: string;
   cacheManagementDescription: string;
   invalidateAll: string;
@@ -379,6 +382,7 @@ interface AdminSettingsContentProps {
     indexCustomHtml: string | null;
     threadCustomHtml: string | null;
     tripcodeSalt: string | null;
+    gaTrackingId: string | null;
   };
   geoIpAvailable: boolean;
   authLabels: AuthLabels;
@@ -402,6 +406,7 @@ export function AdminSettingsContent({
   const [indexCustomHtml, setIndexCustomHtml] = useState(initialSettings.indexCustomHtml ?? "");
   const [threadCustomHtml, setThreadCustomHtml] = useState(initialSettings.threadCustomHtml ?? "");
   const [tripcodeSalt, setTripcodeSalt] = useState(initialSettings.tripcodeSalt ?? "");
+  const [gaTrackingId, setGaTrackingId] = useState(initialSettings.gaTrackingId ?? "");
   const [customLinks, setCustomLinks] = useState<CustomLink[]>(initialSettings.customLinks);
   const [newLinkLabel, setNewLinkLabel] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
@@ -442,6 +447,7 @@ export function AdminSettingsContent({
           indexCustomHtml: indexCustomHtml || null,
           threadCustomHtml: threadCustomHtml || null,
           tripcodeSalt: tripcodeSalt || null,
+          gaTrackingId: gaTrackingId || null,
           customLinks,
         }),
       });
@@ -578,6 +584,20 @@ export function AdminSettingsContent({
             disabled={!canUpdate}
           />
           <Description>{labels.threadCustomHtmlDescription}</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="gaTrackingId">{labels.gaTrackingId}</Label>
+          <TitleInput
+            id="gaTrackingId"
+            type="text"
+            value={gaTrackingId}
+            onChange={(e) => setGaTrackingId(e.target.value)}
+            placeholder={labels.gaTrackingIdPlaceholder}
+            maxLength={50}
+            disabled={!canUpdate}
+          />
+          <Description>{labels.gaTrackingIdDescription}</Description>
         </FormGroup>
 
         <FormGroup>

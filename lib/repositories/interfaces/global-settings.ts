@@ -14,6 +14,7 @@ export interface GlobalSettingsData {
   indexCustomHtml: string | null;
   threadCustomHtml: string | null;
   tripcodeSalt: string | null;
+  gaTrackingId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -27,6 +28,7 @@ export interface UpdateGlobalSettingsInput {
   indexCustomHtml?: string | null;
   threadCustomHtml?: string | null;
   tripcodeSalt?: string | null;
+  gaTrackingId?: string | null;
 }
 
 export interface GlobalSettingsRepository {
