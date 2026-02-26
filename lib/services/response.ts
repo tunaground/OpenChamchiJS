@@ -147,14 +147,6 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 
-      // Build range key parts for cache key
-      const rangeKeyParts = [threadId.toString(), range.type];
-      switch (range.type) {
-        case "recent": rangeKeyParts.push(range.limit.toString()); break;
-        case "single": rangeKeyParts.push(range.seq.toString()); break;
-        case "range": rangeKeyParts.push(range.startSeq.toString(), range.endSeq.toString()); break;
-      }
-
       const fetchResponses = async () => {
         switch (range.type) {
           case "all":
@@ -209,24 +201,11 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         }
       };
 
-      // Only cache when no filter is applied
-      if (filter) {
-        return fetchResponses();
-      }
-
-      return cached(
-        fetchResponses,
-        ["responses-by-range", ...rangeKeyParts],
-        [CACHE_TAGS.responses(threadId)]
-      );
+      return fetchResponses();
     },
 
     async countByThreadId(threadId: number): Promise<number> {
-      return cached(
-        () => responseRepository.countByThreadId(threadId),
-        ["response-count", threadId.toString()],
-        [CACHE_TAGS.responses(threadId)]
-      );
+      return responseRepository.countByThreadId(threadId);
     },
 
     async findById(id: string): Promise<ResponseData> {

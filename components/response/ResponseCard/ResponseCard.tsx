@@ -1,11 +1,12 @@
 "use client";
 
+import { memo } from "react";
 import { useLocale } from "next-intl";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 import * as S from "./ResponseCard.styles";
 import type { ResponseCardProps } from "./types";
 
-export function ResponseCard({
+export const ResponseCard = memo(function ResponseCard({
   response,
   boardId,
   threadId,
@@ -61,4 +62,4 @@ export function ResponseCard({
       </S.Content>
     </S.Card>
   );
-}
+});

@@ -4,6 +4,7 @@ export { ContentPreview } from "./ContentPreview";
 export { TomPreview } from "./TomPreview";
 export { ResponseCard } from "./ResponseCard";
 export type { ResponseCardData, ResponseCardProps } from "./ResponseCard";
+export { ResponseFormSection } from "./ResponseFormSection";
 export { AnchorPreview, useAnchorStack } from "./AnchorPreview";
 export type {
   AnchorStackItem,

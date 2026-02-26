@@ -2,26 +2,23 @@
 
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
-import { ResponseOptionButtons, ResponsePreview, ResponseCard } from "@/components/response";
+import { ResponseCard } from "@/components/response";
+import { ResponseFormSection } from "@/components/response/ResponseFormSection";
 import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
-import { ImageUpload } from "@/components/response/ImageUpload";
 import { ImageAttachment } from "@/components/response/ImageAttachment";
 import { useResponseOptions } from "@/lib/hooks/useResponseOptions";
 import { useChatMode } from "@/lib/hooks/useChatMode";
 import { usePresence } from "@/lib/hooks/usePresence";
 import { CHANNELS } from "@/lib/realtime";
 import { useTranslations } from "next-intl";
-import { parse, prerender, render, toOriginalFormat, type PrerenderedRoot, type AnchorInfo } from "@/lib/tom";
+import { parse, prerender, render, toOriginalFormat, type PrerenderedRoot } from "@/lib/tom";
 import { useToast } from "@/components/Toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCode } from "@fortawesome/free-solid-svg-icons";
 import { formatDateTime } from "@/lib/utils/date-formatter";
-import { formatBytes } from "@/lib/utils/format-bytes";
-import { applyShortcuts } from "@/lib/utils/shortcuts";
 import {
   requestNotificationPermission,
   createThrottledNotifier,
@@ -150,95 +147,6 @@ const EmptyState = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
-`;
-
-const ResponseForm = styled.form`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.6rem;
-  margin-top: 2.4rem;
-`;
-
-
-const FormGroup = styled.div`
-  flex: 1;
-`;
-
-const FormInput = styled.input`
-  width: 100%;
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-
-  &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
-  }
-`;
-
-const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
-  width: 100%;
-  min-height: 12rem;
-  padding: 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: ${(props) => (props.$aaMode ? "1.6rem" : "1.4rem")};
-  background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : props.theme.background)};
-  color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
-  resize: none;
-  font-family: ${(props) => (props.$aaMode ? '"Saitamaar", sans-serif' : "inherit")};
-  line-height: ${(props) => (props.$aaMode ? "1.8rem" : "1.5")};
-  white-space: ${(props) => (props.$aaMode ? "pre" : "pre-wrap")};
-  overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
-  overflow-y: hidden;
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-
-  &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
-  }
-`;
-
-const SubmitButton = styled.button`
-  width: 100%;
-  height: 3.5rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  font-weight: 500;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const EndedNotice = styled.div`
-  text-align: center;
-  padding: 2.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surfaceHover};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  margin-top: 2.4rem;
 `;
 
 const Modal = styled.div`
@@ -637,38 +545,23 @@ export function ThreadDetailContent({
 }: ThreadDetailContentProps) {
   const router = useRouter();
   const [responses, setResponses] = useState(initialResponses);
-  const [username, setUsername] = useState("");
-  const [content, setContent] = useState("");
-  const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
-  const [submitting, setSubmitting] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
+  const wasAtBottomRef = useRef(true);
   const initialScrollDone = useRef(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { showToast } = useToast();
 
   const alwaysBottomRef = useRef(false);
-  const autoResize = useCallback(() => {
-    const textarea = textareaRef.current;
-    if (textarea) {
-      textarea.style.height = "auto";
-      textarea.style.height = `${textarea.scrollHeight + 4}px`;
-    }
-    if (alwaysBottomRef.current && isAtBottomRef.current && pageEndRef.current) {
-      pageEndRef.current.scrollIntoView({ behavior: "instant" });
-    }
+
+  // Capture scroll position before DOM changes, then update responses
+  const addResponses = useCallback((updater: (prev: ResponseData[]) => ResponseData[]) => {
+    const scrollTop = window.scrollY;
+    const windowHeight = window.innerHeight;
+    const documentHeight = document.documentElement.scrollHeight;
+    wasAtBottomRef.current = scrollTop + windowHeight >= documentHeight - 100;
+    setResponses(updater);
   }, []);
-
-  useEffect(() => {
-    autoResize();
-  }, [content, autoResize]);
-
-  // Load saved username from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem(`chamchi:username:thread:${thread.id}`);
-    if (saved) setUsername(saved);
-  }, [thread.id]);
 
   // Calculate minLoadedSeq (smallest seq excluding 0)
   const minLoadedSeq = useMemo(() => {
@@ -737,6 +630,31 @@ export function ThreadDetailContent({
     if (responses.length === 0) return lastSeq;
     return Math.max(lastSeq, ...responses.map((r) => r.seq));
   }, [responses, lastSeq]);
+
+  // Fetch new responses after current last seq
+  const fetchNewResponses = useCallback(async () => {
+    try {
+      const afterSeq = currentLastSeq;
+      const res = await fetch(
+        `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${afterSeq + 1}&endSeq=${afterSeq + 1000}`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if ((data as ResponseData[]).length > 0) {
+          addResponses((prev) => {
+            const existingIds = new Set(prev.map((r) => r.id));
+            const newResponses = (data as ResponseData[]).filter(
+              (r) => !existingIds.has(r.id)
+            );
+            if (newResponses.length === 0) return prev;
+            return [...prev, ...newResponses].sort((a, b) => a.seq - b.seq);
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch new responses:", error);
+    }
+  }, [thread.boardId, thread.id, currentLastSeq, addResponses]);
 
   // Throttled notification for chat mode (1 second throttle, shows last response only)
   const throttledNotify = useMemo(() => createThrottledNotifier(1000), []);
@@ -852,7 +770,7 @@ export function ThreadDetailContent({
       }
     }
 
-    setResponses((prev) => {
+    addResponses((prev) => {
       // Avoid duplicates
       if (prev.some((r) => r.id === newResponse.id)) {
         return prev;
@@ -868,7 +786,7 @@ export function ThreadDetailContent({
     // Browser notification
     const body = `${newResponse.username}: ${newResponse.content}`;
     throttledNotify(thread.title, body);
-  }, [throttledNotify, thread.title, anonId, filter, filterActive]);
+  }, [throttledNotify, thread.title, anonId, filter, filterActive, addResponses]);
 
   // Chat mode hook
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -958,13 +876,11 @@ export function ThreadDetailContent({
     }
   }, [responseOptions.alwaysBottom]);
 
-  // Always-on-Bottom mode: scroll to bottom only when user is already at bottom
+  // Scroll to bottom when responses change, only if user was at bottom before the update
   useEffect(() => {
-    if (responseOptions.alwaysBottom && pageEndRef.current && isAtBottomRef.current) {
-      // In chat mode, use instant scroll to prevent jitter
-      // Otherwise, use smooth scroll for better UX
-      const behavior = responseOptions.chatMode ? "instant" : "smooth";
-      pageEndRef.current.scrollIntoView({ behavior });
+    if (!pageEndRef.current) return;
+    if ((responseOptions.alwaysBottom || responseOptions.chatMode) && wasAtBottomRef.current) {
+      pageEndRef.current.scrollIntoView({ behavior: "instant" });
     }
   }, [responseOptions.alwaysBottom, responseOptions.chatMode, responses]);
 
@@ -980,125 +896,46 @@ export function ThreadDetailContent({
   }, [responses]);
 
   const t = useTranslations();
-  const tThread = useTranslations("threadDetail");
 
-  const maxSizeLabel = tThread("maxSize", { size: formatBytes(uploadMaxSize) });
+  // Stable copy callback
+  const handleCopy = useCallback(() => {
+    showToast(labels.copied);
+  }, [showToast, labels.copied]);
 
-  const getErrorMessage = (data: { error: string | object }): string => {
-    if (typeof data.error === "string") {
-      if (data.error === "FOREIGN_IP_BLOCKED") {
-        return labels.foreignIpBlocked;
-      }
-      if (data.error === "WRITE_LOCKED") {
-        return labels.writeLocked;
-      }
-      if (data.error === "THREAD_BANNED") {
-        return labels.threadBanned;
-      }
-      return data.error;
-    }
-    return labels.unknownError;
-  };
+  // Stable attachment renderer
+  const attachmentRenderer = useCallback((src: string) =>
+    src.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
+    src.includes("/storage/") ? (
+      <ImageAttachment src={src} />
+    ) : (
+      <AttachmentLink
+        href={src}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        📎 Attachment
+      </AttachmentLink>
+    ), []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!content.trim()) return;
-
-    setSubmitting(true);
-
-    try {
-      // Apply AA mode: wrap content with [aa][/aa] tags
-      // Don't trim in AA mode to preserve whitespace
-      let finalContent = responseOptions.aaMode
-        ? `[aa]${content}[/aa]`
-        : content.trim();
-
-      // Use FormData if there's a file, otherwise use JSON
-      let res: Response;
-      if (attachmentFile) {
-        const formData = new FormData();
-        formData.append("file", attachmentFile);
-        formData.append("content", finalContent);
-        formData.append("anonId", anonId);
-        if (username.trim()) {
-          formData.append("username", username.trim());
-        }
-        if (responseOptions.noupMode) {
-          formData.append("noup", "true");
-        }
-
-        res = await fetch(`/api/boards/${thread.boardId}/threads/${thread.id}/responses`, {
-          method: "POST",
-          body: formData,
-        });
-      } else {
-        res = await fetch(`/api/boards/${thread.boardId}/threads/${thread.id}/responses`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            username: username.trim() || undefined,
-            content: finalContent,
-            noup: responseOptions.noupMode || undefined,
-            anonId,
-          }),
-        });
-      }
-
-      if (res.ok) {
-        // Save username to localStorage for this thread
-        if (username.trim()) {
-          localStorage.setItem(`chamchi:username:thread:${thread.id}`, username.trim());
-        }
-        setContent("");
-        setAttachmentFile(null);
-        // In chat mode, the response will arrive via WebSocket
-        // Otherwise, refresh the page to fetch the new response
-        if (!responseOptions.chatMode) {
-          router.refresh();
-        }
-      } else {
-        let errorMessage = labels.unknownError;
-        try {
-          const data = await res.json();
-          console.error("Failed to create response:", data);
-
-          // Handle deleted user - sign out and redirect
-          if (data.error === "USER_NOT_FOUND") {
-            await signOut({ redirect: true, callbackUrl: "/" });
-            return;
-          }
-
-          errorMessage = getErrorMessage(data);
-        } catch {
-          console.error("Failed to parse error response");
-        }
-        alert(errorMessage);
-      }
-    } catch (err) {
-      alert(err instanceof Error ? err.message : labels.unknownError);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  // Quick submit handler for keyboard shortcut
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    const { quickSubmitKey } = responseOptions;
-    if (quickSubmitKey === "none") return;
-
-    const isCtrlEnter = e.key === "Enter" && (e.ctrlKey || e.metaKey);
-    const isShiftEnter = e.key === "Enter" && e.shiftKey;
-
-    if (
-      (quickSubmitKey === "ctrl" && isCtrlEnter) ||
-      (quickSubmitKey === "shift" && isShiftEnter)
-    ) {
-      e.preventDefault();
-      if (content.trim() && !submitting) {
-        handleSubmit(e as unknown as React.FormEvent);
+  // Memoize TOM render results
+  const renderedContents = useMemo(() => {
+    const map = new Map<string, React.ReactNode>();
+    for (const response of responses) {
+      const prerendered = prerenderedContents.get(response.id);
+      if (prerendered) {
+        const mainKey = `main:${response.id}`;
+        map.set(response.id, render(prerendered, {
+          boardId: thread.boardId,
+          threadId: thread.id,
+          responseId: mainKey,
+          setAnchorInfo: handleAnchorClick,
+          t,
+          onCopy: handleCopy,
+        }));
       }
     }
-  };
+    return map;
+  }, [prerenderedContents, responses, thread.boardId, thread.id, handleAnchorClick, t, handleCopy]);
 
   // Manage modal handlers
   const openManageModal = async () => {
@@ -1435,13 +1272,13 @@ export function ThreadDetailContent({
                 onAnchorClick={handleAnchorClick}
                 onClose={closeAnchorPreview}
                 closeLabel={labels.close}
-                onCopy={() => showToast(labels.copied)}
+                onCopy={handleCopy}
               />
               <ResponseCard
                 response={response}
                 boardId={thread.boardId}
                 threadId={thread.id}
-                onCopy={() => showToast(labels.copied)}
+                onCopy={handleCopy}
                 onUsernameClick={handleUsernameFilter}
                 onAuthorIdClick={handleAuthorIdFilter}
                 showRawContent={rawContentIds.has(response.id)}
@@ -1455,32 +1292,8 @@ export function ThreadDetailContent({
                     <FontAwesomeIcon icon={faCode} />
                   </RawContentButton>
                 }
-                attachmentRenderer={(src) =>
-                  src.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
-                  src.includes("/storage/") ? (
-                    <ImageAttachment src={src} />
-                  ) : (
-                    <AttachmentLink
-                      href={src}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      📎 Attachment
-                    </AttachmentLink>
-                  )
-                }
-                prerenderedContent={
-                  prerenderedContents.has(response.id)
-                    ? render(prerenderedContents.get(response.id)!, {
-                        boardId: thread.boardId,
-                        threadId: thread.id,
-                        responseId: mainKey,
-                        setAnchorInfo: handleAnchorClick,
-                        t,
-                        onCopy: () => showToast(labels.copied),
-                      })
-                    : undefined
-                }
+                attachmentRenderer={attachmentRenderer}
+                prerenderedContent={renderedContents.get(response.id)}
               />
               {/* Custom HTML slot - shown after seq 0 */}
               {response.seq === 0 && threadCustomHtml && (
@@ -1515,77 +1328,26 @@ export function ThreadDetailContent({
         )}
       </ResponsesSection>
 
-      {/* Preview - shown after responses like the next post */}
-      {!thread.ended && responseOptions.previewMode && (
-        <ResponsePreview
-          content={content}
-          boardId={thread.boardId}
-          threadId={thread.id}
-          lastSeq={currentLastSeq}
-          aaMode={responseOptions.aaMode}
-          username={username}
-          defaultUsername={defaultUsername}
-          tripcodeSalt={tripcodeSalt}
-        />
-      )}
-
-      {thread.ended ? (
-        <EndedNotice>{labels.threadEnded}</EndedNotice>
-      ) : (
-        <ResponseForm onSubmit={handleSubmit}>
-          <ResponseOptionButtons
-            options={responseOptions}
-            onToggle={toggleOption}
-            isOverridden={isGlobalActive}
-            hasThreadOverride={hasThreadOverride}
-            onResetThreadOptions={resetAllThreadOptions}
-            realtimeEnabled={realtimeEnabled}
-          />
-          <FormGroup style={{ marginBottom: "1.6rem" }}>
-            <FormInput
-              type="text"
-              name="username"
-              autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder={labels.usernamePlaceholder}
-              spellCheck={false}
-            />
-          </FormGroup>
-          <FormGroup style={{ marginBottom: "1.6rem" }}>
-            <FormTextarea
-              ref={textareaRef}
-              value={content}
-              onChange={(e) => setContent(applyShortcuts(e.target.value))}
-              onKeyDown={handleKeyDown}
-              placeholder={labels.contentPlaceholder}
-              $aaMode={responseOptions.aaMode}
-              spellCheck={false}
-              required
-            />
-          </FormGroup>
-          {storageEnabled && (
-            <FormGroup style={{ marginBottom: "1.6rem" }}>
-              <ImageUpload
-                onFileSelect={setAttachmentFile}
-                currentFile={attachmentFile}
-                maxSizeLabel={maxSizeLabel}
-                disabled={submitting}
-                labels={{
-                  selectImage: labels.selectImage,
-                  removeImage: labels.removeImage,
-                }}
-              />
-            </FormGroup>
-          )}
-          <SubmitButton
-            type="submit"
-            disabled={submitting || !content.trim()}
-          >
-            {submitting ? labels.submitting : labels.submit}
-          </SubmitButton>
-        </ResponseForm>
-      )}
+      <ResponseFormSection
+        thread={thread}
+        defaultUsername={defaultUsername}
+        tripcodeSalt={tripcodeSalt}
+        responseOptions={responseOptions}
+        toggleOption={toggleOption}
+        isGlobalActive={isGlobalActive}
+        hasThreadOverride={hasThreadOverride}
+        resetAllThreadOptions={resetAllThreadOptions}
+        realtimeEnabled={realtimeEnabled}
+        storageEnabled={storageEnabled}
+        uploadMaxSize={uploadMaxSize}
+        currentLastSeq={currentLastSeq}
+        anonId={anonId}
+        labels={labels}
+        alwaysBottomRef={alwaysBottomRef}
+        isAtBottomRef={isAtBottomRef}
+        pageEndRef={pageEndRef}
+        onSubmitSuccess={fetchNewResponses}
+      />
       <div ref={pageEndRef} />
       </Container>
 
