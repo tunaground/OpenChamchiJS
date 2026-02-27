@@ -1009,9 +1009,20 @@ export function ThreadDetailContent({
       );
 
       if (res.ok) {
-        const data = await res.json();
+        const [data, bansRes] = await Promise.all([
+          res.json(),
+          fetch(`/api/boards/${thread.boardId}/threads/${thread.id}/bans`, {
+            headers: { "X-Thread-Password": btoa(encodeURIComponent(managePassword)) },
+          }),
+        ]);
         // Filter out seq 0 (thread body) - it cannot be modified via this modal
         setAllResponses(data.filter((r: ResponseData & { visible: boolean }) => r.seq !== 0));
+        if (bansRes.ok) {
+          const bans = await bansRes.json();
+          const map = new Map<string, string>();
+          bans.forEach((b: { id: string; authorId: string }) => map.set(b.authorId, b.id));
+          setBannedAuthorIds(map);
+        }
         setManageUnlocked(true);
         setManageUnlockedByAdmin(false); // Password-based unlock
       } else {
@@ -1135,11 +1146,15 @@ export function ThreadDetailContent({
         const response = allResponses.find((r) => r.id === id);
         if (response) authorIdSet.add(response.authorId);
       }
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (managePassword) {
+        headers["X-Thread-Password"] = btoa(encodeURIComponent(managePassword));
+      }
       const res = await fetch(
         `/api/boards/${thread.boardId}/threads/${thread.id}/bans`,
         {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({ authorIds: [...authorIdSet] }),
         }
       );
@@ -1161,11 +1176,15 @@ export function ThreadDetailContent({
   };
 
   const handleSingleBan = async (authorId: string) => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (managePassword) {
+      headers["X-Thread-Password"] = btoa(encodeURIComponent(managePassword));
+    }
     const res = await fetch(
       `/api/boards/${thread.boardId}/threads/${thread.id}/bans`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers,
         body: JSON.stringify({ authorIds: [authorId] }),
       }
     );
@@ -1184,9 +1203,13 @@ export function ThreadDetailContent({
   const handleUnban = async (authorId: string) => {
     const banId = bannedAuthorIds.get(authorId);
     if (!banId) return;
+    const headers: Record<string, string> = {};
+    if (managePassword) {
+      headers["X-Thread-Password"] = btoa(encodeURIComponent(managePassword));
+    }
     const res = await fetch(
       `/api/boards/${thread.boardId}/threads/${thread.id}/bans/${banId}`,
-      { method: "DELETE" }
+      { method: "DELETE", headers }
     );
     if (res.ok) {
       setBannedAuthorIds((prev) => {
@@ -1405,11 +1428,9 @@ export function ThreadDetailContent({
                           <ConfirmButton onClick={handleBulkHide} disabled={bulkDeleting}>
                             {labels.hide} ({selectedResponseIds.size})
                           </ConfirmButton>
-                          {manageUnlockedByAdmin && (
-                            <ConfirmButton onClick={handleBulkBan} disabled={bulkBanning}>
-                              {labels.ban} ({selectedResponseIds.size})
-                            </ConfirmButton>
-                          )}
+                          <ConfirmButton onClick={handleBulkBan} disabled={bulkBanning}>
+                            {labels.ban} ({selectedResponseIds.size})
+                          </ConfirmButton>
                         </>
                       )}
                     </div>
@@ -1430,7 +1451,7 @@ export function ThreadDetailContent({
                             <StatusBadge $visible={response.visible}>
                               {response.visible ? labels.visible : labels.hidden}
                             </StatusBadge>
-                            {manageUnlockedByAdmin && bannedAuthorIds.has(response.authorId) && (
+                            {bannedAuthorIds.has(response.authorId) && (
                               <StatusBadge $visible={false}>
                                 {labels.banned}
                               </StatusBadge>
@@ -1447,16 +1468,14 @@ export function ThreadDetailContent({
                             >
                               {response.visible ? labels.hide : labels.restore}
                             </ActionButton>
-                            {manageUnlockedByAdmin && (
-                              bannedAuthorIds.has(response.authorId) ? (
-                                <ActionButton onClick={() => handleUnban(response.authorId)}>
-                                  {labels.unban}
-                                </ActionButton>
-                              ) : (
-                                <ActionButton onClick={() => handleSingleBan(response.authorId)}>
-                                  {labels.ban}
-                                </ActionButton>
-                              )
+                            {bannedAuthorIds.has(response.authorId) ? (
+                              <ActionButton onClick={() => handleUnban(response.authorId)}>
+                                {labels.unban}
+                              </ActionButton>
+                            ) : (
+                              <ActionButton onClick={() => handleSingleBan(response.authorId)}>
+                                {labels.ban}
+                              </ActionButton>
                             )}
                           </ManageResponseCardActions>
                         </ManageResponseCard>

@@ -21,13 +21,16 @@ export class ThreadBanServiceError extends ServiceError {
 
 export interface ThreadBanService {
   findByThreadId(userId: string, threadId: number): Promise<ThreadBanData[]>;
+  findByThreadIdDirect(threadId: number): Promise<ThreadBanData[]>;
   isBanned(threadId: number, authorId: string): Promise<boolean>;
   createBans(
     adminUserId: string,
     threadId: number,
     authorIds: string[]
   ): Promise<ThreadBanData[]>;
+  createBansDirect(threadId: number, authorIds: string[]): Promise<ThreadBanData[]>;
   deleteBan(adminUserId: string, banId: string): Promise<ThreadBanData>;
+  deleteBanDirect(banId: string): Promise<ThreadBanData>;
 }
 
 interface ThreadBanServiceDeps {
@@ -72,6 +75,11 @@ export function createThreadBanService(
       return threadBanRepository.findByThreadId(threadId);
     },
 
+    async findByThreadIdDirect(threadId: number): Promise<ThreadBanData[]> {
+      await getThread(threadId);
+      return threadBanRepository.findByThreadId(threadId);
+    },
+
     async isBanned(threadId: number, authorId: string): Promise<boolean> {
       return cached(
         () => threadBanRepository.isBanned(threadId, authorId),
@@ -105,6 +113,29 @@ export function createThreadBanService(
       return bans;
     },
 
+    async createBansDirect(
+      threadId: number,
+      authorIds: string[]
+    ): Promise<ThreadBanData[]> {
+      if (authorIds.length === 0) {
+        throw new ThreadBanServiceError(
+          "At least one authorId is required",
+          "BAD_REQUEST"
+        );
+      }
+
+      await getThread(threadId);
+
+      const uniqueAuthorIds = [...new Set(authorIds)];
+      const bans = await threadBanRepository.createMany(
+        uniqueAuthorIds.map((authorId) => ({ threadId, authorId }))
+      );
+
+      invalidateCache(CACHE_TAGS.bans(threadId));
+
+      return bans;
+    },
+
     async deleteBan(
       adminUserId: string,
       banId: string
@@ -116,6 +147,21 @@ export function createThreadBanService(
 
       const thread = await getThread(ban.threadId);
       await checkPermissions(adminUserId, thread.boardId);
+
+      const result = await threadBanRepository.delete(banId);
+
+      invalidateCache(CACHE_TAGS.bans(ban.threadId));
+
+      return result;
+    },
+
+    async deleteBanDirect(banId: string): Promise<ThreadBanData> {
+      const ban = await threadBanRepository.findById(banId);
+      if (!ban) {
+        throw new ThreadBanServiceError("Ban not found", "NOT_FOUND");
+      }
+
+      await getThread(ban.threadId);
 
       const result = await threadBanRepository.delete(banId);
 
