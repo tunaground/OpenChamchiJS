@@ -548,7 +548,7 @@ export function ThreadDetailContent({
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
-  const wasAtBottomRef = useRef(true);
+  const wasAtBottomRef = useRef(false);
   const initialScrollDone = useRef(false);
   const { showToast } = useToast();
 
