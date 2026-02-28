@@ -311,31 +311,108 @@ describe("TOM Prerenderer", () => {
     });
   });
 
+  describe("malformed dice fallback", () => {
+    it("unwraps children when attribute has trailing period (e.g. [dice 1 10.])", () => {
+      // DB에 [dice 1 10.]처럼 저장된 옛 데이터 - "10."은 순수 정수가 아님
+      // 파서에서 dice는 non-self-closing이므로 이후 콘텐츠가 children으로 흡수됨
+      const ast = parse("[dice 1 10.]following text");
+      const result = prerender(ast, fixedRandom);
+
+      // Opening tag becomes text, children are unwrapped and processed normally
+      expect(result.children.length).toBeGreaterThanOrEqual(2);
+      const firstNode = result.children[0] as any;
+      expect(firstNode.type).toBe("text");
+      expect(firstNode.value).toBe("[dice 1 10.]");
+
+      // "following text" should be preserved as a separate node
+      const textNodes = result.children.filter(
+        (n: any) => n.type === "text" && n.value.includes("following text")
+      );
+      expect(textNodes.length).toBe(1);
+    });
+
+    it("preserves valid TOM nodes inside malformed dice children", () => {
+      // 핵심 테스트: 잘못된 dice 뒤의 유효한 TOM 노드가 정상 렌더링되는지
+      const ast = parse("[dice 1 10.]world[bld]bold[/bld]rest");
+      const result = prerender(ast, fixedRandom);
+
+      // Opening tag text + unwrapped children (text "world" + element bld + text "rest")
+      const firstNode = result.children[0] as any;
+      expect(firstNode.type).toBe("text");
+      expect(firstNode.value).toBe("[dice 1 10.]");
+
+      // [bld]bold[/bld] should be a proper element, not flattened to text
+      const bldNode = result.children.find(
+        (n: any) => n.type === "element" && n.name === "bld"
+      ) as any;
+      expect(bldNode).toBeDefined();
+      expect(bldNode.children[0].type).toBe("text");
+      expect(bldNode.children[0].value).toBe("bold");
+    });
+
+    it("unwraps children when dice children are not a single integer", () => {
+      // children이 숫자가 아닌 경우
+      const ast = parse("[dice 1 10]not a number[/dice]");
+      const result = prerender(ast, fixedRandom);
+
+      const firstNode = result.children[0] as any;
+      expect(firstNode.type).toBe("text");
+      expect(firstNode.value).toBe("[dice 1 10]");
+
+      // "not a number" should be unwrapped as a child text node
+      const textNodes = result.children.filter(
+        (n: any) => n.type === "text" && n.value.includes("not a number")
+      );
+      expect(textNodes.length).toBe(1);
+    });
+
+    it("falls back to opening tag text when dice has no children (empty result)", () => {
+      const ast = parse("[dice 1 6][/dice]");
+      const result = prerender(ast, fixedRandom);
+
+      const firstNode = result.children[0] as any;
+      expect(firstNode.type).toBe("text");
+      expect(firstNode.value).toBe("[dice 1 6]");
+    });
+
+    it("still reads valid stored dice result from DB format", () => {
+      const ast = parse("[dice 1 6]3[/dice]");
+      const result = prerender(ast, fixedRandom);
+
+      const dice = result.children[0] as TomDiceResult;
+      expect(isTomDiceResult(dice)).toBe(true);
+      expect(dice.min).toBe(1);
+      expect(dice.max).toBe(6);
+      expect(dice.result).toBe(3);
+    });
+  });
+
   describe("error handling", () => {
-    it("falls back to text on invalid calc syntax", () => {
+    it("falls back to opening tag text on invalid calc syntax", () => {
       const ast = parse("[calc invalid][/calc]");
       const result = prerender(ast, fixedRandom);
 
-      expect(result.children).toHaveLength(1);
-      expect((result.children[0] as any).type).toBe("text");
-      expect((result.children[0] as any).value).toContain("[calc");
+      // Opening tag becomes text, children (if any) are unwrapped
+      const firstNode = result.children[0] as any;
+      expect(firstNode.type).toBe("text");
+      expect(firstNode.value).toContain("[calc");
     });
 
-    it("falls back to text on unsupported operator", () => {
+    it("falls back to opening tag text on unsupported operator", () => {
       const ast = parse("[calc (^ 2 3)][/calc]");
       const result = prerender(ast, fixedRandom);
 
-      expect(result.children).toHaveLength(1);
-      expect((result.children[0] as any).type).toBe("text");
-      expect((result.children[0] as any).value).toContain("[calc");
+      const firstNode = result.children[0] as any;
+      expect(firstNode.type).toBe("text");
+      expect(firstNode.value).toContain("[calc");
     });
 
-    it("falls back to text on nested invalid dice in calcn (full flow)", () => {
+    it("falls back to opening tag text on nested invalid dice in calcn (full flow)", () => {
       const result = writeAndRead("[calcn (1+[dice 1])][/calcn]");
 
-      expect(result.children).toHaveLength(1);
-      expect((result.children[0] as any).type).toBe("text");
-      expect((result.children[0] as any).value).toContain("[calcn");
+      const firstNode = result.children[0] as any;
+      expect(firstNode.type).toBe("text");
+      expect(firstNode.value).toContain("[calcn");
     });
   });
 });

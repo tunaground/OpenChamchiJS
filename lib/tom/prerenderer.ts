@@ -188,32 +188,34 @@ function processDice(node: TomElement, random: RandomFn): TomDiceResult {
   const minNode = node.attributes[0];
   const maxNode = node.attributes[1];
 
-  const min = extractNumber(minNode, random);
-  const max = extractNumber(maxNode, random);
-
-  if (!Number.isInteger(min) || !Number.isInteger(max)) {
-    throw new Error("dice min/max must be integers");
+  // Validate attributes are text nodes with pure integer values
+  // Rejects malformed data like "10." which parseFloat would accept as 10
+  if (
+    !isTomText(minNode) || !isTomText(maxNode) ||
+    !/^-?\d+$/.test(minNode.value.trim()) || !/^-?\d+$/.test(maxNode.value.trim())
+  ) {
+    throw new Error("dice min/max must be pure integer text");
   }
+
+  const min = parseInt(minNode.value.trim(), 10);
+  const max = parseInt(maxNode.value.trim(), 10);
 
   if (min > max) {
     throw new Error(`dice min (${min}) cannot be greater than max (${max})`);
   }
 
   // Read result from children (DB stores [dice min max]result[/dice])
-  let result: number;
-  if (node.children.length > 0 && isTomText(node.children[0])) {
-    const resultText = node.children[0].value.trim();
-    const parsedResult = parseInt(resultText, 10);
-    if (!isNaN(parsedResult)) {
-      result = parsedResult;
-    } else {
-      // Fallback to random if result is not a valid number
-      result = random(min, max);
-    }
-  } else {
-    // Fallback to random if no children
-    result = random(min, max);
+  // Strict validation - no random fallback for malformed data
+  if (node.children.length !== 1 || !isTomText(node.children[0])) {
+    throw new Error("dice must have exactly one text child with the stored result");
   }
+
+  const resultText = node.children[0].value.trim();
+  if (!/^-?\d+$/.test(resultText)) {
+    throw new Error(`dice result is not a valid integer: ${resultText}`);
+  }
+
+  const result = parseInt(resultText, 10);
 
   return {
     type: "element",
@@ -350,87 +352,89 @@ function stringifyNestedOriginal(node: TomNested): string {
   return parts.join(" ");
 }
 
-// Convert element back to text for fallback
-function elementToText(node: TomElement): TomText {
-  function nodeToString(n: TomNode): string {
+// Convert element's opening tag to text for fallback (does NOT include children)
+function openingTagToText(node: TomElement): TomText {
+  function attrToString(n: TomNode): string {
     if (isTomText(n)) {
       return n.value;
     }
     if (isTomNested(n)) {
-      return "(" + n.children.map(nodeToString).join(" ") + ")";
+      return "(" + n.children.map(attrToString).join(" ") + ")";
     }
     if (isTomElement(n)) {
-      const attrs = n.attributes.map(nodeToString).join(" ");
-      const children = n.children.map(nodeToString).join("");
-      const opening = attrs ? `[${n.name} ${attrs}]` : `[${n.name}]`;
-      if (n.children.length === 0 && ["dice", "hr", "youtube"].includes(n.name)) {
-        return opening;
-      }
-      return `${opening}${children}[/${n.name}]`;
+      const attrs = n.attributes.map(attrToString).join(" ");
+      return attrs ? `[${n.name} ${attrs}]` : `[${n.name}]`;
     }
     return "";
   }
 
+  const attrs = node.attributes.map(attrToString).join(" ");
+  const opening = attrs ? `[${node.name} ${attrs}]` : `[${node.name}]`;
+
   return {
     type: "text",
-    value: nodeToString(node),
+    value: opening,
   };
 }
 
 // Main prerender function (read-time)
 export function prerender(root: TomRoot, random: RandomFn = defaultRandom): PrerenderedRoot {
-  function processNode(node: TomNode): PrerenderedNode {
+  function processNode(node: TomNode): PrerenderedNode[] {
     if (isTomText(node)) {
-      return node;
+      return [node];
     }
 
     if (isTomNested(node)) {
-      return {
+      return [{
         type: "nested",
-        children: node.children.map(processNode),
-      };
+        children: processNodes(node.children),
+      }];
     }
 
     if (isTomElement(node)) {
       // Process special elements with error fallback
       if (node.name === "dice") {
         try {
-          return processDice(node, random);
+          return [processDice(node, random)];
         } catch {
-          return elementToText(node);
+          return [openingTagToText(node), ...processNodes(node.children)];
         }
       }
 
       if (node.name === "calc") {
         try {
-          return processCalc(node, random);
+          return [processCalc(node, random)];
         } catch {
-          return elementToText(node);
+          return [openingTagToText(node), ...processNodes(node.children)];
         }
       }
 
       if (node.name === "calcn") {
         try {
-          return processCalcn(node, random);
+          return [processCalcn(node, random)];
         } catch {
-          return elementToText(node);
+          return [openingTagToText(node), ...processNodes(node.children)];
         }
       }
 
       // Regular element - process children recursively
-      return {
+      return [{
         type: "element",
         name: node.name,
-        attributes: node.attributes.map(processNode),
-        children: node.children.map(processNode),
-      };
+        attributes: processNodes(node.attributes),
+        children: processNodes(node.children),
+      }];
     }
 
-    return node;
+    return [node];
+  }
+
+  function processNodes(nodes: TomNode[]): PrerenderedNode[] {
+    return nodes.flatMap(processNode);
   }
 
   return {
     type: "root",
-    children: root.children.map(processNode),
+    children: processNodes(root.children),
   };
 }
