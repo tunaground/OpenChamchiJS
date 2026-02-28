@@ -127,8 +127,8 @@ describe("TOM Renderer", () => {
 
   describe("dice", () => {
     it("renders dice result", () => {
-      const { container } = renderTom("[dice 1 6]");
-      // Result should be 5 (from fixed random)
+      // Use DB format: [dice min max]result[/dice]
+      const { container } = renderTom("[dice 1 6]5[/dice]");
       expect(container.textContent).toContain("5");
       // ::before content is CSS, not in textContent - check $exp prop via HTML
       const calcSpan = container.querySelector("span");

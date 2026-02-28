@@ -48,14 +48,14 @@ const defaultRandom: RandomFn = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-// Extract numeric value from a text node
+// Extract numeric value from a text node (dice attributes must be pure integers)
 function extractNumber(node: TomNode): number {
   if (isTomText(node)) {
-    const num = parseFloat(node.value);
-    if (isNaN(num)) {
-      throw new Error(`Invalid number: ${node.value}`);
+    const trimmed = node.value.trim();
+    if (!/^-?\d+$/.test(trimmed)) {
+      throw new Error(`Invalid integer: ${node.value}`);
     }
-    return num;
+    return parseInt(trimmed, 10);
   }
   throw new Error("Expected text node for number");
 }
