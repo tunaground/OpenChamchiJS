@@ -47,15 +47,22 @@ const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
   padding: 1.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 4px;
-  font-size: ${(props) => (props.$aaMode ? "1.6rem" : "1.4rem")};
+  font-size: 1.5rem;
   background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : props.theme.background)};
   color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
   resize: none;
   font-family: ${(props) => (props.$aaMode ? '"Saitamaar", sans-serif' : "inherit")};
-  line-height: ${(props) => (props.$aaMode ? "1.8rem" : "1.5")};
+  line-height: ${(props) => (props.$aaMode ? "1.6rem" : "1.5")};
   white-space: ${(props) => (props.$aaMode ? "pre" : "pre-wrap")};
   overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
   overflow-y: hidden;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    ${(props) => props.$aaMode && `
+      font-size: 1.2rem;
+      line-height: 1.4rem;
+    `}
+  }
 
   &:focus {
     outline: none;
