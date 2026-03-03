@@ -122,7 +122,6 @@ const CustomHtmlContainer = styled.div`
   border-radius: 8px;
   padding: 1.6rem;
   margin-bottom: 2.4rem;
-  overflow: hidden;
 `;
 
 const ActionsBar = styled.div`

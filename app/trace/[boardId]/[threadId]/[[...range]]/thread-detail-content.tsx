@@ -341,7 +341,6 @@ const CustomHtmlContainer = styled.div`
   border-radius: 8px;
   padding: 1.6rem;
   margin-top: 1.6rem;
-  overflow: hidden;
 `;
 
 const LoadMoreSection = styled.div`
