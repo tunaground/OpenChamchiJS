@@ -4,7 +4,7 @@ import { useMemo, useState, useEffect } from "react";
 import styled from "styled-components";
 import { useTranslations } from "next-intl";
 import bcrypt from "bcryptjs";
-import { preparse, prerender, render } from "@/lib/tom";
+import { preparse, preprocess, stringifyPreprocessed, parse, prerender, render } from "@/lib/tom";
 import { DEFAULT_TRIPCODE_SALT } from "@/lib/utils/tripcode";
 import { AnchorPreview, useAnchorStack } from "./AnchorPreview";
 import { ResponseCard } from "./ResponseCard";
@@ -99,7 +99,10 @@ export function TomPreview({
       // Apply AA mode: wrap content with [aa][/aa] tags
       const processedContent = aaMode ? `[aa]${content}[/aa]` : content;
       const preparsed = preparse(processedContent);
-      const prerendered = prerender(preparsed);
+      const preprocessed = preprocess(preparsed);
+      const stringified = stringifyPreprocessed(preprocessed);
+      const parsed = parse(stringified);
+      const prerendered = prerender(parsed);
       return render(prerendered, {
         boardId,
         threadId,
