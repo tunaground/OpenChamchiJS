@@ -879,10 +879,10 @@ export function ThreadDetailContent({
   // Scroll to bottom when responses change, only if user was at bottom before the update
   useEffect(() => {
     if (!pageEndRef.current) return;
-    if ((responseOptions.alwaysBottom || responseOptions.chatMode) && wasAtBottomRef.current) {
+    if (responseOptions.alwaysBottom && wasAtBottomRef.current) {
       pageEndRef.current.scrollIntoView({ behavior: "instant" });
     }
-  }, [responseOptions.alwaysBottom, responseOptions.chatMode, responses]);
+  }, [responseOptions.alwaysBottom, responses]);
 
   // Prerender TOM content for all responses
   const prerenderedContents = useMemo(() => {
