@@ -24,6 +24,7 @@ import {
   createThrottledNotifier,
 } from "@/lib/utils/notification";
 import { getAnonId } from "@/lib/utils/anon-id";
+import CustomHtml from "@/components/CustomHtml";
 
 const Container = styled.div`
   padding: 1.6rem;
@@ -333,14 +334,6 @@ const UnlockInput = styled(ModalInput)`
 
 const UnlockButton = styled(ConfirmButton)`
   background: ${(props) => props.theme.buttonPrimary};
-`;
-
-const CustomHtmlContainer = styled.div`
-  background: ${(props) => props.theme.responseCard};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.6rem;
-  margin-top: 1.6rem;
 `;
 
 const LoadMoreSection = styled.div`
@@ -1319,9 +1312,7 @@ export function ThreadDetailContent({
               />
               {/* Custom HTML slot - shown after seq 0 */}
               {response.seq === 0 && threadCustomHtml && (
-                <CustomHtmlContainer
-                  dangerouslySetInnerHTML={{ __html: threadCustomHtml }}
-                />
+                <CustomHtml html={threadCustomHtml} style={{ marginTop: '1.6rem' }} />
               )}
               {/* Load More button - shown after seq 0 */}
               {response.seq === 0 && hasMoreToLoad && (

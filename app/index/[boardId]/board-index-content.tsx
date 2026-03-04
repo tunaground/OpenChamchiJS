@@ -11,6 +11,7 @@ import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { usePresence } from "@/lib/hooks/usePresence";
 import { CHANNELS } from "@/lib/realtime";
 import { formatDateTime } from "@/lib/utils/date-formatter";
+import CustomHtml from "@/components/CustomHtml";
 
 const Container = styled.div`
   padding: ${(props) => props.theme.containerPadding};
@@ -114,14 +115,6 @@ const NoticeDate = styled.span`
   color: ${(props) => props.theme.textSecondary};
   font-size: 1.2rem;
   flex-shrink: 0;
-`;
-
-const CustomHtmlContainer = styled.div`
-  background: ${(props) => props.theme.responseCard};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.6rem;
-  margin-bottom: 2.4rem;
 `;
 
 const ActionsBar = styled.div`
@@ -422,9 +415,7 @@ export function BoardIndexContent({
       )}
 
       {indexCustomHtml && (
-        <CustomHtmlContainer
-          dangerouslySetInnerHTML={{ __html: indexCustomHtml }}
-        />
+        <CustomHtml html={indexCustomHtml} style={{ marginBottom: '2.4rem' }} />
       )}
 
       <ActionsBar>
