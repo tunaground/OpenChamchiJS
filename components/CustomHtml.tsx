@@ -8,8 +8,6 @@ const Container = styled.div`
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 8px;
   padding: 1.6rem;
-  overflow-x: auto;
-
   & > ins,
   & > iframe {
     max-width: 100% !important;
