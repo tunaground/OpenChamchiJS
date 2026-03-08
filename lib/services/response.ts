@@ -158,7 +158,6 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
             });
           case "single": {
             // Always include seq 0 (thread body) plus the requested seq
-            // Note: single mode doesn't apply filter (always shows specific seq)
             const responses: ResponseData[] = [];
             const [firstResponse, singleResponse] = await Promise.all([
               responseRepository.findByThreadIdAndSeq(threadId, 0),
@@ -166,10 +165,10 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
                 ? Promise.resolve(null)
                 : responseRepository.findByThreadIdAndSeq(threadId, range.seq),
             ]);
-            if (firstResponse && !firstResponse.deleted) {
+            if (firstResponse && !firstResponse.deleted && firstResponse.visible) {
               responses.push(firstResponse);
             }
-            if (singleResponse && !singleResponse.deleted) {
+            if (singleResponse && !singleResponse.deleted && singleResponse.visible) {
               responses.push(singleResponse);
             }
             return responses;
@@ -186,7 +185,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
                 }),
               ]);
               const responses: ResponseData[] = [];
-              if (firstResponse && !firstResponse.deleted) {
+              if (firstResponse && !firstResponse.deleted && firstResponse.visible) {
                 responses.push(firstResponse);
               }
               responses.push(...rangeResponses);
