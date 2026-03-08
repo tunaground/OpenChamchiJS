@@ -880,9 +880,15 @@ export function ThreadDetailContent({
   const prerenderedContents = useMemo(() => {
     const map = new Map<string, PrerenderedRoot>();
     for (const response of responses) {
-      const parsed = parse(response.content);
-      const prerendered = prerender(parsed);
-      map.set(response.id, prerendered);
+      try {
+        const parsed = parse(response.content);
+        const prerendered = prerender(parsed);
+        map.set(response.id, prerendered);
+      } catch {
+        // Fallback: treat content as plain text if parsing fails
+        const fallback = parse(response.content.replace(/[[\]]/g, ""));
+        map.set(response.id, prerender(fallback));
+      }
     }
     return map;
   }, [responses]);

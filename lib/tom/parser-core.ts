@@ -89,7 +89,7 @@ export interface ParserConfig {
 // Security limits to prevent DoS attacks
 export const PARSER_LIMITS = {
   MAX_INPUT_LENGTH: 100000, // 100KB max input
-  MAX_STACK_DEPTH: 50, // Max nesting depth
+  MAX_STACK_DEPTH: 200, // Max nesting depth
   MAX_TOKENS: 50000, // Max number of tokens
 } as const;
 
@@ -272,9 +272,16 @@ export function parseWithConfig(input: string, config: ParserConfig): TomRoot {
 
           // Security: Check stack depth before pushing
           if (stack.length + 2 > PARSER_LIMITS.MAX_STACK_DEPTH) {
-            throw new ParserLimitError(
-              `Nesting too deep: ${stack.length} (max: ${PARSER_LIMITS.MAX_STACK_DEPTH})`
-            );
+            // Too deep - treat as plain text instead of throwing
+            current().nodes.pop(); // Remove the element we just pushed
+            appendText(current().nodes, "[" + token.value);
+            i++;
+            // Consume the following ] if present
+            if (i < tokens.length && tokens[i].type === "close_bracket") {
+              appendText(current().nodes, "]");
+              i++;
+            }
+            continue;
           }
 
           // Push children frame first (will be used after attributes)
@@ -353,9 +360,10 @@ export function parseWithConfig(input: string, config: ParserConfig): TomRoot {
         if (current().context === "attribute" || current().context === "nested") {
           // Security: Check stack depth before pushing
           if (stack.length + 1 > PARSER_LIMITS.MAX_STACK_DEPTH) {
-            throw new ParserLimitError(
-              `Nesting too deep: ${stack.length} (max: ${PARSER_LIMITS.MAX_STACK_DEPTH})`
-            );
+            // Too deep - treat as plain text instead of throwing
+            appendText(current().nodes, "(");
+            i++;
+            break;
           }
           const nested: TomNested = { type: "nested", children: [] };
           current().nodes.push(nested);
