@@ -42,6 +42,7 @@ export function AnchorPreview({
         <S.Loading>{t("response.not_found")}</S.Loading>
       ) : (
         anchorResponses
+          .filter((r) => info.start === 0 || r.seq !== 0)
           .map((anchorResponse) => {
             const nestedKey = `anchor:${sourceKey}:${anchorResponse.id}`;
             const prerendered = prerenderedContents.get(anchorResponse.id);
