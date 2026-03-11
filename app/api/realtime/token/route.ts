@@ -4,6 +4,7 @@ import {
   isServerRealtimeEnabled,
 } from "@/lib/realtime/config.server";
 import { RealtimeError } from "@/lib/realtime/errors";
+import { getClientIp } from "@/lib/api/foreign-ip-check";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,8 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Extract client IP for presence deduplication
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    const clientIp = forwardedFor?.split(",")[0]?.trim() || "unknown";
+    const clientIp = getClientIp(request);
 
     const provider = await getServerRealtimeProvider();
 
