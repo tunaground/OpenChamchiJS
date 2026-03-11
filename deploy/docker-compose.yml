@@ -1,0 +1,10 @@
+services:
+  app:
+    image: ghcr.io/tunaground/openchamchijs:latest
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./GeoLite2-Country.mmdb:/app/lib/GeoLite2-Country.mmdb:ro
+    restart: unless-stopped
