@@ -8,8 +8,6 @@ RUN npm ci
 # Stage 2: Build application
 FROM node:22-alpine AS builder
 WORKDIR /app
-ARG MAXMIND_LICENSE_KEY
-ENV MAXMIND_LICENSE_KEY=$MAXMIND_LICENSE_KEY
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
@@ -24,8 +22,8 @@ RUN addgroup --system --gid 1001 nodejs && \
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-# Copy mmdb file if it exists (foreign IP blocking)
-COPY --from=builder /app/lib/GeoLite2-Country.mmdb* ./lib/
+# Mount mmdb file via volume: -v /path/to/GeoLite2-Country.mmdb:/app/lib/GeoLite2-Country.mmdb:ro
+RUN mkdir -p ./lib
 
 USER nextjs
 EXPOSE 3000
