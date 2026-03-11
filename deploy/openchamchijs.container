@@ -1,0 +1,13 @@
+[Unit]
+Description=OpenChamchiJS
+After=network-online.target
+
+[Container]
+Image=ghcr.io/tunaground/openchamchijs:latest
+PublishPort=3000:3000
+EnvironmentFile=%h/.config/openchamchijs/.env
+Volume=%h/data/GeoLite2-Country.mmdb:/app/lib/GeoLite2-Country.mmdb:ro
+AutoUpdate=registry
+
+[Install]
+WantedBy=default.target
