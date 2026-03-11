@@ -17,6 +17,10 @@ export interface GlobalSettingsData {
   gaTrackingId: string | null;
   realtimeProvider: string | null;
   realtimeApiKey: string | null;
+  realtimeWsUrl: string | null;
+  realtimeWsApiUrl: string | null;
+  realtimeWsApiKey: string | null;
+  realtimeWsTokenSecret: string | null;
   storageProvider: string | null;
   storageUrl: string | null;
   storageSecret: string | null;
@@ -37,6 +41,10 @@ export interface UpdateGlobalSettingsInput {
   gaTrackingId?: string | null;
   realtimeProvider?: string | null;
   realtimeApiKey?: string | null;
+  realtimeWsUrl?: string | null;
+  realtimeWsApiUrl?: string | null;
+  realtimeWsApiKey?: string | null;
+  realtimeWsTokenSecret?: string | null;
   storageProvider?: string | null;
   storageUrl?: string | null;
   storageSecret?: string | null;

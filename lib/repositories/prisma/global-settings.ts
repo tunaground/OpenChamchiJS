@@ -32,6 +32,10 @@ function toGlobalSettingsData(settings: {
   gaTrackingId: string | null;
   realtimeProvider: string | null;
   realtimeApiKey: string | null;
+  realtimeWsUrl: string | null;
+  realtimeWsApiUrl: string | null;
+  realtimeWsApiKey: string | null;
+  realtimeWsTokenSecret: string | null;
   storageProvider: string | null;
   storageUrl: string | null;
   storageSecret: string | null;
@@ -82,6 +86,10 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       gaTrackingId?: string | null;
       realtimeProvider?: string | null;
       realtimeApiKey?: string | null;
+      realtimeWsUrl?: string | null;
+      realtimeWsApiUrl?: string | null;
+      realtimeWsApiKey?: string | null;
+      realtimeWsTokenSecret?: string | null;
       storageProvider?: string | null;
       storageUrl?: string | null;
       storageSecret?: string | null;
@@ -120,6 +128,18 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.realtimeApiKey !== undefined) {
       updateData.realtimeApiKey = data.realtimeApiKey;
+    }
+    if (data.realtimeWsUrl !== undefined) {
+      updateData.realtimeWsUrl = data.realtimeWsUrl;
+    }
+    if (data.realtimeWsApiUrl !== undefined) {
+      updateData.realtimeWsApiUrl = data.realtimeWsApiUrl;
+    }
+    if (data.realtimeWsApiKey !== undefined) {
+      updateData.realtimeWsApiKey = data.realtimeWsApiKey;
+    }
+    if (data.realtimeWsTokenSecret !== undefined) {
+      updateData.realtimeWsTokenSecret = data.realtimeWsTokenSecret;
     }
     if (data.storageProvider !== undefined) {
       updateData.storageProvider = data.storageProvider;

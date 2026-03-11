@@ -29,6 +29,13 @@ export async function GET(request: NextRequest) {
         const tokenRequest = await createAblyTokenRequest(clientIp);
         return NextResponse.json(tokenRequest);
       }
+      case "ws": {
+        const { createWsToken } = await import(
+          "@/lib/realtime/adapters/ws/token"
+        );
+        const tokenData = await createWsToken(clientIp);
+        return NextResponse.json(tokenData);
+      }
       case "pusher": {
         return NextResponse.json(
           { error: "Pusher token generation not implemented" },

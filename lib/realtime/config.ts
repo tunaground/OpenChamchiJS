@@ -5,12 +5,22 @@
  * Server-side functions are in config.server.ts
  */
 
-export type RealtimeProvider = "ably" | "pusher" | "socketio";
+export type RealtimeProvider = "ably" | "pusher" | "socketio" | "ws";
 
 declare global {
   interface Window {
-    __RUNTIME_CONFIG__?: { realtimeProvider?: string };
+    __RUNTIME_CONFIG__?: { realtimeProvider?: string; wsServerUrl?: string };
   }
+}
+
+/**
+ * Get the WebSocket server URL for the ws provider (client-side)
+ */
+export function getClientWsServerUrl(): string | null {
+  if (typeof window !== "undefined" && window.__RUNTIME_CONFIG__?.wsServerUrl) {
+    return window.__RUNTIME_CONFIG__.wsServerUrl;
+  }
+  return null;
 }
 
 /**

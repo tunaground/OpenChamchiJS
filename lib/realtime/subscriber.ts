@@ -30,6 +30,16 @@ export function getSubscriber(): RealtimeSubscriber {
       instance = new AblySubscriber();
       break;
     }
+    case "ws": {
+      const { getClientWsServerUrl } = require("./config");
+      const wsUrl = getClientWsServerUrl();
+      if (!wsUrl) {
+        throw new Error("WebSocket server URL is not configured");
+      }
+      const { WsSubscriber } = require("./adapters/ws/subscriber");
+      instance = new WsSubscriber(wsUrl);
+      break;
+    }
     case "pusher": {
       throw new Error("Pusher subscriber not implemented");
     }

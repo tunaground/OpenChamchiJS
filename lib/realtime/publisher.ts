@@ -30,6 +30,11 @@ export async function getPublisher(): Promise<RealtimePublisher> {
       instance = new AblyPublisher();
       break;
     }
+    case "ws": {
+      const { WsPublisher } = await import("./adapters/ws/publisher");
+      instance = new WsPublisher();
+      break;
+    }
     case "pusher": {
       throw new RealtimeError("Pusher adapter not implemented", "NOT_CONFIGURED");
     }

@@ -42,6 +42,7 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html:
           `window.__RUNTIME_CONFIG__=${JSON.stringify({
             realtimeProvider: settings.realtimeProvider || null,
+            wsServerUrl: settings.realtimeWsUrl || null,
           })}`
         }} />
         <StyledComponentsRegistry>

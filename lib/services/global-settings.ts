@@ -39,7 +39,11 @@ export function createGlobalSettingsService(
       // Reset singletons if provider settings changed
       const realtimeChanged =
         data.realtimeProvider !== undefined ||
-        data.realtimeApiKey !== undefined;
+        data.realtimeApiKey !== undefined ||
+        data.realtimeWsUrl !== undefined ||
+        data.realtimeWsApiUrl !== undefined ||
+        data.realtimeWsApiKey !== undefined ||
+        data.realtimeWsTokenSecret !== undefined;
       const storageChanged =
         data.storageProvider !== undefined ||
         data.storageUrl !== undefined ||

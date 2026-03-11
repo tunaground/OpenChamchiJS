@@ -1,0 +1,13 @@
+{
+  "name": "openchamchijs-ws-server",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "WebSocket server for OpenChamchiJS realtime features",
+  "main": "server.mjs",
+  "scripts": {
+    "start": "node server.mjs"
+  },
+  "dependencies": {
+    "ws": "^8.18.0"
+  }
+}

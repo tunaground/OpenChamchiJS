@@ -406,6 +406,10 @@ interface AdminSettingsContentProps {
     gaTrackingId: string | null;
     realtimeProvider: string | null;
     realtimeApiKey: string | null;
+    realtimeWsUrl: string | null;
+    realtimeWsApiUrl: string | null;
+    realtimeWsApiKey: string | null;
+    realtimeWsTokenSecret: string | null;
     storageProvider: string | null;
     storageUrl: string | null;
     storageSecret: string | null;
@@ -436,6 +440,10 @@ export function AdminSettingsContent({
   const [gaTrackingId, setGaTrackingId] = useState(initialSettings.gaTrackingId ?? "");
   const [realtimeProvider, setRealtimeProvider] = useState(initialSettings.realtimeProvider ?? "");
   const [realtimeApiKey, setRealtimeApiKey] = useState(initialSettings.realtimeApiKey ?? "");
+  const [realtimeWsUrl, setRealtimeWsUrl] = useState(initialSettings.realtimeWsUrl ?? "");
+  const [realtimeWsApiUrl, setRealtimeWsApiUrl] = useState(initialSettings.realtimeWsApiUrl ?? "");
+  const [realtimeWsApiKey, setRealtimeWsApiKey] = useState(initialSettings.realtimeWsApiKey ?? "");
+  const [realtimeWsTokenSecret, setRealtimeWsTokenSecret] = useState(initialSettings.realtimeWsTokenSecret ?? "");
   const [storageProvider, setStorageProvider] = useState(initialSettings.storageProvider ?? "");
   const [storageUrl, setStorageUrl] = useState(initialSettings.storageUrl ?? "");
   const [storageSecret, setStorageSecret] = useState(initialSettings.storageSecret ?? "");
@@ -483,6 +491,10 @@ export function AdminSettingsContent({
           gaTrackingId: gaTrackingId || null,
           realtimeProvider: realtimeProvider || null,
           realtimeApiKey: realtimeApiKey || null,
+          realtimeWsUrl: realtimeWsUrl || null,
+          realtimeWsApiUrl: realtimeWsApiUrl || null,
+          realtimeWsApiKey: realtimeWsApiKey || null,
+          realtimeWsTokenSecret: realtimeWsTokenSecret || null,
           storageProvider: storageProvider || null,
           storageUrl: storageUrl || null,
           storageSecret: storageSecret || null,
@@ -668,11 +680,12 @@ export function AdminSettingsContent({
           >
             <option value="">None</option>
             <option value="ably">Ably</option>
+            <option value="ws">WebSocket Server</option>
           </Select>
           <Description>Select a realtime provider to enable chat mode.</Description>
         </FormGroup>
 
-        {realtimeProvider && (
+        {realtimeProvider === "ably" && (
           <FormGroup>
             <Label htmlFor="realtimeApiKey">API Key</Label>
             <TitleInput
@@ -686,6 +699,66 @@ export function AdminSettingsContent({
             />
             <Description>Server-side API key for the realtime provider.</Description>
           </FormGroup>
+        )}
+
+        {realtimeProvider === "ws" && (
+          <>
+            <FormGroup>
+              <Label htmlFor="realtimeWsUrl">WebSocket URL (Client)</Label>
+              <TitleInput
+                id="realtimeWsUrl"
+                type="text"
+                value={realtimeWsUrl}
+                onChange={(e) => setRealtimeWsUrl(e.target.value)}
+                placeholder="wss://ws.example.com"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>Public WebSocket URL that browsers connect to.</Description>
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="realtimeWsApiUrl">API URL (Server)</Label>
+              <TitleInput
+                id="realtimeWsApiUrl"
+                type="text"
+                value={realtimeWsApiUrl}
+                onChange={(e) => setRealtimeWsApiUrl(e.target.value)}
+                placeholder="http://localhost:4000"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>Internal URL for server-side publishing (e.g., http://ws-server:4000).</Description>
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="realtimeWsApiKey">API Key</Label>
+              <TitleInput
+                id="realtimeWsApiKey"
+                type="password"
+                value={realtimeWsApiKey}
+                onChange={(e) => setRealtimeWsApiKey(e.target.value)}
+                placeholder="Enter WS API key"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>API key for authenticating publish requests to the WS server.</Description>
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="realtimeWsTokenSecret">Token Secret</Label>
+              <SaltInput
+                id="realtimeWsTokenSecret"
+                type="password"
+                value={realtimeWsTokenSecret}
+                onChange={(e) => setRealtimeWsTokenSecret(e.target.value)}
+                placeholder="Enter token signing secret"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>Shared secret for signing client authentication tokens (must match WS_TOKEN_SECRET on the WS server).</Description>
+            </FormGroup>
+          </>
         )}
 
         <Divider />

@@ -120,8 +120,12 @@ model GlobalSettings {
   threadCustomHtml String?  @db.Text // Custom HTML for thread pages (above load more)
   tripcodeSalt     String?  // bcrypt salt for tripcode generation
   gaTrackingId     String?  // Google Analytics Measurement ID (G-XXXXXXXXXX)
-  realtimeProvider  String?   // "ably" | null
-  realtimeApiKey    String?   // Ably API key (server-only)
+  realtimeProvider      String?   // "ably" | "ws" | null
+  realtimeApiKey        String?   // Ably API key (server-only)
+  realtimeWsUrl         String?   // WS server public URL (for client WebSocket connections)
+  realtimeWsApiUrl      String?   // WS server API URL (for server-side publishing)
+  realtimeWsApiKey      String?   // WS server API key (for publishing auth)
+  realtimeWsTokenSecret String?   // WS token signing secret
   storageProvider   String?   // "supabase" | null
   storageUrl        String?   // Supabase URL
   storageSecret     String?   // Supabase service key
