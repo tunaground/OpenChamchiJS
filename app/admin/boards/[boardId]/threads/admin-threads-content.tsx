@@ -817,7 +817,7 @@ export function AdminThreadsContent({
         <Header>
           <Title>{labels.title}</Title>
           <Breadcrumb>
-            <Link href="/admin/boards">Boards</Link> / {boardName}
+            <Link prefetch={false} href="/admin/boards">Boards</Link> / {boardName}
           </Breadcrumb>
         </Header>
 
@@ -844,7 +844,7 @@ export function AdminThreadsContent({
               <ThreadCard key={thread.id} $deleted={thread.deleted}>
                 <CardTitle>
                   <span>#{thread.id} </span>
-                  <TitleLink href={`/trace/${boardId}/${thread.id}`}>
+                  <TitleLink prefetch={false} href={`/trace/${boardId}/${thread.id}`}>
                     {thread.title}
                   </TitleLink>
                   <CardBadges>

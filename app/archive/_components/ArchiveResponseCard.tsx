@@ -183,7 +183,7 @@ export const ArchiveResponseCard = forwardRef<HTMLDivElement, ArchiveResponseCar
       <Card ref={ref} $highlighted={highlighted} id={`response-${response.sequence}`}>
         <Header $highlighted={highlighted}>
           <ResponseSeq>
-            <Link href={`/archive/${boardId}/${threadId}/${response.sequence}`}>
+            <Link prefetch={false} href={`/archive/${boardId}/${threadId}/${response.sequence}`}>
               #{response.sequence}
             </Link>
           </ResponseSeq>

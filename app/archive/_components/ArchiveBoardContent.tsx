@@ -358,7 +358,7 @@ export function ArchiveBoardContent({ boardId }: ArchiveBoardContentProps) {
               <ThreadCard key={thread.threadId}>
                 <ThreadTitle>
                   <ThreadId>#{thread.threadId}</ThreadId>
-                  <Link href={`/archive/${boardId}/${thread.threadId}`}>
+                  <Link prefetch={false} href={`/archive/${boardId}/${thread.threadId}`}>
                     {thread.title}
                   </Link>
                   <ThreadSize> ({thread.size})</ThreadSize>

@@ -32,7 +32,7 @@ interface SettingsButtonProps {
 
 export function SettingsButton({ active }: SettingsButtonProps) {
   return (
-    <Button href="/settings" aria-label="Settings" $active={active}>
+    <Button prefetch={false} href="/settings" aria-label="Settings" $active={active}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

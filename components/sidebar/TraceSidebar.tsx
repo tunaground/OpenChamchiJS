@@ -87,6 +87,7 @@ function NavLink({ href, $active, $disabled, children }: NavLinkProps) {
 
   return (
     <StyledNavLink
+      prefetch={false}
       href={href}
       $active={$active}
       $disabled={$disabled}
@@ -532,7 +533,7 @@ export function TraceSidebar({
             const isActive = pathname.startsWith(href) || board.id === boardId;
             return (
               <NavItem key={board.id}>
-                <BaseNavLink href={href} $active={isActive}>
+                <BaseNavLink prefetch={false} href={href} $active={isActive}>
                   {board.name}
                 </BaseNavLink>
               </NavItem>

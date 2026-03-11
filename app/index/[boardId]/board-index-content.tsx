@@ -397,14 +397,14 @@ export function BoardIndexContent({
         <NoticesSection>
           <NoticesHeader>
             <NoticesTitle>{labels.notices}</NoticesTitle>
-            <MoreLink href={`/notice/${boardId}`}>{labels.moreNotices}</MoreLink>
+            <MoreLink prefetch={false} href={`/notice/${boardId}`}>{labels.moreNotices}</MoreLink>
           </NoticesHeader>
           <NoticeList>
             {notices.map((notice) => (
               <NoticeItem key={notice.id}>
                 {notice.isGlobal && <GlobalBadge>{labels.globalNotice}</GlobalBadge>}
                 {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
-                <Link href={`/notice/${boardId}/${notice.id}`}>
+                <Link prefetch={false} href={`/notice/${boardId}/${notice.id}`}>
                   {notice.title}
                 </Link>
                 <NoticeDate>{formatDateTime(notice.createdAt, locale)}</NoticeDate>
@@ -419,7 +419,7 @@ export function BoardIndexContent({
       )}
 
       <ActionsBar>
-        <CreateButton href={`/index/${boardId}/create`}>
+        <CreateButton prefetch={false} href={`/index/${boardId}/create`}>
           {labels.createThread}
         </CreateButton>
         <SearchForm onSubmit={handleSearch}>
@@ -444,11 +444,11 @@ export function BoardIndexContent({
                   {thread.top && <Badge $variant="top">{labels.top}</Badge>}
                   {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
                   <span>#{thread.id} </span>
-                  <Link href={`/trace/${boardId}/${thread.id}/recent`}>
+                  <Link prefetch={false} href={`/trace/${boardId}/${thread.id}/recent`}>
                     {thread.title}
                   </Link>
                   {" "}
-                  <ResponseCountLink href={`/trace/${boardId}/${thread.id}/`}>
+                  <ResponseCountLink prefetch={false} href={`/trace/${boardId}/${thread.id}/`}>
                     ({Math.max(0, thread.responseCount - 1)})
                   </ResponseCountLink>
                 </CardTitle>

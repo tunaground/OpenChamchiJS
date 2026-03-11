@@ -521,7 +521,7 @@ export function AdminNoticesContent({
         <Header>
           <Title>{labels.title}</Title>
           <Breadcrumb>
-            <Link href="/admin/boards">Boards</Link> / {boardName}
+            <Link prefetch={false} href="/admin/boards">Boards</Link> / {boardName}
           </Breadcrumb>
         </Header>
 

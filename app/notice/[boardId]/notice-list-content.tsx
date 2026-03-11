@@ -261,7 +261,7 @@ export function NoticeListContent({
       authLabels={authLabels}
     >
       <Container>
-        <BoardLink href={`/index/${boardId}`}>&larr; {labels.goToBoard}</BoardLink>
+        <BoardLink prefetch={false} href={`/index/${boardId}`}>&larr; {labels.goToBoard}</BoardLink>
 
         <ActionsBar>
           <PageTitle>{labels.title} : {boardName}</PageTitle>
@@ -288,7 +288,7 @@ export function NoticeListContent({
                   <CardTitle>
                     {notice.isGlobal && <GlobalBadge>{labels.globalNotice}</GlobalBadge>}
                     {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
-                    <Link href={`/notice/${boardId}/${notice.id}`}>
+                    <Link prefetch={false} href={`/notice/${boardId}/${notice.id}`}>
                       {notice.title}
                     </Link>
                   </CardTitle>

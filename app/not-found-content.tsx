@@ -55,7 +55,7 @@ export function NotFoundContent({ code, message, backHome }: NotFoundContentProp
       <Card>
         <Code>{code}</Code>
         <Message>{message}</Message>
-        <StyledLink href="/">{backHome}</StyledLink>
+        <StyledLink prefetch={false} href="/">{backHome}</StyledLink>
       </Card>
     </Container>
   );

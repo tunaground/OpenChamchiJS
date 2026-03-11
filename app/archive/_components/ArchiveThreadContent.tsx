@@ -152,7 +152,7 @@ export function ArchiveThreadContent({
   if (loading) {
     return (
       <Container>
-        <BackLink href={`/archive/${boardId}`}>
+        <BackLink prefetch={false} href={`/archive/${boardId}`}>
           <svg
             width="16"
             height="16"
@@ -173,7 +173,7 @@ export function ArchiveThreadContent({
   if (error || !thread) {
     return (
       <Container>
-        <BackLink href={`/archive/${boardId}`}>
+        <BackLink prefetch={false} href={`/archive/${boardId}`}>
           <svg
             width="16"
             height="16"
@@ -193,7 +193,7 @@ export function ArchiveThreadContent({
 
   return (
     <Container>
-      <BackLink href={`/archive/${boardId}`}>
+      <BackLink prefetch={false} href={`/archive/${boardId}`}>
         <svg
           width="16"
           height="16"

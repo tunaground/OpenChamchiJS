@@ -70,6 +70,7 @@ export function NavLink({ href, $active, $disabled, children }: NavLinkProps) {
 
   return (
     <StyledNavLink
+      prefetch={false}
       href={href}
       $active={$active}
       $disabled={$disabled}
@@ -112,7 +113,7 @@ export function BackLink({ href, children }: BackLinkProps) {
   };
 
   return (
-    <StyledBackLink href={href} onClick={handleClick}>
+    <StyledBackLink prefetch={false} href={href} onClick={handleClick}>
       {children}
     </StyledBackLink>
   );
