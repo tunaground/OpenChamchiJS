@@ -7,4 +7,9 @@ services:
       - .env
     volumes:
       - ./GeoLite2-Country.mmdb:/app/lib/GeoLite2-Country.mmdb:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
     restart: unless-stopped
