@@ -13,3 +13,18 @@ services:
         max-size: "1g"
         max-file: "2"
     restart: unless-stopped
+
+  ws-server:
+    image: ghcr.io/tunaground/openchamchijs-ws-server:latest
+    ports:
+      - "4000:4000"
+    environment:
+      - WS_PORT=4000
+      - WS_API_KEY=${WS_API_KEY}
+      - WS_TOKEN_SECRET=${WS_TOKEN_SECRET}
+    logging:
+      driver: json-file
+      options:
+        max-size: "256m"
+        max-file: "2"
+    restart: unless-stopped
