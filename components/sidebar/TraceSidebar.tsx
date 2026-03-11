@@ -533,7 +533,7 @@ export function TraceSidebar({
             const isActive = pathname.startsWith(href) || board.id === boardId;
             return (
               <NavItem key={board.id}>
-                <BaseNavLink prefetch={false} href={href} $active={isActive}>
+                <BaseNavLink href={href} $active={isActive}>
                   {board.name}
                 </BaseNavLink>
               </NavItem>
