@@ -122,7 +122,7 @@ const server = createServer((req, res) => {
   }
 
   // Health check
-  if (req.method === "GET" && req.url === "/health") {
+  if (req.method === "GET" && (req.url === "/health" || req.url === "/ws/health")) {
     let totalConnections = 0;
     for (const subs of channels.values()) {
       totalConnections += subs.size;
@@ -133,7 +133,7 @@ const server = createServer((req, res) => {
   }
 
   // Publish endpoint
-  if (req.method === "POST" && req.url === "/publish") {
+  if (req.method === "POST" && (req.url === "/publish" || req.url === "/ws/publish")) {
     const authHeader = req.headers.authorization;
     if (!authHeader || authHeader !== `Bearer ${API_KEY}`) {
       res.writeHead(401, { "Content-Type": "application/json" });
@@ -178,6 +178,14 @@ const wss = new WebSocketServer({ noServer: true });
 
 server.on("upgrade", (req, socket, head) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
+
+  // Accept WebSocket upgrade on /ws path
+  if (url.pathname !== "/ws") {
+    socket.write("HTTP/1.1 404 Not Found\r\n\r\n");
+    socket.destroy();
+    return;
+  }
+
   const token = url.searchParams.get("token");
 
   if (!token) {
