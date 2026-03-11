@@ -8,7 +8,7 @@ import { boardService, BoardServiceError } from "@/lib/services/board";
 import { threadService } from "@/lib/services/thread";
 import { noticeService } from "@/lib/services/notice";
 import { globalSettingsService } from "@/lib/services/global-settings";
-import { isRealtimeEnabled } from "@/lib/realtime";
+import { isRealtimeEnabled } from "@/lib/realtime/publisher";
 import { toISOString } from "@/lib/cache";
 import { BoardIndexContent } from "./board-index-content";
 
@@ -61,7 +61,7 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
         boardId={boardId}
         boardName={board.name}
         boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
-        realtimeEnabled={isRealtimeEnabled()}
+        realtimeEnabled={await isRealtimeEnabled()}
         isLoggedIn={!!session}
         canAccessAdmin={canAccessAdmin}
         authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}

@@ -18,7 +18,7 @@ function generateClientId(clientIp: string): string {
 export async function createAblyTokenRequest(
   clientIp: string
 ): Promise<Ably.TokenRequest> {
-  const client = getAblyRestClient();
+  const client = await getAblyRestClient();
   const tokenRequest = await client.auth.createTokenRequest({
     clientId: generateClientId(clientIp),
     capability: {

@@ -39,6 +39,11 @@ export default async function RootLayout({
         />
       </head>
       <body>
+        <script dangerouslySetInnerHTML={{ __html:
+          `window.__RUNTIME_CONFIG__=${JSON.stringify({
+            realtimeProvider: settings.realtimeProvider || null,
+          })}`
+        }} />
         <StyledComponentsRegistry>
           <NextIntlClientProvider messages={messages}>
             <Providers>{children}</Providers>

@@ -31,6 +31,12 @@ export default async function AdminSettingsPage() {
         threadCustomHtml: settings.threadCustomHtml,
         tripcodeSalt: settings.tripcodeSalt,
         gaTrackingId: settings.gaTrackingId,
+        realtimeProvider: settings.realtimeProvider,
+        realtimeApiKey: settings.realtimeApiKey,
+        storageProvider: settings.storageProvider,
+        storageUrl: settings.storageUrl,
+        storageSecret: settings.storageSecret,
+        storageBucket: settings.storageBucket,
       }}
       geoIpAvailable={geoIpAvailable}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}

@@ -12,14 +12,14 @@ export class SupabaseStorageAdapter implements StoragePort {
   private client: SupabaseClient;
   private bucket: string;
 
-  constructor() {
-    const supabaseUrl = process.env.SUPABASE_URL;
-    const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
-    this.bucket = process.env.SUPABASE_STORAGE_BUCKET || "attachments";
+  constructor(url?: string | null, serviceKey?: string | null, bucket?: string | null) {
+    const supabaseUrl = url || undefined;
+    const supabaseKey = serviceKey || undefined;
+    this.bucket = bucket || "attachments";
 
     if (!supabaseUrl || !supabaseKey) {
       throw new StorageError(
-        "Supabase configuration missing (SUPABASE_URL, SUPABASE_SERVICE_KEY)",
+        "Supabase configuration missing (URL and service key required)",
         "NOT_CONFIGURED"
       );
     }

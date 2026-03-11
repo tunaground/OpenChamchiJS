@@ -30,6 +30,12 @@ function toGlobalSettingsData(settings: {
   threadCustomHtml: string | null;
   tripcodeSalt: string | null;
   gaTrackingId: string | null;
+  realtimeProvider: string | null;
+  realtimeApiKey: string | null;
+  storageProvider: string | null;
+  storageUrl: string | null;
+  storageSecret: string | null;
+  storageBucket: string | null;
   createdAt: Date;
   updatedAt: Date;
 }): GlobalSettingsData {
@@ -74,6 +80,12 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       threadCustomHtml?: string | null;
       tripcodeSalt?: string | null;
       gaTrackingId?: string | null;
+      realtimeProvider?: string | null;
+      realtimeApiKey?: string | null;
+      storageProvider?: string | null;
+      storageUrl?: string | null;
+      storageSecret?: string | null;
+      storageBucket?: string | null;
     } = {};
 
     if (data.siteTitle !== undefined) {
@@ -102,6 +114,24 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.gaTrackingId !== undefined) {
       updateData.gaTrackingId = data.gaTrackingId;
+    }
+    if (data.realtimeProvider !== undefined) {
+      updateData.realtimeProvider = data.realtimeProvider;
+    }
+    if (data.realtimeApiKey !== undefined) {
+      updateData.realtimeApiKey = data.realtimeApiKey;
+    }
+    if (data.storageProvider !== undefined) {
+      updateData.storageProvider = data.storageProvider;
+    }
+    if (data.storageUrl !== undefined) {
+      updateData.storageUrl = data.storageUrl;
+    }
+    if (data.storageSecret !== undefined) {
+      updateData.storageSecret = data.storageSecret;
+    }
+    if (data.storageBucket !== undefined) {
+      updateData.storageBucket = data.storageBucket;
     }
 
     const updated = await prisma.globalSettings.upsert({

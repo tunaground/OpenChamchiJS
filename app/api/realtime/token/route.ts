@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   getServerRealtimeProvider,
   isServerRealtimeEnabled,
-} from "@/lib/realtime/config";
+} from "@/lib/realtime/config.server";
 import { RealtimeError } from "@/lib/realtime/errors";
 
 export async function GET(request: NextRequest) {
   try {
     // Check if realtime is enabled
-    if (!isServerRealtimeEnabled()) {
+    if (!(await isServerRealtimeEnabled())) {
       return NextResponse.json(
         { error: "Realtime is not configured" },
         { status: 503 }
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     const forwardedFor = request.headers.get("x-forwarded-for");
     const clientIp = forwardedFor?.split(",")[0]?.trim() || "unknown";
 
-    const provider = getServerRealtimeProvider();
+    const provider = await getServerRealtimeProvider();
 
     switch (provider) {
       case "ably": {

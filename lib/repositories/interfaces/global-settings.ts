@@ -15,6 +15,12 @@ export interface GlobalSettingsData {
   threadCustomHtml: string | null;
   tripcodeSalt: string | null;
   gaTrackingId: string | null;
+  realtimeProvider: string | null;
+  realtimeApiKey: string | null;
+  storageProvider: string | null;
+  storageUrl: string | null;
+  storageSecret: string | null;
+  storageBucket: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -29,6 +35,12 @@ export interface UpdateGlobalSettingsInput {
   threadCustomHtml?: string | null;
   tripcodeSalt?: string | null;
   gaTrackingId?: string | null;
+  realtimeProvider?: string | null;
+  realtimeApiKey?: string | null;
+  storageProvider?: string | null;
+  storageUrl?: string | null;
+  storageSecret?: string | null;
+  storageBucket?: string | null;
 }
 
 export interface GlobalSettingsRepository {

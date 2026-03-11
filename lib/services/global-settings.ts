@@ -36,6 +36,28 @@ export function createGlobalSettingsService(
       // Invalidate cache
       invalidateCache(CACHE_TAGS.settings);
 
+      // Reset singletons if provider settings changed
+      const realtimeChanged =
+        data.realtimeProvider !== undefined ||
+        data.realtimeApiKey !== undefined;
+      const storageChanged =
+        data.storageProvider !== undefined ||
+        data.storageUrl !== undefined ||
+        data.storageSecret !== undefined ||
+        data.storageBucket !== undefined;
+
+      if (realtimeChanged) {
+        const { resetPublisher } = await import("@/lib/realtime/publisher");
+        const { resetAblyClient } = await import("@/lib/realtime/adapters/ably/client");
+        resetPublisher();
+        resetAblyClient();
+      }
+
+      if (storageChanged) {
+        const { resetStorage } = await import("@/lib/storage");
+        resetStorage();
+      }
+
       return result;
     },
 

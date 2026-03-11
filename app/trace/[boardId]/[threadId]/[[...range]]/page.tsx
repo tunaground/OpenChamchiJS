@@ -9,7 +9,7 @@ import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { responseService } from "@/lib/services/response";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { parseRangeParam } from "@/lib/types/response-range";
-import { isRealtimeEnabled } from "@/lib/realtime";
+import { isRealtimeEnabled } from "@/lib/realtime/publisher";
 import { isStorageEnabled } from "@/lib/storage";
 import { toISOString } from "@/lib/cache";
 import { ThreadDetailContent } from "./thread-detail-content";
@@ -144,9 +144,9 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
         boards={allBoards.map((b) => ({ id: b.id, name: b.name }))}
         defaultUsername={board.defaultUsername}
         tripcodeSalt={settings.tripcodeSalt || undefined}
-        showUserCount={board.showUserCount && isRealtimeEnabled()}
-        realtimeEnabled={isRealtimeEnabled()}
-        storageEnabled={isStorageEnabled()}
+        showUserCount={board.showUserCount && (await isRealtimeEnabled())}
+        realtimeEnabled={await isRealtimeEnabled()}
+        storageEnabled={await isStorageEnabled()}
         uploadMaxSize={board.uploadMaxSize}
         isLoggedIn={!!session}
         canAccessAdmin={canAccessAdmin}

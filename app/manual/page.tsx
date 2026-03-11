@@ -4,13 +4,15 @@ import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { boardService } from "@/lib/services/board";
 import { globalSettingsService } from "@/lib/services/global-settings";
+import { isRealtimeEnabled } from "@/lib/realtime/publisher";
 import { ManualContent } from "./manual-content";
 
 export default async function ManualPage() {
-  const [allBoards, session, settings] = await Promise.all([
+  const [allBoards, session, settings, hasRealtimeConfig] = await Promise.all([
     boardService.findAll(),
     getServerSession(authOptions),
     globalSettingsService.get(),
+    isRealtimeEnabled(),
   ]);
 
   const t = await getTranslations("manual");
@@ -19,8 +21,6 @@ export default async function ManualPage() {
   const canAccessAdmin = session
     ? await permissionService.checkUserPermission(session.user.id, "admin:read")
     : false;
-
-  const hasAblyConfig = !!process.env.ABLY_API_KEY;
 
   return (
     <ManualContent
@@ -119,7 +119,7 @@ export default async function ManualPage() {
           darkTitle: t("theme.darkTitle"),
           darkDescription: t("theme.darkDescription"),
         },
-        userCounter: hasAblyConfig
+        userCounter: hasRealtimeConfig
           ? {
               title: t("userCounter.title"),
               description: t("userCounter.description"),

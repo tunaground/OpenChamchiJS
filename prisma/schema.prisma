@@ -120,6 +120,12 @@ model GlobalSettings {
   threadCustomHtml String?  @db.Text // Custom HTML for thread pages (above load more)
   tripcodeSalt     String?  // bcrypt salt for tripcode generation
   gaTrackingId     String?  // Google Analytics Measurement ID (G-XXXXXXXXXX)
+  realtimeProvider  String?   // "ably" | null
+  realtimeApiKey    String?   // Ably API key (server-only)
+  storageProvider   String?   // "supabase" | null
+  storageUrl        String?   // Supabase URL
+  storageSecret     String?   // Supabase service key
+  storageBucket     String?   // Supabase bucket name
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

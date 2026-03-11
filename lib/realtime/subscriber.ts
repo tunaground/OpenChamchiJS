@@ -18,7 +18,7 @@ export function getSubscriber(): RealtimeSubscriber {
 
   if (!provider) {
     throw new Error(
-      "NEXT_PUBLIC_REALTIME_PROVIDER environment variable is not set"
+      "Realtime provider is not configured"
     );
   }
 

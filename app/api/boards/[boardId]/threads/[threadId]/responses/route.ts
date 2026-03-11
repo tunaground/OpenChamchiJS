@@ -15,7 +15,8 @@ import { preparse, preprocess, stringifyPreprocessed } from "@/lib/tom";
 import { threadRepository } from "@/lib/repositories/prisma/thread";
 import { userRepository } from "@/lib/repositories/prisma/user";
 import { createResponseSchema } from "@/lib/schemas";
-import { getPublisher, isRealtimeEnabled, CHANNELS, EVENTS } from "@/lib/realtime";
+import { getPublisher, isRealtimeEnabled } from "@/lib/realtime/publisher";
+import { CHANNELS, EVENTS } from "@/lib/realtime";
 import { getStorage, isStorageEnabled, StorageError } from "@/lib/storage";
 import { generateTripcode } from "@/lib/utils/tripcode";
 import { threadBanService } from "@/lib/services/thread-ban";
@@ -228,7 +229,7 @@ export async function POST(
     }
 
     // Handle file upload if present
-    if (file && isStorageEnabled()) {
+    if (file && (await isStorageEnabled())) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
 
@@ -236,7 +237,7 @@ export async function POST(
         .split(",")
         .map((t) => t.trim());
 
-      const storage = getStorage();
+      const storage = await getStorage();
       const result = await storage.upload(buffer, file.name, file.type, {
         maxSizeBytes: board.uploadMaxSize,
         allowedMimeTypes,
@@ -270,9 +271,9 @@ export async function POST(
     });
 
     // Publish to realtime channel for chat mode subscribers
-    if (isRealtimeEnabled()) {
+    if (await isRealtimeEnabled()) {
       try {
-        const publisher = getPublisher();
+        const publisher = await getPublisher();
         // Strip sensitive fields before publishing
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { ip: _ip, userId: _userId, ...safeResponse } = response;
@@ -295,7 +296,7 @@ export async function POST(
     // If response creation failed but image was uploaded, delete the image
     if (uploadedKey) {
       try {
-        const storage = getStorage();
+        const storage = await getStorage();
         await storage.delete(uploadedKey);
       } catch (deleteError) {
         console.error("Failed to delete uploaded image after error:", deleteError);

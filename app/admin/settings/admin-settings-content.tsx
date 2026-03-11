@@ -372,6 +372,27 @@ interface Labels {
   invalidated: string;
 }
 
+const Select = styled.select`
+  width: 100%;
+  max-width: 20rem;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border-radius: 4px;
+  font-size: 1.4rem;
+  background: ${(props) => props.theme.background};
+  color: ${(props) => props.theme.textPrimary};
+
+  &:focus {
+    outline: none;
+    border-color: ${(props) => props.theme.textSecondary};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
 interface AdminSettingsContentProps {
   initialSettings: {
     siteTitle: string;
@@ -383,6 +404,12 @@ interface AdminSettingsContentProps {
     threadCustomHtml: string | null;
     tripcodeSalt: string | null;
     gaTrackingId: string | null;
+    realtimeProvider: string | null;
+    realtimeApiKey: string | null;
+    storageProvider: string | null;
+    storageUrl: string | null;
+    storageSecret: string | null;
+    storageBucket: string | null;
   };
   geoIpAvailable: boolean;
   authLabels: AuthLabels;
@@ -407,6 +434,12 @@ export function AdminSettingsContent({
   const [threadCustomHtml, setThreadCustomHtml] = useState(initialSettings.threadCustomHtml ?? "");
   const [tripcodeSalt, setTripcodeSalt] = useState(initialSettings.tripcodeSalt ?? "");
   const [gaTrackingId, setGaTrackingId] = useState(initialSettings.gaTrackingId ?? "");
+  const [realtimeProvider, setRealtimeProvider] = useState(initialSettings.realtimeProvider ?? "");
+  const [realtimeApiKey, setRealtimeApiKey] = useState(initialSettings.realtimeApiKey ?? "");
+  const [storageProvider, setStorageProvider] = useState(initialSettings.storageProvider ?? "");
+  const [storageUrl, setStorageUrl] = useState(initialSettings.storageUrl ?? "");
+  const [storageSecret, setStorageSecret] = useState(initialSettings.storageSecret ?? "");
+  const [storageBucket, setStorageBucket] = useState(initialSettings.storageBucket ?? "");
   const [customLinks, setCustomLinks] = useState<CustomLink[]>(initialSettings.customLinks);
   const [newLinkLabel, setNewLinkLabel] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
@@ -448,6 +481,12 @@ export function AdminSettingsContent({
           threadCustomHtml: threadCustomHtml || null,
           tripcodeSalt: tripcodeSalt || null,
           gaTrackingId: gaTrackingId || null,
+          realtimeProvider: realtimeProvider || null,
+          realtimeApiKey: realtimeApiKey || null,
+          storageProvider: storageProvider || null,
+          storageUrl: storageUrl || null,
+          storageSecret: storageSecret || null,
+          storageBucket: storageBucket || null,
           customLinks,
         }),
       });
@@ -613,6 +652,103 @@ export function AdminSettingsContent({
           />
           <Description>{labels.tripcodeSaltDescription}</Description>
         </FormGroup>
+
+        <Divider />
+
+        <FormGroup>
+          <SectionTitle>Realtime</SectionTitle>
+          <SectionDescription>Configure realtime messaging provider for chat mode.</SectionDescription>
+
+          <Label htmlFor="realtimeProvider">Provider</Label>
+          <Select
+            id="realtimeProvider"
+            value={realtimeProvider}
+            onChange={(e) => setRealtimeProvider(e.target.value)}
+            disabled={!canUpdate}
+          >
+            <option value="">None</option>
+            <option value="ably">Ably</option>
+          </Select>
+          <Description>Select a realtime provider to enable chat mode.</Description>
+        </FormGroup>
+
+        {realtimeProvider && (
+          <FormGroup>
+            <Label htmlFor="realtimeApiKey">API Key</Label>
+            <TitleInput
+              id="realtimeApiKey"
+              type="password"
+              value={realtimeApiKey}
+              onChange={(e) => setRealtimeApiKey(e.target.value)}
+              placeholder="Enter API key"
+              maxLength={200}
+              disabled={!canUpdate}
+            />
+            <Description>Server-side API key for the realtime provider.</Description>
+          </FormGroup>
+        )}
+
+        <Divider />
+
+        <FormGroup>
+          <SectionTitle>Storage</SectionTitle>
+          <SectionDescription>Configure storage provider for file uploads.</SectionDescription>
+
+          <Label htmlFor="storageProvider">Provider</Label>
+          <Select
+            id="storageProvider"
+            value={storageProvider}
+            onChange={(e) => setStorageProvider(e.target.value)}
+            disabled={!canUpdate}
+          >
+            <option value="">None</option>
+            <option value="supabase">Supabase</option>
+          </Select>
+          <Description>Select a storage provider to enable file uploads.</Description>
+        </FormGroup>
+
+        {storageProvider && (
+          <>
+            <FormGroup>
+              <Label htmlFor="storageUrl">URL</Label>
+              <TitleInput
+                id="storageUrl"
+                type="text"
+                value={storageUrl}
+                onChange={(e) => setStorageUrl(e.target.value)}
+                placeholder="https://your-project.supabase.co"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="storageSecret">Service Key</Label>
+              <TitleInput
+                id="storageSecret"
+                type="password"
+                value={storageSecret}
+                onChange={(e) => setStorageSecret(e.target.value)}
+                placeholder="Enter service key"
+                maxLength={500}
+                disabled={!canUpdate}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="storageBucket">Bucket Name</Label>
+              <TitleInput
+                id="storageBucket"
+                type="text"
+                value={storageBucket}
+                onChange={(e) => setStorageBucket(e.target.value)}
+                placeholder="attachments"
+                maxLength={100}
+                disabled={!canUpdate}
+              />
+            </FormGroup>
+          </>
+        )}
 
         <Divider />
 

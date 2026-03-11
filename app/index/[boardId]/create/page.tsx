@@ -38,7 +38,7 @@ export default async function CreateThreadPage({ params }: Props) {
         defaultUsername={board.defaultUsername}
         tripcodeSalt={settings.tripcodeSalt || undefined}
         boards={boards.map((b) => ({ id: b.id, name: b.name }))}
-        storageEnabled={isStorageEnabled()}
+        storageEnabled={await isStorageEnabled()}
         uploadMaxSize={board.uploadMaxSize}
         isLoggedIn={isLoggedIn}
         canAccessAdmin={canAccessAdmin}

@@ -1,5 +1,5 @@
 import type { RealtimePublisher } from "./ports/realtime";
-import { getServerRealtimeProvider, isServerRealtimeEnabled } from "./config";
+import { getServerRealtimeProvider, isServerRealtimeEnabled } from "./config.server";
 import { RealtimeError } from "./errors";
 
 let publisherInstance: RealtimePublisher | null = null;
@@ -8,16 +8,16 @@ let publisherInstance: RealtimePublisher | null = null;
  * Get the realtime publisher instance (server-side only)
  * Uses singleton pattern to reuse the same instance
  */
-export function getPublisher(): RealtimePublisher {
+export async function getPublisher(): Promise<RealtimePublisher> {
   if (publisherInstance) {
     return publisherInstance;
   }
 
-  const provider = getServerRealtimeProvider();
+  const provider = await getServerRealtimeProvider();
 
   if (!provider) {
     throw new RealtimeError(
-      "REALTIME_PROVIDER environment variable is not set",
+      "Realtime provider is not configured",
       "NOT_CONFIGURED"
     );
   }
@@ -26,8 +26,7 @@ export function getPublisher(): RealtimePublisher {
 
   switch (provider) {
     case "ably": {
-      // Dynamic import to avoid bundling unused adapters
-      const { AblyPublisher } = require("./adapters/ably/publisher");
+      const { AblyPublisher } = await import("./adapters/ably/publisher");
       instance = new AblyPublisher();
       break;
     }
@@ -58,7 +57,7 @@ export function getPublisher(): RealtimePublisher {
 export { isServerRealtimeEnabled as isRealtimeEnabled };
 
 /**
- * Reset the publisher instance (for testing)
+ * Reset the publisher instance (for settings changes and testing)
  */
 export function resetPublisher(): void {
   publisherInstance = null;
