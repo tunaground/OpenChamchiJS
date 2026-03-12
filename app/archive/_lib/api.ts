@@ -1,13 +1,13 @@
-import { ARCHIVE_CONFIG } from "./config";
 import type { ArchiveThreadIndex, ArchiveThread } from "./types";
 
 /**
  * Fetch board index (thread list)
  */
 export async function fetchArchiveIndex(
+  baseUrl: string,
   boardId: string
 ): Promise<ArchiveThreadIndex[]> {
-  const url = `${ARCHIVE_CONFIG.baseUrl}/${boardId}/index.json`;
+  const url = `${baseUrl}/${boardId}/index.json`;
   const res = await fetch(url);
 
   if (!res.ok) {
@@ -21,10 +21,11 @@ export async function fetchArchiveIndex(
  * Fetch thread detail
  */
 export async function fetchArchiveThread(
+  baseUrl: string,
   boardId: string,
   threadId: number
 ): Promise<ArchiveThread> {
-  const url = `${ARCHIVE_CONFIG.baseUrl}/${boardId}/${threadId}.json`;
+  const url = `${baseUrl}/${boardId}/${threadId}.json`;
   const res = await fetch(url);
 
   if (!res.ok) {
@@ -38,11 +39,12 @@ export async function fetchArchiveThread(
  * Check if archive thread exists
  */
 export async function checkArchiveExists(
+  baseUrl: string,
   boardId: string,
   threadId: number
 ): Promise<boolean> {
   try {
-    const url = `${ARCHIVE_CONFIG.baseUrl}/${boardId}/${threadId}.json`;
+    const url = `${baseUrl}/${boardId}/${threadId}.json`;
     const res = await fetch(url, { method: "HEAD" });
     return res.ok;
   } catch {
@@ -53,6 +55,6 @@ export async function checkArchiveExists(
 /**
  * Get attachment URL
  */
-export function getAttachmentUrl(boardId: string, filename: string): string {
-  return `${ARCHIVE_CONFIG.baseUrl}/${boardId}/attachment/${encodeURIComponent(filename)}`;
+export function getAttachmentUrl(baseUrl: string, boardId: string, filename: string): string {
+  return `${baseUrl}/${boardId}/attachment/${encodeURIComponent(filename)}`;
 }

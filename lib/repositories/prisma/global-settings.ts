@@ -1,14 +1,16 @@
 import { prisma } from "@/lib/prisma";
+import type { GlobalSettings } from "@prisma/client";
 import {
   GlobalSettingsRepository,
   GlobalSettingsData,
   UpdateGlobalSettingsInput,
   CustomLink,
+  ArchiveBoard,
 } from "@/lib/repositories/interfaces/global-settings";
 
 const DEFAULT_ID = "default";
 
-function parseCustomLinks(json: string | null): CustomLink[] {
+function parseJsonArray<T>(json: string | null): T[] {
   if (!json) return [];
   try {
     const parsed = JSON.parse(json);
@@ -19,33 +21,11 @@ function parseCustomLinks(json: string | null): CustomLink[] {
   }
 }
 
-function toGlobalSettingsData(settings: {
-  id: string;
-  siteTitle: string;
-  siteDescription: string;
-  countryCode: string;
-  homepageContent: string | null;
-  customLinks: string | null;
-  indexCustomHtml: string | null;
-  threadCustomHtml: string | null;
-  tripcodeSalt: string | null;
-  gaTrackingId: string | null;
-  realtimeProvider: string | null;
-  realtimeApiKey: string | null;
-  realtimeWsUrl: string | null;
-  realtimeWsApiUrl: string | null;
-  realtimeWsApiKey: string | null;
-  realtimeWsTokenSecret: string | null;
-  storageProvider: string | null;
-  storageUrl: string | null;
-  storageSecret: string | null;
-  storageBucket: string | null;
-  createdAt: Date;
-  updatedAt: Date;
-}): GlobalSettingsData {
+function toGlobalSettingsData(settings: GlobalSettings): GlobalSettingsData {
   return {
     ...settings,
-    customLinks: parseCustomLinks(settings.customLinks),
+    customLinks: parseJsonArray<CustomLink>(settings.customLinks),
+    archiveBoards: parseJsonArray<ArchiveBoard>(settings.archiveBoards),
   };
 }
 
@@ -94,6 +74,9 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       storageUrl?: string | null;
       storageSecret?: string | null;
       storageBucket?: string | null;
+      archiveBaseUrl?: string | null;
+      archiveBoards?: string | null;
+      archiveRedirect?: boolean;
     } = {};
 
     if (data.siteTitle !== undefined) {
@@ -152,6 +135,15 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.storageBucket !== undefined) {
       updateData.storageBucket = data.storageBucket;
+    }
+    if (data.archiveBaseUrl !== undefined) {
+      updateData.archiveBaseUrl = data.archiveBaseUrl;
+    }
+    if (data.archiveBoards !== undefined) {
+      updateData.archiveBoards = data.archiveBoards ? JSON.stringify(data.archiveBoards) : null;
+    }
+    if (data.archiveRedirect !== undefined) {
+      updateData.archiveRedirect = data.archiveRedirect;
     }
 
     const updated = await prisma.globalSettings.upsert({

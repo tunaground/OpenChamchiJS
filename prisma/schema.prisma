@@ -130,6 +130,9 @@ model GlobalSettings {
   storageUrl        String?   // Supabase URL
   storageSecret     String?   // Supabase service key
   storageBucket     String?   // Supabase bucket name
+  archiveBaseUrl    String?   // Archive data URL
+  archiveBoards     String?   @db.Text  // JSON: [{"id":"board1","name":"Board 1"}]
+  archiveRedirect   Boolean   @default(false)  // Redirect to archive when thread not found
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

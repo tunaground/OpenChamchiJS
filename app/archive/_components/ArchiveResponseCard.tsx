@@ -160,16 +160,17 @@ interface ArchiveResponseCardProps {
   threadId: number;
   response: ArchiveResponse;
   highlighted?: boolean;
+  baseUrl: string;
 }
 
 export const ArchiveResponseCard = forwardRef<HTMLDivElement, ArchiveResponseCardProps>(
-  function ArchiveResponseCard({ boardId, threadId, response, highlighted }, ref) {
+  function ArchiveResponseCard({ boardId, threadId, response, highlighted, baseUrl }, ref) {
     const locale = useLocale();
     const hasAttachment = response.attachment && response.attachment.length > 0;
     const youtubeId = extractYoutubeId(response.youtube);
     const hasYoutube = !!youtubeId;
     const attachmentUrl = hasAttachment
-      ? getAttachmentUrl(boardId, response.attachment)
+      ? getAttachmentUrl(baseUrl, boardId, response.attachment)
       : null;
     const isImage =
       hasAttachment && /\.(jpg|jpeg|png|gif|webp)$/i.test(response.attachment);

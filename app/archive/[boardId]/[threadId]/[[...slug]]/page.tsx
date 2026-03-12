@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { ArchiveLayout } from "../../../_components/ArchiveLayout";
 import { ArchiveThreadContent } from "../../../_components/ArchiveThreadContent";
-import { ARCHIVE_CONFIG } from "../../../_lib/config";
 import { parseSlugToHighlightSeqs } from "../../../_lib/utils";
 
 interface Props {
@@ -16,7 +16,9 @@ export default async function ArchiveThreadPage({ params }: Props) {
   const { boardId, threadId, slug } = await params;
   const threadIdNum = parseInt(threadId, 10);
 
-  const board = ARCHIVE_CONFIG.boards.find((b) => b.id === boardId);
+  const settings = await globalSettingsService.get();
+
+  const board = settings.archiveBoards.find((b) => b.id === boardId);
   if (!board || isNaN(threadIdNum)) {
     notFound();
   }
@@ -24,12 +26,13 @@ export default async function ArchiveThreadPage({ params }: Props) {
   const highlightSeqs = parseSlugToHighlightSeqs(slug);
 
   return (
-    <ArchiveLayout>
+    <ArchiveLayout boards={settings.archiveBoards}>
       <ArchiveThreadContent
         boardId={boardId}
         boardName={board.name}
         threadId={threadIdNum}
         highlightSeqs={highlightSeqs}
+        baseUrl={settings.archiveBaseUrl || ""}
       />
     </ArchiveLayout>
   );

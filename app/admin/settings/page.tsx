@@ -41,6 +41,9 @@ export default async function AdminSettingsPage() {
         storageUrl: settings.storageUrl,
         storageSecret: settings.storageSecret,
         storageBucket: settings.storageBucket,
+        archiveBaseUrl: settings.archiveBaseUrl,
+        archiveBoards: settings.archiveBoards,
+        archiveRedirect: settings.archiveRedirect,
       }}
       geoIpAvailable={geoIpAvailable}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}

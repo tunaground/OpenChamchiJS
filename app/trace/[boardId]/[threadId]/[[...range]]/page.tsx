@@ -14,13 +14,16 @@ import { isStorageEnabled } from "@/lib/storage";
 import { toISOString } from "@/lib/cache";
 import { ThreadDetailContent } from "./thread-detail-content";
 
-const ARCHIVE_REDIRECT_ENABLED = process.env.ARCHIVE_REDIRECT_ENABLED === "true";
-
-async function checkArchiveExists(boardId: string, threadId: number): Promise<boolean> {
-  if (!ARCHIVE_REDIRECT_ENABLED) return false;
+async function checkArchiveExists(
+  archiveBaseUrl: string | null,
+  archiveRedirect: boolean,
+  boardId: string,
+  threadId: number,
+): Promise<boolean> {
+  if (!archiveRedirect || !archiveBaseUrl) return false;
   try {
     const res = await fetch(
-      `https://archive-data.tunaground.net/data/${boardId}/${threadId}.json`,
+      `${archiveBaseUrl}/${boardId}/${threadId}.json`,
       { method: "HEAD" }
     );
     return res.ok;
@@ -234,7 +237,13 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
   } catch (error) {
     if (error instanceof ThreadServiceError && error.code === "NOT_FOUND") {
       // Check if archive exists and redirect if enabled
-      const archiveExists = await checkArchiveExists(boardId, threadIdNum);
+      const archiveSettings = await globalSettingsService.get();
+      const archiveExists = await checkArchiveExists(
+        archiveSettings.archiveBaseUrl,
+        archiveSettings.archiveRedirect,
+        boardId,
+        threadIdNum,
+      );
       if (archiveExists) {
         const slug = rangeParam?.join("/") || "";
         redirect(`/archive/${boardId}/${threadIdNum}${slug ? "/" + slug : ""}`);

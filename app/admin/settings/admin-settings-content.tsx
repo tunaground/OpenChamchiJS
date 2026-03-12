@@ -12,6 +12,11 @@ interface CustomLink {
   url: string;
 }
 
+interface ArchiveBoard {
+  id: string;
+  name: string;
+}
+
 const Container = styled.div`
   padding: ${(props) => props.theme.containerPadding};
   max-width: ${(props) => props.theme.adminMaxWidth};
@@ -414,6 +419,9 @@ interface AdminSettingsContentProps {
     storageUrl: string | null;
     storageSecret: string | null;
     storageBucket: string | null;
+    archiveBaseUrl: string | null;
+    archiveBoards: ArchiveBoard[];
+    archiveRedirect: boolean;
   };
   geoIpAvailable: boolean;
   authLabels: AuthLabels;
@@ -448,6 +456,11 @@ export function AdminSettingsContent({
   const [storageUrl, setStorageUrl] = useState(initialSettings.storageUrl ?? "");
   const [storageSecret, setStorageSecret] = useState(initialSettings.storageSecret ?? "");
   const [storageBucket, setStorageBucket] = useState(initialSettings.storageBucket ?? "");
+  const [archiveBaseUrl, setArchiveBaseUrl] = useState(initialSettings.archiveBaseUrl ?? "");
+  const [archiveBoards, setArchiveBoards] = useState<ArchiveBoard[]>(initialSettings.archiveBoards ?? []);
+  const [archiveRedirect, setArchiveRedirect] = useState(initialSettings.archiveRedirect ?? false);
+  const [newArchiveBoardId, setNewArchiveBoardId] = useState("");
+  const [newArchiveBoardName, setNewArchiveBoardName] = useState("");
   const [customLinks, setCustomLinks] = useState<CustomLink[]>(initialSettings.customLinks);
   const [newLinkLabel, setNewLinkLabel] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
@@ -455,6 +468,18 @@ export function AdminSettingsContent({
   const [saved, setSaved] = useState(false);
   const [cacheInvalidating, setCacheInvalidating] = useState(false);
   const [cacheInvalidated, setCacheInvalidated] = useState(false);
+
+  const handleAddArchiveBoard = () => {
+    if (!newArchiveBoardId.trim() || !newArchiveBoardName.trim()) return;
+    if (archiveBoards.some((b) => b.id === newArchiveBoardId.trim())) return;
+    setArchiveBoards([...archiveBoards, { id: newArchiveBoardId.trim(), name: newArchiveBoardName.trim() }]);
+    setNewArchiveBoardId("");
+    setNewArchiveBoardName("");
+  };
+
+  const handleDeleteArchiveBoard = (id: string) => {
+    setArchiveBoards(archiveBoards.filter((b) => b.id !== id));
+  };
 
   const handleAddLink = () => {
     if (!newLinkLabel.trim() || !newLinkUrl.trim()) return;
@@ -500,6 +525,9 @@ export function AdminSettingsContent({
           storageSecret: storageSecret || null,
           storageBucket: storageBucket || null,
           customLinks,
+          archiveBaseUrl: archiveBaseUrl || null,
+          archiveBoards: archiveBoards.length > 0 ? archiveBoards : null,
+          archiveRedirect,
         }),
       });
 
@@ -822,6 +850,90 @@ export function AdminSettingsContent({
             </FormGroup>
           </>
         )}
+
+        <Divider />
+
+        <FormGroup>
+          <SectionTitle>Archive</SectionTitle>
+          <SectionDescription>Configure archive data source for viewing archived threads.</SectionDescription>
+
+          <Label htmlFor="archiveBaseUrl">Base URL</Label>
+          <TitleInput
+            id="archiveBaseUrl"
+            type="text"
+            value={archiveBaseUrl}
+            onChange={(e) => setArchiveBaseUrl(e.target.value)}
+            placeholder="https://archive-data.example.com/data"
+            maxLength={500}
+            disabled={!canUpdate}
+          />
+          <Description>URL where archive JSON data files are hosted.</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="archiveRedirect" style={{ display: "inline", marginRight: "0.8rem" }}>
+            <input
+              id="archiveRedirect"
+              type="checkbox"
+              checked={archiveRedirect}
+              onChange={(e) => setArchiveRedirect(e.target.checked)}
+              disabled={!canUpdate}
+              style={{ marginRight: "0.4rem" }}
+            />
+            Redirect to archive
+          </Label>
+          <Description>When a thread is not found, check if it exists in the archive and redirect.</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label>Archive Boards</Label>
+          {archiveBoards.length === 0 ? (
+            <EmptyState>No archive boards configured.</EmptyState>
+          ) : (
+            <LinkList>
+              {archiveBoards.map((board) => (
+                <LinkItem key={board.id}>
+                  <LinkLabel>{board.id}</LinkLabel>
+                  <LinkUrl>{board.name}</LinkUrl>
+                  {canUpdate && (
+                    <DeleteButton onClick={() => handleDeleteArchiveBoard(board.id)}>
+                      {labels.deleteLink}
+                    </DeleteButton>
+                  )}
+                </LinkItem>
+              ))}
+            </LinkList>
+          )}
+
+          {canUpdate && (
+            <AddLinkForm>
+              <InputGroup>
+                <InputLabel>Board ID</InputLabel>
+                <LinkInput
+                  type="text"
+                  value={newArchiveBoardId}
+                  onChange={(e) => setNewArchiveBoardId(e.target.value)}
+                  placeholder="board-id"
+                />
+              </InputGroup>
+              <InputGroup>
+                <InputLabel>Board Name</InputLabel>
+                <LinkInput
+                  type="text"
+                  value={newArchiveBoardName}
+                  onChange={(e) => setNewArchiveBoardName(e.target.value)}
+                  placeholder="Board Name"
+                />
+              </InputGroup>
+              <AddButton
+                onClick={handleAddArchiveBoard}
+                disabled={!newArchiveBoardId.trim() || !newArchiveBoardName.trim()}
+              >
+                {labels.addLink}
+              </AddButton>
+            </AddLinkForm>
+          )}
+        </FormGroup>
 
         <Divider />
 

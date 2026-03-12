@@ -168,6 +168,9 @@ export const updateSettingsSchema = z.object({
   storageUrl: z.string().url().max(200).optional().nullable(),
   storageSecret: z.string().max(500).optional().nullable(),
   storageBucket: z.string().max(100).optional().nullable(),
+  archiveBaseUrl: z.string().url().max(500).optional().nullable(),
+  archiveBoards: z.array(z.object({ id: z.string(), name: z.string() })).optional().nullable(),
+  archiveRedirect: z.boolean().optional(),
 });
 
 export type CustomLinkInput = z.infer<typeof customLinkSchema>;

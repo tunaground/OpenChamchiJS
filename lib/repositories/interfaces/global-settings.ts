@@ -4,6 +4,11 @@ export interface CustomLink {
   url: string;
 }
 
+export interface ArchiveBoard {
+  id: string;
+  name: string;
+}
+
 export interface GlobalSettingsData {
   id: string;
   siteTitle: string;
@@ -25,6 +30,9 @@ export interface GlobalSettingsData {
   storageUrl: string | null;
   storageSecret: string | null;
   storageBucket: string | null;
+  archiveBaseUrl: string | null;
+  archiveBoards: ArchiveBoard[];
+  archiveRedirect: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -49,6 +57,9 @@ export interface UpdateGlobalSettingsInput {
   storageUrl?: string | null;
   storageSecret?: string | null;
   storageBucket?: string | null;
+  archiveBaseUrl?: string | null;
+  archiveBoards?: ArchiveBoard[] | null;
+  archiveRedirect?: boolean;
 }
 
 export interface GlobalSettingsRepository {

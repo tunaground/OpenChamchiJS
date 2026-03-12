@@ -7,7 +7,7 @@ import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { formatDate } from "../_lib/utils";
 import { fetchArchiveIndex } from "../_lib/api";
-import { ARCHIVE_CONFIG } from "../_lib/config";
+import { ARCHIVE_THREADS_PER_PAGE } from "../_lib/config";
 import type { ArchiveThreadIndex } from "../_lib/types";
 
 const Container = styled.div`
@@ -164,9 +164,10 @@ const LoadingState = styled.div`
 
 interface ArchiveBoardContentProps {
   boardId: string;
+  baseUrl: string;
 }
 
-export function ArchiveBoardContent({ boardId }: ArchiveBoardContentProps) {
+export function ArchiveBoardContent({ boardId, baseUrl }: ArchiveBoardContentProps) {
   const router = useRouter();
   const pathname = usePathname();
   const locale = useLocale();
@@ -175,7 +176,7 @@ export function ArchiveBoardContent({ boardId }: ArchiveBoardContentProps) {
   const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const threadsPerPage = ARCHIVE_CONFIG.threadsPerPage;
+  const threadsPerPage = ARCHIVE_THREADS_PER_PAGE;
 
   useEffect(() => {
     let cancelled = false;
@@ -183,7 +184,7 @@ export function ArchiveBoardContent({ boardId }: ArchiveBoardContentProps) {
     setLoading(true);
     setError(false);
 
-    fetchArchiveIndex(boardId)
+    fetchArchiveIndex(baseUrl, boardId)
       .then((data) => {
         if (cancelled) return;
         data.sort(
@@ -204,7 +205,7 @@ export function ArchiveBoardContent({ boardId }: ArchiveBoardContentProps) {
     return () => {
       cancelled = true;
     };
-  }, [boardId]);
+  }, [baseUrl, boardId]);
 
   // Read initial search/page from URL
   useEffect(() => {

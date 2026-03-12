@@ -99,6 +99,7 @@ interface ArchiveThreadContentProps {
   boardName: string;
   threadId: number;
   highlightSeqs: number[];
+  baseUrl: string;
 }
 
 export function ArchiveThreadContent({
@@ -106,6 +107,7 @@ export function ArchiveThreadContent({
   boardName,
   threadId,
   highlightSeqs,
+  baseUrl,
 }: ArchiveThreadContentProps) {
   const locale = useLocale();
   const firstHighlightRef = useRef<HTMLDivElement>(null);
@@ -119,7 +121,7 @@ export function ArchiveThreadContent({
     setLoading(true);
     setError(false);
 
-    fetchArchiveThread(boardId, threadId)
+    fetchArchiveThread(baseUrl, boardId, threadId)
       .then((data) => {
         if (cancelled) return;
         setThread(data);
@@ -136,7 +138,7 @@ export function ArchiveThreadContent({
     return () => {
       cancelled = true;
     };
-  }, [boardId, threadId]);
+  }, [baseUrl, boardId, threadId]);
 
   useEffect(() => {
     if (highlightSeqs.length > 0 && firstHighlightRef.current) {
@@ -243,6 +245,7 @@ export function ArchiveThreadContent({
               threadId={thread.threadId}
               response={response}
               highlighted={isHighlighted}
+              baseUrl={baseUrl}
             />
           );
         })}
