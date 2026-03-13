@@ -1,19 +1,14 @@
-name: Build and Push Web Image
+name: Build and Push WS Server Image
 
 on:
   push:
     branches: [main, feat/docker-cloudfront]
     paths:
-      - '**'
-      - '!deploy/**'
-      - '!ws-server/**'
-      - '!*.md'
-      - '!.gitignore'
+      - 'ws-server/**'
   workflow_dispatch:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
 
 jobs:
   build-and-push:
@@ -43,7 +38,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/tunaground/openchamchijs-ws-server
           tags: |
             type=raw,value={{branch}}
             type=raw,value=latest
@@ -52,7 +47,7 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: .
+          context: ./ws-server
           platforms: linux/amd64,linux/arm64
           push: true
           tags: ${{ steps.meta.outputs.tags }}
