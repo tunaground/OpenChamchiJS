@@ -2,45 +2,60 @@
 set -euo pipefail
 
 STACK_NAME="chamchi"
+COMPOSE_FILE="docker-compose.swarm.yml"
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 cd "$SCRIPT_DIR"
 
-service_for() {
-  case "$1" in
-    web) echo "ghcr.io/tunaground/openchamchijs" ;;
-    ws)  echo "ghcr.io/tunaground/openchamchijs-ws-server" ;;
-    *)   echo "Unknown service: $1" >&2; exit 1 ;;
-  esac
+IMAGES=(
+  "web ghcr.io/tunaground/openchamchijs APP_VERSION"
+  "ws  ghcr.io/tunaground/openchamchijs-ws-server WS_VERSION"
+)
+
+current_version() {
+  local service="$1"
+  docker service inspect --format '{{.Spec.TaskTemplate.ContainerSpec.Image}}' \
+    "${STACK_NAME}_${service}" 2>/dev/null | sed 's/.*://' | sed 's/@.*//'
+}
+
+stack_deploy() {
+  docker compose -f "$COMPOSE_FILE" --env-file .env config \
+    | docker stack deploy -c - "$STACK_NAME"
 }
 
 deploy() {
-  local service="${1:?Usage: $0 deploy <service> <version>}"
-  local version="${2:?Usage: $0 deploy <service> <version>}"
-  local image
-  image="$(service_for "$service"):${version}"
+  local target="${1:-}"
+  local version="${2:-}"
 
-  echo "Deploying ${service}: ${image}"
-  docker service update --image "$image" "${STACK_NAME}_${service}"
+  for entry in "${IMAGES[@]}"; do
+    local name=$(echo "$entry" | awk '{print $1}')
+    local var=$(echo "$entry" | awk '{print $3}')
+
+    if [ "$name" = "$target" ] && [ -n "$version" ]; then
+      export "$var=$version"
+      echo "Deploying ${name}: ${version}"
+    else
+      local cur
+      cur=$(current_version "$name")
+      if [ -n "$cur" ]; then
+        export "$var=$cur"
+      fi
+    fi
+  done
+
+  stack_deploy
 }
 
 rollback() {
   local service="${1:?Usage: $0 rollback <service>}"
-  service_for "$service" > /dev/null
-
   echo "Rolling back ${service}..."
   docker service rollback "${STACK_NAME}_${service}"
 }
 
-init() {
-  echo "Initializing stack '$STACK_NAME'..."
-  docker compose -f docker-compose.swarm.yml --env-file .env config \
-    | docker stack deploy -c - "$STACK_NAME"
-}
-
 case "${1:-}" in
   init)
-    init
+    echo "Initializing stack '$STACK_NAME'..."
+    stack_deploy
     ;;
   deploy)
     deploy "${2:-}" "${3:-}"
@@ -51,7 +66,7 @@ case "${1:-}" in
   *)
     echo "Usage:"
     echo "  $0 init"
-    echo "  $0 deploy <service> <version>"
+    echo "  $0 deploy [service] [version]"
     echo "  $0 rollback <service>"
     echo ""
     echo "Services: web, ws"
