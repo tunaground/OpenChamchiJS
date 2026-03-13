@@ -1,0 +1,57 @@
+services:
+  web:
+    image: ghcr.io/tunaground/openchamchijs:${APP_VERSION:-latest}
+    ports:
+      - "3000:3000"
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+    volumes:
+      - ./GeoLite2-Country.mmdb:/app/lib/GeoLite2-Country.mmdb:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        failure_action: rollback
+      rollback_config:
+        order: start-first
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  ws:
+    image: ghcr.io/tunaground/openchamchijs-ws-server:${WS_VERSION:-latest}
+    ports:
+      - "4000:4000"
+    environment:
+      - WS_PORT=4000
+      - WS_API_KEY=${WS_API_KEY}
+      - WS_TOKEN_SECRET=${WS_TOKEN_SECRET}
+    logging:
+      driver: json-file
+      options:
+        max-size: "256m"
+        max-file: "2"
+    deploy:
+      replicas: 1
+      update_config:
+        order: start-first
+        failure_action: rollback
+      rollback_config:
+        order: start-first
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
