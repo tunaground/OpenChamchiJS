@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { threadService } from "@/lib/services/thread";
+import { toISOString } from "@/lib/cache";
 import { AdminThreadsContent } from "./admin-threads-content";
 
 interface Props {
@@ -59,8 +60,8 @@ export default async function AdminThreadsPage({ params, searchParams }: Props) 
           ended: thread.ended,
           top: thread.top,
           deleted: thread.deleted,
-          createdAt: thread.createdAt.toISOString(),
-          updatedAt: thread.updatedAt.toISOString(),
+          createdAt: toISOString(thread.createdAt),
+          updatedAt: toISOString(thread.updatedAt),
         }))}
         pagination={result.pagination}
         search={search ?? ""}
