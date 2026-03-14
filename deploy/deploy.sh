@@ -20,6 +20,8 @@ current_version() {
 
 stack_deploy() {
   docker compose -f "$COMPOSE_FILE" --env-file .env config \
+    | sed 's/published: "\([0-9]*\)"/published: \1/' \
+    | grep -v '^name:' \
     | docker stack deploy -c - "$STACK_NAME"
 }
 
