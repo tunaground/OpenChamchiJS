@@ -7,7 +7,7 @@ export class AblySubscriber implements RealtimeSubscriber {
   private client: Ably.Realtime | null = null;
   private channels: Map<string, Ably.RealtimeChannel> = new Map();
   private connectionCallback: ((connected: boolean) => void) | null = null;
-  private presenceCallbacks: Map<string, (members: PresenceMember[]) => void> = new Map();
+  private presenceCallbacks: Map<string, (count: number) => void> = new Map();
   private tokenUrl: string;
 
   constructor(tokenUrl: string = "/api/realtime/token") {
@@ -102,7 +102,7 @@ export class AblySubscriber implements RealtimeSubscriber {
     return channelInstance;
   }
 
-  private async fetchPresenceMembers(channel: string): Promise<PresenceMember[]> {
+  private async fetchPresenceCount(channel: string): Promise<number> {
     const channelInstance = this.getOrCreateChannel(channel);
     const members = await channelInstance.presence.get();
 
@@ -112,9 +112,7 @@ export class AblySubscriber implements RealtimeSubscriber {
       uniqueClientIds.add(m.clientId || m.connectionId || "unknown");
     }
 
-    return Array.from(uniqueClientIds).map((id) => ({
-      oderId: id,
-    }));
+    return uniqueClientIds.size;
   }
 
   async enterPresence(channel: string, data?: PresenceMember): Promise<void> {
@@ -129,17 +127,17 @@ export class AblySubscriber implements RealtimeSubscriber {
     }
   }
 
-  async getPresenceMembers(channel: string): Promise<PresenceMember[]> {
-    return this.fetchPresenceMembers(channel);
+  async getPresenceCount(channel: string): Promise<number> {
+    return this.fetchPresenceCount(channel);
   }
 
-  onPresenceChange(channel: string, callback: (members: PresenceMember[]) => void): void {
+  onPresenceChange(channel: string, callback: (count: number) => void): void {
     const channelInstance = this.getOrCreateChannel(channel);
     this.presenceCallbacks.set(channel, callback);
 
     const handlePresenceChange = async () => {
-      const members = await this.fetchPresenceMembers(channel);
-      callback(members);
+      const count = await this.fetchPresenceCount(channel);
+      callback(count);
     };
 
     channelInstance.presence.subscribe("enter", handlePresenceChange);

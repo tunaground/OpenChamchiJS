@@ -1,9 +1,9 @@
 "use client";
 
-import type { RealtimeSubscriber, PresenceMember } from "../../ports/realtime";
+import type { RealtimeSubscriber } from "../../ports/realtime";
 
 interface PendingPresenceGet {
-  resolve: (members: PresenceMember[]) => void;
+  resolve: (count: number) => void;
   reject: (error: Error) => void;
 }
 
@@ -11,7 +11,7 @@ export class WsSubscriber implements RealtimeSubscriber {
   private ws: WebSocket | null = null;
   private connectionCallback: ((connected: boolean) => void) | null = null;
   private subscriptions: Map<string, Map<string, (data: unknown) => void>> = new Map();
-  private presenceCallbacks: Map<string, (members: PresenceMember[]) => void> = new Map();
+  private presenceCallbacks: Map<string, (count: number) => void> = new Map();
   private pendingPresenceGets: Map<string, PendingPresenceGet[]> = new Map();
   private subscribedChannels: Set<string> = new Set();
   private presenceChannels: Set<string> = new Set();
@@ -118,7 +118,7 @@ export class WsSubscriber implements RealtimeSubscriber {
     this.send({ type: "presence:leave", channel });
   }
 
-  async getPresenceMembers(channel: string): Promise<PresenceMember[]> {
+  async getPresenceCount(channel: string): Promise<number> {
     return new Promise((resolve, reject) => {
       if (!this.pendingPresenceGets.has(channel)) {
         this.pendingPresenceGets.set(channel, []);
@@ -140,7 +140,7 @@ export class WsSubscriber implements RealtimeSubscriber {
     });
   }
 
-  onPresenceChange(channel: string, callback: (members: PresenceMember[]) => void): void {
+  onPresenceChange(channel: string, callback: (count: number) => void): void {
     this.presenceCallbacks.set(channel, callback);
   }
 
@@ -160,7 +160,7 @@ export class WsSubscriber implements RealtimeSubscriber {
       channel?: string;
       event?: string;
       data?: unknown;
-      members?: PresenceMember[];
+      count?: number;
     };
     try {
       msg = JSON.parse(raw);
@@ -180,7 +180,7 @@ export class WsSubscriber implements RealtimeSubscriber {
 
       case "presence:update": {
         const cb = this.presenceCallbacks.get(msg.channel!);
-        cb?.(msg.members || []);
+        cb?.(msg.count ?? 0);
         break;
       }
 
@@ -188,7 +188,7 @@ export class WsSubscriber implements RealtimeSubscriber {
         const pending = this.pendingPresenceGets.get(msg.channel!);
         if (pending && pending.length > 0) {
           const { resolve } = pending.shift()!;
-          resolve(msg.members || []);
+          resolve(msg.count ?? 0);
           if (pending.length === 0) {
             this.pendingPresenceGets.delete(msg.channel!);
           }

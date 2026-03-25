@@ -59,23 +59,22 @@ function broadcastToChannel(channel, message) {
 }
 
 /**
- * Get deduplicated presence members for a channel
+ * Get deduplicated presence member count for a channel
  */
-function getPresenceMembers(channel) {
+function getPresenceCount(channel) {
   const channelPresence = presence.get(channel);
-  if (!channelPresence) return [];
-  return Array.from(channelPresence.keys()).map((id) => ({ oderId: id }));
+  if (!channelPresence) return 0;
+  return channelPresence.size;
 }
 
 /**
  * Broadcast presence update to all subscribers of a channel
  */
 function broadcastPresenceUpdate(channel) {
-  const members = getPresenceMembers(channel);
   broadcastToChannel(channel, {
     type: "presence:update",
     channel,
-    members,
+    count: getPresenceCount(channel),
   });
 }
 
@@ -284,13 +283,12 @@ wss.on("connection", (ws) => {
       }
 
       case "presence:get": {
-        const members = getPresenceMembers(channel);
         if (ws.readyState === 1) {
           ws.send(
             JSON.stringify({
               type: "presence:members",
               channel,
-              members,
+              count: getPresenceCount(channel),
             })
           );
         }

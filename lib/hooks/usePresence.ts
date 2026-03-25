@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { getSubscriber } from "@/lib/realtime";
-import type { RealtimeSubscriber, PresenceMember } from "@/lib/realtime";
+import type { RealtimeSubscriber } from "@/lib/realtime";
 
 interface UsePresenceResult {
   memberCount: number;
@@ -22,8 +22,8 @@ export function usePresence(channel: string, enabled: boolean): UsePresenceResul
   const [error, setError] = useState<Error | null>(null);
   const subscriberRef = useRef<RealtimeSubscriber | null>(null);
 
-  const handlePresenceChange = useCallback((members: PresenceMember[]) => {
-    setMemberCount(members.length);
+  const handlePresenceChange = useCallback((count: number) => {
+    setMemberCount(count);
   }, []);
 
   useEffect(() => {
@@ -60,11 +60,11 @@ export function usePresence(channel: string, enabled: boolean): UsePresenceResul
         await subscriber.enterPresence(channel);
 
         // Get initial member count (after enter to ensure we're included)
-        // Small delay to ensure Ably has processed our enter
+        // Small delay to ensure server has processed our enter
         await new Promise((resolve) => setTimeout(resolve, 100));
-        const members = await subscriber.getPresenceMembers(channel);
+        const count = await subscriber.getPresenceCount(channel);
         if (mounted) {
-          setMemberCount(members.length);
+          setMemberCount(count);
         }
 
         if (mounted) {
@@ -132,15 +132,15 @@ export function useMultiPresence(
         for (const { channel } of enabledChannels) {
           try {
             await subscriber.enterPresence(channel);
-            const members = await subscriber.getPresenceMembers(channel);
+            const count = await subscriber.getPresenceCount(channel);
 
             newResults.set(channel, {
-              memberCount: members.length,
+              memberCount: count,
               isConnected: true,
               error: null,
             });
 
-            subscriber.onPresenceChange(channel, (members) => {
+            subscriber.onPresenceChange(channel, (count) => {
               if (mountedRef.current) {
                 setResults((prev) => {
                   const updated = new Map(prev);
@@ -148,7 +148,7 @@ export function useMultiPresence(
                   if (current) {
                     updated.set(channel, {
                       ...current,
-                      memberCount: members.length,
+                      memberCount: count,
                     });
                   }
                   return updated;

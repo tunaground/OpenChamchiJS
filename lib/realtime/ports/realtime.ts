@@ -81,17 +81,17 @@ export interface RealtimeSubscriber {
   leavePresence(channel: string): Promise<void>;
 
   /**
-   * Get current presence members on a channel
-   * @param channel - Channel name to get members from
+   * Get current presence count on a channel
+   * @param channel - Channel name to get count from
    */
-  getPresenceMembers(channel: string): Promise<PresenceMember[]>;
+  getPresenceCount(channel: string): Promise<number>;
 
   /**
    * Subscribe to presence changes on a channel
    * @param channel - Channel name to subscribe to
-   * @param callback - Function to call when presence changes (receives updated member list)
+   * @param callback - Function to call when presence changes (receives member count)
    */
-  onPresenceChange(channel: string, callback: (members: PresenceMember[]) => void): void;
+  onPresenceChange(channel: string, callback: (count: number) => void): void;
 
   /**
    * Unsubscribe from presence changes on a channel
