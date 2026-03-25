@@ -555,13 +555,13 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
                 <span>{labels.threads}: {board.threadCount}</span>
               </CardMeta>
               <CardActions>
-                <Link href={`/admin/boards/${board.id}/threads`}>
+                <Link prefetch={false} href={`/admin/boards/${board.id}/threads`}>
                   <SmallButton>{labels.manageThreads}</SmallButton>
                 </Link>
-                <Link href={`/admin/boards/${board.id}/responses`}>
+                <Link prefetch={false} href={`/admin/boards/${board.id}/responses`}>
                   <SmallButton>{labels.manageResponses}</SmallButton>
                 </Link>
-                <Link href={`/admin/boards/${board.id}/notices`}>
+                <Link prefetch={false} href={`/admin/boards/${board.id}/notices`}>
                   <SmallButton>{labels.manageNotices}</SmallButton>
                 </Link>
                 {canUpdate && (

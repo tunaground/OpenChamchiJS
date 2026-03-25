@@ -561,7 +561,7 @@ export function AdminResponsesContent({
         <Header>
           <Title>{labels.title}</Title>
           <Breadcrumb>
-            <Link href="/admin/boards">Boards</Link> / {boardName}
+            <Link prefetch={false} href="/admin/boards">Boards</Link> / {boardName}
           </Breadcrumb>
         </Header>
 
@@ -598,6 +598,7 @@ export function AdminResponsesContent({
                 <ResponseCard key={response.id} $deleted={response.deleted}>
                   <CardHeader>
                     <ThreadLink
+                      prefetch={false}
                       href={`/trace/${boardId}/${response.threadId}`}
                     >
                       #{response.threadId} {response.threadTitle}

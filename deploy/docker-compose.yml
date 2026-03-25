@@ -1,0 +1,30 @@
+services:
+  app:
+    image: ghcr.io/tunaground/openchamchijs:latest
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    volumes:
+      - ./GeoLite2-Country.mmdb:/app/lib/GeoLite2-Country.mmdb:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "1g"
+        max-file: "2"
+    restart: unless-stopped
+
+  ws-server:
+    image: ghcr.io/tunaground/openchamchijs-ws-server:latest
+    ports:
+      - "4000:4000"
+    environment:
+      - WS_PORT=4000
+      - WS_API_KEY=${WS_API_KEY}
+      - WS_TOKEN_SECRET=${WS_TOKEN_SECRET}
+    logging:
+      driver: json-file
+      options:
+        max-size: "256m"
+        max-file: "2"
+    restart: unless-stopped

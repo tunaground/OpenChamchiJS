@@ -33,10 +33,17 @@ export default async function AdminSettingsPage() {
         gaTrackingId: settings.gaTrackingId,
         realtimeProvider: settings.realtimeProvider,
         realtimeApiKey: settings.realtimeApiKey,
+        realtimeWsUrl: settings.realtimeWsUrl,
+        realtimeWsApiUrl: settings.realtimeWsApiUrl,
+        realtimeWsApiKey: settings.realtimeWsApiKey,
+        realtimeWsTokenSecret: settings.realtimeWsTokenSecret,
         storageProvider: settings.storageProvider,
         storageUrl: settings.storageUrl,
         storageSecret: settings.storageSecret,
         storageBucket: settings.storageBucket,
+        archiveBaseUrl: settings.archiveBaseUrl,
+        archiveBoards: settings.archiveBoards,
+        archiveRedirect: settings.archiveRedirect,
       }}
       geoIpAvailable={geoIpAvailable}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}

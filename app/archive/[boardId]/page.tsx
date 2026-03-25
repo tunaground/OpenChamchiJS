@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
+import { globalSettingsService } from "@/lib/services/global-settings";
 import { ArchiveLayout } from "../_components/ArchiveLayout";
 import { ArchiveBoardContent } from "../_components/ArchiveBoardContent";
-import { ARCHIVE_CONFIG } from "../_lib/config";
 
 interface Props {
   params: Promise<{ boardId: string }>;
@@ -9,15 +9,16 @@ interface Props {
 
 export default async function ArchiveBoardPage({ params }: Props) {
   const { boardId } = await params;
+  const settings = await globalSettingsService.get();
 
-  const board = ARCHIVE_CONFIG.boards.find((b) => b.id === boardId);
+  const board = settings.archiveBoards.find((b) => b.id === boardId);
   if (!board) {
     notFound();
   }
 
   return (
-    <ArchiveLayout title={`${board.name} Archive`}>
-      <ArchiveBoardContent boardId={boardId} />
+    <ArchiveLayout title={`${board.name} Archive`} boards={settings.archiveBoards}>
+      <ArchiveBoardContent boardId={boardId} baseUrl={settings.archiveBaseUrl || ""} />
     </ArchiveLayout>
   );
 }

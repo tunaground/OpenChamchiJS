@@ -4,6 +4,7 @@ import {
   isServerRealtimeEnabled,
 } from "@/lib/realtime/config.server";
 import { RealtimeError } from "@/lib/realtime/errors";
+import { getClientIp } from "@/lib/api/foreign-ip-check";
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,8 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Extract client IP for presence deduplication
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    const clientIp = forwardedFor?.split(",")[0]?.trim() || "unknown";
+    const clientIp = getClientIp(request);
 
     const provider = await getServerRealtimeProvider();
 
@@ -28,6 +28,13 @@ export async function GET(request: NextRequest) {
         );
         const tokenRequest = await createAblyTokenRequest(clientIp);
         return NextResponse.json(tokenRequest);
+      }
+      case "ws": {
+        const { createWsToken } = await import(
+          "@/lib/realtime/adapters/ws/token"
+        );
+        const tokenData = await createWsToken(clientIp);
+        return NextResponse.json(tokenData);
       }
       case "pusher": {
         return NextResponse.json(

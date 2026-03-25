@@ -7,17 +7,22 @@ import {
   NavItem,
   NavLink,
 } from "@/components/sidebar/SidebarStyles";
-import { ARCHIVE_CONFIG } from "../_lib/config";
+
+interface ArchiveBoard {
+  id: string;
+  name: string;
+}
 
 interface ArchiveBoardListSidebarProps {
   title?: string;
+  boards: ArchiveBoard[];
 }
 
 export function ArchiveBoardListSidebar({
   title = "Archive",
+  boards,
 }: ArchiveBoardListSidebarProps) {
   const pathname = usePathname();
-  const boards = ARCHIVE_CONFIG.boards;
 
   return (
     <div>

@@ -27,12 +27,18 @@ const Content = styled.div`
   width: 100%;
 `;
 
+interface ArchiveBoard {
+  id: string;
+  name: string;
+}
+
 interface ArchiveLayoutProps {
   title?: string;
+  boards: ArchiveBoard[];
   children: React.ReactNode;
 }
 
-export function ArchiveLayout({ title, children }: ArchiveLayoutProps) {
+export function ArchiveLayout({ title, boards, children }: ArchiveLayoutProps) {
   const {
     desktopOpen,
     mobileOpen,
@@ -121,7 +127,7 @@ export function ArchiveLayout({ title, children }: ArchiveLayoutProps) {
       <ArchiveTopBar title={title} onMenuClick={handleMenuClick} />
       {mounted && (
         <Sidebar open={sidebarOpen} onClose={closeSidebar}>
-          <ArchiveBoardListSidebar />
+          <ArchiveBoardListSidebar boards={boards} />
         </Sidebar>
       )}
       <Main $desktopOpen={mounted ? desktopOpen : true}>

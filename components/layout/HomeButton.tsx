@@ -32,7 +32,7 @@ interface HomeButtonProps {
 
 export function HomeButton({ active }: HomeButtonProps) {
   return (
-    <Button href="/" aria-label="Home" $active={active}>
+    <Button prefetch={false} href="/" aria-label="Home" $active={active}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

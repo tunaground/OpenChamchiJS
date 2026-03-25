@@ -158,12 +158,19 @@ export const updateSettingsSchema = z.object({
   threadCustomHtml: z.string().max(50000).optional().nullable(),
   tripcodeSalt: z.string().max(100).optional().nullable(),
   gaTrackingId: z.string().max(50).optional().nullable(),
-  realtimeProvider: z.enum(["ably"]).optional().nullable(),
+  realtimeProvider: z.enum(["ably", "ws"]).optional().nullable(),
   realtimeApiKey: z.string().max(200).optional().nullable(),
+  realtimeWsUrl: z.string().max(200).optional().nullable(),
+  realtimeWsApiUrl: z.string().max(200).optional().nullable(),
+  realtimeWsApiKey: z.string().max(200).optional().nullable(),
+  realtimeWsTokenSecret: z.string().max(200).optional().nullable(),
   storageProvider: z.enum(["supabase"]).optional().nullable(),
   storageUrl: z.string().url().max(200).optional().nullable(),
   storageSecret: z.string().max(500).optional().nullable(),
   storageBucket: z.string().max(100).optional().nullable(),
+  archiveBaseUrl: z.string().url().max(500).optional().nullable(),
+  archiveBoards: z.array(z.object({ id: z.string(), name: z.string() })).optional().nullable(),
+  archiveRedirect: z.boolean().optional(),
 });
 
 export type CustomLinkInput = z.infer<typeof customLinkSchema>;

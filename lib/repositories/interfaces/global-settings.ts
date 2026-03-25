@@ -4,6 +4,11 @@ export interface CustomLink {
   url: string;
 }
 
+export interface ArchiveBoard {
+  id: string;
+  name: string;
+}
+
 export interface GlobalSettingsData {
   id: string;
   siteTitle: string;
@@ -17,10 +22,17 @@ export interface GlobalSettingsData {
   gaTrackingId: string | null;
   realtimeProvider: string | null;
   realtimeApiKey: string | null;
+  realtimeWsUrl: string | null;
+  realtimeWsApiUrl: string | null;
+  realtimeWsApiKey: string | null;
+  realtimeWsTokenSecret: string | null;
   storageProvider: string | null;
   storageUrl: string | null;
   storageSecret: string | null;
   storageBucket: string | null;
+  archiveBaseUrl: string | null;
+  archiveBoards: ArchiveBoard[];
+  archiveRedirect: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,10 +49,17 @@ export interface UpdateGlobalSettingsInput {
   gaTrackingId?: string | null;
   realtimeProvider?: string | null;
   realtimeApiKey?: string | null;
+  realtimeWsUrl?: string | null;
+  realtimeWsApiUrl?: string | null;
+  realtimeWsApiKey?: string | null;
+  realtimeWsTokenSecret?: string | null;
   storageProvider?: string | null;
   storageUrl?: string | null;
   storageSecret?: string | null;
   storageBucket?: string | null;
+  archiveBaseUrl?: string | null;
+  archiveBoards?: ArchiveBoard[] | null;
+  archiveRedirect?: boolean;
 }
 
 export interface GlobalSettingsRepository {

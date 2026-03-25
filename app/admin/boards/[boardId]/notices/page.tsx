@@ -5,6 +5,7 @@ import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { noticeService } from "@/lib/services/notice";
+import { toISOString } from "@/lib/cache";
 import { AdminNoticesContent } from "./admin-notices-content";
 
 interface Props {
@@ -61,8 +62,8 @@ export default async function AdminNoticesPage({ params, searchParams }: Props) 
           title: notice.title,
           content: notice.content,
           pinned: notice.pinned,
-          createdAt: notice.createdAt.toISOString(),
-          updatedAt: notice.updatedAt.toISOString(),
+          createdAt: toISOString(notice.createdAt),
+          updatedAt: toISOString(notice.updatedAt),
         }))}
         pagination={result.pagination}
         search={search ?? ""}

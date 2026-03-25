@@ -158,7 +158,7 @@ export function NoticeDetailContent({
       authLabels={authLabels}
     >
       <Container>
-        <BackLink href={`/notice/${boardId}`}>&larr; {labels.backToList}</BackLink>
+        <BackLink prefetch={false} href={`/notice/${boardId}`}>&larr; {labels.backToList}</BackLink>
 
         <Article>
           <Header>

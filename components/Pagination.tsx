@@ -122,7 +122,7 @@ export function Pagination({
   return (
     <PaginationWrapper>
       {currentPage > 1 ? (
-        <PageLink href={getPageUrl(currentPage - 1)}>&laquo;</PageLink>
+        <PageLink prefetch={false} href={getPageUrl(currentPage - 1)}>&laquo;</PageLink>
       ) : (
         <DisabledLink>&laquo;</DisabledLink>
       )}
@@ -133,6 +133,7 @@ export function Pagination({
         ) : (
           <PageLink
             key={page}
+            prefetch={false}
             href={getPageUrl(page)}
             $active={page === currentPage}
           >
@@ -142,7 +143,7 @@ export function Pagination({
       )}
 
       {currentPage < totalPages ? (
-        <PageLink href={getPageUrl(currentPage + 1)}>&raquo;</PageLink>
+        <PageLink prefetch={false} href={getPageUrl(currentPage + 1)}>&raquo;</PageLink>
       ) : (
         <DisabledLink>&raquo;</DisabledLink>
       )}

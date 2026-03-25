@@ -7,6 +7,7 @@ import { boardService, BoardServiceError } from "@/lib/services/board";
 import { responseService, SearchType } from "@/lib/services/response";
 import { AdminResponseCursor } from "@/lib/repositories/interfaces/response";
 import { getCountryCode } from "@/lib/ip";
+import { toISOString } from "@/lib/cache";
 import { AdminResponsesContent } from "./admin-responses-content";
 
 interface Props {
@@ -71,7 +72,7 @@ export default async function AdminResponsesPage({ params, searchParams }: Props
       content: response.content,
       visible: response.visible,
       deleted: response.deleted,
-      createdAt: response.createdAt.toISOString(),
+      createdAt: toISOString(response.createdAt),
     }));
 
     return (

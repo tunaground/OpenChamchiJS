@@ -87,6 +87,7 @@ function NavLink({ href, $active, $disabled, children }: NavLinkProps) {
 
   return (
     <StyledNavLink
+      prefetch={false}
       href={href}
       $active={$active}
       $disabled={$disabled}

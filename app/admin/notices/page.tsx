@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
 import { permissionService } from "@/lib/services/permission";
 import { noticeService } from "@/lib/services/notice";
+import { toISOString } from "@/lib/cache";
 import { AdminGlobalNoticesContent } from "./admin-global-notices-content";
 
 interface Props {
@@ -42,8 +43,8 @@ export default async function AdminGlobalNoticesPage({ searchParams }: Props) {
         title: notice.title,
         content: notice.content,
         pinned: notice.pinned,
-        createdAt: notice.createdAt.toISOString(),
-        updatedAt: notice.updatedAt.toISOString(),
+        createdAt: toISOString(notice.createdAt),
+        updatedAt: toISOString(notice.updatedAt),
       }))}
       pagination={result.pagination}
       search={search ?? ""}

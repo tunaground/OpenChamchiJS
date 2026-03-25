@@ -32,7 +32,7 @@ interface AdminButtonProps {
 
 export function AdminButton({ active }: AdminButtonProps) {
   return (
-    <Button href="/admin/boards" aria-label="Admin" $active={active}>
+    <Button prefetch={false} href="/admin/boards" aria-label="Admin" $active={active}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         fill="none"

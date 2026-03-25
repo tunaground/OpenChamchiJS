@@ -12,6 +12,11 @@ interface CustomLink {
   url: string;
 }
 
+interface ArchiveBoard {
+  id: string;
+  name: string;
+}
+
 const Container = styled.div`
   padding: ${(props) => props.theme.containerPadding};
   max-width: ${(props) => props.theme.adminMaxWidth};
@@ -406,10 +411,17 @@ interface AdminSettingsContentProps {
     gaTrackingId: string | null;
     realtimeProvider: string | null;
     realtimeApiKey: string | null;
+    realtimeWsUrl: string | null;
+    realtimeWsApiUrl: string | null;
+    realtimeWsApiKey: string | null;
+    realtimeWsTokenSecret: string | null;
     storageProvider: string | null;
     storageUrl: string | null;
     storageSecret: string | null;
     storageBucket: string | null;
+    archiveBaseUrl: string | null;
+    archiveBoards: ArchiveBoard[];
+    archiveRedirect: boolean;
   };
   geoIpAvailable: boolean;
   authLabels: AuthLabels;
@@ -436,10 +448,19 @@ export function AdminSettingsContent({
   const [gaTrackingId, setGaTrackingId] = useState(initialSettings.gaTrackingId ?? "");
   const [realtimeProvider, setRealtimeProvider] = useState(initialSettings.realtimeProvider ?? "");
   const [realtimeApiKey, setRealtimeApiKey] = useState(initialSettings.realtimeApiKey ?? "");
+  const [realtimeWsUrl, setRealtimeWsUrl] = useState(initialSettings.realtimeWsUrl ?? "");
+  const [realtimeWsApiUrl, setRealtimeWsApiUrl] = useState(initialSettings.realtimeWsApiUrl ?? "");
+  const [realtimeWsApiKey, setRealtimeWsApiKey] = useState(initialSettings.realtimeWsApiKey ?? "");
+  const [realtimeWsTokenSecret, setRealtimeWsTokenSecret] = useState(initialSettings.realtimeWsTokenSecret ?? "");
   const [storageProvider, setStorageProvider] = useState(initialSettings.storageProvider ?? "");
   const [storageUrl, setStorageUrl] = useState(initialSettings.storageUrl ?? "");
   const [storageSecret, setStorageSecret] = useState(initialSettings.storageSecret ?? "");
   const [storageBucket, setStorageBucket] = useState(initialSettings.storageBucket ?? "");
+  const [archiveBaseUrl, setArchiveBaseUrl] = useState(initialSettings.archiveBaseUrl ?? "");
+  const [archiveBoards, setArchiveBoards] = useState<ArchiveBoard[]>(initialSettings.archiveBoards ?? []);
+  const [archiveRedirect, setArchiveRedirect] = useState(initialSettings.archiveRedirect ?? false);
+  const [newArchiveBoardId, setNewArchiveBoardId] = useState("");
+  const [newArchiveBoardName, setNewArchiveBoardName] = useState("");
   const [customLinks, setCustomLinks] = useState<CustomLink[]>(initialSettings.customLinks);
   const [newLinkLabel, setNewLinkLabel] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
@@ -447,6 +468,18 @@ export function AdminSettingsContent({
   const [saved, setSaved] = useState(false);
   const [cacheInvalidating, setCacheInvalidating] = useState(false);
   const [cacheInvalidated, setCacheInvalidated] = useState(false);
+
+  const handleAddArchiveBoard = () => {
+    if (!newArchiveBoardId.trim() || !newArchiveBoardName.trim()) return;
+    if (archiveBoards.some((b) => b.id === newArchiveBoardId.trim())) return;
+    setArchiveBoards([...archiveBoards, { id: newArchiveBoardId.trim(), name: newArchiveBoardName.trim() }]);
+    setNewArchiveBoardId("");
+    setNewArchiveBoardName("");
+  };
+
+  const handleDeleteArchiveBoard = (id: string) => {
+    setArchiveBoards(archiveBoards.filter((b) => b.id !== id));
+  };
 
   const handleAddLink = () => {
     if (!newLinkLabel.trim() || !newLinkUrl.trim()) return;
@@ -483,11 +516,18 @@ export function AdminSettingsContent({
           gaTrackingId: gaTrackingId || null,
           realtimeProvider: realtimeProvider || null,
           realtimeApiKey: realtimeApiKey || null,
+          realtimeWsUrl: realtimeWsUrl || null,
+          realtimeWsApiUrl: realtimeWsApiUrl || null,
+          realtimeWsApiKey: realtimeWsApiKey || null,
+          realtimeWsTokenSecret: realtimeWsTokenSecret || null,
           storageProvider: storageProvider || null,
           storageUrl: storageUrl || null,
           storageSecret: storageSecret || null,
           storageBucket: storageBucket || null,
           customLinks,
+          archiveBaseUrl: archiveBaseUrl || null,
+          archiveBoards: archiveBoards.length > 0 ? archiveBoards : null,
+          archiveRedirect,
         }),
       });
 
@@ -668,11 +708,12 @@ export function AdminSettingsContent({
           >
             <option value="">None</option>
             <option value="ably">Ably</option>
+            <option value="ws">WebSocket Server</option>
           </Select>
           <Description>Select a realtime provider to enable chat mode.</Description>
         </FormGroup>
 
-        {realtimeProvider && (
+        {realtimeProvider === "ably" && (
           <FormGroup>
             <Label htmlFor="realtimeApiKey">API Key</Label>
             <TitleInput
@@ -686,6 +727,66 @@ export function AdminSettingsContent({
             />
             <Description>Server-side API key for the realtime provider.</Description>
           </FormGroup>
+        )}
+
+        {realtimeProvider === "ws" && (
+          <>
+            <FormGroup>
+              <Label htmlFor="realtimeWsUrl">WebSocket URL (Client)</Label>
+              <TitleInput
+                id="realtimeWsUrl"
+                type="text"
+                value={realtimeWsUrl}
+                onChange={(e) => setRealtimeWsUrl(e.target.value)}
+                placeholder="wss://ws.example.com"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>Public WebSocket URL that browsers connect to.</Description>
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="realtimeWsApiUrl">API URL (Server)</Label>
+              <TitleInput
+                id="realtimeWsApiUrl"
+                type="text"
+                value={realtimeWsApiUrl}
+                onChange={(e) => setRealtimeWsApiUrl(e.target.value)}
+                placeholder="http://localhost:4000"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>Internal URL for server-side publishing (e.g., http://ws-server:4000).</Description>
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="realtimeWsApiKey">API Key</Label>
+              <TitleInput
+                id="realtimeWsApiKey"
+                type="password"
+                value={realtimeWsApiKey}
+                onChange={(e) => setRealtimeWsApiKey(e.target.value)}
+                placeholder="Enter WS API key"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>API key for authenticating publish requests to the WS server.</Description>
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="realtimeWsTokenSecret">Token Secret</Label>
+              <SaltInput
+                id="realtimeWsTokenSecret"
+                type="password"
+                value={realtimeWsTokenSecret}
+                onChange={(e) => setRealtimeWsTokenSecret(e.target.value)}
+                placeholder="Enter token signing secret"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>Shared secret for signing client authentication tokens (must match WS_TOKEN_SECRET on the WS server).</Description>
+            </FormGroup>
+          </>
         )}
 
         <Divider />
@@ -749,6 +850,90 @@ export function AdminSettingsContent({
             </FormGroup>
           </>
         )}
+
+        <Divider />
+
+        <FormGroup>
+          <SectionTitle>Archive</SectionTitle>
+          <SectionDescription>Configure archive data source for viewing archived threads.</SectionDescription>
+
+          <Label htmlFor="archiveBaseUrl">Base URL</Label>
+          <TitleInput
+            id="archiveBaseUrl"
+            type="text"
+            value={archiveBaseUrl}
+            onChange={(e) => setArchiveBaseUrl(e.target.value)}
+            placeholder="https://archive-data.example.com/data"
+            maxLength={500}
+            disabled={!canUpdate}
+          />
+          <Description>URL where archive JSON data files are hosted.</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="archiveRedirect" style={{ display: "inline", marginRight: "0.8rem" }}>
+            <input
+              id="archiveRedirect"
+              type="checkbox"
+              checked={archiveRedirect}
+              onChange={(e) => setArchiveRedirect(e.target.checked)}
+              disabled={!canUpdate}
+              style={{ marginRight: "0.4rem" }}
+            />
+            Redirect to archive
+          </Label>
+          <Description>When a thread is not found, check if it exists in the archive and redirect.</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label>Archive Boards</Label>
+          {archiveBoards.length === 0 ? (
+            <EmptyState>No archive boards configured.</EmptyState>
+          ) : (
+            <LinkList>
+              {archiveBoards.map((board) => (
+                <LinkItem key={board.id}>
+                  <LinkLabel>{board.id}</LinkLabel>
+                  <LinkUrl>{board.name}</LinkUrl>
+                  {canUpdate && (
+                    <DeleteButton onClick={() => handleDeleteArchiveBoard(board.id)}>
+                      {labels.deleteLink}
+                    </DeleteButton>
+                  )}
+                </LinkItem>
+              ))}
+            </LinkList>
+          )}
+
+          {canUpdate && (
+            <AddLinkForm>
+              <InputGroup>
+                <InputLabel>Board ID</InputLabel>
+                <LinkInput
+                  type="text"
+                  value={newArchiveBoardId}
+                  onChange={(e) => setNewArchiveBoardId(e.target.value)}
+                  placeholder="board-id"
+                />
+              </InputGroup>
+              <InputGroup>
+                <InputLabel>Board Name</InputLabel>
+                <LinkInput
+                  type="text"
+                  value={newArchiveBoardName}
+                  onChange={(e) => setNewArchiveBoardName(e.target.value)}
+                  placeholder="Board Name"
+                />
+              </InputGroup>
+              <AddButton
+                onClick={handleAddArchiveBoard}
+                disabled={!newArchiveBoardId.trim() || !newArchiveBoardName.trim()}
+              >
+                {labels.addLink}
+              </AddButton>
+            </AddLinkForm>
+          )}
+        </FormGroup>
 
         <Divider />
 

@@ -1,0 +1,78 @@
+services:
+  web:
+    image: ghcr.io/tunaground/openchamchijs:${APP_VERSION:-latest}
+    ports:
+      - target: 3000
+        published: 3000
+    environment:
+      - DATABASE_URL=${DATABASE_URL}
+      - DIRECT_URL=${DIRECT_URL}
+      - NEXTAUTH_URL=${NEXTAUTH_URL}
+      - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - NODE_OPTIONS=--max-old-space-size=1024
+    volumes:
+      - ./GeoLite2-Country.mmdb:/app/lib/GeoLite2-Country.mmdb:ro
+    logging:
+      driver: json-file
+      options:
+        max-size: "256m"
+        max-file: "2"
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 1280M
+        reservations:
+          memory: 512M
+      update_config:
+        order: start-first
+        failure_action: rollback
+      rollback_config:
+        order: start-first
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r=>{if(!r.ok)throw r;process.exit(0)}).catch(()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  ws:
+    image: ghcr.io/tunaground/openchamchijs-ws-server:${WS_VERSION:-latest}
+    ports:
+      - target: 4000
+        published: 4000
+    environment:
+      - WS_PORT=4000
+      - WS_API_KEY=${WS_API_KEY}
+      - WS_TOKEN_SECRET=${WS_TOKEN_SECRET}
+      - NODE_OPTIONS=--max-old-space-size=256
+    logging:
+      driver: json-file
+      options:
+        max-size: "256m"
+        max-file: "2"
+    deploy:
+      replicas: 1
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 128M
+      update_config:
+        order: start-first
+        failure_action: rollback
+      rollback_config:
+        order: start-first
+    healthcheck:
+      test: ["CMD", "node", "-e", "const s=require('net').connect(4000,'localhost');s.on('connect',()=>{s.end();process.exit(0)});s.on('error',()=>process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+networks:
+  default:
+    driver: overlay
+    ipam:
+      config:
+        - subnet: 10.101.0.0/24

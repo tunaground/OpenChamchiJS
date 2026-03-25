@@ -7,14 +7,17 @@ import { permissionService } from "@/lib/services/permission";
 import { BoardData } from "@/lib/repositories/interfaces/board";
 
 export function getClientIp(request: NextRequest): string {
+  // CloudFront proxy (ip:port format)
+  const cfViewerAddr = request.headers.get("cloudfront-viewer-address");
+  if (cfViewerAddr) {
+    const ip = cfViewerAddr.split(":").slice(0, -1).join(":");
+    if (ip) return ip;
+  }
+  // Standard proxy
   const forwarded = request.headers.get("x-forwarded-for");
-  if (forwarded) {
-    return forwarded.split(",")[0].trim();
-  }
+  if (forwarded) return forwarded.split(",")[0].trim();
   const realIp = request.headers.get("x-real-ip");
-  if (realIp) {
-    return realIp;
-  }
+  if (realIp) return realIp;
   return "127.0.0.1";
 }
 
