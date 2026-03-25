@@ -174,7 +174,18 @@ const server = createServer((req, res) => {
 });
 
 // WebSocket server
-const wss = new WebSocketServer({ noServer: true });
+const wss = new WebSocketServer({
+  noServer: true,
+  perMessageDeflate: {
+    zlibDeflateOptions: { chunkSize: 1024, memLevel: 7, level: 3 },
+    zlibInflateOptions: { chunkSize: 10 * 1024 },
+    clientNoContextTakeover: true,
+    serverNoContextTakeover: true,
+    serverMaxWindowBits: 10,
+    concurrencyLimit: 10,
+    threshold: 128,
+  },
+});
 
 server.on("upgrade", (req, socket, head) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
