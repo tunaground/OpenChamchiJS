@@ -419,6 +419,12 @@ interface AdminSettingsContentProps {
     storageUrl: string | null;
     storageSecret: string | null;
     storageBucket: string | null;
+    s3Region: string | null;
+    s3Endpoint: string | null;
+    s3AccessKeyId: string | null;
+    s3SecretAccessKey: string | null;
+    s3Bucket: string | null;
+    s3PublicUrl: string | null;
     archiveBaseUrl: string | null;
     archiveBoards: ArchiveBoard[];
     archiveRedirect: boolean;
@@ -456,6 +462,12 @@ export function AdminSettingsContent({
   const [storageUrl, setStorageUrl] = useState(initialSettings.storageUrl ?? "");
   const [storageSecret, setStorageSecret] = useState(initialSettings.storageSecret ?? "");
   const [storageBucket, setStorageBucket] = useState(initialSettings.storageBucket ?? "");
+  const [s3Region, setS3Region] = useState(initialSettings.s3Region ?? "");
+  const [s3Endpoint, setS3Endpoint] = useState(initialSettings.s3Endpoint ?? "");
+  const [s3AccessKeyId, setS3AccessKeyId] = useState(initialSettings.s3AccessKeyId ?? "");
+  const [s3SecretAccessKey, setS3SecretAccessKey] = useState(initialSettings.s3SecretAccessKey ?? "");
+  const [s3Bucket, setS3Bucket] = useState(initialSettings.s3Bucket ?? "");
+  const [s3PublicUrl, setS3PublicUrl] = useState(initialSettings.s3PublicUrl ?? "");
   const [archiveBaseUrl, setArchiveBaseUrl] = useState(initialSettings.archiveBaseUrl ?? "");
   const [archiveBoards, setArchiveBoards] = useState<ArchiveBoard[]>(initialSettings.archiveBoards ?? []);
   const [archiveRedirect, setArchiveRedirect] = useState(initialSettings.archiveRedirect ?? false);
@@ -524,6 +536,12 @@ export function AdminSettingsContent({
           storageUrl: storageUrl || null,
           storageSecret: storageSecret || null,
           storageBucket: storageBucket || null,
+          s3Region: s3Region || null,
+          s3Endpoint: s3Endpoint || null,
+          s3AccessKeyId: s3AccessKeyId || null,
+          s3SecretAccessKey: s3SecretAccessKey || null,
+          s3Bucket: s3Bucket || null,
+          s3PublicUrl: s3PublicUrl || null,
           customLinks,
           archiveBaseUrl: archiveBaseUrl || null,
           archiveBoards: archiveBoards.length > 0 ? archiveBoards : null,
@@ -804,11 +822,12 @@ export function AdminSettingsContent({
           >
             <option value="">None</option>
             <option value="supabase">Supabase</option>
+            <option value="s3">S3</option>
           </Select>
           <Description>Select a storage provider to enable file uploads.</Description>
         </FormGroup>
 
-        {storageProvider && (
+        {storageProvider === "supabase" && (
           <>
             <FormGroup>
               <Label htmlFor="storageUrl">URL</Label>
@@ -847,6 +866,90 @@ export function AdminSettingsContent({
                 maxLength={100}
                 disabled={!canUpdate}
               />
+            </FormGroup>
+          </>
+        )}
+
+        {storageProvider === "s3" && (
+          <>
+            <FormGroup>
+              <Label htmlFor="s3Region">Region</Label>
+              <TitleInput
+                id="s3Region"
+                type="text"
+                value={s3Region}
+                onChange={(e) => setS3Region(e.target.value)}
+                placeholder="ap-northeast-2"
+                maxLength={30}
+                disabled={!canUpdate}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="s3AccessKeyId">Access Key ID</Label>
+              <TitleInput
+                id="s3AccessKeyId"
+                type="text"
+                value={s3AccessKeyId}
+                onChange={(e) => setS3AccessKeyId(e.target.value)}
+                placeholder="AKIA..."
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="s3SecretAccessKey">Secret Access Key</Label>
+              <TitleInput
+                id="s3SecretAccessKey"
+                type="password"
+                value={s3SecretAccessKey}
+                onChange={(e) => setS3SecretAccessKey(e.target.value)}
+                placeholder="Enter secret access key"
+                maxLength={500}
+                disabled={!canUpdate}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="s3Bucket">Bucket</Label>
+              <TitleInput
+                id="s3Bucket"
+                type="text"
+                value={s3Bucket}
+                onChange={(e) => setS3Bucket(e.target.value)}
+                placeholder="my-bucket"
+                maxLength={100}
+                disabled={!canUpdate}
+              />
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="s3PublicUrl">Public URL (CDN)</Label>
+              <TitleInput
+                id="s3PublicUrl"
+                type="text"
+                value={s3PublicUrl}
+                onChange={(e) => setS3PublicUrl(e.target.value)}
+                placeholder="https://cdn.example.com"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>CloudFront or CDN URL. Leave empty to use S3 direct URL.</Description>
+            </FormGroup>
+
+            <FormGroup>
+              <Label htmlFor="s3Endpoint">Custom Endpoint</Label>
+              <TitleInput
+                id="s3Endpoint"
+                type="text"
+                value={s3Endpoint}
+                onChange={(e) => setS3Endpoint(e.target.value)}
+                placeholder="https://s3.compatible.service.com"
+                maxLength={200}
+                disabled={!canUpdate}
+              />
+              <Description>For S3-compatible services (R2, MinIO). Leave empty for AWS S3.</Description>
             </FormGroup>
           </>
         )}
