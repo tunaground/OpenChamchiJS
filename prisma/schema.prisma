@@ -126,10 +126,16 @@ model GlobalSettings {
   realtimeWsApiUrl      String?   // WS server API URL (for server-side publishing)
   realtimeWsApiKey      String?   // WS server API key (for publishing auth)
   realtimeWsTokenSecret String?   // WS token signing secret
-  storageProvider   String?   // "supabase" | null
+  storageProvider   String?   // "supabase" | "s3" | null
   storageUrl        String?   // Supabase URL
   storageSecret     String?   // Supabase service key
   storageBucket     String?   // Supabase bucket name
+  s3Region          String?   // AWS region (e.g., "ap-northeast-2")
+  s3Endpoint        String?   // Custom endpoint for S3-compatible services (R2, MinIO)
+  s3AccessKeyId     String?   // AWS access key ID
+  s3SecretAccessKey String?   // AWS secret access key
+  s3Bucket          String?   // S3 bucket name
+  s3PublicUrl       String?   // CloudFront/CDN URL (e.g., "https://cdn.example.com")
   archiveBaseUrl    String?   // Archive data URL
   archiveBoards     String?   @db.Text  // JSON: [{"id":"board1","name":"Board 1"}]
   archiveRedirect   Boolean   @default(false)  // Redirect to archive when thread not found

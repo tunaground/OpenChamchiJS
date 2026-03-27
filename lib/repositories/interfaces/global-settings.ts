@@ -30,6 +30,12 @@ export interface GlobalSettingsData {
   storageUrl: string | null;
   storageSecret: string | null;
   storageBucket: string | null;
+  s3Region: string | null;
+  s3Endpoint: string | null;
+  s3AccessKeyId: string | null;
+  s3SecretAccessKey: string | null;
+  s3Bucket: string | null;
+  s3PublicUrl: string | null;
   archiveBaseUrl: string | null;
   archiveBoards: ArchiveBoard[];
   archiveRedirect: boolean;
@@ -57,6 +63,12 @@ export interface UpdateGlobalSettingsInput {
   storageUrl?: string | null;
   storageSecret?: string | null;
   storageBucket?: string | null;
+  s3Region?: string | null;
+  s3Endpoint?: string | null;
+  s3AccessKeyId?: string | null;
+  s3SecretAccessKey?: string | null;
+  s3Bucket?: string | null;
+  s3PublicUrl?: string | null;
   archiveBaseUrl?: string | null;
   archiveBoards?: ArchiveBoard[] | null;
   archiveRedirect?: boolean;

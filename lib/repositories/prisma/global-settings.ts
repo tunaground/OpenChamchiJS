@@ -74,6 +74,12 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       storageUrl?: string | null;
       storageSecret?: string | null;
       storageBucket?: string | null;
+      s3Region?: string | null;
+      s3Endpoint?: string | null;
+      s3AccessKeyId?: string | null;
+      s3SecretAccessKey?: string | null;
+      s3Bucket?: string | null;
+      s3PublicUrl?: string | null;
       archiveBaseUrl?: string | null;
       archiveBoards?: string | null;
       archiveRedirect?: boolean;
@@ -135,6 +141,24 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.storageBucket !== undefined) {
       updateData.storageBucket = data.storageBucket;
+    }
+    if (data.s3Region !== undefined) {
+      updateData.s3Region = data.s3Region;
+    }
+    if (data.s3Endpoint !== undefined) {
+      updateData.s3Endpoint = data.s3Endpoint;
+    }
+    if (data.s3AccessKeyId !== undefined) {
+      updateData.s3AccessKeyId = data.s3AccessKeyId;
+    }
+    if (data.s3SecretAccessKey !== undefined) {
+      updateData.s3SecretAccessKey = data.s3SecretAccessKey;
+    }
+    if (data.s3Bucket !== undefined) {
+      updateData.s3Bucket = data.s3Bucket;
+    }
+    if (data.s3PublicUrl !== undefined) {
+      updateData.s3PublicUrl = data.s3PublicUrl;
     }
     if (data.archiveBaseUrl !== undefined) {
       updateData.archiveBaseUrl = data.archiveBaseUrl;

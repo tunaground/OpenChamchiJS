@@ -48,7 +48,13 @@ export function createGlobalSettingsService(
         data.storageProvider !== undefined ||
         data.storageUrl !== undefined ||
         data.storageSecret !== undefined ||
-        data.storageBucket !== undefined;
+        data.storageBucket !== undefined ||
+        data.s3Region !== undefined ||
+        data.s3Endpoint !== undefined ||
+        data.s3AccessKeyId !== undefined ||
+        data.s3SecretAccessKey !== undefined ||
+        data.s3Bucket !== undefined ||
+        data.s3PublicUrl !== undefined;
 
       if (realtimeChanged) {
         const { resetPublisher } = await import("@/lib/realtime/publisher");
