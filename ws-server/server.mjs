@@ -180,7 +180,6 @@ const wss = new WebSocketServer({
     zlibInflateOptions: { chunkSize: 10 * 1024 },
     clientNoContextTakeover: true,
     serverNoContextTakeover: true,
-    serverMaxWindowBits: 10,
     concurrencyLimit: 10,
     threshold: 128,
   },
