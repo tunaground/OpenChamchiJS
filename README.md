@@ -8,14 +8,16 @@ Next.js 기반의 오픈소스 익명 게시판 시스템입니다.
 ## 주요 기능
 
 - **익명 게시판** - 스레드/응답 기반 게시판 시스템
-- **실시간 기능** - 채팅 모드, 접속자 수 표시 (Ably WebSocket)
-- **이미지 업로드** - 응답에 이미지 첨부 (Supabase Storage)
+- **실시간 기능** - 채팅 모드, 접속자 수 표시 (자체 WebSocket 서버 또는 Ably)
+- **이미지 업로드** - 응답에 이미지 첨부 (Supabase Storage 또는 S3)
 - **관리자 페이지** - 사용자, 역할, 보드, 스레드, 공지사항 관리
 - **권한 시스템** - 역할 기반 접근 제어 (RBAC)
 - **다국어 지원** - 한국어, 영어, 일본어
 - **아카이브** - 레거시 스레드 정적 뷰어 (선택 사항)
-- **다크 모드** - 라이트/다크 테마 전환
+- **테마** - 라이트/다크/그레이 테마 전환
 - **해외 IP 차단** - 보드별 외국 IP 작성 제한 (선택 사항)
+- **스레드 차단** - 작성자별 스레드 내 차단 (authorId 기반)
+- **트립코드** - 익명 사용자 식별용 트립코드 지원
 
 ## 기술 스택
 
@@ -86,10 +88,13 @@ Realtime과 Storage 설정은 관리자 페이지 → 전역 설정에서 관리
 
 | 변수명 | 설명 |
 |--------|------|
-| `REALTIME_PROVIDER` | 실시간 기능 Provider (`ably`) |
-| `NEXT_PUBLIC_REALTIME_PROVIDER` | 클라이언트용 실시간 Provider (`ably`) |
+| `REALTIME_PROVIDER` | 실시간 Provider (`ws` 또는 `ably`) |
+| `WS_SERVER_URL` | WebSocket 서버 공개 URL (클라이언트 접속용) |
+| `WS_API_URL` | WebSocket 서버 내부 API URL (서버 → 서버) |
+| `WS_API_KEY` | WebSocket 서버 publish 인증 키 |
+| `WS_TOKEN_SECRET` | WebSocket 토큰 서명 공유 시크릿 |
 | `ABLY_API_KEY` | Ably API 키 ([무료 발급](https://ably.com/)) |
-| `STORAGE_PROVIDER` | 이미지 업로드 스토리지 (`supabase`) |
+| `STORAGE_PROVIDER` | 스토리지 Provider (`supabase` 또는 `s3`) |
 | `SUPABASE_URL` | Supabase 프로젝트 URL |
 | `SUPABASE_SERVICE_KEY` | Supabase service_role 키 |
 | `SUPABASE_STORAGE_BUCKET` | 스토리지 버킷 이름 |
@@ -111,6 +116,7 @@ Realtime과 Storage 설정은 관리자 페이지 → 전역 설정에서 관리
 
 ```
 ghcr.io/tunaground/openchamchijs:latest
+ghcr.io/tunaground/openchamchijs-ws-server:latest
 ```
 
 ### Docker Compose
@@ -132,6 +138,22 @@ docker compose up -d
 ```
 
 `deploy/docker-compose.yml`을 참고하세요. GeoIP mmdb 파일은 볼륨 마운트로 제공합니다.
+
+### Docker Swarm
+
+```bash
+# 스택 초기화
+./deploy/deploy.sh init
+
+# 서비스 배포 (특정 버전)
+./deploy/deploy.sh deploy web v1.0.0
+./deploy/deploy.sh deploy ws v1.0.0
+
+# 롤백
+./deploy/deploy.sh rollback web
+```
+
+`deploy/docker-compose.swarm.yml`을 사용합니다. 서비스: web (Next.js, port 3000), ws (WebSocket, port 4000).
 
 ### Podman Quadlet (systemd)
 
@@ -210,6 +232,7 @@ npx prisma studio      # Prisma Studio GUI
 | `board:update` | 보드 수정 |
 | `thread:edit` | 모든 스레드 수정 |
 | `thread:delete` | 모든 스레드 삭제 |
+| `response:delete` | 모든 응답 삭제 |
 | `foreign:write` | 해외 IP 차단 우회 |
 
 ### 보드별 권한
@@ -221,20 +244,32 @@ npx prisma studio      # Prisma Studio GUI
 - `notice:{boardId}:update` - 해당 보드 공지 수정
 - `notice:{boardId}:delete` - 해당 보드 공지 삭제
 
-## 실시간 기능 설정 (Ably)
+## 실시간 기능 설정
 
-실시간 채팅 모드와 접속자 수 표시를 사용하려면 Ably 설정이 필요합니다.
+실시간 채팅 모드와 접속자 수 표시를 사용하려면 Realtime Provider 설정이 필요합니다.
+
+### 자체 WebSocket 서버 (권장)
+
+1. `ws-server/` Docker 이미지를 배포합니다
+2. 환경 변수 설정:
+   ```env
+   REALTIME_PROVIDER=ws
+   WS_SERVER_URL=wss://ws.your-domain.com
+   WS_API_URL=http://ws-server:4000
+   WS_API_KEY=your-api-key
+   WS_TOKEN_SECRET=your-shared-secret
+   ```
+3. Docker Swarm/Compose 사용 시 `deploy/` 설정 참고
+
+### Ably
 
 1. [Ably](https://ably.com/)에서 무료 계정 생성
-2. 새 앱 생성 후 API Keys 탭으로 이동
-3. API 키 생성 (필요 권한: Publish, Subscribe, Presence)
-4. 환경 변수 설정:
+2. API 키 생성 (Publish, Subscribe, Presence 권한)
+3. 환경 변수 설정:
    ```env
    REALTIME_PROVIDER=ably
-   NEXT_PUBLIC_REALTIME_PROVIDER=ably
    ABLY_API_KEY=your-ably-api-key
    ```
-5. 재배포
 
 ### 기능
 
@@ -242,49 +277,34 @@ npx prisma studio      # Prisma Studio GUI
 - **접속자 수 (사용자 카운터)**: 현재 페이지를 보고 있는 사용자 수를 상단 바에 표시
   - `/index` 페이지: 항상 표시 (해당 보드를 보고 있는 접속자 수)
   - `/trace` 페이지: 보드 설정에서 "접속자 수 표시" 활성화 시 표시 (해당 스레드를 보고 있는 접속자 수)
-  - Ably의 Presence 기능을 사용하여 실시간 집계
   - 동일 사용자가 여러 탭을 열어도 중복 없이 1명으로 카운트
 
-Ably 무료 플랜: 월 600만 메시지, 동시 접속 200명
+## 이미지 업로드 설정
 
-## 이미지 업로드 설정 (Supabase Storage)
+응답에 이미지 첨부 기능을 사용하려면 Storage Provider 설정이 필요합니다.
 
-응답에 이미지 첨부 기능을 사용하려면 Supabase Storage 설정이 필요합니다.
-
-### 1. Supabase 프로젝트 설정
+### Supabase Storage
 
 1. [Supabase](https://supabase.com/)에서 프로젝트 생성 (또는 기존 프로젝트 사용)
 2. Settings → API에서 Project URL과 service_role 키 확인
+3. Storage → "New bucket" → 버킷 이름 입력 → **Public bucket** 체크 → Create
+4. 환경 변수 설정:
+   ```env
+   STORAGE_PROVIDER=supabase
+   SUPABASE_URL=https://your-project.supabase.co
+   SUPABASE_SERVICE_KEY=your-service-role-key
+   SUPABASE_STORAGE_BUCKET=attachments
+   ```
 
-### 2. Storage 버킷 생성
+### S3 (또는 S3 호환 서비스)
 
-1. Supabase 대시보드 → Storage
-2. "New bucket" 클릭
-3. 버킷 이름 입력 (예: `attachments`)
-4. **Public bucket** 체크 (이미지를 공개 URL로 제공하기 위해 필요)
-5. Create bucket
+S3, CloudFront/CDN, S3 호환 서비스 (MinIO, R2 등)를 지원합니다. 관리자 페이지 → 전역 설정에서 설정합니다.
 
-### 3. 환경 변수 설정
-
-```env
-STORAGE_PROVIDER=supabase
-SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_KEY=your-service-role-key
-SUPABASE_STORAGE_BUCKET=attachments
-```
-
-### 4. 보드별 업로드 설정
+### 보드별 업로드 설정
 
 관리자 페이지 → 보드 설정에서 각 보드별로 설정 가능:
 - **최대 업로드 용량**: 기본 5MB
 - **허용 MIME 타입**: 기본 `image/png,image/jpeg,image/gif,image/webp`
-
-### 기능
-
-- 응답 작성 시 이미지 첨부 가능
-- 이미지는 응답 본문 상단에 썸네일(최대 400px)로 표시
-- 클릭 시 원본 크기로 확대
-- 글 작성 실패 시 업로드된 이미지 자동 정리
 
 > 환경 변수가 설정되지 않으면 이미지 업로드 버튼이 표시되지 않습니다.
 

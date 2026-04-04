@@ -11,7 +11,7 @@ services:
       - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
       - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
       - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
-      - NODE_OPTIONS=--max-old-space-size=1024
+      - NODE_OPTIONS=--max-old-space-size=1400
     volumes:
       - ./GeoLite2-Country.mmdb:/app/lib/GeoLite2-Country.mmdb:ro
     logging:
@@ -23,9 +23,9 @@ services:
       replicas: 1
       resources:
         limits:
-          memory: 1280M
+          memory: 2g
         reservations:
-          memory: 512M
+          memory: 1g
       update_config:
         order: start-first
         failure_action: rollback
