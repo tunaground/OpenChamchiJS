@@ -240,6 +240,21 @@ const ConfirmButton = styled(ModalButton)`
   }
 `;
 
+const RevertButton = styled(ModalButton)`
+  background: transparent;
+  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  color: ${(props) => props.theme.textPrimary};
+
+  &:hover {
+    background: ${(props) => props.theme.surfaceHover};
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
 const ErrorMessage = styled.p`
   font-size: 1.3rem;
   color: ${(props) => props.theme.error};
@@ -247,7 +262,7 @@ const ErrorMessage = styled.p`
 `;
 
 const ManageModalContent = styled(ModalContent)`
-  max-width: 50rem;
+  max-width: 60rem;
   max-height: 90vh;
   overflow-y: auto;
 `;
@@ -452,6 +467,7 @@ interface Labels {
   loadingMore: string;
   ban: string;
   unban: string;
+  show: string;
   threadBanned: string;
   banned: string;
 }
@@ -835,6 +851,8 @@ export function ThreadDetailContent({
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [bulkBanning, setBulkBanning] = useState(false);
+  const [bulkShowing, setBulkShowing] = useState(false);
+  const [bulkUnbanning, setBulkUnbanning] = useState(false);
   const [bannedAuthorIds, setBannedAuthorIds] = useState<Map<string, string>>(new Map());
 
   useEffect(() => {
@@ -1135,6 +1153,38 @@ export function ThreadDetailContent({
     }
   };
 
+  const handleBulkShow = async () => {
+    if (selectedResponseIds.size === 0) return;
+    setBulkShowing(true);
+    try {
+      const body = manageUnlockedByAdmin
+        ? { visible: true }
+        : { password: managePassword, visible: true };
+
+      const showPromises = Array.from(selectedResponseIds).map((id) =>
+        fetch(
+          `/api/boards/${thread.boardId}/threads/${thread.id}/responses/${id}`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }
+        )
+      );
+      await Promise.all(showPromises);
+
+      setAllResponses((prev) =>
+        prev.map((r) =>
+          selectedResponseIds.has(r.id) ? { ...r, visible: true } : r
+        )
+      );
+      setSelectedResponseIds(new Set());
+      router.refresh();
+    } finally {
+      setBulkShowing(false);
+    }
+  };
+
   const handleBulkBan = async () => {
     if (selectedResponseIds.size === 0) return;
     setBulkBanning(true);
@@ -1170,6 +1220,51 @@ export function ThreadDetailContent({
       }
     } finally {
       setBulkBanning(false);
+    }
+  };
+
+  const handleBulkUnban = async () => {
+    if (selectedResponseIds.size === 0) return;
+    setBulkUnbanning(true);
+    try {
+      const authorIdSet = new Set<string>();
+      for (const id of selectedResponseIds) {
+        const response = allResponses.find((r) => r.id === id);
+        if (response) authorIdSet.add(response.authorId);
+      }
+
+      const headers: Record<string, string> = {};
+      if (managePassword) {
+        headers["X-Thread-Password"] = btoa(encodeURIComponent(managePassword));
+      }
+
+      const deletePromises: Promise<Response>[] = [];
+      const authorIdsToRemove: string[] = [];
+      for (const authorId of authorIdSet) {
+        const banId = bannedAuthorIds.get(authorId);
+        if (banId) {
+          authorIdsToRemove.push(authorId);
+          deletePromises.push(
+            fetch(
+              `/api/boards/${thread.boardId}/threads/${thread.id}/bans/${banId}`,
+              { method: "DELETE", headers }
+            )
+          );
+        }
+      }
+
+      await Promise.all(deletePromises);
+
+      setBannedAuthorIds((prev) => {
+        const map = new Map(prev);
+        for (const authorId of authorIdsToRemove) {
+          map.delete(authorId);
+        }
+        return map;
+      });
+      setSelectedResponseIds(new Set());
+    } finally {
+      setBulkUnbanning(false);
     }
   };
 
@@ -1419,16 +1514,18 @@ export function ThreadDetailContent({
                         />
                         <span style={{ fontSize: "1.2rem" }}>전체 선택</span>
                       </label>
-                      {selectedResponseIds.size > 0 && (
-                        <>
-                          <ConfirmButton onClick={handleBulkHide} disabled={bulkDeleting}>
-                            {labels.hide} ({selectedResponseIds.size})
-                          </ConfirmButton>
-                          <ConfirmButton onClick={handleBulkBan} disabled={bulkBanning}>
-                            {labels.ban} ({selectedResponseIds.size})
-                          </ConfirmButton>
-                        </>
-                      )}
+                      <ConfirmButton onClick={handleBulkHide} disabled={bulkDeleting}>
+                        {labels.hide} ({selectedResponseIds.size})
+                      </ConfirmButton>
+                      <ConfirmButton onClick={handleBulkBan} disabled={bulkBanning}>
+                        {labels.ban} ({selectedResponseIds.size})
+                      </ConfirmButton>
+                      <RevertButton onClick={handleBulkShow} disabled={bulkShowing}>
+                        {labels.show} ({selectedResponseIds.size})
+                      </RevertButton>
+                      <RevertButton onClick={handleBulkUnban} disabled={bulkUnbanning}>
+                        {labels.unban} ({selectedResponseIds.size})
+                      </RevertButton>
                     </div>
                     <ManageResponseCards>
                       {allResponses.map((response, index) => (

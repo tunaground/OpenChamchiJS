@@ -212,6 +212,7 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
           loadingMore: t("loadingMore"),
           ban: t("ban"),
           unban: t("unban"),
+          show: t("show"),
           threadBanned: t("threadBanned"),
           banned: t("banned"),
         }}
