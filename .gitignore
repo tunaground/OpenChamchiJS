@@ -45,6 +45,9 @@ yarn-error.log*
 # claude code local settings
 .claude/
 
+# git worktrees
+/.worktrees/
+
 # vercel
 .vercel
 
