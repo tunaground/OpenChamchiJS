@@ -242,7 +242,7 @@ npx prisma studio      # Open Prisma Studio GUI
 
 ### Caching
 - Tag-based cache invalidation via `lib/cache.ts`
-- Tags: `board`, `boards`, `board-{id}`, `threads-{boardId}`, `thread-{id}`, `responses-{threadId}`, `bans-{threadId}`, `notices`, `notices-{boardId}`, `notices-global`, `settings`, `permissions-{userId}`
+- Tags: `board`, `boards`, `board-{id}`, `threads-{boardId}`, `thread-{id}`, `responses-{threadId}`, `notices`, `notices-{boardId}`, `notices-global`, `settings`, `permissions-{userId}`
 - Admin cache invalidation endpoint: `POST /api/admin/cache`
 
 ### Deployment
