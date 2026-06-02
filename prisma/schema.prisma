@@ -118,6 +118,7 @@ model GlobalSettings {
   customLinks      String?  @db.Text // JSON array of {id, label, url}
   indexCustomHtml  String?  @db.Text // Custom HTML for board index pages (below notices)
   threadCustomHtml String?  @db.Text // Custom HTML for thread pages (above load more)
+  robotsTxt        String?  @db.Text // Dynamic robots.txt content (falls back to DEFAULT_ROBOTS_TXT)
   tripcodeSalt     String?  // bcrypt salt for tripcode generation
   gaTrackingId     String?  // Google Analytics Measurement ID (G-XXXXXXXXXX)
   realtimeProvider      String?   // "ably" | "ws" | null

@@ -1,4 +1,4 @@
-User-agent: *
+export const DEFAULT_ROBOTS_TXT = `User-agent: *
 Allow: /
 Disallow: /api/
 Disallow: /admin/
@@ -9,3 +9,4 @@ Disallow: /login
 Disallow: /settings
 Disallow: /test/
 Disallow: /*?*
+`;

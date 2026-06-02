@@ -367,6 +367,9 @@ interface Labels {
   threadCustomHtml: string;
   threadCustomHtmlPlaceholder: string;
   threadCustomHtmlDescription: string;
+  robotsTxt: string;
+  robotsTxtPlaceholder: string;
+  robotsTxtDescription: string;
   gaTrackingId: string;
   gaTrackingIdPlaceholder: string;
   gaTrackingIdDescription: string;
@@ -407,6 +410,7 @@ interface AdminSettingsContentProps {
     customLinks: CustomLink[];
     indexCustomHtml: string | null;
     threadCustomHtml: string | null;
+    robotsTxt: string | null;
     tripcodeSalt: string | null;
     gaTrackingId: string | null;
     realtimeProvider: string | null;
@@ -450,6 +454,7 @@ export function AdminSettingsContent({
   const [homepageContent, setHomepageContent] = useState(initialSettings.homepageContent ?? "");
   const [indexCustomHtml, setIndexCustomHtml] = useState(initialSettings.indexCustomHtml ?? "");
   const [threadCustomHtml, setThreadCustomHtml] = useState(initialSettings.threadCustomHtml ?? "");
+  const [robotsTxt, setRobotsTxt] = useState(initialSettings.robotsTxt ?? "");
   const [tripcodeSalt, setTripcodeSalt] = useState(initialSettings.tripcodeSalt ?? "");
   const [gaTrackingId, setGaTrackingId] = useState(initialSettings.gaTrackingId ?? "");
   const [realtimeProvider, setRealtimeProvider] = useState(initialSettings.realtimeProvider ?? "");
@@ -524,6 +529,7 @@ export function AdminSettingsContent({
           homepageContent: homepageContent || null,
           indexCustomHtml: indexCustomHtml || null,
           threadCustomHtml: threadCustomHtml || null,
+          robotsTxt: robotsTxt || null,
           tripcodeSalt: tripcodeSalt || null,
           gaTrackingId: gaTrackingId || null,
           realtimeProvider: realtimeProvider || null,
@@ -681,6 +687,18 @@ export function AdminSettingsContent({
             disabled={!canUpdate}
           />
           <Description>{labels.threadCustomHtmlDescription}</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="robotsTxt">{labels.robotsTxt}</Label>
+          <TextArea
+            id="robotsTxt"
+            value={robotsTxt}
+            onChange={(e) => setRobotsTxt(e.target.value)}
+            placeholder={labels.robotsTxtPlaceholder}
+            disabled={!canUpdate}
+          />
+          <Description>{labels.robotsTxtDescription}</Description>
         </FormGroup>
 
         <FormGroup>

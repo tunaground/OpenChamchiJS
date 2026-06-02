@@ -18,6 +18,7 @@ export interface GlobalSettingsData {
   customLinks: CustomLink[];
   indexCustomHtml: string | null;
   threadCustomHtml: string | null;
+  robotsTxt: string | null;
   tripcodeSalt: string | null;
   gaTrackingId: string | null;
   realtimeProvider: string | null;
@@ -51,6 +52,7 @@ export interface UpdateGlobalSettingsInput {
   customLinks?: CustomLink[];
   indexCustomHtml?: string | null;
   threadCustomHtml?: string | null;
+  robotsTxt?: string | null;
   tripcodeSalt?: string | null;
   gaTrackingId?: string | null;
   realtimeProvider?: string | null;

@@ -156,6 +156,7 @@ export const updateSettingsSchema = z.object({
   customLinks: z.array(customLinkSchema).max(20).optional(),
   indexCustomHtml: z.string().max(50000).optional().nullable(),
   threadCustomHtml: z.string().max(50000).optional().nullable(),
+  robotsTxt: z.string().max(50000).optional().nullable(),
   tripcodeSalt: z.string().max(100).optional().nullable(),
   gaTrackingId: z.string().max(50).optional().nullable(),
   realtimeProvider: z.enum(["ably", "ws"]).optional().nullable(),

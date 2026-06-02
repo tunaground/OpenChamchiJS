@@ -62,6 +62,7 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       customLinks?: string | null;
       indexCustomHtml?: string | null;
       threadCustomHtml?: string | null;
+      robotsTxt?: string | null;
       tripcodeSalt?: string | null;
       gaTrackingId?: string | null;
       realtimeProvider?: string | null;
@@ -105,6 +106,9 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.threadCustomHtml !== undefined) {
       updateData.threadCustomHtml = data.threadCustomHtml;
+    }
+    if (data.robotsTxt !== undefined) {
+      updateData.robotsTxt = data.robotsTxt;
     }
     if (data.tripcodeSalt !== undefined) {
       updateData.tripcodeSalt = data.tripcodeSalt;
