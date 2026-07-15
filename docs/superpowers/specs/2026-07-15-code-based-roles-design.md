@@ -18,15 +18,16 @@
 1. **`thread:edit`는 존재하지 않는 권한이다.** `lib/api/write-lock-check.ts:17`과 `app/admin/boards/[boardId]/threads/page.tsx:24`가 이를 체크하나, 생성되는 것은 `thread:update`뿐이다. 결과적으로 `writeLocked` 게시판에는 `all:all` 보유자만 글을 쓸 수 있다.
 2. **`board:{boardId}:delete`는 생성되지만 아무도 읽지 않는다.** 보드 삭제는 `board:update` 계열로만 막혀 있어, 보드 수정 권한자가 곧 삭제 권한자다.
 3. **보드 생성과 권한 생성이 원자적이지 않다** (`board.ts:143-144`). 실패 시 권한 없는 보드가 남는다.
-4. **`noticeService.findGlobal`은 인가 체크가 없다** (`app/admin/notices/page.tsx:23`). `admin:read` 레이아웃 게이트에만 의존한다.
-5. **어드민 사이드바의 조건부 렌더링이 죽어 있다.** `labels.roles && ...` 형태로 권한이 아닌 라벨 존재만 확인하는데, 호출부 5곳이 라벨을 무조건 전부 넘긴다.
-6. **`/setup` 부트스트랩은 check-then-act 경쟁 조건이다.** 동시 요청 시 둘 다 통과할 수 있고, 시드와 롤 바인딩이 트랜잭션이 아니다.
+4. **어드민 사이드바의 조건부 렌더링이 죽어 있다.** `labels.roles && ...` 형태로 권한이 아닌 라벨 존재만 확인하는데, 호출부 5곳이 라벨을 무조건 전부 넘긴다.
+5. **`/setup` 부트스트랩은 check-then-act 경쟁 조건이다.** 동시 요청 시 둘 다 통과할 수 있고, 시드와 롤 바인딩이 트랜잭션이 아니다.
 
-1, 2, 5는 본 설계로 해소된다. 3은 보드별 권한 생성 자체가 사라져 소멸한다.
+1, 2, 4는 본 설계로 해소된다. 3은 보드별 권한 생성 자체가 사라져 소멸한다.
 
-4는 `noticeService.findGlobal`에 `userId`를 받아 `isAdmin`을 요구하도록 고친다 — 어차피 전역 공지가 ADMIN 전용이 되면서 손대는 코드다.
+5의 경쟁 조건은 이번 범위 밖으로 둔다. `/setup`은 최초 1회 부트스트랩이고 동시 요청 가능성이 현실적으로 낮으며, 이를 고치려면 트랜잭션 경계 설계가 별도로 필요하다. `/setup`의 판정 로직 자체는 `roles` 기반으로 바뀌지만 check-then-act 구조는 그대로 유지된다.
 
-6의 경쟁 조건은 이번 범위 밖으로 둔다. `/setup`은 최초 1회 부트스트랩이고 동시 요청 가능성이 현실적으로 낮으며, 이를 고치려면 트랜잭션 경계 설계가 별도로 필요하다. `/setup`의 판정 로직 자체는 `roles` 기반으로 바뀌지만 check-then-act 구조는 그대로 유지된다.
+### 결함이 아닌 것: `noticeService.findGlobal`
+
+`findGlobal`에는 인가 체크가 없으나 이는 의도된 동작이다. `GET /api/notices`(`app/api/notices/route.ts:10-23`)는 세션을 요구하지 않는 공개 엔드포인트이며, 전역 공지 읽기는 공개 데이터다. ADMIN 전용이 되는 것은 전역 공지의 **쓰기**(`createGlobal`/`update`/`delete`)뿐이다. `findGlobal`에 인가를 추가해서는 안 된다.
 
 ## 롤 정의
 
@@ -90,7 +91,8 @@ listManagedBoardIds(userId): Promise<string[] | "all">
 | `/admin` 진입, 어드민 사이드바 | `admin:read` | `isAdmin` 또는 보드 어드민 1개 이상 |
 | 스레드/응답 수정·삭제, ThreadBan, 카운터 교정, 보드 설정 수정, `writeLocked` 우회 | `thread:*`, `response:*`, `board:*` 전역/보드별 쌍 | `canManageBoard(userId, boardId)` |
 | 보드 공지 CRUD | `notice:{boardId}:*` | `canManageBoard(userId, boardId)` |
-| 보드 생성, 보드 삭제, 전역 공지, 사용자·롤 관리, 전역 설정, 캐시 무효화 | `board:create`, `board:update`, `notice:*`, `user:*`, `role:*`, `all:all` | `isAdmin(userId)` |
+| 보드 생성, 보드 삭제, 전역 공지 쓰기, 사용자·롤 관리, 전역 설정, 캐시 무효화 | `board:create`, `board:update`, `notice:*`, `user:*`, `role:*`, `all:all` | `isAdmin(userId)` |
+| 공지 읽기(전역/보드), 보드 목록(공개 화면) | 없음 | 없음 (공개 유지) |
 | 해외 IP 우회 | `foreign:write` | `isVerified(userId)` |
 
 ### 보드 삭제
