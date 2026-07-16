@@ -1,9 +1,8 @@
 import {
-  permissionService as defaultPermissionService,
-  PermissionService,
-} from "@/lib/services/permission";
+  roleService as defaultRoleService,
+  RoleService,
+} from "@/lib/services/role";
 import { boardRepository as defaultBoardRepository } from "@/lib/repositories/prisma/board";
-import { permissionRepository as defaultPermissionRepository } from "@/lib/repositories/prisma/permission";
 import {
   BoardRepository,
   BoardData,
@@ -12,7 +11,6 @@ import {
   UpdateBoardInput,
   ConfigBoardInput,
 } from "@/lib/repositories/interfaces/board";
-import { PermissionRepository } from "@/lib/repositories/interfaces/permission";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
 import { cached, invalidateCache, CACHE_TAGS } from "@/lib/cache";
 
@@ -37,64 +35,11 @@ export interface BoardService {
 
 interface BoardServiceDeps {
   boardRepository: BoardRepository;
-  permissionService: PermissionService;
-  permissionRepository: PermissionRepository;
+  roleService: RoleService;
 }
 
 export function createBoardService(deps: BoardServiceDeps): BoardService {
-  const { boardRepository, permissionService, permissionRepository } = deps;
-
-  async function checkPermissions(
-    userId: string,
-    permissions: string[]
-  ): Promise<boolean> {
-    return permissionService.checkUserPermissions(userId, permissions);
-  }
-
-  async function createBoardPermissions(boardId: string): Promise<void> {
-    await permissionRepository.createMany([
-      // 보드 권한
-      {
-        name: `board:${boardId}:update`,
-        description: `${boardId} 보드 수정`,
-      },
-      {
-        name: `board:${boardId}:delete`,
-        description: `${boardId} 보드 삭제`,
-      },
-      // 공지 권한
-      {
-        name: `notice:${boardId}:create`,
-        description: `${boardId} 보드 공지 생성`,
-      },
-      {
-        name: `notice:${boardId}:update`,
-        description: `${boardId} 보드 공지 수정`,
-      },
-      {
-        name: `notice:${boardId}:delete`,
-        description: `${boardId} 보드 공지 삭제`,
-      },
-      // 스레드 권한
-      {
-        name: `thread:${boardId}:update`,
-        description: `${boardId} 보드 스레드 수정`,
-      },
-      {
-        name: `thread:${boardId}:delete`,
-        description: `${boardId} 보드 스레드 삭제`,
-      },
-      // 응답 권한
-      {
-        name: `response:${boardId}:update`,
-        description: `${boardId} 보드 응답 수정`,
-      },
-      {
-        name: `response:${boardId}:delete`,
-        description: `${boardId} 보드 응답 삭제`,
-      },
-    ]);
-  }
+  const { boardRepository, roleService } = deps;
 
   return {
     async findAll(): Promise<BoardData[]> {
@@ -106,15 +51,19 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
     },
 
     async findAllWithThreadCount(userId: string): Promise<BoardWithThreadCount[]> {
-      const hasPermission = await checkPermissions(userId, ["board:read"]);
-      if (!hasPermission) {
+      const managed = await roleService.listManagedBoardIds(userId);
+      if (managed !== "all" && managed.length === 0) {
         throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
-      return cached(
+
+      const boards = await cached(
         () => boardRepository.findAllWithThreadCount(),
         ["boards-with-count"],
         [CACHE_TAGS.boards]
       );
+
+      if (managed === "all") return boards;
+      return boards.filter((board) => managed.includes(board.id));
     },
 
     async findById(id: string): Promise<BoardData> {
@@ -130,8 +79,7 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
     },
 
     async create(userId: string, data: CreateBoardInput): Promise<BoardData> {
-      const hasPermission = await checkPermissions(userId, ["board:create"]);
-      if (!hasPermission) {
+      if (!(await roleService.isAdmin(userId))) {
         throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
 
@@ -141,9 +89,7 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
       }
 
       const board = await boardRepository.create(data);
-      await createBoardPermissions(board.id);
 
-      // Invalidate cache
       invalidateCache(CACHE_TAGS.boards);
 
       return board;
@@ -159,25 +105,17 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
         throw new BoardServiceError("Board not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkPermissions(userId, [
-        "board:update",
-        `board:${id}:update`,
-      ]);
-      if (!hasPermission) {
+      if (!(await roleService.canManageBoard(userId, id))) {
+        throw new BoardServiceError("Permission denied", "FORBIDDEN");
+      }
+
+      // 보드 삭제/복구는 시스템 어드민 전용
+      if (data.deleted !== undefined && !(await roleService.isAdmin(userId))) {
         throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
 
       const result = await boardRepository.update(id, data);
 
-      // Soft delete/restore board-specific permissions
-      if (data.deleted === true) {
-        await permissionRepository.softDeleteByBoardId(id);
-      } else if (data.deleted === false && board.deleted === true) {
-        // Restoring a deleted board - also restore its permissions
-        await permissionRepository.restoreByBoardId(id);
-      }
-
-      // Invalidate cache
       invalidateCache(CACHE_TAGS.boards);
       invalidateCache(CACHE_TAGS.board(id));
 
@@ -194,17 +132,12 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
         throw new BoardServiceError("Board not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkPermissions(userId, [
-        "board:update",
-        `board:${id}:update`,
-      ]);
-      if (!hasPermission) {
+      if (!(await roleService.canManageBoard(userId, id))) {
         throw new BoardServiceError("Permission denied", "FORBIDDEN");
       }
 
       const result = await boardRepository.updateConfig(id, data);
 
-      // Invalidate cache
       invalidateCache(CACHE_TAGS.boards);
       invalidateCache(CACHE_TAGS.board(id));
 
@@ -215,6 +148,5 @@ export function createBoardService(deps: BoardServiceDeps): BoardService {
 
 export const boardService = createBoardService({
   boardRepository: defaultBoardRepository,
-  permissionService: defaultPermissionService,
-  permissionRepository: defaultPermissionRepository,
+  roleService: defaultRoleService,
 });

@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { threadService } from "@/lib/services/thread";
 import { noticeService } from "@/lib/services/notice";
@@ -52,9 +52,10 @@ export default async function BoardIndexPage({ params, searchParams }: Props) {
     const t = await getTranslations("boardIndex");
     const tCommon = await getTranslations("common");
 
-    const canAccessAdmin = session
-      ? await permissionService.checkUserPermission(session.user.id, "admin:read")
-      : false;
+    const managed = session
+      ? await roleService.listManagedBoardIds(session.user.id)
+      : null;
+    const canAccessAdmin = managed !== null && (managed === "all" || managed.length > 0);
 
     return (
       <BoardIndexContent

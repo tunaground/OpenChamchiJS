@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { responseService, ResponseServiceError } from "@/lib/services/response";
+import { roleService } from "@/lib/services/role";
 import { handleServiceError } from "@/lib/api/error-handler";
 import { updateResponseSchema, deleteResponseSchema } from "@/lib/schemas";
 
@@ -10,11 +11,31 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ boardId: string; threadId: string; responseId: string }> }
 ) {
-  const { responseId } = await params;
+  const { boardId, responseId } = await params;
+
+  const { searchParams } = new URL(request.url);
+  const includeIp = searchParams.get("includeIp") === "true";
 
   try {
-    const response = await responseService.findById(responseId);
-    return NextResponse.json(response);
+    const response = await responseService.findById(responseId, boardId);
+
+    // Check if user has admin permission for the response's own board
+    // (must use the response's own board, not the URL's boardId)
+    let isAdmin = false;
+    const session = await getServerSession(authOptions);
+    if (session?.user?.id) {
+      isAdmin = await roleService.canManageBoard(session.user.id, response.boardId);
+    }
+
+    if (includeIp && isAdmin) {
+      // Admin with includeIp can see everything
+      return NextResponse.json(response);
+    }
+
+    // Strip sensitive fields for everyone else
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { ip, userId, ...rest } = response;
+    return NextResponse.json(rest);
   } catch (error) {
     if (error instanceof ResponseServiceError) {
       return handleServiceError(error);
@@ -53,7 +74,10 @@ export async function PUT(
       const response = await responseService.updateWithPassword(responseId, password, {
         visible: updateData.visible,
       });
-      return NextResponse.json(response);
+      // Strip sensitive fields: write endpoints never need to return ip/userId
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { ip, userId, ...rest } = response;
+      return NextResponse.json(rest);
     } catch (error) {
       if (error instanceof ResponseServiceError) {
         return handleServiceError(error);
@@ -70,7 +94,10 @@ export async function PUT(
 
   try {
     const response = await responseService.update(session.user.id, responseId, updateData);
-    return NextResponse.json(response);
+    // Strip sensitive fields: write endpoints never need to return ip/userId
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { ip, userId, ...rest } = response;
+    return NextResponse.json(rest);
   } catch (error) {
     if (error instanceof ResponseServiceError) {
       return handleServiceError(error);
@@ -102,7 +129,10 @@ export async function DELETE(
 
   try {
     const response = await responseService.delete(userId, responseId, password);
-    return NextResponse.json(response);
+    // Strip sensitive fields: write endpoints never need to return ip/userId
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { ip, userId: responseUserId, ...rest } = response;
+    return NextResponse.json(rest);
   } catch (error) {
     if (error instanceof ResponseServiceError) {
       return handleServiceError(error);

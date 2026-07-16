@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { boardService } from "@/lib/services/board";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { responseService } from "@/lib/services/response";
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
   try {
     const [thread, board] = await Promise.all([
-      threadService.findById(threadIdNum),
+      threadService.findById(threadIdNum, { boardId }),
       boardService.findById(boardId),
     ]);
     return {
@@ -74,16 +74,11 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
 
   try {
     const [thread, allBoards, session, settings] = await Promise.all([
-      threadService.findById(threadIdNum),
+      threadService.findById(threadIdNum, { boardId }),
       boardService.findAll(),
       getServerSession(authOptions),
       globalSettingsService.get(),
     ]);
-
-    // Verify boardId matches
-    if (thread.boardId !== boardId) {
-      notFound();
-    }
 
     const board = await boardService.findById(thread.boardId);
 
@@ -106,22 +101,15 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
     const tCommon = await getTranslations("common");
     const tSidebar = await getTranslations("traceSidebar");
 
-    const canAccessAdmin = session
-      ? await permissionService.checkUserPermission(session.user.id, "admin:read")
-      : false;
+    const managed = session
+      ? await roleService.listManagedBoardIds(session.user.id)
+      : null;
+    const canAccessAdmin = managed !== null && (managed === "all" || managed.length > 0);
 
-    // Check if user can manage responses (global or board-specific permission)
+    // Check if user can manage responses (global ADMIN or this board's admin)
     let canManageResponses = false;
     if (session?.user?.id) {
-      const hasGlobalPermission = await permissionService.checkUserPermission(
-        session.user.id,
-        "response:delete"
-      );
-      const hasBoardPermission = await permissionService.checkUserPermission(
-        session.user.id,
-        `response:${boardId}:delete`
-      );
-      canManageResponses = hasGlobalPermission || hasBoardPermission;
+      canManageResponses = await roleService.canManageBoard(session.user.id, boardId);
     }
 
     // Determine current view type for navigation

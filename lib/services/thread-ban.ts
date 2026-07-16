@@ -1,7 +1,7 @@
 import {
-  permissionService as defaultPermissionService,
-  PermissionService,
-} from "@/lib/services/permission";
+  roleService as defaultRoleService,
+  RoleService,
+} from "@/lib/services/role";
 import { threadBanRepository as defaultThreadBanRepository } from "@/lib/repositories/prisma/thread-ban";
 import { threadRepository as defaultThreadRepository } from "@/lib/repositories/prisma/thread";
 import {
@@ -35,13 +35,13 @@ export interface ThreadBanService {
 interface ThreadBanServiceDeps {
   threadBanRepository: ThreadBanRepository;
   threadRepository: ThreadRepository;
-  permissionService: PermissionService;
+  roleService: RoleService;
 }
 
 export function createThreadBanService(
   deps: ThreadBanServiceDeps
 ): ThreadBanService {
-  const { threadBanRepository, threadRepository, permissionService } = deps;
+  const { threadBanRepository, threadRepository, roleService } = deps;
 
   async function getThread(threadId: number) {
     const thread = await threadRepository.findById(threadId);
@@ -55,10 +55,7 @@ export function createThreadBanService(
     userId: string,
     boardId: string
   ): Promise<void> {
-    const hasPermission = await permissionService.checkUserPermissions(userId, [
-      "response:delete",
-      `response:${boardId}:delete`,
-    ]);
+    const hasPermission = await roleService.canManageBoard(userId, boardId);
     if (!hasPermission) {
       throw new ThreadBanServiceError("Permission denied", "FORBIDDEN");
     }
@@ -162,5 +159,5 @@ export function createThreadBanService(
 export const threadBanService = createThreadBanService({
   threadBanRepository: defaultThreadBanRepository,
   threadRepository: defaultThreadRepository,
-  permissionService: defaultPermissionService,
+  roleService: defaultRoleService,
 });

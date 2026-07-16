@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { boardService } from "@/lib/services/board";
 import { toISOString } from "@/lib/cache";
 import { BoardsContent } from "./boards-content";
@@ -10,8 +10,7 @@ export default async function AdminBoardsPage() {
   const session = (await getServerSession(authOptions))!;
   const userId = session.user.id;
 
-  const canCreate = await permissionService.checkUserPermission(userId, "board:create");
-  const canUpdate = await permissionService.checkUserPermission(userId, "board:update");
+  const isAdmin = await roleService.isAdmin(userId);
 
   const boards = await boardService.findAllWithThreadCount(userId);
 
@@ -43,12 +42,12 @@ export default async function AdminBoardsPage() {
         backToHome: tSidebar("backToHome"),
         boards: tSidebar("boards"),
         users: tSidebar("users"),
-        roles: tSidebar("roles"),
         settings: tSidebar("settings"),
         globalNotices: tSidebar("globalNotices"),
       }}
-      canCreate={canCreate}
-      canUpdate={canUpdate}
+      isAdmin={isAdmin}
+      canCreate={isAdmin}
+      canUpdate={isAdmin}
       labels={{
         title: t("title"),
         createBoard: t("createBoard"),

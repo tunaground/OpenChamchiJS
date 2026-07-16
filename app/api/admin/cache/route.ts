@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { invalidateCache, invalidateAllCaches, ALL_CACHE_TAGS } from "@/lib/cache";
 
 // POST /api/admin/cache - Invalidate cache
@@ -11,10 +11,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const hasPermission = await permissionService.checkUserPermission(
-    session.user.id,
-    "all:all"
-  );
+  const hasPermission = await roleService.isAdmin(session.user.id);
   if (!hasPermission) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }

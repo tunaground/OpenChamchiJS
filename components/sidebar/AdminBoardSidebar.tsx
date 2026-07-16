@@ -15,12 +15,14 @@ interface AdminBoardSidebarProps {
   boardId: string;
   boardName: string;
   labels: AdminBoardSidebarLabels;
+  isAdmin: boolean;
 }
 
 export function AdminBoardSidebar({
   boardId,
   boardName,
   labels,
+  isAdmin,
 }: AdminBoardSidebarProps) {
   const pathname = usePathname();
 
@@ -31,7 +33,7 @@ export function AdminBoardSidebar({
   ];
 
   return (
-    <AdminSidebar labels={labels}>
+    <AdminSidebar labels={labels} isAdmin={isAdmin}>
       <SidebarSection>
         <SectionTitle>{boardName}</SectionTitle>
         <NavList>

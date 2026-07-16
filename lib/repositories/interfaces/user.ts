@@ -7,10 +7,7 @@ export interface UserData {
 }
 
 export interface UserWithRoles extends UserData {
-  roles: {
-    id: string;
-    name: string;
-  }[];
+  roles: string[];
 }
 
 export interface FindAllWithCountResult {
@@ -30,9 +27,7 @@ export interface UserRepository {
     search?: string;
   }): Promise<FindAllWithCountResult>;
   findById(id: string): Promise<UserWithRoles | null>;
-  findUserIdsByRoleId(roleId: string): Promise<string[]>;
   count(search?: string): Promise<number>;
-  addRole(userId: string, roleId: string): Promise<void>;
-  removeRole(userId: string, roleId: string): Promise<void>;
+  setRoles(userId: string, roles: string[]): Promise<void>;
   delete(id: string): Promise<void>;
 }

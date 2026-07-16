@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 import {
-  permissionService as defaultPermissionService,
-  PermissionService,
-} from "@/lib/services/permission";
+  roleService as defaultRoleService,
+  RoleService,
+} from "@/lib/services/role";
 import { threadRepository as defaultThreadRepository } from "@/lib/repositories/prisma/thread";
 import { boardRepository as defaultBoardRepository } from "@/lib/repositories/prisma/board";
 import {
@@ -39,6 +39,7 @@ export interface FindThreadParams extends PaginationParams {
 
 export interface FindByIdOptions {
   includeDeleted?: boolean;
+  boardId?: string;
 }
 
 export interface ThreadService {
@@ -59,24 +60,11 @@ export interface ThreadService {
 interface ThreadServiceDeps {
   threadRepository: ThreadRepository;
   boardRepository: BoardRepository;
-  permissionService: PermissionService;
+  roleService: RoleService;
 }
 
 export function createThreadService(deps: ThreadServiceDeps): ThreadService {
-  const { threadRepository, boardRepository, permissionService } = deps;
-
-  async function checkThreadPermission(
-    userId: string | null,
-    boardId: string,
-    action: "update" | "delete"
-  ): Promise<boolean> {
-    if (!userId) return false;
-
-    return permissionService.checkUserPermissions(userId, [
-      `thread:${action}`,
-      `thread:${boardId}:${action}`,
-    ]);
-  }
+  const { threadRepository, boardRepository, roleService } = deps;
 
   return {
     async findByBoardId(
@@ -116,6 +104,9 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
       if (!thread || (!includeDeleted && thread.deleted)) {
         throw new ThreadServiceError("Thread not found", "NOT_FOUND");
       }
+      if (options?.boardId && thread.boardId !== options.boardId) {
+        throw new ThreadServiceError("Thread not found", "NOT_FOUND");
+      }
       return thread;
     },
 
@@ -153,7 +144,7 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
         throw new ThreadServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkThreadPermission(userId, thread.boardId, "update");
+      const hasPermission = await roleService.canManageBoard(userId, thread.boardId);
       if (!hasPermission) {
         throw new ThreadServiceError("Permission denied", "FORBIDDEN");
       }
@@ -174,7 +165,7 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
         throw new ThreadServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkThreadPermission(userId, thread.boardId, "delete");
+      const hasPermission = await roleService.canManageBoard(userId, thread.boardId);
       if (!hasPermission) {
         throw new ThreadServiceError("Permission denied", "FORBIDDEN");
       }
@@ -194,5 +185,5 @@ export function createThreadService(deps: ThreadServiceDeps): ThreadService {
 export const threadService = createThreadService({
   threadRepository: defaultThreadRepository,
   boardRepository: defaultBoardRepository,
-  permissionService: defaultPermissionService,
+  roleService: defaultRoleService,
 });

@@ -31,14 +31,15 @@ npx prisma studio      # Open Prisma Studio GUI
 ### Key Directories
 - `app/` - App Router pages and layouts
 - `app/api/` - API routes
-- `app/admin/` - Admin pages (requires `admin:read` permission)
+- `app/admin/` - Admin pages (requires `ADMIN` role, or a `{boardId}:ADMIN` role for board-scoped access)
 - `app/index/[boardId]/` - Board index page (thread list)
 - `app/trace/[boardId]/[threadId]/[[...range]]/` - Thread detail page (with optional range)
 - `app/notice/[boardId]/` - Notice list/detail pages
 - `app/archive/` - Archive pages (legacy thread static viewer)
 - `app/settings/` - User preferences page
 - `app/manual/` - Manual/documentation page
-- `lib/services/` - Business logic (board, thread, response, permission, notice, user, role, thread-ban, global-settings)
+- `lib/services/` - Business logic (board, thread, response, role, notice, user, thread-ban, global-settings)
+- `lib/auth/roles.ts` - Code-based role definitions (`ROLE`, `boardAdminRole`, `isBoardAdminRole`, `boardIdFromRole`)
 - `lib/repositories/` - Data access layer (Prisma implementations, interfaces)
 - `lib/schemas/` - Zod validation schemas with input sanitization
 - `lib/api/` - API utilities (auth, csrf, foreign-ip-check, write-lock-check, error-handler)
@@ -59,7 +60,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - `ws-server/` - Standalone WebSocket server (Node.js, separate Docker image)
 - `deploy/` - Docker Compose, Swarm config, deploy/setup scripts
 - `__tests__/` - Jest unit tests (mirrors lib/ structure)
-- `proxy.ts` - Next.js 16 middleware (admin auth redirects, permission checks)
+- `proxy.ts` - Next.js 16 middleware (`/dashboard` auth redirect only; `/admin` gating lives in `app/admin/layout.tsx`)
 
 ### Conventions
 - **Server Components by default** - Add `'use client'` directive only when needed
@@ -68,7 +69,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - **Image optimization** - Use `next/image` component with `priority` for above-the-fold images
 - **Prisma Client** - Import from `@/lib/prisma` (singleton pattern with PrismaPg adapter for Prisma 7)
 - **Auth config** - Import `authOptions` from `@/lib/auth`
-- **Permission check** - Use `permissionService.checkUserPermission(userId, "permission:name")` from `@/lib/services/permission`
+- **Role check** - Use `roleService.isAdmin(userId)` / `roleService.canManageBoard(userId, boardId)` from `@/lib/services/role`
 - **CSRF protection** - State-changing API endpoints use `validateOrigin()` from `@/lib/api/csrf`
 - **Error handling** - Services throw `ServiceError` with typed codes, API routes use `handleServiceError()` to map to HTTP status
 - **Validation** - Use Zod schemas from `@/lib/schemas` for input validation with control character sanitization
@@ -76,10 +77,13 @@ npx prisma studio      # Open Prisma Studio GUI
 ### Authentication & Authorization
 - NextAuth 4 with Google OAuth provider
 - JWT session strategy with Prisma adapter
-- RBAC with User → UserRole → Role → RolePermission → Permission
-- `all:all` permission grants access to everything
+- 코드 기반 롤 (`lib/auth/roles.ts`), `User.roles` 칼럼에 문자열 배열로 저장
+- `ADMIN` - 시스템 어드민, 전체 권한
+- `VERIFIED` - 인증 계정, 해외 IP 차단 면역
+- `{boardId}:ADMIN` - 게시판 어드민. 해당 게시판의 스레드/응답/공지 관리, 카운터 교정, 게시판 설정 수정. 게시판 생성/삭제는 불가 (ADMIN 전용)
+- 롤 부여는 ADMIN 전용 (`/admin/users`)
 - First-time setup at `/setup` creates initial admin
-- Protected routes (`/admin`, `/dashboard`) redirect to `/login?callbackUrl=...` if not authenticated
+- Protected routes (`/dashboard`) redirect to `/login?callbackUrl=...` if not authenticated
 - Login page shows logout button when already authenticated
 
 ### Internationalization (i18n)
@@ -109,8 +113,8 @@ npx prisma studio      # Open Prisma Studio GUI
 - `anonId` - 클라이언트 생성 UUID (localStorage), realtime에서 자기 글 식별용
 - `userId` - 로그인 사용자만 저장 (optional)
 - `Thread.updatedAt` - 새 Response 추가 시 수동 갱신 (범프)
-- `blockForeignIp` - 외국 IP 차단, `foreign:write` 권한 있으면 허용
-- `writeLocked` - 쓰기 잠금, `thread:edit` 권한 있으면 허용
+- `blockForeignIp` - 외국 IP 차단, `VERIFIED` 롤이면 허용
+- `writeLocked` - 쓰기 잠금, `ADMIN` 또는 해당 게시판 어드민이면 허용
 - Tripcode 지원 - 사용자명에 `#` 포함 시 트립코드 생성
 
 ### API Endpoints
@@ -118,7 +122,6 @@ npx prisma studio      # Open Prisma Studio GUI
 #### Auth & Settings
 - `GET/POST /api/auth/[...nextauth]` - NextAuth 핸들러
 - `GET/PUT /api/settings` - 전역 설정 조회/수정
-- `GET /api/permissions` - 현재 사용자 권한 조회
 - `GET /api/realtime/token` - Realtime 토큰 발급
 
 #### Boards
@@ -148,24 +151,11 @@ npx prisma studio      # Open Prisma Studio GUI
 - `GET /api/users` - 사용자 목록 (검색, 페이지네이션)
 - `DELETE /api/users/me` - 내 계정 삭제
 - `GET/DELETE /api/users/[userId]` - 사용자 상세/삭제
-- `POST/DELETE /api/users/[userId]/roles` - 역할 부여/해제
-- `GET/POST /api/roles` - 역할 목록/생성
-- `GET/PUT/DELETE /api/roles/[roleId]` - 역할 상세/수정/삭제
-- `POST/DELETE /api/roles/[roleId]/permissions` - 권한 부여/해제
+- `PATCH /api/users/[userId]/roles` - 롤 일괄 저장 (ADMIN)
 
 #### Admin
 - `GET /api/admin/boards/[boardId]/responses` - 응답 검색 (admin)
-- `POST /api/admin/cache` - 캐시 무효화 (requires `all:all`)
-
-### Permissions
-- `all:all` - 모든 권한
-- `admin:read` - 관리자 페이지 접근
-- `board:all`, `board:create`, `board:update`, `board:config` - 보드 관리
-- `thread:all`, `thread:edit`, `thread:delete` - 전역 스레드/응답 권한
-- `thread:{boardId}:all`, `thread:{boardId}:edit`, `thread:{boardId}:delete` - 보드별 권한 (보드 생성 시 자동 생성)
-- `notice:{boardId}:create/update/delete` - 보드별 공지 권한
-- `response:delete` - 응답 삭제 (admin 검색에서도 사용)
-- `foreign:write` - 해외 IP 차단 우회
+- `POST /api/admin/cache` - 캐시 무효화 (requires `ADMIN` role)
 
 ### Authorization Rules
 | 대상 | 수정 | 삭제 |
@@ -176,7 +166,7 @@ npx prisma studio      # Open Prisma Studio GUI
 ### Foreign IP Blocking
 - `blockForeignIp` 보드 설정 활성화 시 외국 IP 차단
 - `GlobalSettings.countryCode` (ISO 3166-1 alpha-2) 기준으로 판단
-- `foreign:write` 권한 있으면 차단 우회
+- `VERIFIED` 롤이 있으면 차단 우회
 - GeoLite2-Country.mmdb 파일로 IP 국가 조회 (`lib/ip.ts`)
 
 #### GeoIP Setup (Optional)
@@ -242,7 +232,7 @@ npx prisma studio      # Open Prisma Studio GUI
 
 ### Caching
 - Tag-based cache invalidation via `lib/cache.ts`
-- Tags: `board`, `boards`, `board-{id}`, `threads-{boardId}`, `thread-{id}`, `responses-{threadId}`, `notices`, `notices-{boardId}`, `notices-global`, `settings`, `permissions-{userId}`
+- Tags: `board`, `boards`, `board-{id}`, `threads-{boardId}`, `thread-{id}`, `responses-{threadId}`, `notices`, `notices-{boardId}`, `notices-global`, `settings`, `roles-{userId}`
 - Admin cache invalidation endpoint: `POST /api/admin/cache`
 
 ### Deployment

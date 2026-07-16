@@ -85,11 +85,11 @@ export async function POST(
       // Check permission via service (will throw if no permission)
       const thread = await threadRepository.findById(id);
       if (thread) {
-        const { permissionService } = await import("@/lib/services/permission");
-        authorized = await permissionService.checkUserPermissions(session.user.id, [
-          "response:delete",
-          `response:${thread.boardId}:delete`,
-        ]);
+        const { roleService } = await import("@/lib/services/role");
+        authorized = await roleService.canManageBoard(
+          session.user.id,
+          thread.boardId
+        );
       }
     } catch {
       // Permission denied, fall through to password check

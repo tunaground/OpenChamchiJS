@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAuth } from "@/lib/api/auth";
 import { validateOrigin } from "@/lib/api/csrf";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { CACHE_TAGS, invalidateCaches } from "@/lib/cache";
 
 type Params = { params: Promise<{ boardId: string }> };
@@ -19,9 +19,7 @@ export async function POST(request: NextRequest, { params }: Params) {
   const { boardId } = await params;
   const userId = auth.user.id;
 
-  const canUpdate =
-    (await permissionService.checkUserPermission(userId, "board:update")) ||
-    (await permissionService.checkUserPermission(userId, `board:${boardId}:update`));
+  const canUpdate = await roleService.canManageBoard(userId, boardId);
 
   if (!canUpdate) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
 import { boardService, BoardServiceError } from "@/lib/services/board";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { checkForeignIpBlocked } from "@/lib/api/foreign-ip-check";
 import { checkWriteLocked } from "@/lib/api/write-lock-check";
@@ -29,10 +29,7 @@ export async function GET(
     if (includeDeleted) {
       const session = await getServerSession(authOptions);
       if (session?.user?.id) {
-        canViewDeleted = await permissionService.checkUserPermissions(session.user.id, [
-          "thread:delete",
-          `thread:${boardId}:delete`,
-        ]);
+        canViewDeleted = await roleService.canManageBoard(session.user.id, boardId);
       }
     }
 

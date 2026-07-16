@@ -1,5 +1,5 @@
 import { createNoticeService } from "@/lib/services/notice";
-import { PermissionService } from "@/lib/services/permission";
+import { RoleService } from "@/lib/services/role";
 import { NoticeRepository, NoticeData } from "@/lib/repositories/interfaces/notice";
 import { BoardRepository, BoardData } from "@/lib/repositories/interfaces/board";
 
@@ -27,13 +27,14 @@ function createMockBoardRepo(): jest.Mocked<BoardRepository> {
   };
 }
 
-function createMockPermissionService(): jest.Mocked<PermissionService> {
+function createMockRoleService(overrides: Partial<jest.Mocked<RoleService>> = {}): jest.Mocked<RoleService> {
   return {
-    getUserPermissions: jest.fn(),
-    hasPermission: jest.fn(),
-    hasAnyPermission: jest.fn(),
-    checkUserPermission: jest.fn(),
-    checkUserPermissions: jest.fn(),
+    getUserRoles: jest.fn().mockResolvedValue([]),
+    isAdmin: jest.fn().mockResolvedValue(false),
+    isVerified: jest.fn().mockResolvedValue(false),
+    canManageBoard: jest.fn().mockResolvedValue(false),
+    listManagedBoardIds: jest.fn().mockResolvedValue([]),
+    ...overrides,
   };
 }
 
@@ -71,18 +72,20 @@ function createMockBoard(overrides?: Partial<BoardData>): BoardData {
 describe("NoticeService", () => {
   let noticeRepo: jest.Mocked<NoticeRepository>;
   let boardRepo: jest.Mocked<BoardRepository>;
-  let permissionService: jest.Mocked<PermissionService>;
+  let roleService: jest.Mocked<RoleService>;
   let service: ReturnType<typeof createNoticeService>;
+
+  const baseDeps = () => ({
+    noticeRepository: noticeRepo,
+    boardRepository: boardRepo,
+    roleService,
+  });
 
   beforeEach(() => {
     noticeRepo = createMockNoticeRepo();
     boardRepo = createMockBoardRepo();
-    permissionService = createMockPermissionService();
-    service = createNoticeService({
-      noticeRepository: noticeRepo,
-      boardRepository: boardRepo,
-      permissionService,
-    });
+    roleService = createMockRoleService();
+    service = createNoticeService(baseDeps());
   });
 
   describe("findByBoardId", () => {
@@ -196,10 +199,10 @@ describe("NoticeService", () => {
   });
 
   describe("create", () => {
-    it("creates notice when user has permission", async () => {
+    it("creates notice when user can manage the board", async () => {
       const notice = createMockNotice();
       boardRepo.findById.mockResolvedValue(createMockBoard());
-      permissionService.checkUserPermissions.mockResolvedValue(true);
+      roleService.canManageBoard.mockResolvedValue(true);
       noticeRepo.create.mockResolvedValue(notice);
 
       const result = await service.create("user-1", {
@@ -212,9 +215,9 @@ describe("NoticeService", () => {
       expect(noticeRepo.create).toHaveBeenCalled();
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
+    it("throws FORBIDDEN when user cannot manage the board", async () => {
       boardRepo.findById.mockResolvedValue(createMockBoard());
-      permissionService.checkUserPermissions.mockResolvedValue(false);
+      roleService.canManageBoard.mockResolvedValue(false);
 
       await expect(
         service.create("user-1", {
@@ -237,9 +240,9 @@ describe("NoticeService", () => {
       ).rejects.toThrow("Board not found");
     });
 
-    it("checks both global and board-specific permissions", async () => {
+    it("checks board-management role with the target board id", async () => {
       boardRepo.findById.mockResolvedValue(createMockBoard());
-      permissionService.checkUserPermissions.mockResolvedValue(true);
+      roleService.canManageBoard.mockResolvedValue(true);
       noticeRepo.create.mockResolvedValue(createMockNotice());
 
       await service.create("user-1", {
@@ -248,19 +251,44 @@ describe("NoticeService", () => {
         content: "Content",
       });
 
-      expect(permissionService.checkUserPermissions).toHaveBeenCalledWith(
-        "user-1",
-        ["notice:create", "notice:test-board:create"]
-      );
+      expect(roleService.canManageBoard).toHaveBeenCalledWith("user-1", "test-board");
+    });
+
+    it("forbids a board admin from creating a global notice", async () => {
+      const service = createNoticeService({
+        ...baseDeps(),
+        roleService: createMockRoleService({
+          isAdmin: jest.fn().mockResolvedValue(false),
+          canManageBoard: jest.fn().mockResolvedValue(true),
+        }),
+      });
+
+      await expect(
+        service.createGlobal("u1", { title: "공지", content: "내용" })
+      ).rejects.toThrow("Permission denied");
+    });
+
+    it("lets a board admin create a notice on their board", async () => {
+      const mockRoleService = createMockRoleService({
+        isAdmin: jest.fn().mockResolvedValue(false),
+        canManageBoard: jest.fn().mockResolvedValue(true),
+      });
+      boardRepo.findById.mockResolvedValue(createMockBoard({ id: "free" }));
+      noticeRepo.create.mockResolvedValue(createMockNotice({ boardId: "free" }));
+      const service = createNoticeService({ ...baseDeps(), roleService: mockRoleService });
+
+      await service.create("u1", { boardId: "free", title: "공지", content: "내용" });
+
+      expect(mockRoleService.canManageBoard).toHaveBeenCalledWith("u1", "free");
     });
   });
 
   describe("update", () => {
-    it("updates notice when user has permission", async () => {
+    it("updates notice when user can manage the board", async () => {
       const notice = createMockNotice();
       const updatedNotice = { ...notice, title: "Updated" };
       noticeRepo.findById.mockResolvedValue(notice);
-      permissionService.checkUserPermissions.mockResolvedValue(true);
+      roleService.canManageBoard.mockResolvedValue(true);
       noticeRepo.update.mockResolvedValue(updatedNotice);
 
       const result = await service.update("user-1", 1, { title: "Updated" });
@@ -276,9 +304,9 @@ describe("NoticeService", () => {
       ).rejects.toThrow("Notice not found");
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
+    it("throws FORBIDDEN when user cannot manage the board", async () => {
       noticeRepo.findById.mockResolvedValue(createMockNotice());
-      permissionService.checkUserPermissions.mockResolvedValue(false);
+      roleService.canManageBoard.mockResolvedValue(false);
 
       await expect(
         service.update("user-1", 1, { title: "Updated" })
@@ -287,10 +315,10 @@ describe("NoticeService", () => {
   });
 
   describe("delete", () => {
-    it("deletes notice when user has permission", async () => {
+    it("deletes notice when user can manage the board", async () => {
       const notice = createMockNotice();
       noticeRepo.findById.mockResolvedValue(notice);
-      permissionService.checkUserPermissions.mockResolvedValue(true);
+      roleService.canManageBoard.mockResolvedValue(true);
       noticeRepo.delete.mockResolvedValue({ ...notice, deleted: true });
 
       const result = await service.delete("user-1", 1);
@@ -306,9 +334,9 @@ describe("NoticeService", () => {
       );
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
+    it("throws FORBIDDEN when user cannot manage the board", async () => {
       noticeRepo.findById.mockResolvedValue(createMockNotice());
-      permissionService.checkUserPermissions.mockResolvedValue(false);
+      roleService.canManageBoard.mockResolvedValue(false);
 
       await expect(service.delete("user-1", 1)).rejects.toThrow(
         "Permission denied"
@@ -348,12 +376,23 @@ describe("NoticeService", () => {
       expect(result.data).toHaveLength(2);
       expect(result.pagination.total).toBe(2);
     });
+
+    it("does not authorize global notice reads", async () => {
+      const mockRoleService = createMockRoleService();
+      noticeRepo.findGlobalWithCount.mockResolvedValue({ data: [], total: 0 });
+      const service = createNoticeService({ ...baseDeps(), roleService: mockRoleService });
+
+      await service.findGlobal({ page: 1 });
+
+      expect(mockRoleService.isAdmin).not.toHaveBeenCalled();
+      expect(mockRoleService.getUserRoles).not.toHaveBeenCalled();
+    });
   });
 
   describe("createGlobal", () => {
     it("creates global notice with boardId null", async () => {
       const notice = createMockNotice({ boardId: null });
-      permissionService.checkUserPermissions.mockResolvedValue(true);
+      roleService.isAdmin.mockResolvedValue(true);
       noticeRepo.create.mockResolvedValue(notice);
 
       const result = await service.createGlobal("user-1", {
@@ -367,8 +406,8 @@ describe("NoticeService", () => {
       );
     });
 
-    it("checks only global notice:create permission", async () => {
-      permissionService.checkUserPermissions.mockResolvedValue(true);
+    it("checks the admin role, not board management", async () => {
+      roleService.isAdmin.mockResolvedValue(true);
       noticeRepo.create.mockResolvedValue(createMockNotice({ boardId: null }));
 
       await service.createGlobal("user-1", {
@@ -376,14 +415,12 @@ describe("NoticeService", () => {
         content: "Content",
       });
 
-      expect(permissionService.checkUserPermissions).toHaveBeenCalledWith(
-        "user-1",
-        ["notice:create"]
-      );
+      expect(roleService.isAdmin).toHaveBeenCalledWith("user-1");
+      expect(roleService.canManageBoard).not.toHaveBeenCalled();
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
-      permissionService.checkUserPermissions.mockResolvedValue(false);
+    it("throws FORBIDDEN when user is not admin", async () => {
+      roleService.isAdmin.mockResolvedValue(false);
 
       await expect(
         service.createGlobal("user-1", {
@@ -395,34 +432,30 @@ describe("NoticeService", () => {
   });
 
   describe("update (global notice)", () => {
-    it("checks only global permission for global notices", async () => {
+    it("checks the admin role for global notices", async () => {
       const notice = createMockNotice({ boardId: null });
       noticeRepo.findById.mockResolvedValue(notice);
-      permissionService.checkUserPermissions.mockResolvedValue(true);
+      roleService.isAdmin.mockResolvedValue(true);
       noticeRepo.update.mockResolvedValue({ ...notice, title: "Updated" });
 
       await service.update("user-1", 1, { title: "Updated" });
 
-      expect(permissionService.checkUserPermissions).toHaveBeenCalledWith(
-        "user-1",
-        ["notice:update"]
-      );
+      expect(roleService.isAdmin).toHaveBeenCalledWith("user-1");
+      expect(roleService.canManageBoard).not.toHaveBeenCalled();
     });
   });
 
   describe("delete (global notice)", () => {
-    it("checks only global permission for global notices", async () => {
+    it("checks the admin role for global notices", async () => {
       const notice = createMockNotice({ boardId: null });
       noticeRepo.findById.mockResolvedValue(notice);
-      permissionService.checkUserPermissions.mockResolvedValue(true);
+      roleService.isAdmin.mockResolvedValue(true);
       noticeRepo.delete.mockResolvedValue({ ...notice, deleted: true });
 
       await service.delete("user-1", 1);
 
-      expect(permissionService.checkUserPermissions).toHaveBeenCalledWith(
-        "user-1",
-        ["notice:delete"]
-      );
+      expect(roleService.isAdmin).toHaveBeenCalledWith("user-1");
+      expect(roleService.canManageBoard).not.toHaveBeenCalled();
     });
   });
 });

@@ -3,9 +3,8 @@ export interface AdminSidebarLabels {
   backToHome: string;
   boards: string;
   users: string;
-  roles?: string;
-  settings?: string;
-  globalNotices?: string;
+  settings: string;
+  globalNotices: string;
 }
 
 export interface AdminBoardSidebarLabels extends AdminSidebarLabels {

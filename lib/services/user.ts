@@ -1,11 +1,10 @@
 import {
-  permissionService as defaultPermissionService,
-  PermissionService,
-} from "@/lib/services/permission";
+  roleService as defaultRoleService,
+  RoleService,
+} from "@/lib/services/role";
+import { ROLE, isBoardAdminRole } from "@/lib/auth/roles";
 import { userRepository as defaultUserRepository } from "@/lib/repositories/prisma/user";
-import { roleRepository as defaultRoleRepository } from "@/lib/repositories/prisma/role";
 import { UserRepository, UserWithRoles } from "@/lib/repositories/interfaces/user";
-import { RoleRepository, RoleData } from "@/lib/repositories/interfaces/role";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
 import { DEFAULT_USER_LIMIT } from "@/lib/types/pagination";
 import { invalidateCache, CACHE_TAGS } from "@/lib/cache";
@@ -34,31 +33,21 @@ export interface UserService {
     };
   }>;
   findById(requesterId: string, id: string): Promise<UserWithRoles>;
-  getAllRoles(requesterId: string): Promise<RoleData[]>;
-  addRole(requesterId: string, userId: string, roleId: string): Promise<void>;
-  removeRole(requesterId: string, userId: string, roleId: string): Promise<void>;
+  setRoles(requesterId: string, userId: string, roles: string[]): Promise<void>;
   delete(requesterId: string, userId: string): Promise<void>;
   deleteSelf(userId: string): Promise<void>;
 }
 
 interface UserServiceDeps {
   userRepository: UserRepository;
-  roleRepository: RoleRepository;
-  permissionService: PermissionService;
+  roleService: RoleService;
 }
 
 export function createUserService(deps: UserServiceDeps): UserService {
-  const { userRepository, roleRepository, permissionService } = deps;
+  const { userRepository, roleService } = deps;
 
-  async function checkPermission(
-    requesterId: string,
-    permission: string
-  ): Promise<void> {
-    const hasPermission = await permissionService.checkUserPermission(
-      requesterId,
-      permission
-    );
-    if (!hasPermission) {
+  async function requireAdmin(requesterId: string): Promise<void> {
+    if (!(await roleService.isAdmin(requesterId))) {
       throw new UserServiceError("Permission denied", "FORBIDDEN");
     }
   }
@@ -68,7 +57,7 @@ export function createUserService(deps: UserServiceDeps): UserService {
       requesterId: string,
       options?: { page?: number; search?: string; limit?: number }
     ) {
-      await checkPermission(requesterId, "user:read");
+      await requireAdmin(requesterId);
 
       const { page = 1, search, limit = DEFAULT_USER_LIMIT } = options || {};
       const offset = (page - 1) * limit;
@@ -88,7 +77,7 @@ export function createUserService(deps: UserServiceDeps): UserService {
     },
 
     async findById(requesterId: string, id: string): Promise<UserWithRoles> {
-      await checkPermission(requesterId, "user:read");
+      await requireAdmin(requesterId);
 
       const user = await userRepository.findById(id);
       if (!user) {
@@ -97,64 +86,48 @@ export function createUserService(deps: UserServiceDeps): UserService {
       return user;
     },
 
-    async getAllRoles(requesterId: string): Promise<RoleData[]> {
-      await checkPermission(requesterId, "user:read");
-      return roleRepository.findAll();
-    },
-
-    async addRole(
+    async setRoles(
       requesterId: string,
       userId: string,
-      roleId: string
+      roles: string[]
     ): Promise<void> {
-      await checkPermission(requesterId, "user:update");
+      await requireAdmin(requesterId);
+
+      const invalid = roles.filter(
+        (role) =>
+          role !== ROLE.ADMIN &&
+          role !== ROLE.VERIFIED &&
+          !isBoardAdminRole(role)
+      );
+      if (invalid.length > 0) {
+        throw new UserServiceError(`Invalid role: ${invalid[0]}`, "BAD_REQUEST");
+      }
 
       const user = await userRepository.findById(userId);
       if (!user) {
         throw new UserServiceError("User not found", "NOT_FOUND");
       }
 
-      const role = await roleRepository.findById(roleId);
-      if (!role) {
-        throw new UserServiceError("Role not found", "NOT_FOUND");
+      const nextRoles = [...new Set(roles)];
+
+      if (
+        requesterId === userId &&
+        user.roles.includes(ROLE.ADMIN) &&
+        !nextRoles.includes(ROLE.ADMIN)
+      ) {
+        throw new UserServiceError(
+          "Cannot remove your own ADMIN role",
+          "BAD_REQUEST"
+        );
       }
 
-      // Check if user already has this role
-      if (user.roles.some((r) => r.id === roleId)) {
-        throw new UserServiceError("User already has this role", "BAD_REQUEST");
-      }
+      await userRepository.setRoles(userId, nextRoles);
 
-      await userRepository.addRole(userId, roleId);
-
-      // Invalidate permission cache for this user
-      invalidateCache(CACHE_TAGS.userPermissions(userId));
-    },
-
-    async removeRole(
-      requesterId: string,
-      userId: string,
-      roleId: string
-    ): Promise<void> {
-      await checkPermission(requesterId, "user:update");
-
-      const user = await userRepository.findById(userId);
-      if (!user) {
-        throw new UserServiceError("User not found", "NOT_FOUND");
-      }
-
-      // Check if user has this role
-      if (!user.roles.some((r) => r.id === roleId)) {
-        throw new UserServiceError("User does not have this role", "BAD_REQUEST");
-      }
-
-      await userRepository.removeRole(userId, roleId);
-
-      // Invalidate permission cache for this user
-      invalidateCache(CACHE_TAGS.userPermissions(userId));
+      invalidateCache(CACHE_TAGS.userRoles(userId));
     },
 
     async delete(requesterId: string, userId: string): Promise<void> {
-      await checkPermission(requesterId, "user:delete");
+      await requireAdmin(requesterId);
 
       // Prevent self-deletion
       if (requesterId === userId) {
@@ -168,8 +141,8 @@ export function createUserService(deps: UserServiceDeps): UserService {
 
       await userRepository.delete(userId);
 
-      // Invalidate permission cache for deleted user
-      invalidateCache(CACHE_TAGS.userPermissions(userId));
+      // Invalidate role cache for deleted user
+      invalidateCache(CACHE_TAGS.userRoles(userId));
     },
 
     async deleteSelf(userId: string): Promise<void> {
@@ -180,14 +153,13 @@ export function createUserService(deps: UserServiceDeps): UserService {
 
       await userRepository.delete(userId);
 
-      // Invalidate permission cache for deleted user
-      invalidateCache(CACHE_TAGS.userPermissions(userId));
+      // Invalidate role cache for deleted user
+      invalidateCache(CACHE_TAGS.userRoles(userId));
     },
   };
 }
 
 export const userService = createUserService({
   userRepository: defaultUserRepository,
-  roleRepository: defaultRoleRepository,
-  permissionService: defaultPermissionService,
+  roleService: defaultRoleService,
 });

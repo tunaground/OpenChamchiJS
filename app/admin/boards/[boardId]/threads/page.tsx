@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { threadService } from "@/lib/services/thread";
 import { toISOString } from "@/lib/cache";
@@ -20,14 +20,11 @@ export default async function AdminThreadsPage({ params, searchParams }: Props) 
   const session = (await getServerSession(authOptions))!;
   const userId = session.user.id;
 
-  // Check permissions
-  const canEditGlobal = await permissionService.checkUserPermission(userId, "thread:edit");
-  const canEditBoard = await permissionService.checkUserPermission(userId, `thread:${boardId}:edit`);
-  const canEdit = canEditGlobal || canEditBoard;
-
-  const canDeleteGlobal = await permissionService.checkUserPermission(userId, "thread:delete");
-  const canDeleteBoard = await permissionService.checkUserPermission(userId, `thread:${boardId}:delete`);
-  const canDelete = canDeleteGlobal || canDeleteBoard;
+  const canManage = await roleService.canManageBoard(userId, boardId);
+  if (!canManage) {
+    redirect("/admin/boards");
+  }
+  const isAdmin = await roleService.isAdmin(userId);
 
   try {
     const board = await boardService.findById(boardId);
@@ -47,12 +44,13 @@ export default async function AdminThreadsPage({ params, searchParams }: Props) 
           admin: tSidebar("admin"),
           boards: tSidebar("boards"),
           users: tSidebar("users"),
-          roles: tSidebar("roles"),
           settings: tSidebar("settings"),
+          globalNotices: tSidebar("globalNotices"),
           threads: tSidebar("threads"),
           responses: tSidebar("responses"),
           notices: tSidebar("notices"),
         }}
+        isAdmin={isAdmin}
         threads={result.data.map((thread) => ({
           id: thread.id,
           title: thread.title,
@@ -65,8 +63,8 @@ export default async function AdminThreadsPage({ params, searchParams }: Props) 
         }))}
         pagination={result.pagination}
         search={search ?? ""}
-        canEdit={canEdit}
-        canDelete={canDelete}
+        canEdit={canManage}
+        canDelete={canManage}
         labels={{
           title: t("title"),
           threadTitle: t("threadTitle"),

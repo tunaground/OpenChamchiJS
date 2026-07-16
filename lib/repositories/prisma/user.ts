@@ -23,13 +23,6 @@ export const userRepository: UserRepository = {
             ],
           }
         : undefined,
-      include: {
-        userRoles: {
-          include: {
-            role: true,
-          },
-        },
-      },
       orderBy: { id: "asc" },
       take: limit,
       skip: offset,
@@ -41,23 +34,13 @@ export const userRepository: UserRepository = {
       email: user.email,
       image: user.image,
       emailVerified: user.emailVerified,
-      roles: user.userRoles.map((ur) => ({
-        id: ur.role.id,
-        name: ur.role.name,
-      })),
+      roles: user.roles,
     }));
   },
 
   async findById(id: string): Promise<UserWithRoles | null> {
     const user = await prisma.user.findUnique({
       where: { id },
-      include: {
-        userRoles: {
-          include: {
-            role: true,
-          },
-        },
-      },
     });
 
     if (!user) return null;
@@ -68,19 +51,8 @@ export const userRepository: UserRepository = {
       email: user.email,
       image: user.image,
       emailVerified: user.emailVerified,
-      roles: user.userRoles.map((ur) => ({
-        id: ur.role.id,
-        name: ur.role.name,
-      })),
+      roles: user.roles,
     };
-  },
-
-  async findUserIdsByRoleId(roleId: string): Promise<string[]> {
-    const userRoles = await prisma.userRole.findMany({
-      where: { roleId },
-      select: { userId: true },
-    });
-    return userRoles.map((ur) => ur.userId);
   },
 
   async findAllWithCount(options?: {
@@ -103,15 +75,6 @@ export const userRepository: UserRepository = {
     const [users, total] = await prisma.$transaction([
       prisma.user.findMany({
         where: whereClause,
-        include: {
-          userRoles: {
-            include: {
-              role: {
-                select: { id: true, name: true },
-              },
-            },
-          },
-        },
         orderBy: { id: "asc" },
         take: limit,
         skip: offset,
@@ -125,10 +88,7 @@ export const userRepository: UserRepository = {
       email: user.email,
       image: user.image,
       emailVerified: user.emailVerified,
-      roles: user.userRoles.map((ur) => ({
-        id: ur.role.id,
-        name: ur.role.name,
-      })),
+      roles: user.roles,
     }));
 
     return { data, total };
@@ -147,21 +107,10 @@ export const userRepository: UserRepository = {
     });
   },
 
-  async addRole(userId: string, roleId: string): Promise<void> {
-    await prisma.userRole.create({
-      data: {
-        userId,
-        roleId,
-      },
-    });
-  },
-
-  async removeRole(userId: string, roleId: string): Promise<void> {
-    await prisma.userRole.deleteMany({
-      where: {
-        userId,
-        roleId,
-      },
+  async setRoles(userId: string, roles: string[]): Promise<void> {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { roles },
     });
   },
 

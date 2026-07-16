@@ -457,8 +457,8 @@ interface SidebarLabels {
   admin: string;
   boards: string;
   users: string;
-  roles?: string;
-  settings?: string;
+  settings: string;
+  globalNotices: string;
   threads: string;
   responses: string;
   notices: string;
@@ -469,6 +469,7 @@ interface AdminThreadsContentProps {
   boardName: string;
   authLabels: AuthLabels;
   sidebarLabels: SidebarLabels;
+  isAdmin: boolean;
   threads: ThreadData[];
   pagination: PaginationData;
   search: string;
@@ -502,6 +503,7 @@ export function AdminThreadsContent({
   boardName,
   authLabels,
   sidebarLabels,
+  isAdmin,
   threads: initialThreads,
   pagination,
   search: initialSearch,
@@ -801,6 +803,7 @@ export function AdminThreadsContent({
       boardId={boardId}
       boardName={boardName}
       labels={sidebarLabels}
+      isAdmin={isAdmin}
     />
   );
 

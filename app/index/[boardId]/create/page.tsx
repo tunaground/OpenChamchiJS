@@ -4,7 +4,7 @@ import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
 import { boardService } from "@/lib/services/board";
 import { BoardServiceError } from "@/lib/services/board";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { isStorageEnabled } from "@/lib/storage";
 import { CreateThreadContent } from "./create-thread-content";
@@ -24,9 +24,10 @@ export default async function CreateThreadPage({ params }: Props) {
       globalSettingsService.get(),
     ]);
     const isLoggedIn = !!session;
-    const canAccessAdmin = session
-      ? await permissionService.checkUserPermission(session.user.id, "admin:read")
-      : false;
+    const managed = session
+      ? await roleService.listManagedBoardIds(session.user.id)
+      : null;
+    const canAccessAdmin = managed !== null && (managed === "all" || managed.length > 0);
 
     const t = await getTranslations("createThread");
     const tCommon = await getTranslations("common");

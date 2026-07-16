@@ -1,298 +1,147 @@
-import { roleService, RoleServiceError } from "@/lib/services/role";
-import { roleRepository, permissionRepository } from "@/lib/repositories/prisma/role";
-import { userRepository } from "@/lib/repositories/prisma/user";
-import { permissionService } from "@/lib/services/permission";
+import { createRoleService } from "@/lib/services/role";
+import { PrismaClient } from "@prisma/client";
 
-jest.mock("@/lib/repositories/prisma/role");
-jest.mock("@/lib/repositories/prisma/user");
-jest.mock("@/lib/services/permission");
-jest.mock("@/lib/cache", () => ({
-  invalidateCache: jest.fn(),
-  CACHE_TAGS: {
-    userPermissions: (userId: string) => `user-permissions:${userId}`,
-  },
-}));
+jest.mock("@/lib/cache");
 
-const mockedRoleRepo = roleRepository as jest.Mocked<typeof roleRepository>;
-const mockedPermissionRepo = permissionRepository as jest.Mocked<typeof permissionRepository>;
-const mockedUserRepo = userRepository as jest.Mocked<typeof userRepository>;
-const mockedPermissionService = permissionService as jest.Mocked<typeof permissionService>;
+const mockCached = jest.fn();
+const cache = require("@/lib/cache");
+cache.cached = mockCached;
+cache.CACHE_TAGS = {
+  userRoles: (userId: string) => `roles-${userId}`,
+};
+
+// Set up mockCached as a pass-through that records arguments
+mockCached.mockImplementation(<T,>(
+  fn: () => Promise<T>,
+  keyParts: string[],
+  tags: string[]
+) => fn());
 
 describe("RoleService", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  const createMockPrisma = (roles: string[] | null) => ({
+    user: {
+      findUnique: jest.fn().mockResolvedValue(roles === null ? null : { roles }),
+    },
   });
 
-  const mockRole = {
-    id: "role-1",
-    name: "Test Role",
-    description: "Test description",
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
+  const serviceWith = (roles: string[] | null) =>
+    createRoleService(createMockPrisma(roles) as unknown as PrismaClient);
 
-  const mockRoleWithPermissions = {
-    ...mockRole,
-    permissions: [
-      { id: "perm-1", name: "test:read", description: null },
-    ],
-  };
-
-  const mockPermission = {
-    id: "perm-1",
-    name: "test:read",
-    description: null,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-  };
-
-  describe("findAll", () => {
-    it("returns all roles with permissions when user has permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findAllWithPermissions.mockResolvedValue([mockRoleWithPermissions]);
-
-      const result = await roleService.findAll("user-1");
-
-      expect(result).toHaveLength(1);
-      expect(result[0].permissions).toBeDefined();
+  describe("getUserRoles", () => {
+    beforeEach(() => {
+      mockCached.mockClear();
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(false);
+    it("returns the roles column", async () => {
+      const service = serviceWith(["ADMIN"]);
+      await expect(service.getUserRoles("u1")).resolves.toEqual(["ADMIN"]);
+    });
 
-      await expect(roleService.findAll("user-1")).rejects.toThrow(
-        "Permission denied"
+    it("returns empty array when the user does not exist", async () => {
+      const service = serviceWith(null);
+      await expect(service.getUserRoles("nope")).resolves.toEqual([]);
+    });
+
+    it("returns empty array for a falsy userId without hitting the db", async () => {
+      const prisma = createMockPrisma(["ADMIN"]);
+      const service = createRoleService(prisma as unknown as PrismaClient);
+      await expect(service.getUserRoles("")).resolves.toEqual([]);
+      expect(prisma.user.findUnique).not.toHaveBeenCalled();
+    });
+
+    it("pins the cache key and tags for a given userId", async () => {
+      mockCached.mockClear();
+      const service = serviceWith(["ADMIN"]);
+      await service.getUserRoles("u1");
+      expect(mockCached).toHaveBeenCalledWith(
+        expect.any(Function),
+        ["roles", "u1"],
+        ["roles-u1"]
       );
     });
   });
 
-  describe("findById", () => {
-    it("returns role with permissions when user has permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findByIdWithPermissions.mockResolvedValue(mockRoleWithPermissions);
-
-      const result = await roleService.findById("user-1", "role-1");
-
-      expect(result.id).toBe("role-1");
-      expect(result.permissions).toBeDefined();
+  describe("isAdmin", () => {
+    it("is true for ADMIN", async () => {
+      await expect(serviceWith(["ADMIN"]).isAdmin("u1")).resolves.toBe(true);
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(false);
-
-      await expect(roleService.findById("user-1", "role-1")).rejects.toThrow(
-        "Permission denied"
-      );
+    it("is false for VERIFIED", async () => {
+      await expect(serviceWith(["VERIFIED"]).isAdmin("u1")).resolves.toBe(false);
     });
 
-    it("throws NOT_FOUND when role does not exist", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findByIdWithPermissions.mockResolvedValue(null);
+    it("is false for a board admin", async () => {
+      await expect(serviceWith(["free:ADMIN"]).isAdmin("u1")).resolves.toBe(false);
+    });
 
-      await expect(roleService.findById("user-1", "nonexistent")).rejects.toThrow(
-        "Role not found"
-      );
+    it("is false for anonymous", async () => {
+      await expect(serviceWith(["ADMIN"]).isAdmin("")).resolves.toBe(false);
     });
   });
 
-  describe("create", () => {
-    it("creates role when user has permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findByName.mockResolvedValue(null);
-      mockedRoleRepo.create.mockResolvedValue(mockRole);
-
-      const result = await roleService.create("user-1", { name: "New Role" });
-
-      expect(result).toEqual(mockRole);
-      expect(mockedRoleRepo.create).toHaveBeenCalledWith({ name: "New Role" });
+  describe("isVerified", () => {
+    it("is true for VERIFIED", async () => {
+      await expect(serviceWith(["VERIFIED"]).isVerified("u1")).resolves.toBe(true);
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(false);
-
-      await expect(
-        roleService.create("user-1", { name: "New Role" })
-      ).rejects.toThrow("Permission denied");
+    it("is true for ADMIN", async () => {
+      await expect(serviceWith(["ADMIN"]).isVerified("u1")).resolves.toBe(true);
     });
 
-    it("throws BAD_REQUEST when role name already exists", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findByName.mockResolvedValue(mockRole);
+    it("is false for a board admin only", async () => {
+      await expect(serviceWith(["free:ADMIN"]).isVerified("u1")).resolves.toBe(false);
+    });
 
-      await expect(
-        roleService.create("user-1", { name: "Test Role" })
-      ).rejects.toThrow("Role name already exists");
+    it("is false for anonymous", async () => {
+      await expect(serviceWith(["ADMIN"]).isVerified("")).resolves.toBe(false);
     });
   });
 
-  describe("update", () => {
-    it("updates role when user has permission", async () => {
-      const updatedRole = { ...mockRole, name: "Updated Role" };
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(mockRole);
-      mockedRoleRepo.findByName.mockResolvedValue(null);
-      mockedRoleRepo.update.mockResolvedValue(updatedRole);
-
-      const result = await roleService.update("user-1", "role-1", {
-        name: "Updated Role",
-      });
-
-      expect(result.name).toBe("Updated Role");
+  describe("canManageBoard", () => {
+    it("is true for ADMIN on any board", async () => {
+      const service = serviceWith(["ADMIN"]);
+      await expect(service.canManageBoard("u1", "anything")).resolves.toBe(true);
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(false);
-
-      await expect(
-        roleService.update("user-1", "role-1", { name: "Updated" })
-      ).rejects.toThrow("Permission denied");
+    it("is true for the matching board admin", async () => {
+      const service = serviceWith(["free:ADMIN"]);
+      await expect(service.canManageBoard("u1", "free")).resolves.toBe(true);
     });
 
-    it("throws NOT_FOUND when role does not exist", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(null);
-
-      await expect(
-        roleService.update("user-1", "nonexistent", { name: "Updated" })
-      ).rejects.toThrow("Role not found");
+    it("is false for a different board", async () => {
+      const service = serviceWith(["boardA:ADMIN"]);
+      await expect(service.canManageBoard("u1", "boardB")).resolves.toBe(false);
     });
 
-    it("throws BAD_REQUEST when new name already exists", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(mockRole);
-      mockedRoleRepo.findByName.mockResolvedValue({ ...mockRole, id: "other-role" });
-
-      await expect(
-        roleService.update("user-1", "role-1", { name: "Existing Name" })
-      ).rejects.toThrow("Role name already exists");
+    it("is false for VERIFIED only", async () => {
+      const service = serviceWith(["VERIFIED"]);
+      await expect(service.canManageBoard("u1", "free")).resolves.toBe(false);
     });
 
-    it("allows update without name change", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(mockRole);
-      mockedRoleRepo.update.mockResolvedValue(mockRole);
-
-      await roleService.update("user-1", "role-1", { description: "New desc" });
-
-      expect(mockedRoleRepo.findByName).not.toHaveBeenCalled();
+    it("is false for anonymous", async () => {
+      await expect(serviceWith(["free:ADMIN"]).canManageBoard("", "free")).resolves.toBe(false);
     });
   });
 
-  describe("delete", () => {
-    it("deletes role when user has permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(mockRole);
-      mockedUserRepo.findUserIdsByRoleId.mockResolvedValue(["user-2"]);
-
-      await roleService.delete("user-1", "role-1");
-
-      expect(mockedRoleRepo.delete).toHaveBeenCalledWith("role-1");
+  describe("listManagedBoardIds", () => {
+    it('returns "all" for ADMIN', async () => {
+      await expect(serviceWith(["ADMIN"]).listManagedBoardIds("u1")).resolves.toBe("all");
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(false);
-
-      await expect(roleService.delete("user-1", "role-1")).rejects.toThrow(
-        "Permission denied"
-      );
+    it("returns only board ids for a board admin", async () => {
+      const service = serviceWith(["VERIFIED", "boardA:ADMIN", "boardB:ADMIN"]);
+      await expect(service.listManagedBoardIds("u1")).resolves.toEqual([
+        "boardA",
+        "boardB",
+      ]);
     });
 
-    it("throws NOT_FOUND when role does not exist", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(null);
-
-      await expect(roleService.delete("user-1", "nonexistent")).rejects.toThrow(
-        "Role not found"
-      );
-    });
-  });
-
-  describe("addPermission", () => {
-    it("adds permission to role when user has permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(mockRole);
-      mockedPermissionRepo.findById.mockResolvedValue(mockPermission);
-      mockedUserRepo.findUserIdsByRoleId.mockResolvedValue(["user-2"]);
-
-      await roleService.addPermission("user-1", "role-1", "perm-1");
-
-      expect(mockedRoleRepo.addPermission).toHaveBeenCalledWith("role-1", "perm-1");
+    it("returns empty array for a user with no board roles", async () => {
+      await expect(serviceWith(["VERIFIED"]).listManagedBoardIds("u1")).resolves.toEqual([]);
     });
 
-    it("throws FORBIDDEN when user lacks permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(false);
-
-      await expect(
-        roleService.addPermission("user-1", "role-1", "perm-1")
-      ).rejects.toThrow("Permission denied");
-    });
-
-    it("throws NOT_FOUND when role does not exist", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(null);
-
-      await expect(
-        roleService.addPermission("user-1", "nonexistent", "perm-1")
-      ).rejects.toThrow("Role not found");
-    });
-
-    it("throws NOT_FOUND when permission does not exist", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(mockRole);
-      mockedPermissionRepo.findById.mockResolvedValue(null);
-
-      await expect(
-        roleService.addPermission("user-1", "role-1", "nonexistent")
-      ).rejects.toThrow("Permission not found");
-    });
-  });
-
-  describe("removePermission", () => {
-    it("removes permission from role when user has permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(mockRole);
-      mockedUserRepo.findUserIdsByRoleId.mockResolvedValue(["user-2"]);
-
-      await roleService.removePermission("user-1", "role-1", "perm-1");
-
-      expect(mockedRoleRepo.removePermission).toHaveBeenCalledWith("role-1", "perm-1");
-    });
-
-    it("throws FORBIDDEN when user lacks permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(false);
-
-      await expect(
-        roleService.removePermission("user-1", "role-1", "perm-1")
-      ).rejects.toThrow("Permission denied");
-    });
-
-    it("throws NOT_FOUND when role does not exist", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedRoleRepo.findById.mockResolvedValue(null);
-
-      await expect(
-        roleService.removePermission("user-1", "nonexistent", "perm-1")
-      ).rejects.toThrow("Role not found");
-    });
-  });
-
-  describe("getAllPermissions", () => {
-    it("returns all permissions when user has permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(true);
-      mockedPermissionRepo.findAll.mockResolvedValue([mockPermission]);
-
-      const result = await roleService.getAllPermissions("user-1");
-
-      expect(result).toHaveLength(1);
-      expect(result[0].name).toBe("test:read");
-    });
-
-    it("throws FORBIDDEN when user lacks permission", async () => {
-      mockedPermissionService.checkUserPermission.mockResolvedValue(false);
-
-      await expect(roleService.getAllPermissions("user-1")).rejects.toThrow(
-        "Permission denied"
-      );
+    it("returns empty array for anonymous", async () => {
+      await expect(serviceWith(["ADMIN"]).listManagedBoardIds("")).resolves.toEqual([]);
     });
   });
 });

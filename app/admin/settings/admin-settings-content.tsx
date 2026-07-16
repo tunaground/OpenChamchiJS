@@ -324,9 +324,8 @@ interface SidebarLabels {
   backToHome: string;
   boards: string;
   users: string;
-  roles?: string;
-  settings?: string;
-  globalNotices?: string;
+  settings: string;
+  globalNotices: string;
 }
 
 interface Labels {
@@ -437,6 +436,7 @@ interface AdminSettingsContentProps {
   authLabels: AuthLabels;
   sidebarLabels: SidebarLabels;
   labels: Labels;
+  isAdmin: boolean;
   canUpdate: boolean;
 }
 
@@ -446,6 +446,7 @@ export function AdminSettingsContent({
   authLabels,
   sidebarLabels,
   labels,
+  isAdmin,
   canUpdate,
 }: AdminSettingsContentProps) {
   const [siteTitle, setSiteTitle] = useState(initialSettings.siteTitle);
@@ -584,7 +585,7 @@ export function AdminSettingsContent({
     }
   };
 
-  const sidebar = <AdminSidebar labels={sidebarLabels} />;
+  const sidebar = <AdminSidebar labels={sidebarLabels} isAdmin={isAdmin} />;
 
   return (
     <PageLayout

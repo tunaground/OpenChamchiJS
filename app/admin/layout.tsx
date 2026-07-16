@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 
 export default async function AdminLayout({
   children,
@@ -14,9 +14,8 @@ export default async function AdminLayout({
     redirect("/login");
   }
 
-  const hasAccess = await permissionService.checkUserPermission(session.user.id, "admin:read");
-
-  if (!hasAccess) {
+  const managed = await roleService.listManagedBoardIds(session.user.id);
+  if (managed !== "all" && managed.length === 0) {
     redirect("/?error=forbidden");
   }
 

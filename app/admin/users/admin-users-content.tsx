@@ -7,6 +7,7 @@ import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
+import { ROLE, boardAdminRole } from "@/lib/auth/roles";
 
 const Container = styled.div`
   padding: ${(props) => props.theme.containerPadding};
@@ -254,35 +255,44 @@ const DangerButton = styled(Button)`
   }
 `;
 
-const RoleList = styled.div`
+const RoleSection = styled.div`
+  margin-bottom: 1.6rem;
+`;
+
+const RoleSectionTitle = styled.div`
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: ${(props) => props.theme.textSecondary};
+  margin-bottom: 0.8rem;
+`;
+
+const RoleCheckboxList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+  max-height: 24rem;
+  overflow-y: auto;
 `;
 
-const RoleItem = styled.div`
+const RoleCheckbox = styled.label`
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 0.8rem;
-  background: ${(props) => props.theme.surfaceHover};
-  border-radius: 4px;
+  gap: 0.8rem;
+  font-size: 1.4rem;
+  color: ${(props) => props.theme.textPrimary};
+  cursor: pointer;
+
+  input {
+    width: 1.6rem;
+    height: 1.6rem;
+  }
 `;
 
-const Select = styled.select`
-  padding: 0.8rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-  font-size: 1.4rem;
-  width: 100%;
-  margin-bottom: 0.8rem;
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
+const ErrorText = styled.span`
+  color: #dc2626;
+  font-size: 1.2rem;
+  margin-top: 0.4rem;
+  display: block;
 `;
 
 interface UserData {
@@ -290,12 +300,7 @@ interface UserData {
   name: string | null;
   email: string | null;
   image: string | null;
-  roles: { id: string; name: string }[];
-}
-
-interface RoleData {
-  id: string;
-  name: string;
+  roles: string[];
 }
 
 interface PaginationData {
@@ -315,18 +320,20 @@ interface SidebarLabels {
   backToHome: string;
   boards: string;
   users: string;
-  roles?: string;
-  settings?: string;
-  globalNotices?: string;
+  settings: string;
+  globalNotices: string;
+}
+
+interface BoardOption {
+  id: string;
+  name: string;
 }
 
 interface Labels {
   title: string;
   name: string;
   email: string;
-  roles: string;
   actions: string;
-  editRoles: string;
   delete: string;
   noUsers: string;
   noResults: string;
@@ -334,34 +341,37 @@ interface Labels {
   searchButton: string;
   confirmDelete: string;
   cancel: string;
+  editRoles: string;
+  rolesTitle: string;
+  globalRoles: string;
+  boardRoles: string;
   save: string;
-  addRole: string;
-  removeRole: string;
+  saveError: string;
 }
 
 interface AdminUsersContentProps {
   users: UserData[];
-  allRoles: RoleData[];
   pagination: PaginationData;
   search: string;
   authLabels: AuthLabels;
   sidebarLabels: SidebarLabels;
-  canUpdate: boolean;
+  isAdmin: boolean;
   canDelete: boolean;
+  boards: BoardOption[];
   labels: Labels;
 }
 
-type ModalType = "editRoles" | "delete" | null;
+type ModalType = "delete" | "roles" | null;
 
 export function AdminUsersContent({
   users: initialUsers,
-  allRoles,
   pagination,
   search: initialSearch,
   authLabels,
   sidebarLabels,
-  canUpdate,
+  isAdmin,
   canDelete,
+  boards,
   labels,
 }: AdminUsersContentProps) {
   const router = useRouter();
@@ -369,8 +379,10 @@ export function AdminUsersContent({
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedUser, setSelectedUser] = useState<UserData | null>(null);
-  const [selectedRoleId, setSelectedRoleId] = useState("");
   const [loading, setLoading] = useState(false);
+  const [editRoles, setEditRoles] = useState<Set<string>>(new Set());
+  const [rolesError, setRolesError] = useState<string | null>(null);
+  const [savingRoles, setSavingRoles] = useState(false);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -379,70 +391,34 @@ export function AdminUsersContent({
     router.push(`/admin/users?${params.toString()}`);
   };
 
-  const openEditRolesModal = (user: UserData) => {
-    setSelectedUser(user);
-    setSelectedRoleId("");
-    setModalType("editRoles");
-  };
-
   const openDeleteModal = (user: UserData) => {
     setSelectedUser(user);
     setModalType("delete");
   };
 
+  const openRolesModal = (user: UserData) => {
+    setSelectedUser(user);
+    setEditRoles(new Set(user.roles));
+    setRolesError(null);
+    setModalType("roles");
+  };
+
   const closeModal = () => {
     setModalType(null);
     setSelectedUser(null);
-    setSelectedRoleId("");
+    setRolesError(null);
   };
 
-  const handleAddRole = async () => {
-    if (!selectedUser || !selectedRoleId) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/users/${selectedUser.id}/roles`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ roleId: selectedRoleId }),
-      });
-
-      if (res.ok) {
-        const role = allRoles.find((r) => r.id === selectedRoleId);
-        if (role) {
-          const updatedUser = {
-            ...selectedUser,
-            roles: [...selectedUser.roles, { id: role.id, name: role.name }],
-          };
-          setSelectedUser(updatedUser);
-          setUsers(users.map((u) => (u.id === selectedUser.id ? updatedUser : u)));
-          setSelectedRoleId("");
-        }
+  const toggleRole = (role: string) => {
+    setEditRoles((prev) => {
+      const next = new Set(prev);
+      if (next.has(role)) {
+        next.delete(role);
+      } else {
+        next.add(role);
       }
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRemoveRole = async (roleId: string) => {
-    if (!selectedUser) return;
-    setLoading(true);
-    try {
-      const res = await fetch(
-        `/api/users/${selectedUser.id}/roles?roleId=${roleId}`,
-        { method: "DELETE" }
-      );
-
-      if (res.ok) {
-        const updatedUser = {
-          ...selectedUser,
-          roles: selectedUser.roles.filter((r) => r.id !== roleId),
-        };
-        setSelectedUser(updatedUser);
-        setUsers(users.map((u) => (u.id === selectedUser.id ? updatedUser : u)));
-      }
-    } finally {
-      setLoading(false);
-    }
+      return next;
+    });
   };
 
   const handleDelete = async () => {
@@ -462,11 +438,32 @@ export function AdminUsersContent({
     }
   };
 
-  const availableRoles = selectedUser
-    ? allRoles.filter((r) => !selectedUser.roles.some((ur) => ur.id === r.id))
-    : [];
+  const handleSaveRoles = async () => {
+    if (!selectedUser) return;
+    setSavingRoles(true);
+    setRolesError(null);
+    try {
+      const res = await fetch(`/api/users/${selectedUser.id}/roles`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ roles: Array.from(editRoles) }),
+      });
 
-  const sidebar = <AdminSidebar labels={sidebarLabels} />;
+      if (res.ok) {
+        closeModal();
+        router.refresh();
+      } else {
+        const data = await res.json().catch(() => null);
+        setRolesError(
+          typeof data?.error === "string" ? data.error : labels.saveError
+        );
+      }
+    } finally {
+      setSavingRoles(false);
+    }
+  };
+
+  const sidebar = <AdminSidebar labels={sidebarLabels} isAdmin={isAdmin} />;
 
   const buildBaseUrl = () => {
     const params = new URLSearchParams();
@@ -528,15 +525,13 @@ export function AdminUsersContent({
                   </CardUserInfo>
                   <CardRoles>
                     {user.roles.map((role) => (
-                      <RoleBadge key={role.id}>{role.name}</RoleBadge>
+                      <RoleBadge key={role}>{role}</RoleBadge>
                     ))}
                   </CardRoles>
                   <CardActions>
-                    {canUpdate && (
-                      <SmallButton onClick={() => openEditRolesModal(user)}>
-                        {labels.editRoles}
-                      </SmallButton>
-                    )}
+                    <SmallButton onClick={() => openRolesModal(user)}>
+                      {labels.editRoles}
+                    </SmallButton>
                     {canDelete && (
                       <DangerSmallButton onClick={() => openDeleteModal(user)}>
                         {labels.delete}
@@ -555,61 +550,6 @@ export function AdminUsersContent({
           </>
         )}
 
-        {/* Edit Roles Modal */}
-        {modalType === "editRoles" && selectedUser && (
-          <Modal onClick={closeModal}>
-            <ModalContent onClick={(e) => e.stopPropagation()}>
-              <ModalTitle>
-                {labels.editRoles} - {selectedUser.name}
-              </ModalTitle>
-
-              <RoleList>
-                {selectedUser.roles.map((role) => (
-                  <RoleItem key={role.id}>
-                    <span>{role.name}</span>
-                    <SmallButton
-                      onClick={() => handleRemoveRole(role.id)}
-                      disabled={loading}
-                    >
-                      {labels.removeRole}
-                    </SmallButton>
-                  </RoleItem>
-                ))}
-              </RoleList>
-
-              {availableRoles.length > 0 && (
-                <>
-                  <div style={{ marginTop: "1.6rem" }}>
-                    <Select
-                      value={selectedRoleId}
-                      onChange={(e) => setSelectedRoleId(e.target.value)}
-                    >
-                      <option value="">-- Select Role --</option>
-                      {availableRoles.map((role) => (
-                        <option key={role.id} value={role.id}>
-                          {role.name}
-                        </option>
-                      ))}
-                    </Select>
-                    <Button
-                      onClick={handleAddRole}
-                      disabled={!selectedRoleId || loading}
-                    >
-                      {labels.addRole}
-                    </Button>
-                  </div>
-                </>
-              )}
-
-              <ModalActions>
-                <SecondaryButton onClick={closeModal}>
-                  {labels.cancel}
-                </SecondaryButton>
-              </ModalActions>
-            </ModalContent>
-          </Modal>
-        )}
-
         {/* Delete Confirmation Modal */}
         {modalType === "delete" && selectedUser && (
           <Modal onClick={closeModal}>
@@ -626,6 +566,72 @@ export function AdminUsersContent({
                 <DangerButton onClick={handleDelete} disabled={loading}>
                   {labels.delete}
                 </DangerButton>
+              </ModalActions>
+            </ModalContent>
+          </Modal>
+        )}
+
+        {/* Roles Modal */}
+        {modalType === "roles" && selectedUser && (
+          <Modal onClick={closeModal}>
+            <ModalContent onClick={(e) => e.stopPropagation()}>
+              <ModalTitle>{labels.rolesTitle}</ModalTitle>
+              <p style={{ marginBottom: "1.6rem", fontWeight: 500 }}>
+                {selectedUser.name}
+              </p>
+
+              <RoleSection>
+                <RoleSectionTitle>{labels.globalRoles}</RoleSectionTitle>
+                <RoleCheckboxList>
+                  <RoleCheckbox>
+                    <input
+                      type="checkbox"
+                      checked={editRoles.has(ROLE.ADMIN)}
+                      onChange={() => toggleRole(ROLE.ADMIN)}
+                    />
+                    {ROLE.ADMIN}
+                  </RoleCheckbox>
+                  <RoleCheckbox>
+                    <input
+                      type="checkbox"
+                      checked={editRoles.has(ROLE.VERIFIED)}
+                      onChange={() => toggleRole(ROLE.VERIFIED)}
+                    />
+                    {ROLE.VERIFIED}
+                  </RoleCheckbox>
+                </RoleCheckboxList>
+              </RoleSection>
+
+              {boards.length > 0 && (
+                <RoleSection>
+                  <RoleSectionTitle>{labels.boardRoles}</RoleSectionTitle>
+                  <RoleCheckboxList>
+                    {boards.map((board) => {
+                      const role = boardAdminRole(board.id);
+                      return (
+                        <RoleCheckbox key={board.id}>
+                          <input
+                            type="checkbox"
+                            checked={editRoles.has(role)}
+                            onChange={() => toggleRole(role)}
+                          />
+                          {board.name}
+                        </RoleCheckbox>
+                      );
+                    })}
+                  </RoleCheckboxList>
+                </RoleSection>
+              )}
+
+              {rolesError && <ErrorText>{rolesError}</ErrorText>}
+
+              <ModalActions>
+                <SecondaryButton onClick={closeModal} disabled={savingRoles}>
+                  {labels.cancel}
+                </SecondaryButton>
+                <Button onClick={handleSaveRoles} disabled={savingRoles}>
+                  {labels.save}
+                </Button>
               </ModalActions>
             </ModalContent>
           </Modal>

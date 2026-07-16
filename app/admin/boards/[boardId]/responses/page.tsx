@@ -1,8 +1,8 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { responseService, SearchType } from "@/lib/services/response";
 import { AdminResponseCursor } from "@/lib/repositories/interfaces/response";
@@ -35,14 +35,11 @@ export default async function AdminResponsesPage({ params, searchParams }: Props
     }
   }
 
-  // Check permissions (same as thread permissions)
-  const canEditGlobal = await permissionService.checkUserPermission(userId, "response:update");
-  const canEditBoard = await permissionService.checkUserPermission(userId, `response:${boardId}:update`);
-  const canEdit = canEditGlobal || canEditBoard;
-
-  const canDeleteGlobal = await permissionService.checkUserPermission(userId, "response:delete");
-  const canDeleteBoard = await permissionService.checkUserPermission(userId, `response:${boardId}:delete`);
-  const canDelete = canDeleteGlobal || canDeleteBoard;
+  const canManage = await roleService.canManageBoard(userId, boardId);
+  if (!canManage) {
+    redirect("/admin/boards");
+  }
+  const isAdmin = await roleService.isAdmin(userId);
 
   try {
     const board = await boardService.findById(boardId);
@@ -85,20 +82,21 @@ export default async function AdminResponsesPage({ params, searchParams }: Props
           admin: tSidebar("admin"),
           boards: tSidebar("boards"),
           users: tSidebar("users"),
-          roles: tSidebar("roles"),
           settings: tSidebar("settings"),
+          globalNotices: tSidebar("globalNotices"),
           threads: tSidebar("threads"),
           responses: tSidebar("responses"),
           notices: tSidebar("notices"),
         }}
+        isAdmin={isAdmin}
         responses={responsesWithCountry}
         hasMore={result.hasMore}
         nextCursor={result.nextCursor}
         scanned={result.scanned}
         searchType={searchType ?? ""}
         search={search ?? ""}
-        canEdit={canEdit}
-        canDelete={canDelete}
+        canEdit={canManage}
+        canDelete={canManage}
         labels={{
           title: t("title"),
           searchType: t("searchType"),

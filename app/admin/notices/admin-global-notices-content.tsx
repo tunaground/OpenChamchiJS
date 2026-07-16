@@ -325,9 +325,8 @@ interface SidebarLabels {
   admin: string;
   boards: string;
   users: string;
-  roles?: string;
-  settings?: string;
-  globalNotices?: string;
+  settings: string;
+  globalNotices: string;
 }
 
 interface AdminGlobalNoticesContentProps {
@@ -336,6 +335,7 @@ interface AdminGlobalNoticesContentProps {
   notices: NoticeData[];
   pagination: PaginationData;
   search: string;
+  isAdmin: boolean;
   canCreate: boolean;
   canUpdate: boolean;
   canDelete: boolean;
@@ -362,6 +362,7 @@ export function AdminGlobalNoticesContent({
   notices: initialNotices,
   pagination,
   search: initialSearch,
+  isAdmin,
   canCreate,
   canUpdate,
   canDelete,
@@ -480,7 +481,7 @@ export function AdminGlobalNoticesContent({
   };
 
   const sidebar = (
-    <AdminSidebar labels={sidebarLabels} />
+    <AdminSidebar labels={sidebarLabels} isAdmin={isAdmin} />
   );
 
   return (

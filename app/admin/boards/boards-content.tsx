@@ -308,15 +308,15 @@ interface SidebarLabels {
   backToHome: string;
   boards: string;
   users: string;
-  roles?: string;
-  settings?: string;
-  globalNotices?: string;
+  settings: string;
+  globalNotices: string;
 }
 
 interface BoardsContentProps {
   boards: BoardData[];
   authLabels: AuthLabels;
   sidebarLabels: SidebarLabels;
+  isAdmin: boolean;
   canCreate: boolean;
   canUpdate: boolean;
   labels: Labels;
@@ -352,7 +352,7 @@ const defaultFormData: FormData = {
   uploadMimeTypes: "image/png,image/jpeg,image/gif,image/webp",
 };
 
-export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels, canCreate, canUpdate, labels }: BoardsContentProps) {
+export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels, isAdmin, canCreate, canUpdate, labels }: BoardsContentProps) {
   const [boards, setBoards] = useState(initialBoards);
   const [modalType, setModalType] = useState<ModalType>(null);
   const [selectedBoard, setSelectedBoard] = useState<BoardData | null>(null);
@@ -515,7 +515,7 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
     }
   };
 
-  const sidebar = <AdminSidebar labels={sidebarLabels} />;
+  const sidebar = <AdminSidebar labels={sidebarLabels} isAdmin={isAdmin} />;
 
   return (
     <PageLayout

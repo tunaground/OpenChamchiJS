@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { isForeignIp } from "@/lib/ip";
 import { globalSettingsService } from "@/lib/services/global-settings";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { BoardData } from "@/lib/repositories/interfaces/board";
 
 export function getClientIp(request: NextRequest): string {
@@ -39,14 +39,11 @@ export async function checkForeignIpBlocked(
     return null;
   }
 
-  // Check if user has foreign:write permission
+  // VERIFIED(또는 ADMIN) 계정은 해외 IP 차단 면제
   const session = await getServerSession(authOptions);
   if (session) {
-    const hasPermission = await permissionService.checkUserPermission(
-      session.user.id,
-      "foreign:write"
-    );
-    if (hasPermission) {
+    const verified = await roleService.isVerified(session.user.id);
+    if (verified) {
       return null;
     }
   }

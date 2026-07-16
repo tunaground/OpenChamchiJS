@@ -340,8 +340,8 @@ interface SidebarLabels {
   admin: string;
   boards: string;
   users: string;
-  roles?: string;
-  settings?: string;
+  settings: string;
+  globalNotices: string;
   threads: string;
   responses: string;
   notices: string;
@@ -352,6 +352,7 @@ interface AdminNoticesContentProps {
   boardName: string;
   authLabels: AuthLabels;
   sidebarLabels: SidebarLabels;
+  isAdmin: boolean;
   notices: NoticeData[];
   pagination: PaginationData;
   search: string;
@@ -380,6 +381,7 @@ export function AdminNoticesContent({
   boardName,
   authLabels,
   sidebarLabels,
+  isAdmin,
   notices: initialNotices,
   pagination,
   search: initialSearch,
@@ -505,6 +507,7 @@ export function AdminNoticesContent({
       boardId={boardId}
       boardName={boardName}
       labels={sidebarLabels}
+      isAdmin={isAdmin}
     />
   );
 

@@ -364,7 +364,7 @@ if (adminCount > 0) {
 }
 
 const session = await getServerSession(authOptions);
-if (!session) {
+if (!session?.user?.id) {
   redirect("/setup");
 }
 
@@ -1920,7 +1920,7 @@ git commit -m "fix: authorize write lock and foreign ip bypass via roles"
 
 **Interfaces:**
 - Consumes: `roleService` from `@/lib/services/role` (Task 4); `userService.setRoles` and `PATCH /api/users/[userId]/roles` (Task 10)
-- Produces: `AdminSidebar`가 `canManageUsers: boolean`, `canManageGlobal: boolean` prop을 받는다
+- Produces: `AdminSidebar`가 `isAdmin: boolean` prop을 받는다
 
 - [ ] **Step 1: 남은 permissionService 호출부 목록화**
 
@@ -1942,29 +1942,33 @@ if (managed !== "all" && managed.length === 0) {
 
 - [ ] **Step 3: 사이드바를 롤 기반으로 교체**
 
-`components/sidebar/AdminSidebar.tsx`의 props에 `canManageUsers: boolean`, `canManageGlobal: boolean`을 추가한다. 게시판 관리는 `/admin` 진입 자체가 이미 걸러졌으므로 항상 표시한다.
+`components/sidebar/AdminSidebar.tsx`의 `AdminSidebarProps`에 `isAdmin: boolean`을 추가한다. 게시판 관리는 `/admin` 진입 자체가 이미 걸러졌으므로 항상 표시한다. 사용자 관리·전역 공지·전역 설정은 셋 다 ADMIN 전용이므로 하나의 조건으로 묶는다.
 
 ```tsx
-{canManageUsers && (
-  <NavItem>
-    <NavLink href="/admin/users" ...>{labels.users}</NavLink>
-  </NavItem>
-)}
-{canManageGlobal && (
+{isAdmin && (
   <>
     <NavItem>
-      <NavLink href="/admin/notices" ...>{labels.notices}</NavLink>
+      <NavLink href="/admin/users" $active={pathname.startsWith("/admin/users")}>
+        {labels.users}
+      </NavLink>
     </NavItem>
     <NavItem>
-      <NavLink href="/admin/settings" ...>{labels.settings}</NavLink>
+      <NavLink href="/admin/notices" $active={pathname.startsWith("/admin/notices")}>
+        {labels.notices}
+      </NavLink>
+    </NavItem>
+    <NavItem>
+      <NavLink href="/admin/settings" $active={pathname.startsWith("/admin/settings")}>
+        {labels.settings}
+      </NavLink>
     </NavItem>
   </>
 )}
 ```
 
-기존 `labels.X &&` 조건은 제거한다 — 라벨은 항상 전달되므로 조건으로 쓸 수 없다. `NavItem`/`NavLink`의 기존 props(활성 상태 표시 등)는 그대로 유지한다.
+기존 `labels.X &&` 조건은 제거한다 — 라벨은 항상 전달되므로 조건으로 쓸 수 없다. `$active` prop의 정확한 형태는 기존 `/admin/boards` `NavLink`(`AdminSidebar.tsx:27-33`)를 그대로 따른다.
 
-호출부 네 곳(`app/admin/boards/page.tsx`, `app/admin/users/page.tsx`, `app/admin/settings/page.tsx`, `app/admin/notices/page.tsx`)에서 `const isAdmin = await roleService.isAdmin(session.user.id);`를 계산해 `canManageUsers={isAdmin} canManageGlobal={isAdmin}`으로 넘긴다. 두 prop이 지금은 같은 값이지만, 사이드바가 "누가 무엇을 볼 수 있는가"를 자기 어휘로 표현하게 두는 편이 나중에 갈릴 때 안전하다.
+호출부 네 곳(`app/admin/boards/page.tsx`, `app/admin/users/page.tsx`, `app/admin/settings/page.tsx`, `app/admin/notices/page.tsx`)에서 `const isAdmin = await roleService.isAdmin(session.user.id);`를 계산해 `isAdmin={isAdmin}`으로 넘긴다.
 
 - [ ] **Step 4: ADMIN 전용 페이지 게이트 교체**
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { responseService, SearchType } from "@/lib/services/response";
 import { AdminResponseCursor } from "@/lib/repositories/interfaces/response";
 import { getCountryCode } from "@/lib/ip";
@@ -20,10 +20,9 @@ export async function GET(request: NextRequest, { params }: Params) {
   const userId = session.user.id;
 
   // Check permissions
-  const canDeleteGlobal = await permissionService.checkUserPermission(userId, "response:delete");
-  const canDeleteBoard = await permissionService.checkUserPermission(userId, `response:${boardId}:delete`);
+  const canManage = await roleService.canManageBoard(userId, boardId);
 
-  if (!canDeleteGlobal && !canDeleteBoard) {
+  if (!canManage) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

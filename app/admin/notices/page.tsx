@@ -1,7 +1,8 @@
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { noticeService } from "@/lib/services/notice";
 import { toISOString } from "@/lib/cache";
 import { AdminGlobalNoticesContent } from "./admin-global-notices-content";
@@ -16,9 +17,10 @@ export default async function AdminGlobalNoticesPage({ searchParams }: Props) {
   const session = (await getServerSession(authOptions))!;
   const userId = session.user.id;
 
-  const canCreate = await permissionService.checkUserPermission(userId, "notice:create");
-  const canUpdate = await permissionService.checkUserPermission(userId, "notice:update");
-  const canDelete = await permissionService.checkUserPermission(userId, "notice:delete");
+  const isAdmin = await roleService.isAdmin(userId);
+  if (!isAdmin) {
+    redirect("/admin/boards");
+  }
 
   const result = await noticeService.findGlobal({ page, search });
 
@@ -34,7 +36,6 @@ export default async function AdminGlobalNoticesPage({ searchParams }: Props) {
         admin: tSidebar("admin"),
         boards: tSidebar("boards"),
         users: tSidebar("users"),
-        roles: tSidebar("roles"),
         settings: tSidebar("settings"),
         globalNotices: tSidebar("globalNotices"),
       }}
@@ -48,9 +49,10 @@ export default async function AdminGlobalNoticesPage({ searchParams }: Props) {
       }))}
       pagination={result.pagination}
       search={search ?? ""}
-      canCreate={canCreate}
-      canUpdate={canUpdate}
-      canDelete={canDelete}
+      isAdmin={isAdmin}
+      canCreate={isAdmin}
+      canUpdate={isAdmin}
+      canDelete={isAdmin}
       labels={{
         title: t("title"),
         createNotice: t("createNotice"),

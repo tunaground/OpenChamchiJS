@@ -1,7 +1,8 @@
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { isGeoIpAvailable } from "@/lib/ip";
 import { AdminSettingsContent } from "./admin-settings-content";
@@ -10,7 +11,10 @@ export default async function AdminSettingsPage() {
   const session = (await getServerSession(authOptions))!;
   const userId = session.user.id;
 
-  const canUpdate = await permissionService.checkUserPermission(userId, "all:all");
+  const isAdmin = await roleService.isAdmin(userId);
+  if (!isAdmin) {
+    redirect("/admin/boards");
+  }
 
   const settings = await globalSettingsService.get();
   const geoIpAvailable = isGeoIpAvailable();
@@ -59,11 +63,11 @@ export default async function AdminSettingsPage() {
         backToHome: tSidebar("backToHome"),
         boards: tSidebar("boards"),
         users: tSidebar("users"),
-        roles: tSidebar("roles"),
         settings: tSidebar("settings"),
         globalNotices: tSidebar("globalNotices"),
       }}
-      canUpdate={canUpdate}
+      isAdmin={isAdmin}
+      canUpdate={isAdmin}
       labels={{
         title: t("title"),
         siteTitle: t("siteTitle"),

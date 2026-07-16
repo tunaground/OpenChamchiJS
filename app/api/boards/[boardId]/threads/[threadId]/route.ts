@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { threadService, ThreadServiceError } from "@/lib/services/thread";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { handleServiceError } from "@/lib/api/error-handler";
 import { updateThreadSchema } from "@/lib/schemas";
 
@@ -27,15 +27,13 @@ export async function GET(
     if (includeDeleted) {
       const session = await getServerSession(authOptions);
       if (session?.user?.id) {
-        canViewDeleted = await permissionService.checkUserPermissions(session.user.id, [
-          "thread:delete",
-          `thread:${boardId}:delete`,
-        ]);
+        canViewDeleted = await roleService.canManageBoard(session.user.id, boardId);
       }
     }
 
     const thread = await threadService.findById(id, {
       includeDeleted: includeDeleted && canViewDeleted,
+      boardId,
     });
     return NextResponse.json(thread);
   } catch (error) {

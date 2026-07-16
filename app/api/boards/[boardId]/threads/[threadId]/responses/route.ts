@@ -6,7 +6,7 @@ import { authOptions } from "@/lib/auth";
 import { responseService, ResponseServiceError } from "@/lib/services/response";
 import { ResponseFilter } from "@/lib/repositories/interfaces/response";
 import { boardService, BoardServiceError } from "@/lib/services/board";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { checkForeignIpBlocked, getClientIp } from "@/lib/api/foreign-ip-check";
 import { checkWriteLocked } from "@/lib/api/write-lock-check";
@@ -60,10 +60,7 @@ export async function GET(
     let isAdmin = false;
     const session = await getServerSession(authOptions);
     if (session?.user?.id) {
-      isAdmin = await permissionService.checkUserPermissions(session.user.id, [
-        "response:delete",
-        `response:${boardId}:delete`,
-      ]);
+      isAdmin = await roleService.canManageBoard(session.user.id, boardId);
     }
 
     // Check password for includeHidden
@@ -103,7 +100,7 @@ export async function GET(
           includeDeleted: includeDeleted && isAdmin,
           includeHidden: includeHidden && canSeeHidden,
           filter,
-        });
+        }, boardId);
       }
     } else {
       responses = await responseService.findByThreadId(id, {
@@ -112,7 +109,7 @@ export async function GET(
         includeDeleted: includeDeleted && isAdmin,
         includeHidden: includeHidden && canSeeHidden,
         filter,
-      });
+      }, boardId);
     }
 
     // Strip sensitive fields from responses

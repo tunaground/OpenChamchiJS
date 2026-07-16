@@ -1,7 +1,6 @@
 import { createBoardService, BoardServiceError } from "@/lib/services/board";
-import { PermissionService } from "@/lib/services/permission";
-import { BoardRepository, BoardData } from "@/lib/repositories/interfaces/board";
-import { PermissionRepository } from "@/lib/repositories/interfaces/permission";
+import { RoleService } from "@/lib/services/role";
+import { BoardData } from "@/lib/repositories/interfaces/board";
 
 describe("BoardService", () => {
   const mockBoard: BoardData = {
@@ -17,74 +16,66 @@ describe("BoardService", () => {
     updatedAt: new Date(),
   };
 
-  const createMockRepo = (): jest.Mocked<BoardRepository> => ({
+  const createMockBoardRepository = () => ({
     findAll: jest.fn(),
+    findAllWithThreadCount: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     updateConfig: jest.fn(),
   });
 
-  const createMockPermission = (): jest.Mocked<PermissionService> => ({
-    getUserPermissions: jest.fn(),
-    hasPermission: jest.fn(),
-    hasAnyPermission: jest.fn(),
-    checkUserPermission: jest.fn(),
-    checkUserPermissions: jest.fn(),
-  });
-
-  const createMockPermissionRepo = (): jest.Mocked<PermissionRepository> => ({
-    findByName: jest.fn(),
-    create: jest.fn(),
-    createMany: jest.fn(),
+  const createMockRoleService = (
+    overrides: Partial<jest.Mocked<RoleService>> = {}
+  ): jest.Mocked<RoleService> => ({
+    getUserRoles: jest.fn().mockResolvedValue([]),
+    isAdmin: jest.fn().mockResolvedValue(false),
+    isVerified: jest.fn().mockResolvedValue(false),
+    canManageBoard: jest.fn().mockResolvedValue(false),
+    listManagedBoardIds: jest.fn().mockResolvedValue([]),
+    ...overrides,
   });
 
   describe("findAll", () => {
     it("should return all boards", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockRepo.findAll.mockResolvedValue([mockBoard]);
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findAll.mockResolvedValue([mockBoard]);
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService(),
       });
 
       const result = await service.findAll();
 
       expect(result).toEqual([mockBoard]);
-      expect(mockRepo.findAll).toHaveBeenCalledTimes(1);
+      expect(boardRepository.findAll).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("findById", () => {
     it("should return board when found", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockRepo.findById.mockResolvedValue(mockBoard);
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue(mockBoard);
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService(),
       });
 
       const result = await service.findById("test-board");
 
       expect(result).toEqual(mockBoard);
-      expect(mockRepo.findById).toHaveBeenCalledWith("test-board");
+      expect(boardRepository.findById).toHaveBeenCalledWith("test-board");
     });
 
     it("should throw NOT_FOUND when board does not exist", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockRepo.findById.mockResolvedValue(null);
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue(null);
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService(),
       });
 
       await expect(service.findById("non-existent")).rejects.toThrow(
@@ -96,14 +87,12 @@ describe("BoardService", () => {
     });
 
     it("should throw NOT_FOUND when board is deleted", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockRepo.findById.mockResolvedValue({ ...mockBoard, deleted: true });
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue({ ...mockBoard, deleted: true });
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService(),
       });
 
       await expect(service.findById("test-board")).rejects.toMatchObject({
@@ -115,74 +104,50 @@ describe("BoardService", () => {
   describe("create", () => {
     const createInput = { id: "new-board", name: "New Board" };
 
-    it("should create board when user has board:write permission", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockRepo.findById.mockResolvedValue(null);
-      mockRepo.create.mockResolvedValue({ ...mockBoard, ...createInput });
+    it("should create board when user is admin", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue(null);
+      boardRepository.create.mockResolvedValue({ ...mockBoard, ...createInput });
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService({
+          isAdmin: jest.fn().mockResolvedValue(true),
+        }),
       });
 
-      const result = await service.create("user-1", createInput);
+      const result = await service.create("admin", createInput);
 
       expect(result.id).toBe("new-board");
-      expect(mockRepo.create).toHaveBeenCalledWith(createInput);
+      expect(boardRepository.create).toHaveBeenCalledWith(createInput);
     });
 
-    it("should create board when user has board:all permission", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockRepo.findById.mockResolvedValue(null);
-      mockRepo.create.mockResolvedValue({ ...mockBoard, ...createInput });
-
+    it("forbids a board admin from creating a board", async () => {
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository: createMockBoardRepository(),
+        roleService: createMockRoleService({
+          isAdmin: jest.fn().mockResolvedValue(false),
+        }),
       });
 
-      const result = await service.create("user-1", createInput);
-
-      expect(result.id).toBe("new-board");
-    });
-
-    it("should throw FORBIDDEN when user has no permission", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(false);
-
-      const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
-      });
-
-      await expect(service.create("user-1", createInput)).rejects.toMatchObject(
-        { code: "FORBIDDEN" }
+      await expect(service.create("u1", { id: "new" })).rejects.toThrow(
+        "Permission denied"
       );
-      expect(mockRepo.create).not.toHaveBeenCalled();
     });
 
     it("should throw CONFLICT when board already exists", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockRepo.findById.mockResolvedValue(mockBoard);
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue(mockBoard);
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService({
+          isAdmin: jest.fn().mockResolvedValue(true),
+        }),
       });
 
       await expect(
-        service.create("user-1", { id: "test-board", name: "Duplicate" })
+        service.create("admin", { id: "test-board", name: "Duplicate" })
       ).rejects.toMatchObject({ code: "CONFLICT" });
     });
   });
@@ -190,35 +155,81 @@ describe("BoardService", () => {
   describe("update", () => {
     const updateInput = { name: "Updated Board" };
 
-    it("should update board when user has board:edit permission", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockRepo.findById.mockResolvedValue(mockBoard);
-      mockRepo.update.mockResolvedValue({ ...mockBoard, ...updateInput });
-
+    it("lets a board admin update a normal field", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue({ id: "free", deleted: false });
+      boardRepository.update.mockResolvedValue({ id: "free", deleted: false });
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService({
+          canManageBoard: jest.fn().mockResolvedValue(true),
+        }),
       });
 
-      const result = await service.update("user-1", "test-board", updateInput);
-
-      expect(result.name).toBe("Updated Board");
-      expect(mockRepo.update).toHaveBeenCalledWith("test-board", updateInput);
+      await expect(
+        service.update("u1", "free", { name: "새 이름" })
+      ).resolves.toEqual({ id: "free", deleted: false });
     });
 
-    it("should throw FORBIDDEN when user has no permission", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(false);
-      mockRepo.findById.mockResolvedValue(mockBoard);
+    it("forbids a board admin from deleting the board", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue({ id: "free", deleted: false });
+      const service = createBoardService({
+        boardRepository,
+        roleService: createMockRoleService({
+          canManageBoard: jest.fn().mockResolvedValue(true),
+          isAdmin: jest.fn().mockResolvedValue(false),
+        }),
+      });
+
+      await expect(service.update("u1", "free", { deleted: true })).rejects.toThrow(
+        "Permission denied"
+      );
+      expect(boardRepository.update).not.toHaveBeenCalled();
+    });
+
+    it("lets an admin delete the board", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue({ id: "free", deleted: false });
+      boardRepository.update.mockResolvedValue({ id: "free", deleted: true });
+      const service = createBoardService({
+        boardRepository,
+        roleService: createMockRoleService({
+          canManageBoard: jest.fn().mockResolvedValue(true),
+          isAdmin: jest.fn().mockResolvedValue(true),
+        }),
+      });
+
+      await expect(
+        service.update("admin", "free", { deleted: true })
+      ).resolves.toEqual({ id: "free", deleted: true });
+    });
+
+    it("forbids a board admin from restoring a board", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue({ id: "free", deleted: true });
+      const service = createBoardService({
+        boardRepository,
+        roleService: createMockRoleService({
+          canManageBoard: jest.fn().mockResolvedValue(true),
+          isAdmin: jest.fn().mockResolvedValue(false),
+        }),
+      });
+
+      await expect(
+        service.update("u1", "free", { deleted: false })
+      ).rejects.toThrow("Permission denied");
+    });
+
+    it("should throw FORBIDDEN when user cannot manage the board", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue(mockBoard);
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService({
+          canManageBoard: jest.fn().mockResolvedValue(false),
+        }),
       });
 
       await expect(
@@ -227,15 +238,14 @@ describe("BoardService", () => {
     });
 
     it("should throw NOT_FOUND when board does not exist", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockRepo.findById.mockResolvedValue(null);
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue(null);
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService({
+          canManageBoard: jest.fn().mockResolvedValue(true),
+        }),
       });
 
       await expect(
@@ -247,20 +257,19 @@ describe("BoardService", () => {
   describe("updateConfig", () => {
     const configInput = { threadsPerPage: 30 };
 
-    it("should update config when user has board:config permission", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockRepo.findById.mockResolvedValue(mockBoard);
-      mockRepo.updateConfig.mockResolvedValue({
+    it("should update config when user can manage the board", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue(mockBoard);
+      boardRepository.updateConfig.mockResolvedValue({
         ...mockBoard,
         ...configInput,
       });
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService({
+          canManageBoard: jest.fn().mockResolvedValue(true),
+        }),
       });
 
       const result = await service.updateConfig(
@@ -270,52 +279,78 @@ describe("BoardService", () => {
       );
 
       expect(result.threadsPerPage).toBe(30);
-      expect(mockRepo.updateConfig).toHaveBeenCalledWith(
+      expect(boardRepository.updateConfig).toHaveBeenCalledWith(
         "test-board",
         configInput
       );
     });
 
-    it("should update config when user has board:edit permission", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockRepo.findById.mockResolvedValue(mockBoard);
-      mockRepo.updateConfig.mockResolvedValue({
-        ...mockBoard,
-        ...configInput,
-      });
+    it("should throw FORBIDDEN when user cannot manage the board", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findById.mockResolvedValue(mockBoard);
 
       const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
-      });
-
-      const result = await service.updateConfig(
-        "user-1",
-        "test-board",
-        configInput
-      );
-
-      expect(result.threadsPerPage).toBe(30);
-    });
-
-    it("should throw FORBIDDEN when user has no permission", async () => {
-      const mockRepo = createMockRepo();
-      const mockPermission = createMockPermission();
-      mockPermission.checkUserPermissions.mockResolvedValue(false);
-      mockRepo.findById.mockResolvedValue(mockBoard);
-
-      const service = createBoardService({
-        boardRepository: mockRepo,
-        permissionService: mockPermission,
-        permissionRepository: createMockPermissionRepo(),
+        boardRepository,
+        roleService: createMockRoleService({
+          canManageBoard: jest.fn().mockResolvedValue(false),
+        }),
       });
 
       await expect(
         service.updateConfig("user-1", "test-board", configInput)
       ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    });
+  });
+
+  describe("findAllWithThreadCount", () => {
+    it("returns every board for an admin", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findAllWithThreadCount.mockResolvedValue([
+        { id: "a" },
+        { id: "b" },
+      ]);
+      const service = createBoardService({
+        boardRepository,
+        roleService: createMockRoleService({
+          listManagedBoardIds: jest.fn().mockResolvedValue("all"),
+        }),
+      });
+
+      await expect(service.findAllWithThreadCount("admin")).resolves.toEqual([
+        { id: "a" },
+        { id: "b" },
+      ]);
+    });
+
+    it("returns only managed boards for a board admin", async () => {
+      const boardRepository = createMockBoardRepository();
+      boardRepository.findAllWithThreadCount.mockResolvedValue([
+        { id: "a" },
+        { id: "b" },
+      ]);
+      const service = createBoardService({
+        boardRepository,
+        roleService: createMockRoleService({
+          listManagedBoardIds: jest.fn().mockResolvedValue(["b"]),
+        }),
+      });
+
+      await expect(service.findAllWithThreadCount("u1")).resolves.toEqual([
+        { id: "b" },
+      ]);
+    });
+
+    it("forbids a user who manages no boards", async () => {
+      const service = createBoardService({
+        boardRepository: createMockBoardRepository(),
+        roleService: createMockRoleService({
+          listManagedBoardIds: jest.fn().mockResolvedValue([]),
+        }),
+      });
+
+      await expect(service.findAllWithThreadCount("u1")).rejects.toThrow(
+        "Permission denied"
+      );
     });
   });
 });

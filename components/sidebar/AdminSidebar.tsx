@@ -12,10 +12,11 @@ import type { AdminSidebarLabels } from "./types";
 
 interface AdminSidebarProps {
   labels: AdminSidebarLabels;
+  isAdmin: boolean;
   children?: React.ReactNode;
 }
 
-export function AdminSidebar({ labels, children }: AdminSidebarProps) {
+export function AdminSidebar({ labels, isAdmin, children }: AdminSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -31,43 +32,33 @@ export function AdminSidebar({ labels, children }: AdminSidebarProps) {
             {labels.boards}
           </NavLink>
         </NavItem>
-        <NavItem>
-          <NavLink
-            href="/admin/users"
-            $active={pathname.startsWith("/admin/users")}
-          >
-            {labels.users}
-          </NavLink>
-        </NavItem>
-        {labels.roles && (
-          <NavItem>
-            <NavLink
-              href="/admin/roles"
-              $active={pathname.startsWith("/admin/roles")}
-            >
-              {labels.roles}
-            </NavLink>
-          </NavItem>
-        )}
-        {labels.globalNotices && (
-          <NavItem>
-            <NavLink
-              href="/admin/notices"
-              $active={pathname.startsWith("/admin/notices")}
-            >
-              {labels.globalNotices}
-            </NavLink>
-          </NavItem>
-        )}
-        {labels.settings && (
-          <NavItem>
-            <NavLink
-              href="/admin/settings"
-              $active={pathname.startsWith("/admin/settings")}
-            >
-              {labels.settings}
-            </NavLink>
-          </NavItem>
+        {isAdmin && (
+          <>
+            <NavItem>
+              <NavLink
+                href="/admin/users"
+                $active={pathname.startsWith("/admin/users")}
+              >
+                {labels.users}
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
+                href="/admin/notices"
+                $active={pathname.startsWith("/admin/notices")}
+              >
+                {labels.globalNotices}
+              </NavLink>
+            </NavItem>
+            <NavItem>
+              <NavLink
+                href="/admin/settings"
+                $active={pathname.startsWith("/admin/settings")}
+              >
+                {labels.settings}
+              </NavLink>
+            </NavItem>
+          </>
         )}
       </NavList>
       {children}

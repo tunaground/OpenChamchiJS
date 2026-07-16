@@ -5,7 +5,7 @@ import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
 import { boardService, BoardServiceError } from "@/lib/services/board";
 import { noticeService, NoticeServiceError } from "@/lib/services/notice";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { toISOString } from "@/lib/cache";
 import { NoticeDetailContent } from "./notice-detail-content";
@@ -44,9 +44,10 @@ export default async function NoticeDetailPage({ params }: Props) {
   try {
     const session = await getServerSession(authOptions);
     const isLoggedIn = !!session;
-    const canAccessAdmin = session
-      ? await permissionService.checkUserPermission(session.user.id, "admin:read")
-      : false;
+    const managed = session
+      ? await roleService.listManagedBoardIds(session.user.id)
+      : null;
+    const canAccessAdmin = managed !== null && (managed === "all" || managed.length > 0);
 
     const [board, allBoards, notice, settings] = await Promise.all([
       boardService.findById(boardId),

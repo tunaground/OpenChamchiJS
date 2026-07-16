@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { boardService } from "@/lib/services/board";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { isRealtimeEnabled } from "@/lib/realtime/publisher";
@@ -18,9 +18,10 @@ export default async function ManualPage() {
   const t = await getTranslations("manual");
   const tCommon = await getTranslations("common");
 
-  const canAccessAdmin = session
-    ? await permissionService.checkUserPermission(session.user.id, "admin:read")
-    : false;
+  const managed = session
+    ? await roleService.listManagedBoardIds(session.user.id)
+    : null;
+  const canAccessAdmin = managed !== null && (managed === "all" || managed.length > 0);
 
   return (
     <ManualContent

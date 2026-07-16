@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { boardService } from "@/lib/services/board";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { HomeContent } from "./home-content";
@@ -15,9 +15,10 @@ export default async function HomePage() {
 
   const tCommon = await getTranslations("common");
 
-  const canAccessAdmin = session
-    ? await permissionService.checkUserPermission(session.user.id, "admin:read")
-    : false;
+  const managed = session
+    ? await roleService.listManagedBoardIds(session.user.id)
+    : null;
+  const canAccessAdmin = managed !== null && (managed === "all" || managed.length > 0);
 
   return (
     <HomeContent

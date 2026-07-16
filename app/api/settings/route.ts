@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { updateSettingsSchema } from "@/lib/schemas";
 import { validateOrigin } from "@/lib/api/csrf";
@@ -14,10 +14,7 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const hasPermission = await permissionService.checkUserPermission(
-    session.user.id,
-    "admin:read"
-  );
+  const hasPermission = await roleService.isAdmin(session.user.id);
 
   if (!hasPermission) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -38,11 +35,8 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Require all:all permission for global settings
-  const hasPermission = await permissionService.checkUserPermission(
-    session.user.id,
-    "all:all"
-  );
+  // Require ADMIN role for global settings
+  const hasPermission = await roleService.isAdmin(session.user.id);
 
   if (!hasPermission) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { BoardData } from "@/lib/repositories/interfaces/board";
 
 export async function checkWriteLocked(
@@ -14,11 +14,8 @@ export async function checkWriteLocked(
 
   const session = await getServerSession(authOptions);
   if (session) {
-    const hasPermission = await permissionService.checkUserPermissions(
-      session.user.id,
-      ["thread:edit", `thread:${board.id}:edit`]
-    );
-    if (hasPermission) {
+    const canManage = await roleService.canManageBoard(session.user.id, board.id);
+    if (canManage) {
       return null;
     }
   }

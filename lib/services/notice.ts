@@ -1,7 +1,7 @@
 import {
-  permissionService as defaultPermissionService,
-  PermissionService,
-} from "@/lib/services/permission";
+  roleService as defaultRoleService,
+  RoleService,
+} from "@/lib/services/role";
 import { noticeRepository as defaultNoticeRepository } from "@/lib/repositories/prisma/notice";
 import { boardRepository as defaultBoardRepository } from "@/lib/repositories/prisma/board";
 import {
@@ -51,17 +51,19 @@ export interface NoticeService {
 interface NoticeServiceDeps {
   noticeRepository: NoticeRepository;
   boardRepository: BoardRepository;
-  permissionService: PermissionService;
+  roleService: RoleService;
 }
 
 export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
-  const { noticeRepository, boardRepository, permissionService } = deps;
+  const { noticeRepository, boardRepository, roleService } = deps;
 
-  async function checkPermissions(
+  async function canManageNotice(
     userId: string,
-    permissions: string[]
+    boardId: string | null
   ): Promise<boolean> {
-    return permissionService.checkUserPermissions(userId, permissions);
+    return boardId === null
+      ? roleService.isAdmin(userId)
+      : roleService.canManageBoard(userId, boardId);
   }
 
   return {
@@ -146,10 +148,7 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
         }
       }
 
-      const permissions = data.boardId !== null
-        ? ["notice:create", `notice:${data.boardId}:create`]
-        : ["notice:create"];
-      const hasPermission = await checkPermissions(userId, permissions);
+      const hasPermission = await canManageNotice(userId, data.boardId);
       if (!hasPermission) {
         throw new NoticeServiceError("Permission denied", "FORBIDDEN");
       }
@@ -170,7 +169,7 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
       userId: string,
       data: Omit<CreateNoticeInput, "boardId">
     ): Promise<NoticeData> {
-      const hasPermission = await checkPermissions(userId, ["notice:create"]);
+      const hasPermission = await roleService.isAdmin(userId);
       if (!hasPermission) {
         throw new NoticeServiceError("Permission denied", "FORBIDDEN");
       }
@@ -194,10 +193,7 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
         throw new NoticeServiceError("Notice not found", "NOT_FOUND");
       }
 
-      const permissions = notice.boardId !== null
-        ? ["notice:update", `notice:${notice.boardId}:update`]
-        : ["notice:update"];
-      const hasPermission = await checkPermissions(userId, permissions);
+      const hasPermission = await canManageNotice(userId, notice.boardId);
       if (!hasPermission) {
         throw new NoticeServiceError("Permission denied", "FORBIDDEN");
       }
@@ -221,10 +217,7 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
         throw new NoticeServiceError("Notice not found", "NOT_FOUND");
       }
 
-      const permissions = notice.boardId !== null
-        ? ["notice:delete", `notice:${notice.boardId}:delete`]
-        : ["notice:delete"];
-      const hasPermission = await checkPermissions(userId, permissions);
+      const hasPermission = await canManageNotice(userId, notice.boardId);
       if (!hasPermission) {
         throw new NoticeServiceError("Permission denied", "FORBIDDEN");
       }
@@ -247,5 +240,5 @@ export function createNoticeService(deps: NoticeServiceDeps): NoticeService {
 export const noticeService = createNoticeService({
   noticeRepository: defaultNoticeRepository,
   boardRepository: defaultBoardRepository,
-  permissionService: defaultPermissionService,
+  roleService: defaultRoleService,
 });

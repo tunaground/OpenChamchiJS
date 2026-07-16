@@ -1,6 +1,6 @@
 import bcrypt from "bcryptjs";
 import { createThreadService, ThreadServiceError } from "@/lib/services/thread";
-import { PermissionService } from "@/lib/services/permission";
+import { RoleService } from "@/lib/services/role";
 import { ThreadRepository, ThreadData } from "@/lib/repositories/interfaces/thread";
 import { BoardRepository, BoardData } from "@/lib/repositories/interfaces/board";
 
@@ -63,19 +63,22 @@ describe("ThreadService", () => {
     updateConfig: jest.fn(),
   });
 
-  const createMockPermission = (): jest.Mocked<PermissionService> => ({
-    getUserPermissions: jest.fn(),
-    hasPermission: jest.fn(),
-    hasAnyPermission: jest.fn(),
-    checkUserPermission: jest.fn(),
-    checkUserPermissions: jest.fn(),
+  const createMockRoleService = (
+    overrides: Partial<jest.Mocked<RoleService>> = {}
+  ): jest.Mocked<RoleService> => ({
+    getUserRoles: jest.fn().mockResolvedValue([]),
+    isAdmin: jest.fn().mockResolvedValue(false),
+    isVerified: jest.fn().mockResolvedValue(false),
+    canManageBoard: jest.fn().mockResolvedValue(false),
+    listManagedBoardIds: jest.fn().mockResolvedValue([]),
+    ...overrides,
   });
 
   describe("findByBoardId", () => {
     it("should return threads for a valid board", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockBoardRepo.findById.mockResolvedValue(mockBoard);
       mockThreadRepo.findByBoardIdWithCount.mockResolvedValue({
@@ -86,7 +89,7 @@ describe("ThreadService", () => {
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       const result = await service.findByBoardId("test-board");
@@ -98,14 +101,14 @@ describe("ThreadService", () => {
     it("should throw NOT_FOUND when board does not exist", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockBoardRepo.findById.mockResolvedValue(null);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       await expect(service.findByBoardId("non-existent")).rejects.toThrow(ThreadServiceError);
@@ -117,14 +120,14 @@ describe("ThreadService", () => {
     it("should throw NOT_FOUND when board is deleted", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockBoardRepo.findById.mockResolvedValue({ ...mockBoard, deleted: true });
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       await expect(service.findByBoardId("test-board")).rejects.toMatchObject({
@@ -137,14 +140,14 @@ describe("ThreadService", () => {
     it("should return thread when found", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       const result = await service.findById(1);
@@ -156,14 +159,14 @@ describe("ThreadService", () => {
     it("should throw NOT_FOUND when thread does not exist", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockThreadRepo.findById.mockResolvedValue(null);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       await expect(service.findById(999)).rejects.toMatchObject({
@@ -174,19 +177,57 @@ describe("ThreadService", () => {
     it("should throw NOT_FOUND when thread is deleted", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockThreadRepo.findById.mockResolvedValue({ ...mockThread, deleted: true });
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       await expect(service.findById(1)).rejects.toMatchObject({
         code: "NOT_FOUND",
       });
+    });
+
+    it("should throw NOT_FOUND when boardId does not match the thread's board", async () => {
+      const mockThreadRepo = createMockThreadRepo();
+      const mockBoardRepo = createMockBoardRepo();
+      const mockRoleService = createMockRoleService();
+
+      mockThreadRepo.findById.mockResolvedValue(mockThread); // boardId: "test-board"
+
+      const service = createThreadService({
+        threadRepository: mockThreadRepo,
+        boardRepository: mockBoardRepo,
+        roleService: mockRoleService,
+      });
+
+      await expect(
+        service.findById(1, { boardId: "wrong-board" })
+      ).rejects.toMatchObject({
+        code: "NOT_FOUND",
+      });
+    });
+
+    it("should return thread when boardId matches the thread's board", async () => {
+      const mockThreadRepo = createMockThreadRepo();
+      const mockBoardRepo = createMockBoardRepo();
+      const mockRoleService = createMockRoleService();
+
+      mockThreadRepo.findById.mockResolvedValue(mockThread); // boardId: "test-board"
+
+      const service = createThreadService({
+        threadRepository: mockThreadRepo,
+        boardRepository: mockBoardRepo,
+        roleService: mockRoleService,
+      });
+
+      const result = await service.findById(1, { boardId: "test-board" });
+
+      expect(result).toEqual(mockThread);
     });
   });
 
@@ -201,7 +242,7 @@ describe("ThreadService", () => {
     it("should create thread with hashed password when board exists", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockBoardRepo.findById.mockResolvedValue(mockBoard);
       mockThreadRepo.create.mockResolvedValue({ ...mockThread, ...createInput, id: 2 });
@@ -209,7 +250,7 @@ describe("ThreadService", () => {
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       const result = await service.create(createInput);
@@ -224,14 +265,14 @@ describe("ThreadService", () => {
     it("should throw NOT_FOUND when board does not exist", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockBoardRepo.findById.mockResolvedValue(null);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       await expect(service.create(createInput)).rejects.toMatchObject({
@@ -244,19 +285,20 @@ describe("ThreadService", () => {
   describe("update", () => {
     const updateInput = { title: "Updated Title" };
 
-    it("should update thread when user has thread:all permission", async () => {
+    it("should update thread when user can manage the board", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService({
+        canManageBoard: jest.fn().mockResolvedValue(true),
+      });
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockThreadRepo.update.mockResolvedValue({ ...mockThread, ...updateInput });
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       const result = await service.update("user-1", 1, updateInput);
@@ -265,58 +307,19 @@ describe("ThreadService", () => {
       expect(mockThreadRepo.update).toHaveBeenCalledWith(1, updateInput);
     });
 
-    it("should update thread when user has thread:edit permission", async () => {
-      const mockThreadRepo = createMockThreadRepo();
-      const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
-
-      mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockThreadRepo.update.mockResolvedValue({ ...mockThread, ...updateInput });
-
-      const service = createThreadService({
-        threadRepository: mockThreadRepo,
-        boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
-      });
-
-      const result = await service.update("user-1", 1, updateInput);
-
-      expect(result.title).toBe("Updated Title");
-    });
-
-    it("should update thread when user has board-specific permission", async () => {
-      const mockThreadRepo = createMockThreadRepo();
-      const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
-
-      mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockThreadRepo.update.mockResolvedValue({ ...mockThread, ...updateInput });
-
-      const service = createThreadService({
-        threadRepository: mockThreadRepo,
-        boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
-      });
-
-      const result = await service.update("user-1", 1, updateInput);
-
-      expect(result.title).toBe("Updated Title");
-    });
-
     it("should throw FORBIDDEN when user has no permission", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService({
+        canManageBoard: jest.fn().mockResolvedValue(false),
+      });
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermissions.mockResolvedValue(false);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       await expect(service.update("user-1", 1, updateInput)).rejects.toMatchObject({
@@ -328,36 +331,55 @@ describe("ThreadService", () => {
     it("should throw NOT_FOUND when thread does not exist", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockThreadRepo.findById.mockResolvedValue(null);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       await expect(service.update("user-1", 999, updateInput)).rejects.toMatchObject({
         code: "NOT_FOUND",
       });
     });
+
+    it("checks the board admin role for the thread's board", async () => {
+      const threadRepository = createMockThreadRepo();
+      threadRepository.findById.mockResolvedValue({ id: 1, boardId: "free" } as ThreadData);
+      threadRepository.update.mockResolvedValue({ id: 1, boardId: "free" } as ThreadData);
+      const roleService = createMockRoleService({
+        canManageBoard: jest.fn().mockResolvedValue(true),
+      });
+      const service = createThreadService({
+        threadRepository,
+        boardRepository: createMockBoardRepo(),
+        roleService,
+      });
+
+      await service.update("u1", 1, { title: "새 제목" });
+
+      expect(roleService.canManageBoard).toHaveBeenCalledWith("u1", "free");
+    });
   });
 
   describe("delete", () => {
-    it("should delete thread when user has thread:delete permission", async () => {
+    it("should delete thread when user can manage the board", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService({
+        canManageBoard: jest.fn().mockResolvedValue(true),
+      });
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
       mockThreadRepo.delete.mockResolvedValue({ ...mockThread, deleted: true });
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       const result = await service.delete("user-1", 1);
@@ -366,38 +388,19 @@ describe("ThreadService", () => {
       expect(mockThreadRepo.delete).toHaveBeenCalledWith(1);
     });
 
-    it("should delete thread when user has board-specific delete permission", async () => {
-      const mockThreadRepo = createMockThreadRepo();
-      const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
-
-      mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermissions.mockResolvedValue(true);
-      mockThreadRepo.delete.mockResolvedValue({ ...mockThread, deleted: true });
-
-      const service = createThreadService({
-        threadRepository: mockThreadRepo,
-        boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
-      });
-
-      const result = await service.delete("user-1", 1);
-
-      expect(result.deleted).toBe(true);
-    });
-
     it("should throw FORBIDDEN when user has no permission", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService({
+        canManageBoard: jest.fn().mockResolvedValue(false),
+      });
 
       mockThreadRepo.findById.mockResolvedValue(mockThread);
-      mockPermission.checkUserPermissions.mockResolvedValue(false);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       await expect(service.delete("user-1", 1)).rejects.toMatchObject({
@@ -409,19 +412,33 @@ describe("ThreadService", () => {
     it("should throw NOT_FOUND when thread does not exist", async () => {
       const mockThreadRepo = createMockThreadRepo();
       const mockBoardRepo = createMockBoardRepo();
-      const mockPermission = createMockPermission();
+      const mockRoleService = createMockRoleService();
 
       mockThreadRepo.findById.mockResolvedValue(null);
 
       const service = createThreadService({
         threadRepository: mockThreadRepo,
         boardRepository: mockBoardRepo,
-        permissionService: mockPermission,
+        roleService: mockRoleService,
       });
 
       await expect(service.delete("user-1", 999)).rejects.toMatchObject({
         code: "NOT_FOUND",
       });
+    });
+
+    it("forbids deleting a thread on a board the user does not manage", async () => {
+      const threadRepository = createMockThreadRepo();
+      threadRepository.findById.mockResolvedValue({ id: 1, boardId: "free" } as ThreadData);
+      const service = createThreadService({
+        threadRepository,
+        boardRepository: createMockBoardRepo(),
+        roleService: createMockRoleService({
+          canManageBoard: jest.fn().mockResolvedValue(false),
+        }),
+      });
+
+      await expect(service.delete("u1", 1)).rejects.toThrow("Permission denied");
     });
   });
 });

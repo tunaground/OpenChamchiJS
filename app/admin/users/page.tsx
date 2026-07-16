@@ -1,8 +1,10 @@
+import { redirect } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { getTranslations } from "next-intl/server";
 import { authOptions } from "@/lib/auth";
-import { permissionService } from "@/lib/services/permission";
+import { roleService } from "@/lib/services/role";
 import { userService } from "@/lib/services/user";
+import { boardService } from "@/lib/services/board";
 import { AdminUsersContent } from "./admin-users-content";
 
 interface Props {
@@ -15,13 +17,13 @@ export default async function AdminUsersPage({ searchParams }: Props) {
   const session = (await getServerSession(authOptions))!;
   const userId = session.user.id;
 
-  const canUpdate = await permissionService.checkUserPermission(userId, "user:update");
-  const canDelete = await permissionService.checkUserPermission(userId, "user:delete");
+  const isAdmin = await roleService.isAdmin(userId);
+  if (!isAdmin) {
+    redirect("/admin/boards");
+  }
 
-  const [result, roles] = await Promise.all([
-    userService.findAll(userId, { page, search }),
-    userService.getAllRoles(userId),
-  ]);
+  const result = await userService.findAll(userId, { page, search });
+  const boards = await boardService.findAll();
 
   const t = await getTranslations("adminUsers");
   const tCommon = await getTranslations("common");
@@ -37,10 +39,6 @@ export default async function AdminUsersPage({ searchParams }: Props) {
         image: user.image,
         roles: user.roles,
       }))}
-      allRoles={roles.map((role) => ({
-        id: role.id,
-        name: role.name,
-      }))}
       pagination={result.pagination}
       search={search ?? ""}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}
@@ -49,19 +47,17 @@ export default async function AdminUsersPage({ searchParams }: Props) {
         backToHome: tSidebar("backToHome"),
         boards: tSidebar("boards"),
         users: tSidebar("users"),
-        roles: tSidebar("roles"),
         settings: tSidebar("settings"),
         globalNotices: tSidebar("globalNotices"),
       }}
-      canUpdate={canUpdate}
-      canDelete={canDelete}
+      isAdmin={isAdmin}
+      canDelete={isAdmin}
+      boards={boards.map((board) => ({ id: board.id, name: board.name }))}
       labels={{
         title: t("title"),
         name: t("name"),
         email: t("email"),
-        roles: t("roles"),
         actions: t("actions"),
-        editRoles: t("editRoles"),
         delete: t("delete"),
         noUsers: t("noUsers"),
         noResults: t("noResults"),
@@ -69,9 +65,12 @@ export default async function AdminUsersPage({ searchParams }: Props) {
         searchButton: t("searchButton"),
         confirmDelete: t("confirmDelete"),
         cancel: t("cancel"),
+        editRoles: t("editRoles"),
+        rolesTitle: t("rolesTitle"),
+        globalRoles: t("globalRoles"),
+        boardRoles: t("boardRoles"),
         save: t("save"),
-        addRole: t("addRole"),
-        removeRole: t("removeRole"),
+        saveError: t("saveError"),
       }}
     />
   );

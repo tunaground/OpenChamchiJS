@@ -1,8 +1,8 @@
 import bcrypt from "bcryptjs";
 import {
-  permissionService as defaultPermissionService,
-  PermissionService,
-} from "@/lib/services/permission";
+  roleService as defaultRoleService,
+  RoleService,
+} from "@/lib/services/role";
 import { responseRepository as defaultResponseRepository } from "@/lib/repositories/prisma/response";
 import { threadRepository as defaultThreadRepository } from "@/lib/repositories/prisma/thread";
 import { boardRepository as defaultBoardRepository } from "@/lib/repositories/prisma/board";
@@ -49,7 +49,8 @@ export interface FindByBoardIdResult {
 export interface ResponseService {
   findByThreadId(
     threadId: number,
-    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean; filter?: ResponseFilter }
+    options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean; filter?: ResponseFilter },
+    boardId?: string
   ): Promise<ResponseData[]>;
   findByRange(
     threadId: number,
@@ -58,7 +59,7 @@ export interface ResponseService {
     filter?: ResponseFilter
   ): Promise<ResponseData[]>;
   countByThreadId(threadId: number): Promise<number>;
-  findById(id: string): Promise<ResponseData>;
+  findById(id: string, boardId?: string): Promise<ResponseData>;
   findByBoardId(
     boardId: string,
     options?: {
@@ -91,24 +92,11 @@ interface ResponseServiceDeps {
   responseRepository: ResponseRepository;
   threadRepository: ThreadRepository;
   boardRepository: BoardRepository;
-  permissionService: PermissionService;
+  roleService: RoleService;
 }
 
 export function createResponseService(deps: ResponseServiceDeps): ResponseService {
-  const { responseRepository, threadRepository, boardRepository, permissionService } = deps;
-
-  async function checkResponsePermission(
-    userId: string | null,
-    boardId: string,
-    action: "update" | "delete"
-  ): Promise<boolean> {
-    if (!userId) return false;
-
-    return permissionService.checkUserPermissions(userId, [
-      `response:${action}`,
-      `response:${boardId}:${action}`,
-    ]);
-  }
+  const { responseRepository, threadRepository, boardRepository, roleService } = deps;
 
   async function verifyThreadPassword(
     threadId: number,
@@ -123,10 +111,14 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
   return {
     async findByThreadId(
       threadId: number,
-      options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean; filter?: ResponseFilter }
+      options?: { limit?: number; offset?: number; includeDeleted?: boolean; includeHidden?: boolean; filter?: ResponseFilter },
+      boardId?: string
     ): Promise<ResponseData[]> {
       const thread = await threadRepository.findById(threadId);
       if (!thread || thread.deleted) {
+        throw new ResponseServiceError("Thread not found", "NOT_FOUND");
+      }
+      if (boardId && thread.boardId !== boardId) {
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 
@@ -207,9 +199,12 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
       return responseRepository.countByThreadId(threadId);
     },
 
-    async findById(id: string): Promise<ResponseData> {
+    async findById(id: string, boardId?: string): Promise<ResponseData> {
       const response = await responseRepository.findById(id);
       if (!response || response.deleted) {
+        throw new ResponseServiceError("Response not found", "NOT_FOUND");
+      }
+      if (boardId && response.boardId !== boardId) {
         throw new ResponseServiceError("Response not found", "NOT_FOUND");
       }
       return response;
@@ -337,7 +332,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkResponsePermission(userId, thread.boardId, "update");
+      const hasPermission = await roleService.canManageBoard(userId, thread.boardId);
       if (!hasPermission) {
         throw new ResponseServiceError("Permission denied", "FORBIDDEN");
       }
@@ -405,11 +400,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 
-      const hasPermission = await checkResponsePermission(
-        userId,
-        thread.boardId,
-        "delete"
-      );
+      const hasPermission = await roleService.canManageBoard(userId ?? "", thread.boardId);
       const passwordValid = await verifyThreadPassword(response.threadId, password);
 
       if (!hasPermission && !passwordValid) {
@@ -431,5 +422,5 @@ export const responseService = createResponseService({
   responseRepository: defaultResponseRepository,
   threadRepository: defaultThreadRepository,
   boardRepository: defaultBoardRepository,
-  permissionService: defaultPermissionService,
+  roleService: defaultRoleService,
 });
