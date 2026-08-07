@@ -8,7 +8,7 @@ import { themes } from "./themes";
 const GlobalStyle = createGlobalStyle`
   @font-face {
     font-family: "Saitamaar";
-    src: url("https://da1eth.github.io/AA/HeadKasen.woff2") format("woff2");
+    src: url("https://github.com/tunaground/SaitamaarFont/releases/download/v1/Saitamaar-Regular.woff2") format("woff2");
     font-display: swap;
   }
 
