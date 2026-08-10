@@ -51,7 +51,7 @@ const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
   background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : props.theme.background)};
   color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
   resize: none;
-  font-family: ${(props) => (props.$aaMode ? '"Saitamaar", sans-serif' : "inherit")};
+  font-family: ${(props) => (props.$aaMode ? '"AAFont", "HeadKasen", "Saitamaar", sans-serif' : "inherit")};
   line-height: ${(props) => (props.$aaMode ? "1.6rem" : "1.5")};
   white-space: ${(props) => (props.$aaMode ? "pre" : "pre-wrap")};
   overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};

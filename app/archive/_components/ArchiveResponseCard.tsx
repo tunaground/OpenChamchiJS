@@ -142,7 +142,7 @@ const Content = styled.div`
     white-space: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
-    font-family: "Saitamaar", sans-serif;
+    font-family: "AAFont", "HeadKasen", "Saitamaar", sans-serif;
     color: black;
     width: 100%;
     background: rgba(255, 255, 255);

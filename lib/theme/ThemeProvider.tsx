@@ -7,13 +7,13 @@ import { themes } from "./themes";
 
 const GlobalStyle = createGlobalStyle`
   @font-face {
-    font-family: "Saitamaar";
-    src: url("https://tunaground.github.io/SaitamaarFont/fonts/webfonts/Saitamaar-Regular.woff2") format("woff2");
+    font-family: "AAFont";
+    src: url("https://da1eth.github.io/HeadKasen/fonts/web/HeadKasen-Web.woff2") format("woff2");
     font-display: swap;
   }
 
   @font-face {
-    font-family: "Saitamaar";
+    font-family: "AAFont";
     font-style: normal;
     font-weight: 400;
     src: url(//cdn.jsdelivr.net/font-nanum/1.0/nanumgothiccoding/v2/NanumGothicCoding-Regular.eot);

@@ -84,7 +84,7 @@ const Textarea = styled.textarea<{ $aaMode?: boolean }>`
   color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
   min-height: 20rem;
   resize: none;
-  font-family: ${(props) => (props.$aaMode ? '"Saitamaar", sans-serif' : "inherit")};
+  font-family: ${(props) => (props.$aaMode ? '"AAFont", "HeadKasen", "Saitamaar", sans-serif' : "inherit")};
   line-height: ${(props) => (props.$aaMode ? "1.6rem" : "1.5")};
   white-space: ${(props) => (props.$aaMode ? "pre" : "pre-wrap")};
   overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
