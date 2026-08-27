@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `[img IMAGE_URL CAPTION]` TOM tag for external images with optional caption; supports nested tags in the URL (e.g. `[img (https://a.com/x_[dice 1 3].png)]`) and falls back to a clickable URL link for broken images
+- Dynamic robots.txt served from `GlobalSettings`, editable in admin settings (falls back to the previous static content)
 - Bulk show and bulk unban buttons to thread manage modal
 - AWS standalone deployment support
 - S3 storage adapter with CloudFront/CDN and S3-compatible service support
@@ -51,6 +52,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- DB-based RBAC replaced with code-defined roles (`ADMIN`, `VERIFIED`, `{boardId}:ADMIN`) stored on `User.roles`
+- AA font changed to Saitamaar
 - Shared Response components extracted (`ResponseCard`, `AnchorPreview`, `TomPreview`)
 - Shared `ResponseCard` component reused; seq copy feature added
 - Realtime provider configuration centralized
@@ -65,6 +68,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Stale `ThreadBan` cache removed so ban/unban take effect immediately
 - `storageProvider` enum now includes `s3`; S3 fields added to settings validation schema
 - `serverMaxWindowBits:10` removed to prevent chat mode character corruption
 - `seq 0` excluded from anchor preview unless `>>0` is requested
