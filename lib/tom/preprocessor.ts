@@ -109,7 +109,7 @@ function elementToText(node: TomElement): TomText {
       const children = n.children.map(nodeToString).join("");
       const opening = attrs ? `[${n.name} ${attrs}]` : `[${n.name}]`;
       // In preparser context, dice is self-closing
-      if (n.children.length === 0 && ["dice", "hr", "youtube"].includes(n.name)) {
+      if (n.children.length === 0 && ["dice", "hr", "youtube", "img"].includes(n.name)) {
         return opening;
       }
       return `${opening}${children}[/${n.name}]`;
@@ -188,7 +188,7 @@ export function stringify(root: PreprocessedRoot): string {
 
       // Note: dice is handled above as TomDiceResult
       // Other self-closing tags in preparser context
-      const selfClosingTags = ["youtube", "hr"];
+      const selfClosingTags = ["youtube", "hr", "img"];
       if (selfClosingTags.includes(node.name)) {
         return attrs ? `[${node.name} ${attrs}]` : `[${node.name}]`;
       }

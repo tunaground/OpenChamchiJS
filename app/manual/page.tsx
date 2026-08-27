@@ -107,6 +107,8 @@ export default async function ManualPage() {
           anchorExample: t("tom.anchorExample"),
           youtubeTitle: t("tom.youtubeTitle"),
           youtubeExample: t("tom.youtubeExample"),
+          imgTitle: t("tom.imgTitle"),
+          imgExample: t("tom.imgExample"),
           hrTitle: t("tom.hrTitle"),
           hrExample: t("tom.hrExample"),
         },

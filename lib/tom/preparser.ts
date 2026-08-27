@@ -5,7 +5,7 @@
 import { parseWithConfig, TomRoot } from "./parser-core";
 
 // In preparser (write-time), dice IS self-closing
-const PREPARSER_SELF_CLOSING_TAGS = ["youtube", "hr", "dice"] as const;
+const PREPARSER_SELF_CLOSING_TAGS = ["youtube", "hr", "dice", "img"] as const;
 
 const PREPARSER_CONFIG = {
   selfClosingTags: PREPARSER_SELF_CLOSING_TAGS,

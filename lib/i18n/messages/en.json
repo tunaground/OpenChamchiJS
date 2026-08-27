@@ -522,6 +522,8 @@
       "anchorExample": ">1>5 or >1>5-10 or board>1>5",
       "youtubeTitle": "YouTube",
       "youtubeExample": "[youtube VIDEO_ID]",
+      "imgTitle": "Image",
+      "imgExample": "[img IMAGE_URL caption]",
       "hrTitle": "Horizontal Rule",
       "hrExample": "[hr]"
     },

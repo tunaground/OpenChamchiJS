@@ -291,4 +291,41 @@ describe("TOM Parser", () => {
       expect(isTomNested({ type: "text", value: "hello" })).toBe(false);
     });
   });
+
+  describe("img", () => {
+    it("parses img as self-closing with url attribute", () => {
+      const result = parse("[img https://example.com/a.png]after");
+      expect(result.children).toHaveLength(2);
+
+      const img = result.children[0] as TomElement;
+      expect(img.type).toBe("element");
+      expect(img.name).toBe("img");
+      expect(img.attributes).toHaveLength(1);
+      expect((img.attributes[0] as TomText).value).toBe("https://example.com/a.png");
+      expect(img.children).toHaveLength(0);
+
+      expect((result.children[1] as TomText).value).toBe("after");
+    });
+
+    it("parses img with caption as additional attributes", () => {
+      const result = parse("[img https://example.com/a.png my caption]");
+      const img = result.children[0] as TomElement;
+
+      expect(img.name).toBe("img");
+      expect(img.attributes).toHaveLength(3);
+      expect((img.attributes[1] as TomText).value).toBe("my");
+      expect((img.attributes[2] as TomText).value).toBe("caption");
+    });
+
+    it("parses img with nested url containing stored dice", () => {
+      const result = parse(
+        "[img (https://test.com/img/selection_ [dice 1 3]2[/dice] .png)]"
+      );
+      const img = result.children[0] as TomElement;
+
+      expect(img.name).toBe("img");
+      expect(img.attributes).toHaveLength(1);
+      expect(isTomNested(img.attributes[0])).toBe(true);
+    });
+  });
 });

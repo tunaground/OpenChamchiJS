@@ -21,7 +21,7 @@ export {
 } from "./parser-core";
 
 // In parser (read-time), dice is NOT self-closing
-export const SELF_CLOSING_TAGS = ["youtube", "hr"] as const;
+export const SELF_CLOSING_TAGS = ["youtube", "hr", "img"] as const;
 
 export type SelfClosingTagName = (typeof SELF_CLOSING_TAGS)[number];
 

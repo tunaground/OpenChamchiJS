@@ -522,6 +522,8 @@
       "anchorExample": ">1>5 또는 >1>5-10 또는 board>1>5",
       "youtubeTitle": "유튜브",
       "youtubeExample": "[youtube VIDEO_ID]",
+      "imgTitle": "이미지",
+      "imgExample": "[img IMAGE_URL 캡션]",
       "hrTitle": "구분선",
       "hrExample": "[hr]"
     },

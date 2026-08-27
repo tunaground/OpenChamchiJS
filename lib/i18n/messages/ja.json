@@ -510,6 +510,8 @@
       "anchorExample": ">1>5 または >1>5-10 または board>1>5",
       "youtubeTitle": "YouTube",
       "youtubeExample": "[youtube VIDEO_ID]",
+      "imgTitle": "画像",
+      "imgExample": "[img IMAGE_URL キャプション]",
       "hrTitle": "水平線",
       "hrExample": "[hr]"
     },

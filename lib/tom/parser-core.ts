@@ -14,6 +14,7 @@ export const TAGS = [
   "hr",
   "bld",
   "itl",
+  "img",
 ] as const;
 
 export type TagName = (typeof TAGS)[number];

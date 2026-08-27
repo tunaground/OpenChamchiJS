@@ -1,4 +1,4 @@
-import { parse } from "@/lib/tom/parser";
+import { parse, TomElement, TomNested, TomText } from "@/lib/tom/parser";
 import { preparse } from "@/lib/tom/preparser";
 import {
   preprocess,
@@ -413,6 +413,45 @@ describe("TOM Prerenderer", () => {
       const firstNode = result.children[0] as any;
       expect(firstNode.type).toBe("text");
       expect(firstNode.value).toContain("[calcn");
+    });
+  });
+
+  describe("img", () => {
+    it("stores img dice url in DB format via write flow", () => {
+      const preparsed = preparse("[img (https://a.com/x_[dice 1 3].png)]");
+      const preprocessed = preprocess(preparsed, fixedRandom);
+      const dbContent = stringify(preprocessed);
+
+      expect(dbContent).toContain("[img (");
+      expect(dbContent).toContain("[dice 1 3]1[/dice]");
+    });
+
+    it("round-trips img with dice url and caption through write-read flow", () => {
+      const result = writeAndRead(
+        "[img (https://test.com/img/selection_[dice 1 3].png) caption]"
+      );
+
+      const img = result.children[0] as TomElement;
+      expect(img.type).toBe("element");
+      expect(img.name).toBe("img");
+
+      const nested = img.attributes[0] as TomNested;
+      expect(nested.type).toBe("nested");
+
+      const dice = nested.children.find((c) => isTomDiceResult(c)) as TomDiceResult;
+      expect(dice).toBeDefined();
+      expect(dice.result).toBe(1); // fixedRandom returns min
+
+      expect((img.attributes[1] as TomText).value).toBe("caption");
+    });
+
+    it("round-trips simple img with caption unchanged", () => {
+      const result = writeAndRead("[img https://example.com/a.png my caption]");
+
+      const img = result.children[0] as TomElement;
+      expect(img.name).toBe("img");
+      expect(img.attributes).toHaveLength(3);
+      expect((img.attributes[0] as TomText).value).toBe("https://example.com/a.png");
     });
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, ReactNode } from "react";
+import { Fragment, ReactNode, useState } from "react";
 import styled from "styled-components";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -116,6 +116,22 @@ const YoutubeWrapper = styled.div`
     height: 100%;
     border: none;
   }
+`;
+
+const ImageFigure = styled.figure`
+  margin: 0.5rem 0;
+`;
+
+const ExternalImage = styled.img`
+  display: block;
+  max-width: 100%;
+  max-height: 30rem;
+  object-fit: contain;
+`;
+
+const ImageCaption = styled.figcaption`
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.textSecondary};
 `;
 
 // Helper: Extract YouTube video ID from various URL formats
@@ -328,6 +344,50 @@ function flattenWithBreaks(node: PrerenderedNode, key: number): ReactNode {
   return <Fragment key={key}>{result}</Fragment>;
 }
 
+// Helper: Flatten img attribute nodes into a plain string
+// (dice results become their numbers; throws on unsupported nodes for fallback)
+function flattenAttrToString(node: PrerenderedNode): string {
+  if (isTomText(node)) {
+    return node.value;
+  }
+  if (isTomDiceResult(node)) {
+    return String((node as TomDiceResult).result);
+  }
+  if (node.type === "nested") {
+    return node.children.map((c) => flattenAttrToString(c as PrerenderedNode)).join("");
+  }
+  throw new Error("Unsupported node in img attribute");
+}
+
+function TomImage({ url, caption }: { url: string; caption?: string }) {
+  // Remember WHICH url failed, not just that a failure happened: the component
+  // instance can outlive the url (e.g. preview rerolls a dice inside the url
+  // at the same tree position), so a bare boolean would stick forever.
+  const [failedUrl, setFailedUrl] = useState<string | null>(null);
+  const failed = failedUrl === url;
+
+  return (
+    <ImageFigure>
+      {failed ? (
+        <ExternalLink href={url} target="_blank" rel="noopener noreferrer">
+          ⚠️ {url}
+        </ExternalLink>
+      ) : (
+        <a href={url} target="_blank" rel="noopener noreferrer">
+          <ExternalImage
+            src={url}
+            alt={caption ?? url}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+            onError={() => setFailedUrl(url)}
+          />
+        </a>
+      )}
+      {caption && <ImageCaption>{caption}</ImageCaption>}
+    </ImageFigure>
+  );
+}
+
 // Render a single node
 function renderNode(node: PrerenderedNode, key: number, ctx: RenderContext): ReactNode {
   // Text node
@@ -488,6 +548,23 @@ function renderNode(node: PrerenderedNode, key: number, ctx: RenderContext): Rea
               />
             </YoutubeWrapper>
           );
+        }
+
+        case "img": {
+          if (elem.attributes.length < 1) {
+            return flattenWithBreaks(node, key);
+          }
+          const url = flattenAttrToString(elem.attributes[0] as PrerenderedNode);
+          if (!/^https?:\/\//.test(url)) {
+            return flattenWithBreaks(node, key);
+          }
+          const caption =
+            elem.attributes
+              .slice(1)
+              .map((a) => flattenAttrToString(a as PrerenderedNode))
+              .join(" ")
+              .trim() || undefined;
+          return <TomImage key={key} url={url} caption={caption} />;
         }
 
         default:

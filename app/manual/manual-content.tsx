@@ -223,6 +223,8 @@ interface Labels {
     anchorExample: string;
     youtubeTitle: string;
     youtubeExample: string;
+    imgTitle: string;
+    imgExample: string;
     hrTitle: string;
     hrExample: string;
   };
@@ -568,6 +570,12 @@ export function ManualContent({
                 <ItemTitle>{labels.tom.youtubeTitle}</ItemTitle>
               </ItemHeader>
               <TomExample><Code>{labels.tom.youtubeExample}</Code></TomExample>
+            </Item>
+            <Item>
+              <ItemHeader>
+                <ItemTitle>{labels.tom.imgTitle}</ItemTitle>
+              </ItemHeader>
+              <TomExample><Code>{labels.tom.imgExample}</Code></TomExample>
             </Item>
             <Item>
               <ItemHeader>
