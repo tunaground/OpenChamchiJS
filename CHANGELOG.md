@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `[img IMAGE_URL CAPTION]` TOM tag for external images with optional caption; supports nested tags in the URL (e.g. `[img (https://a.com/x_[dice 1 3].png)]`) and falls back to a clickable URL link for broken images
 - Bulk show and bulk unban buttons to thread manage modal
 - AWS standalone deployment support
 - S3 storage adapter with CloudFront/CDN and S3-compatible service support
