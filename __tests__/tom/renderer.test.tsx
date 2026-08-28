@@ -243,16 +243,52 @@ describe("TOM Renderer", () => {
       expect(container.textContent).toContain("[img");
     });
 
-    it("replaces broken image with url link but keeps caption", () => {
-      const { container } = renderTom("[img https://example.com/gone.png my caption]");
+    it("falls back to video when image fails to load", () => {
+      const { container } = renderTom("[img https://example.com/clip.mp4 움짤]");
       fireEvent.error(container.querySelector("img")!);
 
+      const video = container.querySelector("video");
+      expect(video).not.toBeNull();
+      expect(video?.getAttribute("src")).toBe("https://example.com/clip.mp4");
+      expect(video?.hasAttribute("autoplay")).toBe(true);
+      expect(video?.hasAttribute("loop")).toBe(true);
+      expect(video?.hasAttribute("playsinline")).toBe(true);
+      expect((video as HTMLVideoElement).muted).toBe(true);
+      expect(video?.getAttribute("aria-label")).toBe("움짤");
+      expect(video?.closest("a")?.getAttribute("href")).toBe(
+        "https://example.com/clip.mp4"
+      );
       expect(container.querySelector("img")).toBeNull();
+      expect(container.querySelector("figcaption")?.textContent).toBe("움짤");
+    });
+
+    it("replaces broken media with url link after img and video both fail", () => {
+      const { container } = renderTom("[img https://example.com/gone.png my caption]");
+      fireEvent.error(container.querySelector("img")!);
+      fireEvent.error(container.querySelector("video")!);
+
+      expect(container.querySelector("img")).toBeNull();
+      expect(container.querySelector("video")).toBeNull();
       const link = container.querySelector("a");
       expect(link?.getAttribute("href")).toBe("https://example.com/gone.png");
       expect(link?.textContent).toContain("⚠️");
       expect(link?.textContent).toContain("https://example.com/gone.png");
       expect(container.querySelector("figcaption")?.textContent).toBe("my caption");
+    });
+
+    it("retries as img when url changes after falling back to video", () => {
+      const good = "[img (https://a.com/x_ [dice 0 1]0[/dice] .jpg)]";
+      const bad = "[img (https://a.com/x_ [dice 0 1]1[/dice] .jpg)]";
+
+      const view = renderTom(bad);
+      fireEvent.error(view.container.querySelector("img")!);
+      expect(view.container.querySelector("video")).not.toBeNull();
+
+      rerenderTom(view, good);
+      expect(view.container.querySelector("video")).toBeNull();
+      expect(view.container.querySelector("img")?.getAttribute("src")).toBe(
+        "https://a.com/x_0.jpg"
+      );
     });
 
     it("shows new url after rerender even when previous url failed", () => {

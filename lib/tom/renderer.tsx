@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, ReactNode, useState } from "react";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import Link from "next/link";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
@@ -128,11 +128,19 @@ const ImageLink = styled.a`
   max-width: 100%;
 `;
 
-const ExternalImage = styled.img`
+const externalMediaStyle = css`
   display: block;
   max-width: 100%;
   max-height: 30rem;
   object-fit: contain;
+`;
+
+const ExternalImage = styled.img`
+  ${externalMediaStyle}
+`;
+
+const ExternalVideo = styled.video`
+  ${externalMediaStyle}
 `;
 
 const ImageCaption = styled.figcaption`
@@ -366,18 +374,35 @@ function flattenAttrToString(node: PrerenderedNode): string {
 }
 
 function TomImage({ url, caption }: { url: string; caption?: string }) {
-  // Remember WHICH url failed, not just that a failure happened: the component
-  // instance can outlive the url (e.g. preview rerolls a dice inside the url
-  // at the same tree position), so a bare boolean would stick forever.
-  const [failedUrl, setFailedUrl] = useState<string | null>(null);
-  const failed = failedUrl === url;
+  // Fallback chain: img → video → plain link. The browser is the content-type
+  // detector, so there is no upfront classification to get wrong. The state
+  // remembers WHICH url progressed how far, not just that a failure happened:
+  // the component instance can outlive the url (e.g. preview rerolls a dice
+  // inside the url at the same tree position), so it must reset on a new url.
+  const [fallback, setFallback] = useState<{
+    url: string;
+    stage: "video" | "link";
+  } | null>(null);
+  const stage = fallback?.url === url ? fallback.stage : "img";
 
   return (
     <ImageFigure>
-      {failed ? (
+      {stage === "link" ? (
         <ExternalLink href={url} target="_blank" rel="noopener noreferrer">
           ⚠️ {url}
         </ExternalLink>
+      ) : stage === "video" ? (
+        <ImageLink href={url} target="_blank" rel="noopener noreferrer">
+          <ExternalVideo
+            src={url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            aria-label={caption ?? url}
+            onError={() => setFallback({ url, stage: "link" })}
+          />
+        </ImageLink>
       ) : (
         <ImageLink href={url} target="_blank" rel="noopener noreferrer">
           <ExternalImage
@@ -385,7 +410,7 @@ function TomImage({ url, caption }: { url: string; caption?: string }) {
             alt={caption ?? url}
             loading="lazy"
             referrerPolicy="no-referrer"
-            onError={() => setFailedUrl(url)}
+            onError={() => setFallback({ url, stage: "video" })}
           />
         </ImageLink>
       )}
