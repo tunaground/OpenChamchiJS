@@ -44,6 +44,18 @@ describe("TOM Utils", () => {
       expect(original).toBe("[youtube https://youtube.com/watch?v=abc]");
     });
 
+    it("handles img tag as self-closing without [/img]", () => {
+      const dbContent = "[img https://example.com/a.png caption]";
+      const original = toOriginalFormat(dbContent);
+      expect(original).toBe("[img https://example.com/a.png caption]");
+    });
+
+    it("restores dice inside img url without [/img]", () => {
+      const dbContent = "[img (https://a.com/x_ [dice 8 8]8[/dice] .webp) caption]";
+      const original = toOriginalFormat(dbContent);
+      expect(original).toBe("[img (https://a.com/x_ [dice 8 8] .webp) caption]");
+    });
+
     it("handles nested tags with dice", () => {
       const dbContent = "[bld][dice 1 6]4[/dice][/bld]";
       const original = toOriginalFormat(dbContent);

@@ -11,7 +11,7 @@ import {
 } from "./parser";
 
 // Self-closing tags for original format (same as preparser)
-const ORIGINAL_SELF_CLOSING_TAGS = ["youtube", "hr", "dice"];
+const ORIGINAL_SELF_CLOSING_TAGS = ["youtube", "hr", "dice", "img"];
 
 /**
  * Convert a TomNode to remove dice results (children)
