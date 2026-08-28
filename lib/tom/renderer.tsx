@@ -122,6 +122,12 @@ const ImageFigure = styled.figure`
   margin: 0.5rem 0;
 `;
 
+// Shrink-wraps to the image so the empty space beside it is not clickable
+const ImageLink = styled.a`
+  display: inline-block;
+  max-width: 100%;
+`;
+
 const ExternalImage = styled.img`
   display: block;
   max-width: 100%;
@@ -373,7 +379,7 @@ function TomImage({ url, caption }: { url: string; caption?: string }) {
           ⚠️ {url}
         </ExternalLink>
       ) : (
-        <a href={url} target="_blank" rel="noopener noreferrer">
+        <ImageLink href={url} target="_blank" rel="noopener noreferrer">
           <ExternalImage
             src={url}
             alt={caption ?? url}
@@ -381,7 +387,7 @@ function TomImage({ url, caption }: { url: string; caption?: string }) {
             referrerPolicy="no-referrer"
             onError={() => setFailedUrl(url)}
           />
-        </a>
+        </ImageLink>
       )}
       {caption && <ImageCaption>{caption}</ImageCaption>}
     </ImageFigure>

@@ -208,6 +208,12 @@ describe("TOM Renderer", () => {
       expect(link?.querySelector("img")).not.toBeNull();
     });
 
+    it("shrink-wraps the link to the image so empty space is not clickable", () => {
+      const { container } = renderTom("[img https://example.com/a.png]");
+      const link = container.querySelector("a");
+      expect(link).toHaveStyle({ display: "inline-block" });
+    });
+
     it("renders caption as figcaption and img alt", () => {
       const { container } = renderTom("[img https://example.com/a.png my caption]");
       const figcaption = container.querySelector("figcaption");
