@@ -118,8 +118,12 @@ const YoutubeWrapper = styled.div`
   }
 `;
 
+// Inline-block so consecutive [img] tags flow side by side and wrap naturally
 const ImageFigure = styled.figure`
-  margin: 0.5rem 0;
+  display: inline-block;
+  vertical-align: top;
+  max-width: 100%;
+  margin: 0.5rem 0.5rem 0.5rem 0;
 `;
 
 // Shrink-wraps to the image so the empty space beside it is not clickable

@@ -214,6 +214,17 @@ describe("TOM Renderer", () => {
       expect(link).toHaveStyle({ display: "inline-block" });
     });
 
+    it("renders figures inline so consecutive images sit side by side", () => {
+      const { container } = renderTom(
+        "[img https://example.com/a.png][img https://example.com/b.png]"
+      );
+      const figures = container.querySelectorAll("figure");
+      expect(figures).toHaveLength(2);
+      figures.forEach((figure) => {
+        expect(figure).toHaveStyle({ display: "inline-block" });
+      });
+    });
+
     it("renders caption as figcaption and img alt", () => {
       const { container } = renderTom("[img https://example.com/a.png my caption]");
       const figcaption = container.querySelector("figcaption");

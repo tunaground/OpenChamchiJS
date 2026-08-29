@@ -52,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `[img]` renders inline (inline-block figure) so consecutive images sit side by side and wrap naturally
 - DB-based RBAC replaced with code-defined roles (`ADMIN`, `VERIFIED`, `{boardId}:ADMIN`) stored on `User.roles`
 - AA font changed to Saitamaar
 - Shared Response components extracted (`ResponseCard`, `AnchorPreview`, `TomPreview`)
