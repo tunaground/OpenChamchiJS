@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-27
+
 ### Added
 
 - `[img IMAGE_URL CAPTION]` TOM tag for external images and video clips (mp4 etc. rendered as muted looping video) with optional caption; supports nested tags in the URL (e.g. `[img (https://a.com/x_[dice 1 3].png)]`) and falls back to a clickable URL link for broken media
@@ -160,7 +162,8 @@ Initial tagged release. See git history for details.
 
 ## [0.1.0]
 
-[Unreleased]: https://github.com/tunaground/OpenChamchiJS/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/tunaground/OpenChamchiJS/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/tunaground/OpenChamchiJS/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/tunaground/OpenChamchiJS/releases/tag/v0.2.0
 [0.1.2]: https://github.com/tunaground/OpenChamchiJS/releases/tag/v0.1.2
 [0.1.1]: https://github.com/tunaground/OpenChamchiJS/releases/tag/v0.1.1
