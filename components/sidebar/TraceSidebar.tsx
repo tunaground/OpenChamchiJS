@@ -26,6 +26,7 @@ import {
   SidebarDivider,
 } from "./SidebarStyles";
 import { useSidebarContext } from "./SidebarContext";
+import { buildTraceUrl, type ResponseFilter } from "@/lib/utils/trace-url";
 
 const SidebarTitle = styled(BaseSidebarTitle)`
   @media (max-width: ${(props) => props.theme.breakpoint}) {
@@ -127,11 +128,6 @@ interface CustomLink {
   id: string;
   label: string;
   url: string;
-}
-
-interface ResponseFilter {
-  usernames?: string[];
-  authorIds?: string[];
 }
 
 interface TraceSidebarProps {
@@ -409,6 +405,10 @@ export function TraceSidebar({
 
   const isPrevDisabled = prevRange === null;
 
+  // All view links keep the current response filter in the query string
+  const viewHref = (view: string) =>
+    buildTraceUrl(boardId, threadId, view, filter, filterActive);
+
   return (
     <div>
       <SidebarTitle>{labels.navigation}</SidebarTitle>
@@ -431,13 +431,13 @@ export function TraceSidebar({
 
       <NavList>
         <NavItemWithIcon
-          href={`/trace/${boardId}/${threadId}`}
+          href={viewHref("all")}
           icon={faPersonRunning}
           label={labels.viewAll}
           active={currentView === "all"}
         />
         <NavItemWithIcon
-          href={`/trace/${boardId}/${threadId}/recent`}
+          href={viewHref("recent")}
           icon={faClock}
           label={labels.viewRecent}
           active={currentView === "recent"}
@@ -448,13 +448,13 @@ export function TraceSidebar({
 
       <NavList>
         <NavItemWithIcon
-          href={isPrevDisabled ? "#" : `/trace/${boardId}/${threadId}/${prevRange}`}
+          href={isPrevDisabled ? "#" : viewHref(prevRange)}
           icon={faChevronLeft}
           label={labels.prev}
           disabled={isPrevDisabled}
         />
         <NavItemWithIcon
-          href={`/trace/${boardId}/${threadId}/${nextRange}`}
+          href={viewHref(nextRange)}
           icon={faChevronRight}
           label={labels.next}
         />

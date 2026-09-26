@@ -69,6 +69,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Username/authorId focus (filter) now stays on the current view (all/recent/range) instead of always jumping to `/recent`, and the sidebar view-all/recent/prev/next links keep the active filter
 - Stale `ThreadBan` cache removed so ban/unban take effect immediately
 - `storageProvider` enum now includes `s3`; S3 fields added to settings validation schema
 - `serverMaxWindowBits:10` removed to prevent chat mode character corruption

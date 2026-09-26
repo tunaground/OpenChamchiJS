@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
+import { buildTraceUrl, type ResponseFilter } from "@/lib/utils/trace-url";
 import { ResponseCard } from "@/components/response";
 import { ResponseFormSection } from "@/components/response/ResponseFormSection";
 import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
@@ -491,11 +492,6 @@ interface SidebarLabels {
   filter: string;
 }
 
-interface ResponseFilter {
-  usernames?: string[];
-  authorIds?: string[];
-}
-
 interface CustomLink {
   id: string;
   label: string;
@@ -670,95 +666,46 @@ export function ThreadDetailContent({
   // Anonymous ID for identifying own messages in chat mode
   const anonId = useMemo(() => getAnonId(), []);
 
-  // Filter navigation handlers
+  // Filter navigation handlers (stay on the current view, only the query changes)
+  const navigateWithFilter = useCallback((nextFilter: ResponseFilter | undefined, nextActive: boolean) => {
+    router.push(buildTraceUrl(thread.boardId, thread.id, currentView, nextFilter, nextActive));
+  }, [router, thread.boardId, thread.id, currentView]);
+
   const handleUsernameFilter = useCallback((username: string) => {
-    const params = new URLSearchParams();
-    // Keep existing usernames and add new one if not already present
     const existingUsernames = filter?.usernames || [];
     const newUsernames = existingUsernames.includes(username)
       ? existingUsernames
       : [...existingUsernames, username];
-    newUsernames.forEach(u => params.append("username", u));
-    // Keep existing authorIds
-    filter?.authorIds?.forEach(a => params.append("authorId", a));
-    // Keep filterActive state
-    if (!filterActive) {
-      params.set("filterActive", "false");
-    }
-    router.push(`/trace/${thread.boardId}/${thread.id}/recent?${params.toString()}`);
-  }, [router, thread.boardId, thread.id, filter, filterActive]);
+    navigateWithFilter({ usernames: newUsernames, authorIds: filter?.authorIds }, filterActive);
+  }, [navigateWithFilter, filter, filterActive]);
 
   const handleAuthorIdFilter = useCallback((authorId: string) => {
-    const params = new URLSearchParams();
-    // Keep existing usernames
-    filter?.usernames?.forEach(u => params.append("username", u));
-    // Keep existing authorIds and add new one if not already present
     const existingAuthorIds = filter?.authorIds || [];
     const newAuthorIds = existingAuthorIds.includes(authorId)
       ? existingAuthorIds
       : [...existingAuthorIds, authorId];
-    newAuthorIds.forEach(a => params.append("authorId", a));
-    // Keep filterActive state
-    if (!filterActive) {
-      params.set("filterActive", "false");
-    }
-    router.push(`/trace/${thread.boardId}/${thread.id}/recent?${params.toString()}`);
-  }, [router, thread.boardId, thread.id, filter, filterActive]);
+    navigateWithFilter({ usernames: filter?.usernames, authorIds: newAuthorIds }, filterActive);
+  }, [navigateWithFilter, filter, filterActive]);
 
   // Filter removal handlers
   const handleRemoveUsernameFilter = useCallback((usernameToRemove: string) => {
-    const params = new URLSearchParams();
-    // Keep other usernames
-    filter?.usernames?.filter(u => u !== usernameToRemove).forEach(u => params.append("username", u));
-    // Keep all authorIds
-    filter?.authorIds?.forEach(a => params.append("authorId", a));
-    // Keep filterActive state
-    if (!filterActive) {
-      params.set("filterActive", "false");
-    }
-
-    const queryString = params.toString();
-    if (queryString) {
-      router.push(`/trace/${thread.boardId}/${thread.id}/recent?${queryString}`);
-    } else {
-      router.push(`/trace/${thread.boardId}/${thread.id}/recent`);
-    }
-  }, [router, thread.boardId, thread.id, filter, filterActive]);
+    navigateWithFilter({
+      usernames: filter?.usernames?.filter(u => u !== usernameToRemove),
+      authorIds: filter?.authorIds,
+    }, filterActive);
+  }, [navigateWithFilter, filter, filterActive]);
 
   const handleRemoveAuthorIdFilter = useCallback((authorIdToRemove: string) => {
-    const params = new URLSearchParams();
-    // Keep all usernames
-    filter?.usernames?.forEach(u => params.append("username", u));
-    // Keep other authorIds
-    filter?.authorIds?.filter(a => a !== authorIdToRemove).forEach(a => params.append("authorId", a));
-    // Keep filterActive state
-    if (!filterActive) {
-      params.set("filterActive", "false");
-    }
-
-    const queryString = params.toString();
-    if (queryString) {
-      router.push(`/trace/${thread.boardId}/${thread.id}/recent?${queryString}`);
-    } else {
-      router.push(`/trace/${thread.boardId}/${thread.id}/recent`);
-    }
-  }, [router, thread.boardId, thread.id, filter, filterActive]);
+    navigateWithFilter({
+      usernames: filter?.usernames,
+      authorIds: filter?.authorIds?.filter(a => a !== authorIdToRemove),
+    }, filterActive);
+  }, [navigateWithFilter, filter, filterActive]);
 
   // Toggle filter active state
   const handleToggleFilterActive = useCallback(() => {
-    const params = new URLSearchParams();
-    // Keep all filter values
-    filter?.usernames?.forEach(u => params.append("username", u));
-    filter?.authorIds?.forEach(a => params.append("authorId", a));
-    // Toggle filterActive
-    if (filterActive) {
-      params.set("filterActive", "false");
-    }
-    // When re-activating, don't add filterActive param (default is true)
-
-    const queryString = params.toString();
-    router.push(`/trace/${thread.boardId}/${thread.id}/recent?${queryString}`);
-  }, [router, thread.boardId, thread.id, filter, filterActive]);
+    navigateWithFilter(filter, !filterActive);
+  }, [navigateWithFilter, filter, filterActive]);
 
   // Request notification permission when chat mode is enabled
   useEffect(() => {
