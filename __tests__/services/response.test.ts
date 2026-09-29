@@ -284,6 +284,96 @@ describe("ResponseService", () => {
 
       expect(result).toEqual([mockResponse]);
     });
+
+    describe("thread body (seq 0) is always included when a filter is active", () => {
+      const filter = { usernames: ["other"] };
+      const body = { ...mockResponse, id: "body", seq: 0, username: "testuser" };
+      const reply = { ...mockResponse, id: "reply-3", seq: 3, username: "other" };
+
+      function setup() {
+        const mockResponseRepo = createMockResponseRepo();
+        const mockThreadRepo = createMockThreadRepo();
+        mockThreadRepo.findById.mockResolvedValue(mockThread);
+        mockResponseRepo.findByThreadIdAndSeq.mockResolvedValue(body);
+        const service = createResponseService({
+          responseRepository: mockResponseRepo,
+          threadRepository: mockThreadRepo,
+          roleService: createMockRoleService(),
+        });
+        return { service, mockResponseRepo };
+      }
+
+      it("prepends seq 0 for 'all' when the filter excludes it", async () => {
+        const { service, mockResponseRepo } = setup();
+        mockResponseRepo.findByThreadId.mockResolvedValue([reply]);
+
+        const result = await service.findByRange(1, { type: "all" }, undefined, filter);
+
+        expect(mockResponseRepo.findByThreadIdAndSeq).toHaveBeenCalledWith(1, 0);
+        expect(result.map((r) => r.seq)).toEqual([0, 3]);
+      });
+
+      it("prepends seq 0 for 'recent' when the filter excludes it", async () => {
+        const { service, mockResponseRepo } = setup();
+        mockResponseRepo.findRecentByThreadId.mockResolvedValue([reply]);
+
+        const result = await service.findByRange(1, { type: "recent", limit: 10 }, undefined, filter);
+
+        expect(mockResponseRepo.findRecentByThreadId).toHaveBeenCalledWith(1, { limit: 10, filter });
+        expect(result.map((r) => r.seq)).toEqual([0, 3]);
+      });
+
+      it("does not duplicate seq 0 when the filtered query already returned it", async () => {
+        const { service, mockResponseRepo } = setup();
+        mockResponseRepo.findByThreadId.mockResolvedValue([body, reply]);
+
+        const result = await service.findByRange(1, { type: "all" }, undefined, filter);
+
+        expect(result.map((r) => r.id)).toEqual(["body", "reply-3"]);
+      });
+
+      it("omits seq 0 when it is hidden or deleted", async () => {
+        const { service, mockResponseRepo } = setup();
+        mockResponseRepo.findByThreadIdAndSeq.mockResolvedValue({ ...body, visible: false });
+        mockResponseRepo.findByThreadId.mockResolvedValue([reply]);
+
+        const result = await service.findByRange(1, { type: "all" }, undefined, filter);
+
+        expect(result.map((r) => r.seq)).toEqual([3]);
+      });
+
+      it("does not query seq 0 separately when there is no filter", async () => {
+        const { service, mockResponseRepo } = setup();
+        mockResponseRepo.findByThreadId.mockResolvedValue([body, reply]);
+
+        await service.findByRange(1, { type: "all" });
+
+        expect(mockResponseRepo.findByThreadIdAndSeq).not.toHaveBeenCalled();
+      });
+    });
+
+    it("passes an optional limit through for 'range'", async () => {
+      const mockResponseRepo = createMockResponseRepo();
+      const mockThreadRepo = createMockThreadRepo();
+      mockThreadRepo.findById.mockResolvedValue(mockThread);
+      mockResponseRepo.findByThreadIdAndSeq.mockResolvedValue(mockResponse);
+      mockResponseRepo.findByThreadIdAndSeqRange.mockResolvedValue([]);
+      const service = createResponseService({
+        responseRepository: mockResponseRepo,
+        threadRepository: mockThreadRepo,
+        roleService: createMockRoleService(),
+      });
+      const filter = { authorIds: ["a"] };
+
+      await service.findByRange(1, { type: "range", startSeq: 1, endSeq: 20, limit: 5 }, undefined, filter);
+
+      expect(mockResponseRepo.findByThreadIdAndSeqRange).toHaveBeenCalledWith(1, {
+        startSeq: 1,
+        endSeq: 20,
+        limit: 5,
+        filter,
+      });
+    });
   });
 
   describe("findById", () => {

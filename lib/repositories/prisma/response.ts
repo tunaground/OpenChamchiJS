@@ -115,18 +115,30 @@ export const responseRepository: ResponseRepository = {
     threadId: number,
     options: FindBySeqRangeOptions & { filter?: ResponseFilter }
   ): Promise<ResponseData[]> {
-    const { startSeq, endSeq, includeDeleted = false, filter } = options;
+    const { startSeq, endSeq, includeDeleted = false, filter, limit } = options;
+
+    const where = {
+      threadId,
+      seq: {
+        gte: startSeq,
+        lte: endSeq,
+      },
+      ...(includeDeleted ? {} : { deleted: false, visible: true }),
+      ...buildUserFilter(filter),
+    };
+
+    if (limit !== undefined) {
+      // Take the last `limit` of the range, then restore ascending order
+      const latest = await prisma.response.findMany({
+        where,
+        orderBy: { seq: "desc" },
+        take: limit,
+      });
+      return latest.reverse();
+    }
 
     return prisma.response.findMany({
-      where: {
-        threadId,
-        seq: {
-          gte: startSeq,
-          lte: endSeq,
-        },
-        ...(includeDeleted ? {} : { deleted: false, visible: true }),
-        ...buildUserFilter(filter),
-      },
+      where,
       orderBy: { seq: "asc" },
     });
   },
@@ -142,12 +154,17 @@ export const responseRepository: ResponseRepository = {
       ? Prisma.sql``
       : Prisma.sql`AND "deleted" = false AND "visible" = true`;
 
-    // Build user filter for raw query
+    // Build user filter for raw query (OR between username and authorId,
+    // matching buildUserFilter)
     let userFilterSql = Prisma.sql``;
-    if (filter?.usernames && filter.usernames.length > 0) {
-      userFilterSql = Prisma.sql`AND "username" = ANY(${filter.usernames})`;
-    } else if (filter?.authorIds && filter.authorIds.length > 0) {
-      userFilterSql = Prisma.sql`AND "authorId" = ANY(${filter.authorIds})`;
+    const hasUsernames = !!filter?.usernames && filter.usernames.length > 0;
+    const hasAuthorIds = !!filter?.authorIds && filter.authorIds.length > 0;
+    if (hasUsernames && hasAuthorIds) {
+      userFilterSql = Prisma.sql`AND ("username" = ANY(${filter!.usernames}) OR "authorId" = ANY(${filter!.authorIds}))`;
+    } else if (hasUsernames) {
+      userFilterSql = Prisma.sql`AND "username" = ANY(${filter!.usernames})`;
+    } else if (hasAuthorIds) {
+      userFilterSql = Prisma.sql`AND "authorId" = ANY(${filter!.authorIds})`;
     }
 
     // Single UNION ALL query: seq=0 (thread body) + latest N responses, ordered by seq

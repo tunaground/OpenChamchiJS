@@ -34,7 +34,10 @@ export async function GET(
   }
 
   const { searchParams } = new URL(request.url);
-  const limit = parseInt(searchParams.get("limit") || "50", 10);
+  const limitParam = searchParams.get("limit");
+  const limit = parseInt(limitParam || "50", 10);
+  // Range queries return the whole range unless a limit is explicitly given
+  const rangeLimit = limitParam !== null && !isNaN(limit) ? limit : undefined;
   const offset = parseInt(searchParams.get("offset") || "0", 10);
   const includeIp = searchParams.get("includeIp") === "true";
   const includeDeleted = searchParams.get("includeDeleted") === "true";
@@ -92,6 +95,7 @@ export async function GET(
           type: "range",
           startSeq,
           endSeq,
+          limit: rangeLimit,
         }, boardId, filter);
       } else {
         responses = await responseService.findByThreadId(id, {

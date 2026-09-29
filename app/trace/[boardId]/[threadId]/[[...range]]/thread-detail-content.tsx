@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
-import { buildTraceUrl, type ResponseFilter } from "@/lib/utils/trace-url";
+import { buildFilterQuery, buildTraceUrl, type ResponseFilter } from "@/lib/utils/trace-url";
+import { getInitialLoadedFromSeq, getNextLoadedFromSeq } from "@/lib/utils/load-more";
 import { ResponseCard } from "@/components/response";
 import { ResponseFormSection } from "@/components/response/ResponseFormSection";
 import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
@@ -549,6 +550,10 @@ export function ThreadDetailContent({
 }: ThreadDetailContentProps) {
   const router = useRouter();
   const [responses, setResponses] = useState(initialResponses);
+  // Lower bound of the seq range already covered (see lib/utils/load-more)
+  const [loadedFromSeq, setLoadedFromSeq] = useState<number | null>(() =>
+    getInitialLoadedFromSeq(currentView, initialResponses)
+  );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
   const isAtBottomRef = useRef(true);
@@ -567,31 +572,33 @@ export function ThreadDetailContent({
     setResponses(updater);
   }, []);
 
-  // Calculate minLoadedSeq (smallest seq excluding 0)
-  const minLoadedSeq = useMemo(() => {
-    const nonZeroSeqs = responses.filter((r) => r.seq > 0).map((r) => r.seq);
-    return nonZeroSeqs.length > 0 ? Math.min(...nonZeroSeqs) : null;
-  }, [responses]);
+  // Query string carrying the active focus filter (empty when inactive)
+  const activeFilterQuery = useMemo(
+    () => (filterActive ? buildFilterQuery(filter, true) : ""),
+    [filter, filterActive]
+  );
 
   // Check if there are more responses to load
-  const hasMoreToLoad = minLoadedSeq !== null && minLoadedSeq > 1;
+  const hasMoreToLoad = loadedFromSeq !== null && loadedFromSeq > 1;
 
-  // Load more responses
+  // Load more responses: the last `count` responses below the covered range,
+  // respecting the active focus filter
   const loadMoreResponses = useCallback(
     async (count: number) => {
-      if (!hasMoreToLoad || isLoadingMore || minLoadedSeq === null) return;
+      if (!hasMoreToLoad || isLoadingMore || loadedFromSeq === null) return;
 
       setIsLoadingMore(true);
       try {
-        const endSeq = minLoadedSeq - 1;
-        const startSeq = Math.max(1, endSeq - count + 1);
+        const endSeq = loadedFromSeq - 1;
+        const query = `startSeq=1&endSeq=${endSeq}&limit=${count}${activeFilterQuery ? `&${activeFilterQuery}` : ""}`;
 
         const res = await fetch(
-          `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${startSeq}&endSeq=${endSeq}`
+          `/api/boards/${thread.boardId}/threads/${thread.id}/responses?${query}`
         );
 
         if (res.ok) {
-          const data = await res.json();
+          const data = (await res.json()) as ResponseData[];
+          setLoadedFromSeq(getNextLoadedFromSeq(data, count));
           // Merge new responses: insert after seq 0, dedupe by id
           setResponses((prev) => {
             const existingIds = new Set(prev.map((r) => r.id));
@@ -614,7 +621,7 @@ export function ThreadDetailContent({
         setIsLoadingMore(false);
       }
     },
-    [hasMoreToLoad, isLoadingMore, minLoadedSeq, thread.boardId, thread.id]
+    [hasMoreToLoad, isLoadingMore, loadedFromSeq, activeFilterQuery, thread.boardId, thread.id]
   );
 
   // Response options
@@ -640,7 +647,7 @@ export function ThreadDetailContent({
     try {
       const afterSeq = currentLastSeq;
       const res = await fetch(
-        `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${afterSeq + 1}&endSeq=${afterSeq + 1000}`
+        `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${afterSeq + 1}&endSeq=${afterSeq + 1000}${activeFilterQuery ? `&${activeFilterQuery}` : ""}`
       );
       if (res.ok) {
         const data = await res.json();
@@ -658,7 +665,7 @@ export function ThreadDetailContent({
     } catch (error) {
       console.error("Failed to fetch new responses:", error);
     }
-  }, [thread.boardId, thread.id, currentLastSeq, addResponses]);
+  }, [thread.boardId, thread.id, currentLastSeq, activeFilterQuery, addResponses]);
 
   // Throttled notification for chat mode (1 second throttle, shows last response only)
   const throttledNotify = useMemo(() => createThrottledNotifier(1000), []);
@@ -804,7 +811,8 @@ export function ThreadDetailContent({
 
   useEffect(() => {
     setResponses(initialResponses);
-  }, [initialResponses]);
+    setLoadedFromSeq(getInitialLoadedFromSeq(currentView, initialResponses));
+  }, [initialResponses, currentView]);
 
   // Track scroll position to detect if user is at bottom
   useEffect(() => {

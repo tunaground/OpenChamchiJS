@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Thread body (seq 0), the custom HTML slot and the load-more buttons no longer disappear in the all/recent views when a username/authorId focus filter is active
+- Load more now respects the active focus filter and fetches the last N matching responses below the loaded range instead of a fixed seq window
+- Recent view applied only the username filter when both username and authorId filters were present; it now matches either, like the other views
+
 ## [0.3.0] - 2026-09-27
 
 ### Added

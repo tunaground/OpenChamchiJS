@@ -67,6 +67,8 @@ export interface FindBySeqRangeOptions {
   startSeq: number;
   endSeq: number;
   includeDeleted?: boolean;
+  /** When set, return only the last `limit` responses of the range (still in seq order). */
+  limit?: number;
 }
 
 export interface FindRecentOptions {

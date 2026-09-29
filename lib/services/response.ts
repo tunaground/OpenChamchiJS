@@ -35,7 +35,7 @@ export type ResponseRangeType =
   | { type: "all" }
   | { type: "recent"; limit: number }
   | { type: "single"; seq: number }
-  | { type: "range"; startSeq: number; endSeq: number };
+  | { type: "range"; startSeq: number; endSeq: number; limit?: number };
 
 export type SearchType = "username" | "authorId" | "email" | "content" | "ip";
 
@@ -139,15 +139,42 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
         throw new ResponseServiceError("Thread not found", "NOT_FOUND");
       }
 
+      // Policy: the thread body (seq 0) is always shown, even when a user
+      // filter would exclude it. Fetch it separately and prepend if missing.
+      const withThreadBody = async (
+        fetchFiltered: () => Promise<ResponseData[]>
+      ): Promise<ResponseData[]> => {
+        if (!filter) {
+          return fetchFiltered();
+        }
+        const [firstResponse, responses] = await Promise.all([
+          responseRepository.findByThreadIdAndSeq(threadId, 0),
+          fetchFiltered(),
+        ]);
+        if (
+          firstResponse &&
+          !firstResponse.deleted &&
+          firstResponse.visible &&
+          !responses.some((r) => r.seq === 0)
+        ) {
+          return [firstResponse, ...responses];
+        }
+        return responses;
+      };
+
       const fetchResponses = async () => {
         switch (range.type) {
           case "all":
-            return responseRepository.findByThreadId(threadId, { limit: 10000, filter });
+            return withThreadBody(() =>
+              responseRepository.findByThreadId(threadId, { limit: 10000, filter })
+            );
           case "recent":
-            return responseRepository.findRecentByThreadId(threadId, {
-              limit: range.limit,
-              filter,
-            });
+            return withThreadBody(() =>
+              responseRepository.findRecentByThreadId(threadId, {
+                limit: range.limit,
+                filter,
+              })
+            );
           case "single": {
             // Always include seq 0 (thread body) plus the requested seq
             const responses: ResponseData[] = [];
@@ -173,6 +200,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
                 responseRepository.findByThreadIdAndSeqRange(threadId, {
                   startSeq: range.startSeq,
                   endSeq: range.endSeq,
+                  limit: range.limit,
                   filter,
                 }),
               ]);
@@ -186,6 +214,7 @@ export function createResponseService(deps: ResponseServiceDeps): ResponseServic
             return responseRepository.findByThreadIdAndSeqRange(threadId, {
               startSeq: range.startSeq,
               endSeq: range.endSeq,
+              limit: range.limit,
               filter,
             });
           }
