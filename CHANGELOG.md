@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2026-10-22
+
+### Security
+
+- Pin web and ws-server Docker base images to `node:24.22.1-alpine` for the October 2026 Node.js security release (CVE-2026-111497 Brotli decoder RCE, TLS hostname verification bypasses CVE-2026-106069/-105483/-106072, HTTP keep-alive CVE-2026-105481, plus undici/OpenSSL/c-ares/CA certificate updates)
+
 ### Fixed
 
 - Thread body (seq 0), the custom HTML slot and the load-more buttons no longer disappear in the all/recent views when a username/authorId focus filter is active
@@ -168,7 +174,8 @@ Initial tagged release. See git history for details.
 
 ## [0.1.0]
 
-[Unreleased]: https://github.com/tunaground/OpenChamchiJS/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/tunaground/OpenChamchiJS/compare/v0.3.1...HEAD
+[0.3.1]: https://github.com/tunaground/OpenChamchiJS/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/tunaground/OpenChamchiJS/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/tunaground/OpenChamchiJS/releases/tag/v0.2.0
 [0.1.2]: https://github.com/tunaground/OpenChamchiJS/releases/tag/v0.1.2
