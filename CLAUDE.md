@@ -232,6 +232,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - 사용자당 등록 상한 `pushWatchLimit` (개별 off 포함), 가득 차면 거부
 - 전체 on/off(`User.pushEnabled`)와 개별 on/off(`ThreadWatch.enabled`)는 독립
 - 답글 생성 시 `after()`로 `pushNotifier.notifyThread` 실행: SQL 한 문장으로 쿨다운(사용자×스레드, `GlobalSettings.pushCooldownSeconds`, 기본 60초)·보는 중(하트비트 45초)·토글 필터 후 선점
+- 보는 중 = 페이지가 보이고(`visible`) 창이 포커스를 가진 상태(`document.hasFocus()`). 화면에 띄워 두고 다른 앱을 쓰면 푸시 발송 (듀얼 모니터에서도 동일)
 - 서비스 워커 `public/sw.js`. 알림 본문은 `작성자: 본문 발췌`(TOM 마크업 제거, 스포일러 가림, 100자, `lib/push/plain-text.ts`)
 - 404/410/401/403 응답 구독은 삭제, 로그아웃 시 `signOutWithPush`로 이 기기 구독 해제
 - 알림 태그는 서버가 `{PushSubscription.id}:r-{responseId}`로 생성해 답글마다 따로 쌓임 (같은 태그로 교체하면 macOS Chrome이 배너를 띄우지 않고 클릭도 끊김). SW `push` 핸들러는 await 없이 `showNotification`을 바로 호출해야 함 (Safari는 지연 시 미표시 처리 후 구독 해지 가능)

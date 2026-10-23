@@ -18,8 +18,17 @@ export function sendLeftBeacon(url: string): void {
 }
 
 /**
- * While `active` and the page is visible, tells the server the user is
- * looking at this thread so web push for it is suppressed.
+ * "Viewing" means the page is visible AND its window has focus, so a thread
+ * left open on screen while another app is in use still gets pushes.
+ * hasFocus() stays true when focus moves into an embedded iframe (YouTube).
+ */
+export function isActivelyViewing(doc: Document): boolean {
+  return doc.visibilityState === "visible" && doc.hasFocus();
+}
+
+/**
+ * While `active` and the user is actively viewing the page, tells the server
+ * so web push for this thread is suppressed.
  */
 export function useThreadViewingHeartbeat(threadId: number, active: boolean): void {
   useEffect(() => {
@@ -27,6 +36,7 @@ export function useThreadViewingHeartbeat(threadId: number, active: boolean): vo
 
     const url = `/api/push/viewing/${threadId}`;
     let timer: ReturnType<typeof setInterval> | null = null;
+    let disposed = false;
 
     const sendViewing = () => {
       fetch(url, {
@@ -37,31 +47,44 @@ export function useThreadViewingHeartbeat(threadId: number, active: boolean): vo
       }).catch(() => {});
     };
 
-    const start = () => {
-      if (timer) return;
-      sendViewing();
-      timer = setInterval(sendViewing, HEARTBEAT_INTERVAL_MS);
-    };
-
     const stop = () => {
-      if (timer) {
-        clearInterval(timer);
-        timer = null;
-      }
+      if (!timer) return;
+      clearInterval(timer);
+      timer = null;
       sendLeftBeacon(url);
     };
 
-    const onVisibilityChange = () => {
-      if (document.visibilityState === "visible") start();
+    const tick = () => {
+      // Catches focus changes whose events were missed
+      if (isActivelyViewing(document)) sendViewing();
       else stop();
     };
 
-    if (document.visibilityState === "visible") start();
-    document.addEventListener("visibilitychange", onVisibilityChange);
+    const sync = () => {
+      if (disposed) return;
+      if (!isActivelyViewing(document)) {
+        stop();
+      } else if (!timer) {
+        sendViewing();
+        timer = setInterval(tick, HEARTBEAT_INTERVAL_MS);
+      }
+    };
+
+    // blur also fires when focus moves into an iframe on the page; re-check
+    // after focus settles instead of treating every blur as leaving
+    const onBlur = () => setTimeout(sync, 0);
+
+    sync();
+    document.addEventListener("visibilitychange", sync);
+    window.addEventListener("focus", sync);
+    window.addEventListener("blur", onBlur);
     window.addEventListener("pagehide", stop);
 
     return () => {
-      document.removeEventListener("visibilitychange", onVisibilityChange);
+      disposed = true;
+      document.removeEventListener("visibilitychange", sync);
+      window.removeEventListener("focus", sync);
+      window.removeEventListener("blur", onBlur);
       window.removeEventListener("pagehide", stop);
       stop();
     };
