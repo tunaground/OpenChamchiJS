@@ -180,6 +180,7 @@ export const updateSettingsSchema = z.object({
   archiveBoards: z.array(z.object({ id: z.string(), name: z.string() })).optional().nullable(),
   archiveRedirect: z.boolean().optional(),
   pushWatchLimit: z.number().int().min(0).max(100).optional(),
+  pushCooldownSeconds: z.number().int().min(0).max(86400).optional(),
   vapidSubject: z.string().max(200).regex(/^(mailto:|https:)/).optional().nullable(),
 });
 

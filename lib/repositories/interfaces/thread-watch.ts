@@ -34,5 +34,9 @@ export interface ThreadWatchRepository {
   setViewing(userId: string, threadId: number, at: Date | null): Promise<void>;
   getUserPushEnabled(userId: string): Promise<boolean>;
   setUserPushEnabled(userId: string, enabled: boolean): Promise<void>;
-  claimRecipients(threadId: number, excludeUserId: string | null): Promise<PushRecipient[]>;
+  claimRecipients(
+    threadId: number,
+    excludeUserId: string | null,
+    cooldownSeconds: number
+  ): Promise<PushRecipient[]>;
 }

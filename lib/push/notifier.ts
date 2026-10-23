@@ -7,7 +7,8 @@ import {
   GlobalSettingsService,
 } from "@/lib/services/global-settings";
 import { isPushFeatureEnabled } from "@/lib/push/feature";
-import { getPushBody } from "@/lib/push/messages";
+import { getImageLabel } from "@/lib/push/messages";
+import { toPushExcerpt } from "@/lib/push/plain-text";
 import { sendWebPush } from "@/lib/push/web-push-sender";
 
 export type SendPush = (
@@ -19,8 +20,23 @@ export type SendPush = (
 // Push service responses meaning the subscription is gone or bound to an old key
 const EXPIRED_STATUS = new Set([401, 403, 404, 410]);
 
+export interface ReplyMessage {
+  responseId: string;
+  authorUserId: string | null;
+  username: string;
+  content: string;
+  hasAttachment: boolean;
+}
+
 export interface PushNotifier {
-  notifyThread(threadId: number, authorUserId: string | null): Promise<void>;
+  notifyThread(threadId: number, message: ReplyMessage): Promise<void>;
+}
+
+function replyBody(message: ReplyMessage, locale: string | null): string {
+  const imageLabel = getImageLabel(locale);
+  const excerpt = toPushExcerpt(message.content, { image: imageLabel });
+  const text = excerpt || (message.hasAttachment ? imageLabel : "");
+  return text ? `${message.username}: ${text}` : message.username;
 }
 
 interface PushNotifierDeps {
@@ -34,13 +50,17 @@ export function createPushNotifier(deps: PushNotifierDeps): PushNotifier {
   const { threadWatchRepository, pushSubscriptionRepository, globalSettingsService, sendPush } = deps;
 
   return {
-    async notifyThread(threadId: number, authorUserId: string | null): Promise<void> {
+    async notifyThread(threadId: number, message: ReplyMessage): Promise<void> {
       try {
         const settings = await globalSettingsService.get();
         if (!isPushFeatureEnabled(settings)) return;
 
         // Atomically applies cooldown, viewing and toggle filters
-        const recipients = await threadWatchRepository.claimRecipients(threadId, authorUserId);
+        const recipients = await threadWatchRepository.claimRecipients(
+          threadId,
+          message.authorUserId,
+          settings.pushCooldownSeconds
+        );
         if (recipients.length === 0) return;
 
         const byUser = new Map(recipients.map((r) => [r.userId, r]));
@@ -58,11 +78,11 @@ export function createPushNotifier(deps: PushNotifierDeps): PushNotifier {
             const payload = JSON.stringify({
               threadId,
               title: recipient.title,
-              body: getPushBody(sub.locale),
+              body: replyBody(message, sub.locale),
               url: `/trace/${recipient.boardId}/${threadId}/recent`,
-              // Scoped per subscription: a re-registered worker gets a new subscription,
-              // so stale notifications of the old worker never capture this tag
-              tag: `${sub.id}:thread-${threadId}`,
+              // Unique per subscription and reply: replacing a same-tag notification
+              // shows no banner and drops clicks on macOS Chrome, so never replace
+              tag: `${sub.id}:r-${message.responseId}`,
             });
             return sendPush(sub, payload, vapid);
           })

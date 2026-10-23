@@ -56,6 +56,7 @@ export default async function AdminSettingsPage() {
         archiveBoards: settings.archiveBoards,
         archiveRedirect: settings.archiveRedirect,
         pushWatchLimit: settings.pushWatchLimit,
+        pushCooldownSeconds: settings.pushCooldownSeconds,
         vapidPublicKey: settings.vapidPublicKey,
         vapidSubject: settings.vapidSubject,
       }}

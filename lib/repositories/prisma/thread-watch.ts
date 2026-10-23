@@ -109,7 +109,8 @@ export const threadWatchRepository: ThreadWatchRepository = {
 
   async claimRecipients(
     threadId: number,
-    excludeUserId: string | null
+    excludeUserId: string | null,
+    cooldownSeconds: number
   ): Promise<PushRecipient[]> {
     // One statement: concurrent replies cannot both claim the same cooldown window.
     // Columns are UTC "timestamp without time zone" (Prisma default), so compare in UTC.
@@ -123,7 +124,7 @@ export const threadWatchRepository: ThreadWatchRepository = {
         AND u."pushEnabled"
         AND NOT t.deleted
         AND (${excludeUserId}::text IS NULL OR w."userId" <> ${excludeUserId}::text)
-        AND (w."lastPushedAt" IS NULL OR w."lastPushedAt" < (now() AT TIME ZONE 'UTC') - interval '60 seconds')
+        AND (w."lastPushedAt" IS NULL OR w."lastPushedAt" < (now() AT TIME ZONE 'UTC') - make_interval(secs => ${cooldownSeconds}))
         AND (w."lastViewingAt" IS NULL OR w."lastViewingAt" < (now() AT TIME ZONE 'UTC') - interval '45 seconds')
       RETURNING w."userId" AS "userId", t.title AS title, t."boardId" AS "boardId"
     `;

@@ -2,13 +2,13 @@ import ko from "@/lib/i18n/messages/ko.json";
 import en from "@/lib/i18n/messages/en.json";
 import ja from "@/lib/i18n/messages/ja.json";
 
-const BODIES: Record<string, string> = {
-  ko: ko.push.notificationBody,
-  en: en.push.notificationBody,
-  ja: ja.push.notificationBody,
+const IMAGE_LABELS: Record<string, string> = {
+  ko: ko.push.imageLabel,
+  en: en.push.imageLabel,
+  ja: ja.push.imageLabel,
 };
 
-/** Notification body in the locale saved with the device subscription (ko fallback). */
-export function getPushBody(locale: string | null): string {
-  return (locale && BODIES[locale]) || BODIES.ko;
+/** Placeholder for images in a push excerpt, in the subscription's locale (ko fallback). */
+export function getImageLabel(locale: string | null): string {
+  return (locale && IMAGE_LABELS[locale]) || IMAGE_LABELS.ko;
 }

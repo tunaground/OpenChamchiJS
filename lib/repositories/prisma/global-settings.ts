@@ -85,6 +85,7 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       archiveBoards?: string | null;
       archiveRedirect?: boolean;
       pushWatchLimit?: number;
+      pushCooldownSeconds?: number;
       vapidPublicKey?: string | null;
       vapidPrivateKey?: string | null;
       vapidSubject?: string | null;
@@ -179,6 +180,9 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.pushWatchLimit !== undefined) {
       updateData.pushWatchLimit = data.pushWatchLimit;
+    }
+    if (data.pushCooldownSeconds !== undefined) {
+      updateData.pushCooldownSeconds = data.pushCooldownSeconds;
     }
     if (data.vapidPublicKey !== undefined) {
       updateData.vapidPublicKey = data.vapidPublicKey;

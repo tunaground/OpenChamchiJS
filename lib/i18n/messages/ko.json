@@ -581,7 +581,7 @@
     "watch": "알림 받기",
     "unwatch": "알림 해제",
     "limitExceeded": "알림은 최대 {limit}개까지 등록할 수 있어요. 🔔 목록에서 정리해 주세요.",
-    "notificationBody": "새 답글이 있어요",
-    "deviceSubscribeFailed": "이 기기에서 알림 구독에 실패했어요. 잠시 후 다시 시도해 주세요."
+    "deviceSubscribeFailed": "이 기기에서 알림 구독에 실패했어요. 잠시 후 다시 시도해 주세요.",
+    "imageLabel": "(이미지)"
   }
 }

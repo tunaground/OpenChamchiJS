@@ -1,15 +1,15 @@
-import { getPushBody } from "@/lib/push/messages";
+import { getImageLabel } from "@/lib/push/messages";
 
-describe("getPushBody", () => {
-  it("returns the English body for en", () => {
-    expect(getPushBody("en")).toBe("There are new replies");
+describe("getImageLabel", () => {
+  it("returns the English label for en", () => {
+    expect(getImageLabel("en")).toBe("(image)");
   });
 
-  it("returns the Japanese body for ja", () => {
-    expect(getPushBody("ja")).toBe("新しいレスがあります");
+  it("returns the Japanese label for ja", () => {
+    expect(getImageLabel("ja")).toBe("(画像)");
   });
 
   it.each(["xx", null])("falls back to Korean for %p", (locale) => {
-    expect(getPushBody(locale)).toBe("새 답글이 있어요");
+    expect(getImageLabel(locale)).toBe("(이미지)");
   });
 });

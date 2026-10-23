@@ -432,6 +432,7 @@ interface AdminSettingsContentProps {
     archiveBoards: ArchiveBoard[];
     archiveRedirect: boolean;
     pushWatchLimit: number;
+    pushCooldownSeconds: number;
     vapidPublicKey: string | null;
     vapidSubject: string | null;
   };
@@ -481,6 +482,7 @@ export function AdminSettingsContent({
   const [archiveBoards, setArchiveBoards] = useState<ArchiveBoard[]>(initialSettings.archiveBoards ?? []);
   const [archiveRedirect, setArchiveRedirect] = useState(initialSettings.archiveRedirect ?? false);
   const [pushWatchLimit, setPushWatchLimit] = useState(initialSettings.pushWatchLimit ?? 0);
+  const [pushCooldownSeconds, setPushCooldownSeconds] = useState(initialSettings.pushCooldownSeconds ?? 60);
   const [vapidSubject, setVapidSubject] = useState(initialSettings.vapidSubject ?? "");
   const [vapidPublicKey, setVapidPublicKey] = useState(initialSettings.vapidPublicKey ?? "");
   const [vapidGenerating, setVapidGenerating] = useState(false);
@@ -561,6 +563,7 @@ export function AdminSettingsContent({
           archiveBoards: archiveBoards.length > 0 ? archiveBoards : null,
           archiveRedirect,
           pushWatchLimit,
+          pushCooldownSeconds,
           vapidSubject: vapidSubject || null,
         }),
       });
@@ -1023,6 +1026,22 @@ export function AdminSettingsContent({
             disabled={!canUpdate}
           />
           <Description>0 turns web push off entirely and hides it from the UI. Existing watches are kept.</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="pushCooldownSeconds">Minimum interval per thread (seconds)</Label>
+          <TitleInput
+            id="pushCooldownSeconds"
+            type="number"
+            min={0}
+            max={86400}
+            value={pushCooldownSeconds}
+            onChange={(e) =>
+              setPushCooldownSeconds(Math.min(86400, Math.max(0, parseInt(e.target.value, 10) || 0)))
+            }
+            disabled={!canUpdate}
+          />
+          <Description>After a push for a thread, further replies send nothing to that user until this many seconds pass (0–86400, 0 = push on every reply).</Description>
         </FormGroup>
 
         <FormGroup>

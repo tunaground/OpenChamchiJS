@@ -291,7 +291,15 @@ export async function POST(
     }
 
     // Web push to thread watchers runs after the response is sent
-    after(() => pushNotifier.notifyThread(id, userId ?? null));
+    after(() =>
+      pushNotifier.notifyThread(id, {
+        responseId: response.id,
+        authorUserId: userId ?? null,
+        username: response.username,
+        content: response.content,
+        hasAttachment: !!response.attachment,
+      })
+    );
 
     // Strip sensitive fields before returning
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

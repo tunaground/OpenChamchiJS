@@ -15,11 +15,20 @@ describe("PushNotifier", () => {
     vapidPublicKey: "pub",
     vapidPrivateKey: "priv",
     vapidSubject: "mailto:a@b.c",
+    pushCooldownSeconds: 60,
   } as GlobalSettingsData;
 
   const sub = (id: string, userId: string, locale: string | null): PushSubscriptionData => ({
     id, userId, endpoint: `https://push/${id}`, p256dh: "p", auth: "a", locale,
   });
+
+  const message = {
+    responseId: "resp-1",
+    authorUserId: null as string | null,
+    username: "참치",
+    content: "안녕 [spo]비밀[/spo]",
+    hasAttachment: false,
+  };
 
   function setup(settings: Partial<GlobalSettingsData> = {}) {
     const threadWatchRepository = {
@@ -48,47 +57,53 @@ describe("PushNotifier", () => {
 
   it("does nothing when feature disabled", async () => {
     const { notifier, threadWatchRepository } = setup({ pushWatchLimit: 0 });
-    await notifier.notifyThread(1, null);
+    await notifier.notifyThread(1, message);
     expect(threadWatchRepository.claimRecipients).not.toHaveBeenCalled();
   });
 
-  it("passes author userId to claimRecipients", async () => {
-    const { notifier, threadWatchRepository } = setup();
-    await notifier.notifyThread(1, "author");
-    expect(threadWatchRepository.claimRecipients).toHaveBeenCalledWith(1, "author");
+  it("passes author userId and the configured cooldown to claimRecipients", async () => {
+    const { notifier, threadWatchRepository } = setup({ pushCooldownSeconds: 120 });
+    await notifier.notifyThread(1, { ...message, authorUserId: "author" });
+    expect(threadWatchRepository.claimRecipients).toHaveBeenCalledWith(1, "author", 120);
   });
 
-  it("sends to every subscription of claimed users with locale body", async () => {
+  it("sends author and excerpt to every subscription with a per-reply tag", async () => {
     const { notifier, sendPush } = setup();
-    await notifier.notifyThread(1, null);
+    await notifier.notifyThread(1, message);
     expect(sendPush).toHaveBeenCalledTimes(2);
     const payloads = sendPush.mock.calls.map((c) => JSON.parse(c[1]));
     expect(payloads[0]).toEqual({
       threadId: 1,
       title: "Hello",
-      body: "新しいレスがあります",
+      body: "참치: 안녕 ▒▒▒",
       url: "/trace/free/1/recent",
-      tag: "s1:thread-1",
+      tag: "s1:r-resp-1",
     });
-    expect(payloads[1].body).toBe("새 답글이 있어요");
-    // Tag is scoped per subscription so a re-registered worker never inherits old notifications
-    expect(payloads[1].tag).toBe("s2:thread-1");
+    // Unique per subscription and reply: never replaces an earlier notification
+    expect(payloads[1].tag).toBe("s2:r-resp-1");
     expect(sendPush.mock.calls[0][2]).toEqual({
       publicKey: "pub", privateKey: "priv", subject: "mailto:a@b.c",
     });
   });
 
+  it("uses the subscription locale's image label for attachment-only replies", async () => {
+    const { notifier, sendPush } = setup();
+    await notifier.notifyThread(1, { ...message, content: "", hasAttachment: true });
+    const bodies = sendPush.mock.calls.map((c) => JSON.parse(c[1]).body);
+    expect(bodies).toEqual(["참치: (画像)", "참치: (이미지)"]);
+  });
+
   it("does not look up subscriptions when nobody was claimed", async () => {
     const { notifier, threadWatchRepository, pushSubscriptionRepository } = setup();
     threadWatchRepository.claimRecipients.mockResolvedValue([]);
-    await notifier.notifyThread(1, null);
+    await notifier.notifyThread(1, message);
     expect(pushSubscriptionRepository.findByUserIds).not.toHaveBeenCalled();
   });
 
   it.each([404, 410, 401, 403])("deletes subscriptions on %i", async (statusCode) => {
     const { notifier, sendPush, pushSubscriptionRepository } = setup();
     sendPush.mockResolvedValueOnce({ ok: false, statusCode }).mockResolvedValueOnce({ ok: true });
-    await notifier.notifyThread(1, null);
+    await notifier.notifyThread(1, message);
     expect(pushSubscriptionRepository.deleteByIds).toHaveBeenCalledWith(["s1"]);
   });
 
@@ -96,7 +111,7 @@ describe("PushNotifier", () => {
     const { notifier, sendPush, pushSubscriptionRepository } = setup();
     sendPush.mockResolvedValue({ ok: false, statusCode: 500 });
     jest.spyOn(console, "error").mockImplementation(() => {});
-    await notifier.notifyThread(1, null);
+    await notifier.notifyThread(1, message);
     expect(pushSubscriptionRepository.deleteByIds).not.toHaveBeenCalledWith(
       expect.arrayContaining(["s1"])
     );
@@ -106,14 +121,14 @@ describe("PushNotifier", () => {
     const { notifier, sendPush } = setup();
     sendPush.mockRejectedValue(new Error("network"));
     jest.spyOn(console, "error").mockImplementation(() => {});
-    await expect(notifier.notifyThread(1, null)).resolves.toBeUndefined();
+    await expect(notifier.notifyThread(1, message)).resolves.toBeUndefined();
   });
 
   it("touches successfully delivered subscriptions", async () => {
     const { notifier, sendPush, pushSubscriptionRepository } = setup();
     sendPush.mockResolvedValueOnce({ ok: true }).mockResolvedValueOnce({ ok: false, statusCode: 500 });
     jest.spyOn(console, "error").mockImplementation(() => {});
-    await notifier.notifyThread(1, null);
+    await notifier.notifyThread(1, message);
     expect(pushSubscriptionRepository.touch).toHaveBeenCalledWith(["s1"]);
   });
 });

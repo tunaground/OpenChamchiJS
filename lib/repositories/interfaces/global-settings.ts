@@ -41,6 +41,7 @@ export interface GlobalSettingsData {
   archiveBoards: ArchiveBoard[];
   archiveRedirect: boolean;
   pushWatchLimit: number;
+  pushCooldownSeconds: number;
   vapidPublicKey: string | null;
   vapidPrivateKey: string | null;
   vapidSubject: string | null;
@@ -79,6 +80,7 @@ export interface UpdateGlobalSettingsInput {
   archiveBoards?: ArchiveBoard[] | null;
   archiveRedirect?: boolean;
   pushWatchLimit?: number;
+  pushCooldownSeconds?: number;
   vapidPublicKey?: string | null;
   vapidPrivateKey?: string | null;
   vapidSubject?: string | null;

@@ -145,6 +145,7 @@ model GlobalSettings {
   archiveBoards     String?   @db.Text  // JSON: [{"id":"board1","name":"Board 1"}]
   archiveRedirect   Boolean   @default(false)  // Redirect to archive when thread not found
   pushWatchLimit    Int       @default(0)      // Max thread watches per user; 0 disables web push
+  pushCooldownSeconds Int     @default(60)     // Min seconds between pushes per user and thread
   vapidPublicKey    String?   // Web push VAPID public key
   vapidPrivateKey   String?   // Web push VAPID private key (server-only)
   vapidSubject      String?   // VAPID subject (mailto: or https:)
