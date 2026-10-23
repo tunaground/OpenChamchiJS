@@ -2,7 +2,8 @@
 
 import { signOut, type SignOutParams } from "next-auth/react";
 
-export type DeviceStatus = "subscribed" | "unsubscribed" | "denied" | "unsupported";
+export type DeviceStatus = "subscribed" | "unsubscribed" | "denied" | "unsupported" | "failed";
+export type SubscribeResult = "subscribed" | "denied" | "unsupported" | "failed";
 
 const SW_URL = "/sw.js";
 
@@ -70,10 +71,7 @@ async function subscribe(
   publicKey: string,
   locale: string
 ): Promise<void> {
-  const subscription = await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
-  });
+  const subscription = await registration.pushManager.subscribe(subscribeOptions(publicKey));
   await postSubscription(subscription, locale);
 }
 
@@ -85,30 +83,57 @@ export async function getDeviceStatus(): Promise<DeviceStatus> {
   return subscription && Notification.permission === "granted" ? "subscribed" : "unsubscribed";
 }
 
+let preparedRegistration: ServiceWorkerRegistration | null = null;
+
 /**
- * Asks for permission (if needed) and subscribes this device.
- * Must be called from a click handler: iOS only prompts on user gesture.
+ * Registers and activates the worker ahead of any tap, so the tap handler can
+ * call pushManager.subscribe without awaiting anything first.
+ */
+export async function prepareServiceWorker(): Promise<void> {
+  if (!isSupported() || !getPublicKey()) return;
+  try {
+    preparedRegistration = await getActiveRegistration();
+  } catch (error) {
+    console.error("Failed to prepare service worker:", error);
+  }
+}
+
+function subscribeOptions(publicKey: string): PushSubscriptionOptionsInit {
+  return {
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(publicKey) as BufferSource,
+  };
+}
+
+/**
+ * Subscribes this device; must run from a tap. iOS only allows subscribe()
+ * (which also shows the permission prompt) while the tap's user activation
+ * is still alive, so it is the first thing awaited.
  */
 export async function ensureDeviceSubscribed(
   locale: string
-): Promise<"subscribed" | "denied" | "unsupported"> {
+): Promise<SubscribeResult> {
   const publicKey = getPublicKey();
   if (!isSupported() || !publicKey) return "unsupported";
+  if (Notification.permission === "denied") return "denied";
 
-  const permission =
-    Notification.permission === "default"
-      ? await Notification.requestPermission()
-      : Notification.permission;
-  if (permission !== "granted") return "denied";
-
-  const registration = await getActiveRegistration();
-  const existing = await registration.pushManager.getSubscription();
-  if (existing && isSameKey(existing.options.applicationServerKey, publicKey)) {
-    await postSubscription(existing, locale);
-  } else {
+  const registration = preparedRegistration ?? (await getActiveRegistration());
+  let subscription: PushSubscription;
+  try {
+    subscription = await registration.pushManager.subscribe(subscribeOptions(publicKey));
+  } catch (error) {
+    const name = (error as DOMException).name;
+    // Allowed but still rejected: the push service could not subscribe this device
+    if (name === "NotAllowedError") {
+      return Notification.permission === "granted" ? "failed" : "denied";
+    }
+    if (name !== "InvalidStateError") throw error;
+    // Subscribed with an old VAPID key: replace it (permission is already granted)
+    const existing = await registration.pushManager.getSubscription();
     await existing?.unsubscribe();
-    await subscribe(registration, publicKey, locale);
+    subscription = await registration.pushManager.subscribe(subscribeOptions(publicKey));
   }
+  await postSubscription(subscription, locale);
   return "subscribed";
 }
 

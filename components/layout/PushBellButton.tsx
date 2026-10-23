@@ -9,6 +9,7 @@ import {
   DeviceStatus,
   ensureDeviceSubscribed,
   getDeviceStatus,
+  prepareServiceWorker,
   syncDeviceSubscription,
 } from "@/lib/push/client";
 import { usePushFeatureEnabled } from "@/lib/hooks/usePushFeatureEnabled";
@@ -196,6 +197,7 @@ export function PushBellButton() {
   useEffect(() => {
     if (!enabled) return;
     ensureLoaded();
+    prepareServiceWorker();
     syncDeviceSubscription(locale).then(() => getDeviceStatus().then(setDeviceStatus));
   }, [enabled, ensureLoaded, locale]);
 
@@ -235,7 +237,9 @@ export function PushBellButton() {
         ? t("deviceDenied")
         : deviceStatus === "unsupported"
           ? t("deviceUnsupported")
-          : null;
+          : deviceStatus === "failed"
+            ? t("deviceSubscribeFailed")
+            : null;
 
   return (
     <Wrapper ref={wrapperRef}>
@@ -321,7 +325,7 @@ export function PushBellButton() {
 
           <Footer>
             <span>{deviceMessage}</span>
-            {deviceStatus === "unsubscribed" && (
+            {(deviceStatus === "unsubscribed" || deviceStatus === "failed") && (
               <FooterButton type="button" onClick={handleSubscribeDevice}>
                 {t("deviceSubscribe")}
               </FooterButton>

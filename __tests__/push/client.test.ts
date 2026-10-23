@@ -4,6 +4,8 @@ import {
   postSubscription,
   syncDeviceSubscription,
   getActiveRegistration,
+  ensureDeviceSubscribed,
+  prepareServiceWorker,
 } from "@/lib/push/client";
 
 jest.mock("next-auth/react", () => ({ signOut: jest.fn() }));
@@ -88,5 +90,59 @@ describe("getActiveRegistration", () => {
     });
     await expect(getActiveRegistration()).resolves.toBe(readyRegistration);
     expect(register).toHaveBeenCalledWith("/sw.js", { scope: "/" });
+  });
+});
+
+describe("ensureDeviceSubscribed", () => {
+  function setupBrowser(subscribe: jest.Mock) {
+    const registration = {
+      active: {},
+      pushManager: { subscribe, getSubscription: jest.fn().mockResolvedValue(null) },
+    };
+    const requestPermission = jest.fn().mockResolvedValue("granted");
+    Object.assign(global, {
+      window: { __RUNTIME_CONFIG__: { pushEnabled: true, vapidPublicKey: "AQID" }, PushManager: {}, Notification: {} },
+      navigator: {
+        serviceWorker: {
+          getRegistration: jest.fn().mockResolvedValue(registration),
+          register: jest.fn(),
+          ready: Promise.resolve(registration),
+        },
+      },
+      Notification: { permission: "default", requestPermission },
+      fetch: jest.fn().mockResolvedValue({ ok: true, status: 204 }),
+    });
+    return { registration, requestPermission };
+  }
+
+  it("subscribes on a prepared worker without a separate permission prompt", async () => {
+    const subscribe = jest.fn().mockResolvedValue({
+      toJSON: () => ({ endpoint: "https://web.push.apple.com/x", keys: { p256dh: "p", auth: "a" } }),
+    });
+    const { requestPermission } = setupBrowser(subscribe);
+    await prepareServiceWorker();
+    await expect(ensureDeviceSubscribed("ko")).resolves.toBe("subscribed");
+    expect(subscribe).toHaveBeenCalled();
+    expect(requestPermission).not.toHaveBeenCalled();
+  });
+
+  it("returns denied when the browser rejects the subscription", async () => {
+    const subscribe = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error("User denied push permission"), { name: "NotAllowedError" }));
+    setupBrowser(subscribe);
+    await prepareServiceWorker();
+    await expect(ensureDeviceSubscribed("ko")).resolves.toBe("denied");
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it("returns failed when subscription is rejected although permission is granted", async () => {
+    const subscribe = jest
+      .fn()
+      .mockRejectedValue(Object.assign(new Error("User denied push permission"), { name: "NotAllowedError" }));
+    setupBrowser(subscribe);
+    (global as unknown as { Notification: { permission: string } }).Notification.permission = "granted";
+    await prepareServiceWorker();
+    await expect(ensureDeviceSubscribed("ko")).resolves.toBe("failed");
   });
 });

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useToast } from "@/components/Toast";
 import { usePushWatchStore } from "@/lib/store/pushWatch";
-import { ensureDeviceSubscribed } from "@/lib/push/client";
+import { ensureDeviceSubscribed, prepareServiceWorker } from "@/lib/push/client";
 import { usePushFeatureEnabled } from "@/lib/hooks/usePushFeatureEnabled";
 
 export interface ThreadWatchToggle {
@@ -30,7 +30,10 @@ export function useThreadWatchToggle(threadId: number, isLoggedIn: boolean): Thr
   const watched = items.some((item) => item.threadId === threadId);
 
   useEffect(() => {
-    if (visible) ensureLoaded();
+    if (!visible) return;
+    ensureLoaded();
+    // Ready the worker now so the tap can subscribe without waiting
+    prepareServiceWorker();
   }, [visible, ensureLoaded]);
 
   const toggle = useCallback(async () => {
@@ -48,6 +51,10 @@ export function useThreadWatchToggle(threadId: number, isLoggedIn: boolean): Thr
       }
       if (device === "unsupported") {
         showToast(t("deviceUnsupported"));
+        return;
+      }
+      if (device === "failed") {
+        showToast(t("deviceSubscribeFailed"));
         return;
       }
       if ((await watch(threadId)) === "limit") {

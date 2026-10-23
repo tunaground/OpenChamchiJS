@@ -581,6 +581,7 @@
     "watch": "Get alerts",
     "unwatch": "Stop alerts",
     "limitExceeded": "You can watch up to {limit} threads. Clean up the 🔔 list first.",
-    "notificationBody": "There are new replies"
+    "notificationBody": "There are new replies",
+    "deviceSubscribeFailed": "Could not subscribe this device to alerts. Please try again later."
   }
 }
