@@ -261,7 +261,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - **Docker Compose** - `deploy/docker-compose.yml` (simple deployment)
 - **deploy.sh** - Stack: `chamchi`, commands: `init`, `deploy [service] [version]`, `rollback <service>`
 - **setup.sh** - EC2 Amazon Linux 2023 초기 설정
-- **GitHub Actions** - 자동 빌드: `docker-publish.yml` (web), `docker-publish-ws.yml` (ws), `docker-release.yml` (version tags)
+- **GitHub Actions** - 자동 빌드: `docker-publish.yml` (web: main 푸시 → `main`/`latest`/sha, 같은 저장소 PR → `pr-<번호>`/sha), `docker-publish-ws.yml` (ws), `docker-release.yml` (version tags, `v*-rc.*` 프리릴리스 포함)
 - Images: `ghcr.io/tunaground/openchamchijs`, `ghcr.io/tunaground/openchamchijs-ws-server` (amd64/arm64)
 - Output: standalone (for Docker)
 
