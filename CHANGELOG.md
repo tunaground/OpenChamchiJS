@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Known macOS limits: Chrome plays no sound for web push notifications, and in Safari a click only focuses Safari unless a tab of that thread is already open
 - Admin settings for the per-user watch limit (default 0 = feature off and hidden), the per-thread push interval (default 60s), VAPID subject and VAPID key generation
 
+### Changed
+
+- PWA and home screen icons now show the logo on a white background with padding and rounded corners, instead of edge-to-edge artwork on transparency
+
 ### Removed
 
 - Chat-mode in-tab browser notifications, replaced by web push
