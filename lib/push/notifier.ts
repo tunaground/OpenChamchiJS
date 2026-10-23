@@ -60,7 +60,9 @@ export function createPushNotifier(deps: PushNotifierDeps): PushNotifier {
               title: recipient.title,
               body: getPushBody(sub.locale),
               url: `/trace/${recipient.boardId}/${threadId}/recent`,
-              tag: `thread-${threadId}`,
+              // Scoped per subscription: a re-registered worker gets a new subscription,
+              // so stale notifications of the old worker never capture this tag
+              tag: `${sub.id}:thread-${threadId}`,
             });
             return sendPush(sub, payload, vapid);
           })

@@ -234,6 +234,8 @@ npx prisma studio      # Open Prisma Studio GUI
 - 답글 생성 시 `after()`로 `pushNotifier.notifyThread` 실행: SQL 한 문장으로 쿨다운(사용자×스레드 60초)·보는 중(하트비트 45초)·토글 필터 후 선점
 - 서비스 워커 `public/sw.js`, 같은 스레드 알림은 `tag: thread-{id}`로 교체
 - 404/410/401/403 응답 구독은 삭제, 로그아웃 시 `signOutWithPush`로 이 기기 구독 해제
+- 알림 태그는 서버가 `{PushSubscription.id}:thread-{id}`로 생성 (SW 재등록 후 예전 알림과 충돌 방지). SW `push` 핸들러는 await 없이 `showNotification`을 바로 호출해야 함 (Safari는 지연 시 미표시 처리 후 구독 해지 가능)
+- macOS 한계: Chrome은 웹 푸시 알림 소리가 나지 않음. Safari는 `silent: false` 명시 시에만 소리 (알림 소리는 macOS "사운드 효과" 출력 장치로 재생). Safari는 `clients.openWindow`가 `null`을 반환하므로 열린 스레드 탭이 없으면 클릭 시 Safari 포커스만 됨
 
 ### Storage (File Upload)
 - Pluggable provider architecture (`lib/storage/`)

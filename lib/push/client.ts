@@ -34,9 +34,15 @@ function isSupported(): boolean {
   );
 }
 
-async function getRegistration(): Promise<ServiceWorkerRegistration> {
+/**
+ * Registers the worker if needed and resolves once it is active:
+ * pushManager.subscribe rejects while the worker is still installing.
+ */
+export async function getActiveRegistration(): Promise<ServiceWorkerRegistration> {
   const existing = await navigator.serviceWorker.getRegistration(SW_URL);
-  return existing ?? navigator.serviceWorker.register(SW_URL, { scope: "/" });
+  if (existing?.active) return existing;
+  if (!existing) await navigator.serviceWorker.register(SW_URL, { scope: "/" });
+  return navigator.serviceWorker.ready;
 }
 
 export async function postSubscription(
@@ -95,7 +101,7 @@ export async function ensureDeviceSubscribed(
       : Notification.permission;
   if (permission !== "granted") return "denied";
 
-  const registration = await getRegistration();
+  const registration = await getActiveRegistration();
   const existing = await registration.pushManager.getSubscription();
   if (existing && isSameKey(existing.options.applicationServerKey, publicKey)) {
     await postSubscription(existing, locale);
@@ -123,7 +129,7 @@ async function doSyncDeviceSubscription(locale: string): Promise<void> {
   if (!isSupported() || !publicKey || Notification.permission !== "granted") return;
 
   try {
-    const registration = await getRegistration();
+    const registration = await getActiveRegistration();
     const existing = await registration.pushManager.getSubscription();
     if (!existing) return;
 

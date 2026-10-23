@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Thread web push notifications for logged-in users: watch a thread from the thread sidebar and get an OS notification for new replies even when the browser is closed or another tab/app is in front (desktop, Android, iOS Home Screen PWA)
 - 🔔 dropdown in the top bar to review watched threads, toggle each one, toggle all at once (per-thread settings are kept) and remove them
 - At most one push per user and thread per minute, no push while the thread is on screen, and one notification per thread in the notification center
+- Known macOS limits: Chrome plays no sound for web push notifications, and in Safari a click only focuses Safari unless a tab of that thread is already open
 - Admin settings for the per-user watch limit (default 0 = feature off and hidden), VAPID subject and VAPID key generation
 
 ### Removed

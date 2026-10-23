@@ -68,9 +68,11 @@ describe("PushNotifier", () => {
       title: "Hello",
       body: "新しいレスがあります",
       url: "/trace/free/1/recent",
-      tag: "thread-1",
+      tag: "s1:thread-1",
     });
     expect(payloads[1].body).toBe("새 답글이 있어요");
+    // Tag is scoped per subscription so a re-registered worker never inherits old notifications
+    expect(payloads[1].tag).toBe("s2:thread-1");
     expect(sendPush.mock.calls[0][2]).toEqual({
       publicKey: "pub", privateKey: "priv", subject: "mailto:a@b.c",
     });

@@ -3,6 +3,7 @@ import {
   isSameKey,
   postSubscription,
   syncDeviceSubscription,
+  getActiveRegistration,
 } from "@/lib/push/client";
 
 jest.mock("next-auth/react", () => ({ signOut: jest.fn() }));
@@ -69,5 +70,23 @@ describe("syncDeviceSubscription", () => {
     await syncDeviceSubscription("ko");
     await syncDeviceSubscription("ko");
     expect(getRegistration).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("getActiveRegistration", () => {
+  it("waits for the newly registered worker to become active", async () => {
+    const readyRegistration = { active: {} };
+    const register = jest.fn().mockResolvedValue({ active: null, installing: {} });
+    Object.assign(global, {
+      navigator: {
+        serviceWorker: {
+          getRegistration: jest.fn().mockResolvedValue(undefined),
+          register,
+          ready: Promise.resolve(readyRegistration),
+        },
+      },
+    });
+    await expect(getActiveRegistration()).resolves.toBe(readyRegistration);
+    expect(register).toHaveBeenCalledWith("/sw.js", { scope: "/" });
   });
 });
