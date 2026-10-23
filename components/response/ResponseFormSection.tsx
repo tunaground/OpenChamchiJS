@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { signOut } from "next-auth/react";
+import { signOutWithPush } from "@/lib/push/client";
 import styled from "styled-components";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
 import { ImageUpload } from "@/components/response/ImageUpload";
@@ -257,7 +257,7 @@ export function ResponseFormSection({
           console.error("Failed to create response:", data);
 
           if (data.error === "USER_NOT_FOUND") {
-            await signOut({ redirect: true, callbackUrl: "/" });
+            await signOutWithPush({ redirect: true, callbackUrl: "/" });
             return;
           }
 

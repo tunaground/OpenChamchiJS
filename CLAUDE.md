@@ -50,7 +50,8 @@ npx prisma studio      # Open Prisma Studio GUI
 - `lib/i18n/messages/` - Translation files (ko.json, en.json, ja.json)
 - `lib/storage/` - File upload with Ports/Adapters pattern (Supabase, S3 adapters)
 - `lib/realtime/` - Realtime messaging with Ports/Adapters pattern (WS, Ably adapters)
-- `lib/utils/` - Utilities (anon-id, date-formatter, format-bytes, notification, shortcuts, tripcode)
+- `lib/push/` - Web push (feature flag, notifier, web-push sender, server messages, browser client)
+- `lib/utils/` - Utilities (anon-id, date-formatter, format-bytes, shortcuts, tripcode)
 - `lib/types/` - Type definitions (pagination, response-range)
 - `lib/cache.ts` - Tag-based cache invalidation (unstable_cache wrapper)
 - `lib/ip.ts` - GeoIP detection (MaxMind GeoLite2)
@@ -156,6 +157,15 @@ npx prisma studio      # Open Prisma Studio GUI
 #### Admin
 - `GET /api/admin/boards/[boardId]/responses` - 응답 검색 (admin)
 - `POST /api/admin/cache` - 캐시 무효화 (requires `ADMIN` role)
+- `POST /api/admin/push/vapid` - VAPID 키 생성/재생성 (ADMIN, 기존 기기 구독 전부 삭제)
+
+#### Web Push
+- `GET/POST /api/push/watches` - 내 스레드 알림 목록/등록
+- `PATCH/DELETE /api/push/watches/[watchId]` - 개별 on/off / 제거
+- `DELETE /api/push/threads/[threadId]` - 스레드 기준 등록 해제
+- `PATCH /api/push/settings` - 전체 on/off (`User.pushEnabled`)
+- `POST/DELETE /api/push/subscriptions` - 이 기기 구독 등록/해제
+- `POST /api/push/viewing/[threadId]` - 보는 중 하트비트 (항상 204)
 
 ### Authorization Rules
 | 대상 | 수정 | 삭제 |
@@ -214,7 +224,16 @@ npx prisma studio      # Open Prisma Studio GUI
 #### Hooks
 - `useChatMode` - 채팅 모드 연결/해제 관리
 - `usePresence` - 접속자 수 표시
-- 브라우저 알림: 새 응답 시 Notification API 사용 (자기 글은 anonId로 필터링)
+- 새 응답 알림은 Web Push로 대체됨 (아래 Web Push 섹션)
+
+### Web Push
+- 로그인 사용자가 스레드를 알림 등록 (`ThreadWatch`), 기기별 구독은 `PushSubscription` (endpoint 전역 유니크, 하드 삭제)
+- 기능 활성 조건: `GlobalSettings.pushWatchLimit > 0` + VAPID 공개키/비밀키/subject 설정 (`isPushFeatureEnabled`). 비활성이면 UI 자체가 없음
+- 사용자당 등록 상한 `pushWatchLimit` (개별 off 포함), 가득 차면 거부
+- 전체 on/off(`User.pushEnabled`)와 개별 on/off(`ThreadWatch.enabled`)는 독립
+- 답글 생성 시 `after()`로 `pushNotifier.notifyThread` 실행: SQL 한 문장으로 쿨다운(사용자×스레드 60초)·보는 중(하트비트 45초)·토글 필터 후 선점
+- 서비스 워커 `public/sw.js`, 같은 스레드 알림은 `tag: thread-{id}`로 교체
+- 404/410/401/403 응답 구독은 삭제, 로그아웃 시 `signOutWithPush`로 이 기기 구독 해제
 
 ### Storage (File Upload)
 - Pluggable provider architecture (`lib/storage/`)

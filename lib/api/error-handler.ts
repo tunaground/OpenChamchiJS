@@ -7,9 +7,13 @@ const STATUS_MAP: Record<ServiceErrorCode, number> = {
   NOT_FOUND: 404,
   BAD_REQUEST: 400,
   CONFLICT: 409,
+  WATCH_LIMIT_EXCEEDED: 409,
+  FEATURE_DISABLED: 404,
 };
 
 export function handleServiceError(error: ServiceError): NextResponse {
   const status = STATUS_MAP[error.code] ?? 500;
-  return NextResponse.json({ error: error.message }, { status });
+  // Clients branch on this code to show the "list is full" message
+  const message = error.code === "WATCH_LIMIT_EXCEEDED" ? error.code : error.message;
+  return NextResponse.json({ error: message }, { status });
 }

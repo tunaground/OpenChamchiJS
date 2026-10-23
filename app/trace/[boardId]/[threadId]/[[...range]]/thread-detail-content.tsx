@@ -21,10 +21,8 @@ import { useToast } from "@/components/Toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCode } from "@fortawesome/free-solid-svg-icons";
 import { formatDateTime } from "@/lib/utils/date-formatter";
-import {
-  requestNotificationPermission,
-  createThrottledNotifier,
-} from "@/lib/utils/notification";
+import { useThreadViewingHeartbeat } from "@/lib/hooks/useThreadViewingHeartbeat";
+import { usePushWatchStore } from "@/lib/store/pushWatch";
 import { getAnonId } from "@/lib/utils/anon-id";
 import CustomHtml from "@/components/CustomHtml";
 
@@ -667,8 +665,11 @@ export function ThreadDetailContent({
     }
   }, [thread.boardId, thread.id, currentLastSeq, activeFilterQuery, addResponses]);
 
-  // Throttled notification for chat mode (1 second throttle, shows last response only)
-  const throttledNotify = useMemo(() => createThrottledNotifier(1000), []);
+  // Suppress web push for this thread while it is on screen
+  const isWatched = usePushWatchStore((state) =>
+    state.items.some((item) => item.threadId === thread.id)
+  );
+  useThreadViewingHeartbeat(thread.id, isLoggedIn && isWatched);
 
   // Anonymous ID for identifying own messages in chat mode
   const anonId = useMemo(() => getAnonId(), []);
@@ -714,13 +715,6 @@ export function ThreadDetailContent({
     navigateWithFilter(filter, !filterActive);
   }, [navigateWithFilter, filter, filterActive]);
 
-  // Request notification permission when chat mode is enabled
-  useEffect(() => {
-    if (responseOptions.chatMode) {
-      requestNotificationPermission();
-    }
-  }, [responseOptions.chatMode]);
-
   // Chat mode: handle new responses from realtime
   const handleNewResponse = useCallback((newResponse: ResponseData & { anonId?: string }) => {
     // Apply filter for chat mode if active (only when filterActive is true)
@@ -739,16 +733,7 @@ export function ThreadDetailContent({
       }
       return [...prev, newResponse];
     });
-
-    // Skip notification for own messages
-    if (newResponse.anonId === anonId) {
-      return;
-    }
-
-    // Browser notification
-    const body = `${newResponse.username}: ${newResponse.content}`;
-    throttledNotify(thread.title, body);
-  }, [throttledNotify, thread.title, anonId, filter, filterActive, addResponses]);
+  }, [filter, filterActive, addResponses]);
 
   // Chat mode hook
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1279,6 +1264,7 @@ export function ThreadDetailContent({
       customLinks={customLinks}
       labels={sidebarLabels}
       onManageClick={openManageModal}
+      isLoggedIn={isLoggedIn}
       filter={filter}
       filterActive={filterActive}
       onRemoveUsernameFilter={handleRemoveUsernameFilter}

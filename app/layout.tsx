@@ -5,6 +5,7 @@ import {getLocale, getMessages} from "next-intl/server";
 import {Providers} from "./providers";
 import StyledComponentsRegistry from "@/lib/registry";
 import {globalSettingsService} from "@/lib/services/global-settings";
+import {isPushFeatureEnabled} from "@/lib/push/feature";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await globalSettingsService.get();
@@ -29,6 +30,7 @@ export default async function RootLayout({
   const locale = await getLocale();
   const messages = await getMessages();
   const settings = await globalSettingsService.get();
+  const pushEnabled = isPushFeatureEnabled(settings);
 
   return (
     <html lang={locale}>
@@ -43,6 +45,8 @@ export default async function RootLayout({
           `window.__RUNTIME_CONFIG__=${JSON.stringify({
             realtimeProvider: settings.realtimeProvider || null,
             wsServerUrl: settings.realtimeWsUrl || null,
+            pushEnabled,
+            vapidPublicKey: pushEnabled ? settings.vapidPublicKey : null,
           })}`
         }} />
         <StyledComponentsRegistry>

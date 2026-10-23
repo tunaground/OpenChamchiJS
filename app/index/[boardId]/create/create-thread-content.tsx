@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { signOut } from "next-auth/react";
+import { signOutWithPush } from "@/lib/push/client";
 import styled from "styled-components";
 import { useTranslations } from "next-intl";
 import { PageLayout } from "@/components/layout";
@@ -293,7 +293,7 @@ export function CreateThreadContent({
       if (typeof data.error === "string") {
         // Handle deleted user - sign out and redirect
         if (data.error === "USER_NOT_FOUND") {
-          await signOut({ redirect: true, callbackUrl: "/" });
+          await signOutWithPush({ redirect: true, callbackUrl: "/" });
           return ""; // Won't be shown as we're redirecting
         }
         if (data.error === "FOREIGN_IP_BLOCKED") {

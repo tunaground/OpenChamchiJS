@@ -213,7 +213,6 @@
     "manageModalTitle": "답글 관리",
     "manageModalDescription": "답글을 관리하려면 주제글 비밀번호를 입력하세요.",
     "seq": "#",
-    "content": "내용",
     "status": "상태",
     "actions": "작업",
     "visible": "공개",
@@ -567,5 +566,21 @@
       "scrollDownTitle": "아래로",
       "scrollDownDescription": "페이지 최하단으로 스크롤합니다."
     }
+  },
+  "push": {
+    "bellLabel": "스레드 알림",
+    "masterToggle": "전체",
+    "masterOffHint": "전체 알림이 꺼져 있어요. 개별 설정은 그대로 유지돼요.",
+    "empty": "알림 등록한 스레드가 없어요.",
+    "deletedThread": "삭제된 스레드",
+    "remove": "제거",
+    "deviceSubscribed": "이 기기: 알림 허용됨",
+    "deviceSubscribe": "이 기기에서 받기",
+    "deviceDenied": "브라우저 설정에서 알림을 허용해 주세요.",
+    "deviceUnsupported": "이 브라우저는 푸시 알림을 지원하지 않아요. iPhone은 홈 화면에 추가한 뒤 사용해 주세요.",
+    "watch": "알림 받기",
+    "unwatch": "알림 해제",
+    "limitExceeded": "알림은 최대 {limit}개까지 등록할 수 있어요. 🔔 목록에서 정리해 주세요.",
+    "notificationBody": "새 답글이 있어요"
   }
 }

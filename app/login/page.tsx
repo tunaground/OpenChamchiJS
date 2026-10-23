@@ -1,6 +1,7 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
+import { signOutWithPush } from "@/lib/push/client";
 import { useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import styled from "styled-components";
@@ -74,7 +75,7 @@ export default function LoginPage() {
       <Container>
         <Card>
           <Title>{session.user?.name || session.user?.email}</Title>
-          <Button onClick={() => signOut({ callbackUrl: "/" })}>
+          <Button onClick={() => signOutWithPush({ callbackUrl: "/" })}>
             {tCommon("logout")}
           </Button>
         </Card>

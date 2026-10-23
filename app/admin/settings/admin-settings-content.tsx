@@ -431,6 +431,9 @@ interface AdminSettingsContentProps {
     archiveBaseUrl: string | null;
     archiveBoards: ArchiveBoard[];
     archiveRedirect: boolean;
+    pushWatchLimit: number;
+    vapidPublicKey: string | null;
+    vapidSubject: string | null;
   };
   geoIpAvailable: boolean;
   authLabels: AuthLabels;
@@ -477,6 +480,10 @@ export function AdminSettingsContent({
   const [archiveBaseUrl, setArchiveBaseUrl] = useState(initialSettings.archiveBaseUrl ?? "");
   const [archiveBoards, setArchiveBoards] = useState<ArchiveBoard[]>(initialSettings.archiveBoards ?? []);
   const [archiveRedirect, setArchiveRedirect] = useState(initialSettings.archiveRedirect ?? false);
+  const [pushWatchLimit, setPushWatchLimit] = useState(initialSettings.pushWatchLimit ?? 0);
+  const [vapidSubject, setVapidSubject] = useState(initialSettings.vapidSubject ?? "");
+  const [vapidPublicKey, setVapidPublicKey] = useState(initialSettings.vapidPublicKey ?? "");
+  const [vapidGenerating, setVapidGenerating] = useState(false);
   const [newArchiveBoardId, setNewArchiveBoardId] = useState("");
   const [newArchiveBoardName, setNewArchiveBoardName] = useState("");
   const [customLinks, setCustomLinks] = useState<CustomLink[]>(initialSettings.customLinks);
@@ -553,6 +560,8 @@ export function AdminSettingsContent({
           archiveBaseUrl: archiveBaseUrl || null,
           archiveBoards: archiveBoards.length > 0 ? archiveBoards : null,
           archiveRedirect,
+          pushWatchLimit,
+          vapidSubject: vapidSubject || null,
         }),
       });
 
@@ -562,6 +571,26 @@ export function AdminSettingsContent({
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateVapidKeys = async () => {
+    if (!canUpdate) return;
+    if (
+      vapidPublicKey &&
+      !confirm("Regenerating keys invalidates all existing device subscriptions. Continue?")
+    ) {
+      return;
+    }
+    setVapidGenerating(true);
+    try {
+      const res = await fetch("/api/admin/push/vapid", { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        setVapidPublicKey(data.publicKey);
+      }
+    } finally {
+      setVapidGenerating(false);
     }
   };
 
@@ -972,6 +1001,57 @@ export function AdminSettingsContent({
             </FormGroup>
           </>
         )}
+
+        <Divider />
+
+        <FormGroup>
+          <SectionTitle>Web Push</SectionTitle>
+          <SectionDescription>
+            Thread alerts for logged-in users. Enabled only when the watch limit is above 0 and VAPID keys and subject are set.
+          </SectionDescription>
+
+          <Label htmlFor="pushWatchLimit">Watch limit per user</Label>
+          <TitleInput
+            id="pushWatchLimit"
+            type="number"
+            min={0}
+            max={100}
+            value={pushWatchLimit}
+            onChange={(e) =>
+              setPushWatchLimit(Math.min(100, Math.max(0, parseInt(e.target.value, 10) || 0)))
+            }
+            disabled={!canUpdate}
+          />
+          <Description>0 turns web push off entirely and hides it from the UI. Existing watches are kept.</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="vapidSubject">VAPID subject</Label>
+          <TitleInput
+            id="vapidSubject"
+            type="text"
+            value={vapidSubject}
+            onChange={(e) => setVapidSubject(e.target.value)}
+            placeholder="mailto:admin@example.com"
+            maxLength={200}
+            disabled={!canUpdate}
+          />
+          <Description>Contact for push services. Must start with mailto: or https:.</Description>
+        </FormGroup>
+
+        <FormGroup>
+          <Label htmlFor="vapidPublicKey">VAPID public key</Label>
+          <TitleInput id="vapidPublicKey" type="text" value={vapidPublicKey} readOnly />
+          <AddButton
+            type="button"
+            onClick={handleGenerateVapidKeys}
+            disabled={!canUpdate || vapidGenerating}
+            style={{ marginTop: "0.8rem" }}
+          >
+            Generate keys
+          </AddButton>
+          <Description>The private key is stored on the server only. Regenerating keys removes all device subscriptions.</Description>
+        </FormGroup>
 
         <Divider />
 

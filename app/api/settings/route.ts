@@ -5,6 +5,14 @@ import { roleService } from "@/lib/services/role";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { updateSettingsSchema } from "@/lib/schemas";
 import { validateOrigin } from "@/lib/api/csrf";
+import type { GlobalSettingsData } from "@/lib/repositories/interfaces/global-settings";
+
+// The VAPID private key never leaves the server
+function omitPrivateKey(settings: GlobalSettingsData) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { vapidPrivateKey: _vapidPrivateKey, ...rest } = settings;
+  return rest;
+}
 
 // GET /api/settings - Get global settings
 export async function GET() {
@@ -21,7 +29,7 @@ export async function GET() {
   }
 
   const settings = await globalSettingsService.get();
-  return NextResponse.json(settings);
+  return NextResponse.json(omitPrivateKey(settings));
 }
 
 // PUT /api/settings - Update global settings
@@ -50,5 +58,5 @@ export async function PUT(request: NextRequest) {
   }
 
   const settings = await globalSettingsService.update(parsed.data);
-  return NextResponse.json(settings);
+  return NextResponse.json(omitPrivateKey(settings));
 }

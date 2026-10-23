@@ -8,6 +8,7 @@ import { SettingsButton } from "./SettingsButton";
 import { AdminButton } from "./AdminButton";
 import { AuthButton } from "./AuthButton";
 import { UserCounter } from "./UserCounter";
+import { PushBellButton } from "./PushBellButton";
 
 const Bar = styled.header`
   position: fixed;
@@ -222,6 +223,7 @@ export function TopBar({
           <HomeButton active={isHomePage} />
           <ThemeToggleButton />
           <SettingsButton active={isSettingsPage} />
+          {isLoggedIn && <PushBellButton />}
           {canAccessAdmin && <AdminButton active={isAdminPage} />}
         </ButtonGroup>
         <AuthButton

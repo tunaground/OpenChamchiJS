@@ -55,6 +55,9 @@ export default async function AdminSettingsPage() {
         archiveBaseUrl: settings.archiveBaseUrl,
         archiveBoards: settings.archiveBoards,
         archiveRedirect: settings.archiveRedirect,
+        pushWatchLimit: settings.pushWatchLimit,
+        vapidPublicKey: settings.vapidPublicKey,
+        vapidSubject: settings.vapidSubject,
       }}
       geoIpAvailable={geoIpAvailable}
       authLabels={{ login: tCommon("login"), logout: tCommon("logout") }}

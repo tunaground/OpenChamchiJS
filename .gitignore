@@ -60,3 +60,6 @@ next-env.d.ts
 # GeoIP database (downloaded at build time)
 lib/GeoLite2-Country.mmdb
 .mmdb-temp/
+
+# superpowers brainstorm/plan scratch
+.superpowers/
