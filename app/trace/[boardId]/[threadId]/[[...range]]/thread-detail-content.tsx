@@ -6,7 +6,12 @@ import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
 import { buildFilterQuery, buildTraceUrl, type ResponseFilter } from "@/lib/utils/trace-url";
-import { getInitialLoadedFromSeq, getNextLoadedFromSeq, getDisplayedLastSeq } from "@/lib/utils/load-more";
+import {
+  getInitialLoadedFromSeq,
+  getNextLoadedFromSeq,
+  getDisplayedLastSeq,
+  getRefreshRange,
+} from "@/lib/utils/load-more";
 import { ResponseCard } from "@/components/response";
 import { ResponseFormSection } from "@/components/response/ResponseFormSection";
 import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
@@ -541,6 +546,7 @@ interface ThreadDetailContentProps {
   currentView: string;
   lastSeq: number;
   responsesPerPage: number;
+  maxResponsesPerThread: number;
   labels: Labels;
   sidebarLabels: SidebarLabels;
   customLinks?: CustomLink[];
@@ -566,6 +572,7 @@ export function ThreadDetailContent({
   currentView,
   lastSeq,
   responsesPerPage,
+  maxResponsesPerThread,
   labels,
   sidebarLabels,
   customLinks,
@@ -670,9 +677,12 @@ export function ThreadDetailContent({
   // Fetch responses below the last one on screen; returns how many were added
   const fetchNewResponses = useCallback(async (): Promise<number> => {
     try {
-      const afterSeq = getDisplayedLastSeq(responses);
+      const { startSeq, endSeq } = getRefreshRange(
+        getDisplayedLastSeq(responses),
+        maxResponsesPerThread
+      );
       const res = await fetch(
-        `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${afterSeq + 1}&endSeq=${afterSeq + 1000}${activeFilterQuery ? `&${activeFilterQuery}` : ""}`
+        `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${startSeq}&endSeq=${endSeq}${activeFilterQuery ? `&${activeFilterQuery}` : ""}`
       );
       if (res.ok) {
         const data = await res.json();
@@ -692,7 +702,7 @@ export function ThreadDetailContent({
       console.error("Failed to fetch new responses:", error);
     }
     return 0;
-  }, [thread.boardId, thread.id, responses, activeFilterQuery, addResponses]);
+  }, [thread.boardId, thread.id, responses, maxResponsesPerThread, activeFilterQuery, addResponses]);
 
   // "Refresh" button: like "load more", but downward from the last reply on screen
   const [isRefreshing, setIsRefreshing] = useState(false);

@@ -1,4 +1,4 @@
-import { getInitialLoadedFromSeq, getNextLoadedFromSeq, getDisplayedLastSeq } from "@/lib/utils/load-more";
+import { getInitialLoadedFromSeq, getNextLoadedFromSeq, getDisplayedLastSeq, getRefreshRange } from "@/lib/utils/load-more";
 
 describe("load-more", () => {
   describe("getInitialLoadedFromSeq", () => {
@@ -45,6 +45,16 @@ describe("load-more", () => {
 
     it("returns 0 when nothing is shown", () => {
       expect(getDisplayedLastSeq([])).toBe(0);
+    });
+  });
+
+  describe("getRefreshRange", () => {
+    it("reaches the board's reply limit in one request", () => {
+      expect(getRefreshRange(1200, 5000)).toEqual({ startSeq: 1201, endSeq: 5000 });
+    });
+
+    it("never ends before it starts", () => {
+      expect(getRefreshRange(5000, 5000)).toEqual({ startSeq: 5001, endSeq: 5001 });
     });
   });
 });

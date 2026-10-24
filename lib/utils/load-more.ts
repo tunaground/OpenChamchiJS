@@ -55,3 +55,15 @@ export function getNextLoadedFromSeq(fetched: HasSeq[], count: number): number {
 export function getDisplayedLastSeq(responses: HasSeq[]): number {
   return responses.reduce((max, r) => (r.seq > max ? r.seq : max), 0);
 }
+
+/**
+ * Seq range for "refresh": everything after the last reply on screen up to the
+ * board's reply limit (seq can never exceed it), so one request gets them all.
+ */
+export function getRefreshRange(
+  displayedLastSeq: number,
+  maxResponsesPerThread: number
+): { startSeq: number; endSeq: number } {
+  const startSeq = displayedLastSeq + 1;
+  return { startSeq, endSeq: Math.max(startSeq, maxResponsesPerThread) };
+}
