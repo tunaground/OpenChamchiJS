@@ -236,7 +236,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - 서비스 워커 `public/sw.js`. 알림 본문은 `작성자: 본문 발췌`(TOM 마크업 제거, 스포일러 가림, 100자, `lib/push/plain-text.ts`)
 - 404/410/401/403 응답 구독은 삭제, 로그아웃 시 `signOutWithPush`로 이 기기 구독 해제
 - 알림 태그는 서버가 `{PushSubscription.id}:r-{responseId}`로 생성해 답글마다 따로 쌓임 (같은 태그로 교체하면 macOS Chrome이 배너를 띄우지 않고 클릭도 끊김). SW `push` 핸들러는 await 없이 `showNotification`을 바로 호출해야 함 (Safari는 지연 시 미표시 처리 후 구독 해지 가능)
-- macOS 한계: Chrome은 웹 푸시 알림 소리가 나지 않음. Safari는 `silent: false` 명시 시에만 소리 (알림 소리는 macOS "사운드 효과" 출력 장치로 재생). Safari는 `clients.openWindow`가 `null`을 반환하므로 열린 스레드 탭이 없으면 클릭 시 Safari 포커스만 됨
+- macOS 한계: Chrome은 웹 푸시 알림 소리가 나지 않음. Safari는 `silent: false` 명시 시에만 소리 (알림 소리는 macOS "사운드 효과" 출력 장치로 재생). WebKit(Safari, iOS PWA)은 `clients.openWindow`가 `null`을 반환하므로, SW가 이동할 주소를 Cache Storage에 2분간 저장하고 열린 페이지에 `push-navigate` 메시지를 보냄. 페이지(`usePushNavigation`)가 직접 이동하고, 새로 켜진 앱은 시작 시 저장된 주소를 요청함 (작성 중인 `textarea[data-draft]`가 있으면 확인)
 
 ### Storage (File Upload)
 - Pluggable provider architecture (`lib/storage/`)

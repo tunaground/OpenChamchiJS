@@ -585,6 +585,7 @@
     "unwatch": "Stop alerts",
     "limitExceeded": "You can watch up to {limit} threads. Clean up the 🔔 list first.",
     "deviceSubscribeFailed": "Could not subscribe this device to alerts. Please try again later.",
-    "imageLabel": "(image)"
+    "imageLabel": "(image)",
+    "navigateConfirm": "You have unsent text. Go to the thread with the new reply?"
   }
 }

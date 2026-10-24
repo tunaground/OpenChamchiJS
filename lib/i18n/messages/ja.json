@@ -573,6 +573,7 @@
     "unwatch": "通知を解除",
     "limitExceeded": "通知は最大{limit}件まで登録できます。🔔リストを整理してください。",
     "deviceSubscribeFailed": "この端末で通知の登録に失敗しました。しばらくしてから再度お試しください。",
-    "imageLabel": "(画像)"
+    "imageLabel": "(画像)",
+    "navigateConfirm": "入力中の内容があります。新しいレスのあるスレッドへ移動しますか？"
   }
 }

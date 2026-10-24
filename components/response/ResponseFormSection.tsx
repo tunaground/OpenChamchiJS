@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { signOutWithPush } from "@/lib/push/client";
 import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
 import { ImageUpload } from "@/components/response/ImageUpload";
 import { useTranslations } from "next-intl";
@@ -95,7 +97,38 @@ const SubmitButton = styled.button`
   }
 `;
 
+const RefreshButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 3.2rem;
+  padding: 0 1.2rem;
+  border: none;
+  border-radius: 0.4rem;
+  background: ${(props) => props.theme.buttonPrimary};
+  color: ${(props) => props.theme.buttonPrimaryText};
+  font-size: 1.3rem;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.85;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
 const EndedNotice = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
   text-align: center;
   padding: 2.4rem;
   color: ${(props) => props.theme.textSecondary};
@@ -117,6 +150,8 @@ interface FormLabels {
   unknownError: string;
   selectImage: string;
   removeImage: string;
+  refresh: string;
+  refreshing: string;
 }
 
 interface ResponseFormSectionProps {
@@ -138,6 +173,8 @@ interface ResponseFormSectionProps {
   isAtBottomRef: React.RefObject<boolean>;
   pageEndRef: React.RefObject<HTMLDivElement | null>;
   onSubmitSuccess: () => void;
+  onRefresh: () => void;
+  refreshing: boolean;
 }
 
 export function ResponseFormSection({
@@ -159,6 +196,8 @@ export function ResponseFormSection({
   isAtBottomRef,
   pageEndRef,
   onSubmitSuccess,
+  onRefresh,
+  refreshing,
 }: ResponseFormSectionProps) {
   const [username, setUsername] = useState("");
   const [content, setContent] = useState("");
@@ -292,8 +331,20 @@ export function ResponseFormSection({
     }
   };
 
+  const refreshButton = (
+    <RefreshButton type="button" onClick={onRefresh} disabled={refreshing}>
+      <FontAwesomeIcon icon={faArrowsRotate} spin={refreshing} />
+      {refreshing ? labels.refreshing : labels.refresh}
+    </RefreshButton>
+  );
+
   if (thread.ended) {
-    return <EndedNotice>{labels.threadEnded}</EndedNotice>;
+    return (
+      <EndedNotice>
+        <span>{labels.threadEnded}</span>
+        {refreshButton}
+      </EndedNotice>
+    );
   }
 
   return (
@@ -319,6 +370,7 @@ export function ResponseFormSection({
           hasThreadOverride={hasThreadOverride}
           onResetThreadOptions={resetAllThreadOptions}
           realtimeEnabled={realtimeEnabled}
+          trailing={refreshButton}
         />
         <FormGroup style={{ marginBottom: "1.6rem" }}>
           <FormInput
@@ -333,6 +385,7 @@ export function ResponseFormSection({
         </FormGroup>
         <FormGroup style={{ marginBottom: "1.6rem" }}>
           <FormTextarea
+            data-draft
             ref={textareaRef}
             value={content}
             onChange={(e) => setContent(applyShortcuts(e.target.value))}

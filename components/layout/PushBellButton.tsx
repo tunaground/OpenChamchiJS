@@ -15,6 +15,7 @@ import {
   syncDeviceSubscription,
 } from "@/lib/push/client";
 import { usePushFeatureEnabled } from "@/lib/hooks/usePushFeatureEnabled";
+import { usePushNavigation } from "@/lib/hooks/usePushNavigation";
 import { PushSwitch } from "@/components/push/PushSwitch";
 
 const Wrapper = styled.div`
@@ -195,6 +196,7 @@ export function PushBellButton() {
   const [open, setOpen] = useState(false);
   const [deviceStatus, setDeviceStatus] = useState<DeviceStatus | null>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
+  usePushNavigation(enabled, t("navigateConfirm"));
 
   useEffect(() => {
     if (!enabled) return;

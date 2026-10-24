@@ -372,30 +372,6 @@ const LoadMoreSection = styled.div`
   }
 `;
 
-const RefreshButton = styled.button`
-  display: block;
-  width: 100%;
-  margin-top: 1.6rem;
-  padding: 1rem 1.2rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.3rem;
-  font-weight: 500;
-  transition: opacity 0.15s ease;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
 const LoadMoreButton = styled.button<{ $primary?: boolean }>`
   flex: 1;
   padding: 0.6rem 1.2rem;
@@ -1435,10 +1411,6 @@ export function ThreadDetailContent({
         )}
       </ResponsesSection>
 
-      <RefreshButton onClick={handleRefresh} disabled={isRefreshing}>
-        {isRefreshing ? labels.refreshing : labels.refresh}
-      </RefreshButton>
-
       <ResponseFormSection
         thread={thread}
         defaultUsername={defaultUsername}
@@ -1458,6 +1430,8 @@ export function ThreadDetailContent({
         isAtBottomRef={isAtBottomRef}
         pageEndRef={pageEndRef}
         onSubmitSuccess={fetchNewResponses}
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
       />
       <div ref={pageEndRef} />
       </Container>

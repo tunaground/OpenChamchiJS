@@ -466,6 +466,7 @@ export function CreateThreadContent({
               />
             )}
             <Textarea
+              data-draft
               ref={textareaRef}
               $aaMode={options.aaMode}
               value={formData.content}
