@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-25
+
 ### Added
 
 - Thread web push notifications for logged-in users: watch a thread from the thread sidebar and get an OS notification for new replies even when the browser is closed or another tab/app is in front (desktop, Android, iOS Home Screen PWA)
@@ -192,7 +194,8 @@ Initial tagged release. See git history for details.
 
 ## [0.1.0]
 
-[Unreleased]: https://github.com/tunaground/OpenChamchiJS/compare/v0.3.1...HEAD
+[Unreleased]: https://github.com/tunaground/OpenChamchiJS/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/tunaground/OpenChamchiJS/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/tunaground/OpenChamchiJS/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/tunaground/OpenChamchiJS/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/tunaground/OpenChamchiJS/releases/tag/v0.2.0
