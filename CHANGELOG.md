@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 🔔 dropdown in the top bar to review watched threads, toggle each one, toggle all at once (per-thread settings are kept) and remove them
 - At most one push per user and thread per configurable interval, no push while the thread is on screen, and each notification shows the reply's author and a short excerpt (markup removed, spoilers hidden)
 - Known macOS limits: Chrome plays no sound for web push notifications, and in Safari a click only focuses Safari unless a tab of that thread is already open
+- "Refresh" button above the reply form on thread pages: loads replies after the last one on screen (handy in the installed PWA, which has no browser reload button)
 - Admin settings for the per-user watch limit (default 0 = feature off and hidden), the per-thread push interval (default 60s), VAPID subject and VAPID key generation
 
 ### Changed

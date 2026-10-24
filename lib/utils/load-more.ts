@@ -46,3 +46,12 @@ export function getNextLoadedFromSeq(fetched: HasSeq[], count: number): number {
   }
   return Math.min(...nonZero.map((r) => r.seq));
 }
+
+/**
+ * Seq of the last response on screen. "Refresh" loads from here + 1, so
+ * hidden/deleted seqs in between are skipped by the API and replies
+ * restored after the page loaded still show up.
+ */
+export function getDisplayedLastSeq(responses: HasSeq[]): number {
+  return responses.reduce((max, r) => (r.seq > max ? r.seq : max), 0);
+}

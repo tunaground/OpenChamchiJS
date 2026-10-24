@@ -6,7 +6,7 @@ import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
 import { buildFilterQuery, buildTraceUrl, type ResponseFilter } from "@/lib/utils/trace-url";
-import { getInitialLoadedFromSeq, getNextLoadedFromSeq } from "@/lib/utils/load-more";
+import { getInitialLoadedFromSeq, getNextLoadedFromSeq, getDisplayedLastSeq } from "@/lib/utils/load-more";
 import { ResponseCard } from "@/components/response";
 import { ResponseFormSection } from "@/components/response/ResponseFormSection";
 import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
@@ -367,6 +367,30 @@ const LoadMoreSection = styled.div`
   }
 `;
 
+const RefreshButton = styled.button`
+  display: block;
+  width: 100%;
+  margin-top: 1.6rem;
+  padding: 1rem 1.2rem;
+  background: ${(props) => props.theme.buttonPrimary};
+  color: ${(props) => props.theme.buttonPrimaryText};
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1.3rem;
+  font-weight: 500;
+  transition: opacity 0.15s ease;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+`;
+
 const LoadMoreButton = styled.button<{ $primary?: boolean }>`
   flex: 1;
   padding: 0.6rem 1.2rem;
@@ -465,6 +489,9 @@ interface Labels {
   copied: string;
   loadMore: string;
   loadingMore: string;
+  refresh: string;
+  refreshing: string;
+  noNewResponses: string;
   ban: string;
   unban: string;
   show: string;
@@ -640,30 +667,45 @@ export function ThreadDetailContent({
     return Math.max(lastSeq, ...responses.map((r) => r.seq));
   }, [responses, lastSeq]);
 
-  // Fetch new responses after current last seq
-  const fetchNewResponses = useCallback(async () => {
+  // Fetch responses below the last one on screen; returns how many were added
+  const fetchNewResponses = useCallback(async (): Promise<number> => {
     try {
-      const afterSeq = currentLastSeq;
+      const afterSeq = getDisplayedLastSeq(responses);
       const res = await fetch(
         `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${afterSeq + 1}&endSeq=${afterSeq + 1000}${activeFilterQuery ? `&${activeFilterQuery}` : ""}`
       );
       if (res.ok) {
         const data = await res.json();
-        if ((data as ResponseData[]).length > 0) {
+        const existingIds = new Set(responses.map((r) => r.id));
+        const newResponses = (data as ResponseData[]).filter((r) => !existingIds.has(r.id));
+        if (newResponses.length > 0) {
           addResponses((prev) => {
-            const existingIds = new Set(prev.map((r) => r.id));
-            const newResponses = (data as ResponseData[]).filter(
-              (r) => !existingIds.has(r.id)
-            );
-            if (newResponses.length === 0) return prev;
-            return [...prev, ...newResponses].sort((a, b) => a.seq - b.seq);
+            const prevIds = new Set(prev.map((r) => r.id));
+            const toAdd = newResponses.filter((r) => !prevIds.has(r.id));
+            if (toAdd.length === 0) return prev;
+            return [...prev, ...toAdd].sort((a, b) => a.seq - b.seq);
           });
         }
+        return newResponses.length;
       }
     } catch (error) {
       console.error("Failed to fetch new responses:", error);
     }
-  }, [thread.boardId, thread.id, currentLastSeq, activeFilterQuery, addResponses]);
+    return 0;
+  }, [thread.boardId, thread.id, responses, activeFilterQuery, addResponses]);
+
+  // "Refresh" button: like "load more", but downward from the last reply on screen
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      const added = await fetchNewResponses();
+      if (added === 0) showToast(labels.noNewResponses);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, fetchNewResponses, showToast, labels.noNewResponses]);
 
   // Suppress web push for this thread while it is on screen
   const isWatched = usePushWatchStore((state) =>
@@ -1382,6 +1424,10 @@ export function ThreadDetailContent({
           })
         )}
       </ResponsesSection>
+
+      <RefreshButton onClick={handleRefresh} disabled={isRefreshing}>
+        {isRefreshing ? labels.refreshing : labels.refresh}
+      </RefreshButton>
 
       <ResponseFormSection
         thread={thread}
