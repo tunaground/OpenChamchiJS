@@ -213,7 +213,6 @@
     "manageModalTitle": "Manage Responses",
     "manageModalDescription": "Enter the thread password to manage responses.",
     "seq": "#",
-    "content": "Content",
     "status": "Status",
     "actions": "Actions",
     "visible": "Visible",
@@ -234,6 +233,9 @@
     "copied": "Copied to clipboard",
     "loadMore": "Load more",
     "loadingMore": "Loading...",
+    "refresh": "Refresh",
+    "refreshing": "Refreshing...",
+    "noNewResponses": "No new replies.",
     "ban": "Ban",
     "unban": "Unban",
     "show": "Show",
@@ -567,5 +569,23 @@
       "scrollDownTitle": "Scroll Down",
       "scrollDownDescription": "Scroll to the bottom of the page."
     }
+  },
+  "push": {
+    "bellLabel": "Thread alerts",
+    "masterToggle": "All",
+    "masterOffHint": "All alerts are off. Per-thread settings are kept.",
+    "empty": "You are not watching any threads.",
+    "deletedThread": "Deleted thread",
+    "remove": "Remove",
+    "deviceSubscribed": "This device: alerts allowed",
+    "deviceSubscribe": "Get alerts on this device",
+    "deviceDenied": "Allow notifications in your browser settings.",
+    "deviceUnsupported": "This browser does not support push notifications. On iPhone, add the site to your Home Screen first.",
+    "watch": "Get alerts",
+    "unwatch": "Stop alerts",
+    "limitExceeded": "You can watch up to {limit} threads. Clean up the 🔔 list first.",
+    "deviceSubscribeFailed": "Could not subscribe this device to alerts. Please try again later.",
+    "imageLabel": "(image)",
+    "navigateConfirm": "You have unsent text. Go to the thread with the new reply?"
   }
 }

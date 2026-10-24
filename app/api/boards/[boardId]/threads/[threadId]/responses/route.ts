@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { getServerSession } from "next-auth";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -20,6 +20,7 @@ import { CHANNELS, EVENTS } from "@/lib/realtime";
 import { getStorage, isStorageEnabled, StorageError } from "@/lib/storage";
 import { generateTripcode } from "@/lib/utils/tripcode";
 import { threadBanService } from "@/lib/services/thread-ban";
+import { pushNotifier } from "@/lib/push/notifier";
 
 // GET /api/boards/[boardId]/threads/[threadId]/responses - 응답 목록 조회
 export async function GET(
@@ -288,6 +289,17 @@ export async function POST(
         console.error("Failed to publish realtime message:", error);
       }
     }
+
+    // Web push to thread watchers runs after the response is sent
+    after(() =>
+      pushNotifier.notifyThread(id, {
+        responseId: response.id,
+        authorUserId: userId ?? null,
+        username: response.username,
+        content: response.content,
+        hasAttachment: !!response.attachment,
+      })
+    );
 
     // Strip sensitive fields before returning
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -9,7 +9,12 @@ export type RealtimeProvider = "ably" | "pusher" | "socketio" | "ws";
 
 declare global {
   interface Window {
-    __RUNTIME_CONFIG__?: { realtimeProvider?: string; wsServerUrl?: string };
+    __RUNTIME_CONFIG__?: {
+      realtimeProvider?: string;
+      wsServerUrl?: string;
+      pushEnabled?: boolean;
+      vapidPublicKey?: string | null;
+    };
   }
 }
 

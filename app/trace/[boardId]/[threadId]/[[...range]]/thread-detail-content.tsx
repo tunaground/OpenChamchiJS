@@ -6,7 +6,12 @@ import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { TraceSidebar } from "@/components/sidebar/TraceSidebar";
 import { buildFilterQuery, buildTraceUrl, type ResponseFilter } from "@/lib/utils/trace-url";
-import { getInitialLoadedFromSeq, getNextLoadedFromSeq } from "@/lib/utils/load-more";
+import {
+  getInitialLoadedFromSeq,
+  getNextLoadedFromSeq,
+  getDisplayedLastSeq,
+  getRefreshRange,
+} from "@/lib/utils/load-more";
 import { ResponseCard } from "@/components/response";
 import { ResponseFormSection } from "@/components/response/ResponseFormSection";
 import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
@@ -21,10 +26,8 @@ import { useToast } from "@/components/Toast";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCode } from "@fortawesome/free-solid-svg-icons";
 import { formatDateTime } from "@/lib/utils/date-formatter";
-import {
-  requestNotificationPermission,
-  createThrottledNotifier,
-} from "@/lib/utils/notification";
+import { useThreadViewingHeartbeat } from "@/lib/hooks/useThreadViewingHeartbeat";
+import { usePushWatchStore } from "@/lib/store/pushWatch";
 import { getAnonId } from "@/lib/utils/anon-id";
 import CustomHtml from "@/components/CustomHtml";
 
@@ -467,6 +470,9 @@ interface Labels {
   copied: string;
   loadMore: string;
   loadingMore: string;
+  refresh: string;
+  refreshing: string;
+  noNewResponses: string;
   ban: string;
   unban: string;
   show: string;
@@ -516,6 +522,7 @@ interface ThreadDetailContentProps {
   currentView: string;
   lastSeq: number;
   responsesPerPage: number;
+  maxResponsesPerThread: number;
   labels: Labels;
   sidebarLabels: SidebarLabels;
   customLinks?: CustomLink[];
@@ -541,6 +548,7 @@ export function ThreadDetailContent({
   currentView,
   lastSeq,
   responsesPerPage,
+  maxResponsesPerThread,
   labels,
   sidebarLabels,
   customLinks,
@@ -642,33 +650,54 @@ export function ThreadDetailContent({
     return Math.max(lastSeq, ...responses.map((r) => r.seq));
   }, [responses, lastSeq]);
 
-  // Fetch new responses after current last seq
-  const fetchNewResponses = useCallback(async () => {
+  // Fetch responses below the last one on screen; returns how many were added
+  const fetchNewResponses = useCallback(async (): Promise<number> => {
     try {
-      const afterSeq = currentLastSeq;
+      const { startSeq, endSeq } = getRefreshRange(
+        getDisplayedLastSeq(responses),
+        maxResponsesPerThread
+      );
       const res = await fetch(
-        `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${afterSeq + 1}&endSeq=${afterSeq + 1000}${activeFilterQuery ? `&${activeFilterQuery}` : ""}`
+        `/api/boards/${thread.boardId}/threads/${thread.id}/responses?startSeq=${startSeq}&endSeq=${endSeq}${activeFilterQuery ? `&${activeFilterQuery}` : ""}`
       );
       if (res.ok) {
         const data = await res.json();
-        if ((data as ResponseData[]).length > 0) {
+        const existingIds = new Set(responses.map((r) => r.id));
+        const newResponses = (data as ResponseData[]).filter((r) => !existingIds.has(r.id));
+        if (newResponses.length > 0) {
           addResponses((prev) => {
-            const existingIds = new Set(prev.map((r) => r.id));
-            const newResponses = (data as ResponseData[]).filter(
-              (r) => !existingIds.has(r.id)
-            );
-            if (newResponses.length === 0) return prev;
-            return [...prev, ...newResponses].sort((a, b) => a.seq - b.seq);
+            const prevIds = new Set(prev.map((r) => r.id));
+            const toAdd = newResponses.filter((r) => !prevIds.has(r.id));
+            if (toAdd.length === 0) return prev;
+            return [...prev, ...toAdd].sort((a, b) => a.seq - b.seq);
           });
         }
+        return newResponses.length;
       }
     } catch (error) {
       console.error("Failed to fetch new responses:", error);
     }
-  }, [thread.boardId, thread.id, currentLastSeq, activeFilterQuery, addResponses]);
+    return 0;
+  }, [thread.boardId, thread.id, responses, maxResponsesPerThread, activeFilterQuery, addResponses]);
 
-  // Throttled notification for chat mode (1 second throttle, shows last response only)
-  const throttledNotify = useMemo(() => createThrottledNotifier(1000), []);
+  // "Refresh" button: like "load more", but downward from the last reply on screen
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefresh = useCallback(async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+    try {
+      const added = await fetchNewResponses();
+      if (added === 0) showToast(labels.noNewResponses);
+    } finally {
+      setIsRefreshing(false);
+    }
+  }, [isRefreshing, fetchNewResponses, showToast, labels.noNewResponses]);
+
+  // Suppress web push for this thread while it is on screen
+  const isWatched = usePushWatchStore((state) =>
+    state.items.some((item) => item.threadId === thread.id)
+  );
+  useThreadViewingHeartbeat(thread.id, isLoggedIn && isWatched);
 
   // Anonymous ID for identifying own messages in chat mode
   const anonId = useMemo(() => getAnonId(), []);
@@ -714,13 +743,6 @@ export function ThreadDetailContent({
     navigateWithFilter(filter, !filterActive);
   }, [navigateWithFilter, filter, filterActive]);
 
-  // Request notification permission when chat mode is enabled
-  useEffect(() => {
-    if (responseOptions.chatMode) {
-      requestNotificationPermission();
-    }
-  }, [responseOptions.chatMode]);
-
   // Chat mode: handle new responses from realtime
   const handleNewResponse = useCallback((newResponse: ResponseData & { anonId?: string }) => {
     // Apply filter for chat mode if active (only when filterActive is true)
@@ -739,16 +761,7 @@ export function ThreadDetailContent({
       }
       return [...prev, newResponse];
     });
-
-    // Skip notification for own messages
-    if (newResponse.anonId === anonId) {
-      return;
-    }
-
-    // Browser notification
-    const body = `${newResponse.username}: ${newResponse.content}`;
-    throttledNotify(thread.title, body);
-  }, [throttledNotify, thread.title, anonId, filter, filterActive, addResponses]);
+  }, [filter, filterActive, addResponses]);
 
   // Chat mode hook
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1279,6 +1292,7 @@ export function ThreadDetailContent({
       customLinks={customLinks}
       labels={sidebarLabels}
       onManageClick={openManageModal}
+      isLoggedIn={isLoggedIn}
       filter={filter}
       filterActive={filterActive}
       onRemoveUsernameFilter={handleRemoveUsernameFilter}
@@ -1416,6 +1430,8 @@ export function ThreadDetailContent({
         isAtBottomRef={isAtBottomRef}
         pageEndRef={pageEndRef}
         onSubmitSuccess={fetchNewResponses}
+        onRefresh={handleRefresh}
+        refreshing={isRefreshing}
       />
       <div ref={pageEndRef} />
       </Container>

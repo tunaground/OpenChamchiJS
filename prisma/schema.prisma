@@ -50,11 +50,14 @@ model User {
   emailVerified DateTime?
   image         String?
   roles         String[]   @default([])
+  pushEnabled   Boolean    @default(true) // Master toggle for web push
   accounts      Account[]
   sessions      Session[]
   userRoles     UserRole[]
   threads       Thread[]
   responses     Response[]
+  threadWatches     ThreadWatch[]
+  pushSubscriptions PushSubscription[]
 }
 
 // RBAC Models
@@ -141,6 +144,11 @@ model GlobalSettings {
   archiveBaseUrl    String?   // Archive data URL
   archiveBoards     String?   @db.Text  // JSON: [{"id":"board1","name":"Board 1"}]
   archiveRedirect   Boolean   @default(false)  // Redirect to archive when thread not found
+  pushWatchLimit    Int       @default(0)      // Max thread watches per user; 0 disables web push
+  pushCooldownSeconds Int     @default(60)     // Min seconds between pushes per user and thread
+  vapidPublicKey    String?   // Web push VAPID public key
+  vapidPrivateKey   String?   // Web push VAPID private key (server-only)
+  vapidSubject      String?   // VAPID subject (mailto: or https:)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
@@ -196,6 +204,7 @@ model Thread {
   responseCount Int        @default(0) // Counter cache: total responses (including deleted)
   responses     Response[]
   bans          ThreadBan[]
+  watches       ThreadWatch[]
   board         Board      @relation(fields: [boardId], references: [id])
   user          User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
 
@@ -240,4 +249,36 @@ model ThreadBan {
 
   @@unique([threadId, authorId])
   @@index([threadId])
+}
+
+// Web push: a user's watched thread
+model ThreadWatch {
+  id            String    @id @default(cuid())
+  userId        String
+  threadId      Int
+  enabled       Boolean   @default(true) // Per-thread toggle
+  lastPushedAt  DateTime? // Cooldown anchor
+  lastViewingAt DateTime? // Last visible-page heartbeat
+  createdAt     DateTime  @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  thread        Thread    @relation(fields: [threadId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, threadId])
+  @@index([threadId])
+}
+
+// Web push: one browser/device subscription
+model PushSubscription {
+  id         String    @id @default(cuid())
+  userId     String
+  endpoint   String    @unique
+  p256dh     String
+  auth       String
+  locale     String?
+  userAgent  String?
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }

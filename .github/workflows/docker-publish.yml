@@ -9,7 +9,20 @@ on:
       - '!ws-server/**'
       - '!*.md'
       - '!.gitignore'
+  pull_request:
+    branches: [main]
+    paths:
+      - '**'
+      - '!deploy/**'
+      - '!ws-server/**'
+      - '!*.md'
+      - '!.gitignore'
   workflow_dispatch:
+
+# A newer push to the same PR/branch cancels the build in progress
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
@@ -17,6 +30,8 @@ env:
 
 jobs:
   build-and-push:
+    # Fork PRs get a read-only token and cannot push to GHCR
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -44,9 +59,12 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          # push: <branch>, latest (default branch only), <sha>
+          # pull_request: pr-<number>, <sha>
           tags: |
-            type=raw,value={{branch}}
-            type=raw,value=latest
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=
 
       - name: Build and push Docker image

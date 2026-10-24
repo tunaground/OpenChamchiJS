@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Thread web push notifications for logged-in users: watch a thread from the thread sidebar and get an OS notification for new replies even when the browser is closed or another tab/app is in front (desktop, Android, iOS Home Screen PWA)
+- 🔔 dropdown in the top bar to review watched threads, toggle each one, toggle all at once (per-thread settings are kept) and remove them
+- At most one push per user and thread per configurable interval, no push while the thread is on screen, and each notification shows the reply's author and a short excerpt (markup removed, spoilers hidden)
+- Clicking a notification opens the thread in Safari and iOS home screen apps too (the page navigates itself when the browser cannot open a window, asking first if a reply is being written)
+- Known macOS limit: Chrome plays no sound for web push notifications
+- "Refresh" button in the reply form toolbar (and next to the ended-thread notice) on thread pages: loads replies after the last one on screen (handy in the installed PWA, which has no browser reload button)
+- Admin settings for the per-user watch limit (default 0 = feature off and hidden), the per-thread push interval (default 60s), VAPID subject and VAPID key generation
+
+### Changed
+
+- PWA and home screen icons now show the logo on a white background with padding and rounded corners, instead of edge-to-edge artwork on transparency
+
+### Removed
+
+- Chat-mode in-tab browser notifications, replaced by web push
+
 ## [0.3.1] - 2026-10-22
 
 ### Security

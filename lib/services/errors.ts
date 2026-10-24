@@ -3,7 +3,9 @@ export type ServiceErrorCode =
   | "FORBIDDEN"
   | "NOT_FOUND"
   | "BAD_REQUEST"
-  | "CONFLICT";
+  | "CONFLICT"
+  | "WATCH_LIMIT_EXCEEDED"
+  | "FEATURE_DISABLED";
 
 /**
  * Base error class for all service errors.

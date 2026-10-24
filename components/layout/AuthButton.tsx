@@ -1,6 +1,7 @@
 "use client";
 
-import { signIn, signOut } from "next-auth/react";
+import { signIn } from "next-auth/react";
+import { signOutWithPush } from "@/lib/push/client";
 import styled from "styled-components";
 
 const Button = styled.button`
@@ -46,7 +47,7 @@ interface AuthButtonProps {
 export function AuthButton({ isLoggedIn, loginLabel, logoutLabel }: AuthButtonProps) {
   if (isLoggedIn) {
     return (
-      <Button onClick={() => signOut()}>
+      <Button onClick={() => signOutWithPush()}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           fill="none"

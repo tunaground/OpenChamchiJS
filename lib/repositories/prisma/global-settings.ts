@@ -84,6 +84,11 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
       archiveBaseUrl?: string | null;
       archiveBoards?: string | null;
       archiveRedirect?: boolean;
+      pushWatchLimit?: number;
+      pushCooldownSeconds?: number;
+      vapidPublicKey?: string | null;
+      vapidPrivateKey?: string | null;
+      vapidSubject?: string | null;
     } = {};
 
     if (data.siteTitle !== undefined) {
@@ -172,6 +177,21 @@ export const globalSettingsRepository: GlobalSettingsRepository = {
     }
     if (data.archiveRedirect !== undefined) {
       updateData.archiveRedirect = data.archiveRedirect;
+    }
+    if (data.pushWatchLimit !== undefined) {
+      updateData.pushWatchLimit = data.pushWatchLimit;
+    }
+    if (data.pushCooldownSeconds !== undefined) {
+      updateData.pushCooldownSeconds = data.pushCooldownSeconds;
+    }
+    if (data.vapidPublicKey !== undefined) {
+      updateData.vapidPublicKey = data.vapidPublicKey;
+    }
+    if (data.vapidPrivateKey !== undefined) {
+      updateData.vapidPrivateKey = data.vapidPrivateKey;
+    }
+    if (data.vapidSubject !== undefined) {
+      updateData.vapidSubject = data.vapidSubject;
     }
 
     const updated = await prisma.globalSettings.upsert({

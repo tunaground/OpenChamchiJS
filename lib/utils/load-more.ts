@@ -46,3 +46,24 @@ export function getNextLoadedFromSeq(fetched: HasSeq[], count: number): number {
   }
   return Math.min(...nonZero.map((r) => r.seq));
 }
+
+/**
+ * Seq of the last response on screen. "Refresh" loads from here + 1, so
+ * hidden/deleted seqs in between are skipped by the API and replies
+ * restored after the page loaded still show up.
+ */
+export function getDisplayedLastSeq(responses: HasSeq[]): number {
+  return responses.reduce((max, r) => (r.seq > max ? r.seq : max), 0);
+}
+
+/**
+ * Seq range for "refresh": everything after the last reply on screen up to the
+ * board's reply limit (seq can never exceed it), so one request gets them all.
+ */
+export function getRefreshRange(
+  displayedLastSeq: number,
+  maxResponsesPerThread: number
+): { startSeq: number; endSeq: number } {
+  const startSeq = displayedLastSeq + 1;
+  return { startSeq, endSeq: Math.max(startSeq, maxResponsesPerThread) };
+}

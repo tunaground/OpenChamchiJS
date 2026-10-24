@@ -18,11 +18,19 @@ const Container = styled.div`
   margin-bottom: 0.8rem;
 `;
 
+// Actions that are not options (e.g. refresh) sit apart on the right
+const Trailing = styled.div`
+  display: flex;
+  gap: 0.4rem;
+  margin-left: auto;
+`;
+
 const OptionButton = styled.button<{ $active: boolean; $overridden?: boolean }>`
   display: flex;
   align-items: center;
   justify-content: center;
   width: 3.2rem;
+  min-width: 0;
   height: 3.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 0.4rem;
@@ -85,6 +93,7 @@ const ResetButton = styled.button<{ $hasOverrides: boolean }>`
   align-items: center;
   justify-content: center;
   width: 3.2rem;
+  min-width: 0;
   height: 3.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 0.4rem;
@@ -137,6 +146,7 @@ interface ResponseOptionButtonsProps {
   onResetThreadOptions?: () => void;
   resetLabel?: string;
   realtimeEnabled?: boolean;
+  trailing?: React.ReactNode;
 }
 
 export function ResponseOptionButtons({
@@ -147,6 +157,7 @@ export function ResponseOptionButtons({
   onResetThreadOptions,
   resetLabel = "초기화",
   realtimeEnabled = true,
+  trailing,
 }: ResponseOptionButtonsProps) {
   // Filter out chatMode if realtime is not enabled
   const visibleConfigs = realtimeEnabled
@@ -184,6 +195,7 @@ export function ResponseOptionButtons({
           <ResetTooltip>{resetLabel}</ResetTooltip>
         </ResetButton>
       )}
+      {trailing && <Trailing>{trailing}</Trailing>}
     </Container>
   );
 }

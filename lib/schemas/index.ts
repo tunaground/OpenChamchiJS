@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isAllowedPushEndpoint } from "@/lib/push/endpoint";
 
 // Utility functions for input sanitization
 export function removeControlCharacters(input: string): string {
@@ -178,6 +179,38 @@ export const updateSettingsSchema = z.object({
   archiveBaseUrl: z.string().url().max(500).optional().nullable(),
   archiveBoards: z.array(z.object({ id: z.string(), name: z.string() })).optional().nullable(),
   archiveRedirect: z.boolean().optional(),
+  pushWatchLimit: z.number().int().min(0).max(100).optional(),
+  pushCooldownSeconds: z.number().int().min(0).max(86400).optional(),
+  vapidSubject: z.string().max(200).regex(/^(mailto:|https:)/).optional().nullable(),
+});
+
+export const watchThreadSchema = z.object({
+  threadId: z.number().int().positive(),
+});
+
+export const toggleEnabledSchema = z.object({
+  enabled: z.boolean(),
+});
+
+export const pushSettingsSchema = z.object({
+  pushEnabled: z.boolean(),
+});
+
+export const viewingSchema = z.object({
+  viewing: z.boolean(),
+});
+
+export const pushSubscriptionSchema = z.object({
+  endpoint: z.string().url().max(2000).refine(isAllowedPushEndpoint, "Unsupported push endpoint"),
+  keys: z.object({
+    p256dh: z.string().min(1).max(200),
+    auth: z.string().min(1).max(100),
+  }),
+  locale: z.enum(["ko", "en", "ja"]).nullable(),
+});
+
+export const pushUnsubscribeSchema = z.object({
+  endpoint: z.string().url().max(2000),
 });
 
 export type CustomLinkInput = z.infer<typeof customLinkSchema>;

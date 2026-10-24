@@ -40,6 +40,11 @@ export interface GlobalSettingsData {
   archiveBaseUrl: string | null;
   archiveBoards: ArchiveBoard[];
   archiveRedirect: boolean;
+  pushWatchLimit: number;
+  pushCooldownSeconds: number;
+  vapidPublicKey: string | null;
+  vapidPrivateKey: string | null;
+  vapidSubject: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -74,6 +79,11 @@ export interface UpdateGlobalSettingsInput {
   archiveBaseUrl?: string | null;
   archiveBoards?: ArchiveBoard[] | null;
   archiveRedirect?: boolean;
+  pushWatchLimit?: number;
+  pushCooldownSeconds?: number;
+  vapidPublicKey?: string | null;
+  vapidPrivateKey?: string | null;
+  vapidSubject?: string | null;
 }
 
 export interface GlobalSettingsRepository {

@@ -16,6 +16,8 @@ import {
   faXmark,
   faEye,
   faEyeSlash,
+  faBell,
+  faBellSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -27,6 +29,7 @@ import {
 } from "./SidebarStyles";
 import { useSidebarContext } from "./SidebarContext";
 import { buildTraceUrl, type ResponseFilter } from "@/lib/utils/trace-url";
+import { useThreadWatchToggle } from "./ThreadWatchButton";
 
 const SidebarTitle = styled(BaseSidebarTitle)`
   @media (max-width: ${(props) => props.theme.breakpoint}) {
@@ -152,6 +155,7 @@ interface TraceSidebarProps {
     filter: string;
   };
   onManageClick?: () => void;
+  isLoggedIn?: boolean;
   filter?: ResponseFilter;
   filterActive?: boolean;
   onRemoveUsernameFilter?: (username: string) => void;
@@ -318,6 +322,7 @@ export function TraceSidebar({
   customLinks,
   labels,
   onManageClick,
+  isLoggedIn = false,
   filter,
   filterActive = true,
   onRemoveUsernameFilter,
@@ -325,6 +330,7 @@ export function TraceSidebar({
   onToggleFilterActive,
 }: TraceSidebarProps) {
   const pathname = usePathname();
+  const watchToggle = useThreadWatchToggle(threadId, isLoggedIn);
   // Parse current range from currentView
   // currentView can be "all", "recent", "5" (single), or "5/10" (range)
   const parseCurrentRange = (): { start: number; end: number } | null => {
@@ -423,6 +429,13 @@ export function TraceSidebar({
             icon={faGear}
             label={labels.manageThread}
             onClick={onManageClick}
+          />
+        )}
+        {watchToggle.visible && (
+          <NavItemWithIcon
+            icon={watchToggle.watched ? faBellSlash : faBell}
+            label={watchToggle.label}
+            onClick={watchToggle.toggle}
           />
         )}
       </NavList>

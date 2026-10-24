@@ -213,7 +213,6 @@
     "manageModalTitle": "レス管理",
     "manageModalDescription": "レスを管理するにはスレッドのパスワードを入力してください。",
     "seq": "#",
-    "content": "内容",
     "status": "状態",
     "actions": "操作",
     "visible": "表示",
@@ -234,6 +233,9 @@
     "copied": "クリップボードにコピーしました",
     "loadMore": "もっと見る",
     "loadingMore": "読み込み中...",
+    "refresh": "更新",
+    "refreshing": "更新中...",
+    "noNewResponses": "新しいレスはありません。",
     "ban": "BAN",
     "unban": "BAN解除",
     "show": "表示",
@@ -555,5 +557,23 @@
       "scrollDownTitle": "下にスクロール",
       "scrollDownDescription": "ページの下部にスクロールします。"
     }
+  },
+  "push": {
+    "bellLabel": "スレッド通知",
+    "masterToggle": "すべて",
+    "masterOffHint": "すべての通知がオフです。個別の設定はそのまま保持されます。",
+    "empty": "通知登録したスレッドはありません。",
+    "deletedThread": "削除されたスレッド",
+    "remove": "削除",
+    "deviceSubscribed": "この端末: 通知許可済み",
+    "deviceSubscribe": "この端末で受け取る",
+    "deviceDenied": "ブラウザの設定で通知を許可してください。",
+    "deviceUnsupported": "このブラウザはプッシュ通知に対応していません。iPhoneではホーム画面に追加してからご利用ください。",
+    "watch": "通知を受け取る",
+    "unwatch": "通知を解除",
+    "limitExceeded": "通知は最大{limit}件まで登録できます。🔔リストを整理してください。",
+    "deviceSubscribeFailed": "この端末で通知の登録に失敗しました。しばらくしてから再度お試しください。",
+    "imageLabel": "(画像)",
+    "navigateConfirm": "入力中の内容があります。新しいレスのあるスレッドへ移動しますか？"
   }
 }

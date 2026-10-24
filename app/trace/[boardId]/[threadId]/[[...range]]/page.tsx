@@ -155,6 +155,7 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
         currentView={currentView}
         lastSeq={lastSeq}
         responsesPerPage={board.responsesPerPage}
+        maxResponsesPerThread={board.maxResponsesPerThread}
         labels={{
           backToList: t("backToList"),
           author: t("author"),
@@ -198,6 +199,9 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
           copied: t("copied"),
           loadMore: t("loadMore"),
           loadingMore: t("loadingMore"),
+          refresh: t("refresh"),
+          refreshing: t("refreshing"),
+          noNewResponses: t("noNewResponses"),
           ban: t("ban"),
           unban: t("unban"),
           show: t("show"),
