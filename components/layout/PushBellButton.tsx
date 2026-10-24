@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styled from "styled-components";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useLocale, useTranslations } from "next-intl";
 import { usePushWatchStore } from "@/lib/store/pushWatch";
 import {
@@ -160,8 +162,8 @@ const RemoveButton = styled.button`
   background: transparent;
   color: ${(props) => props.theme.error};
   cursor: pointer;
-  font-size: 1.6rem;
-  padding: 0.2rem;
+  font-size: 1.4rem;
+  padding: 0.4rem;
 `;
 
 const Footer = styled.div`
@@ -316,7 +318,7 @@ export function PushBellButton() {
                     title={t("remove")}
                     onClick={() => remove(item.id)}
                   >
-                    🗑
+                    <FontAwesomeIcon icon={faTrash} />
                   </RemoveButton>
                 </Row>
               ))}
