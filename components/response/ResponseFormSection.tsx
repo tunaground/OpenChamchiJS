@@ -121,6 +121,17 @@ const RefreshButton = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 0 0.9rem;
+  }
+`;
+
+// Label hidden on narrow screens; the icon (and title) remain
+const RefreshLabel = styled.span`
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
 `;
 
 const EndedNotice = styled.div`
@@ -332,9 +343,15 @@ export function ResponseFormSection({
   };
 
   const refreshButton = (
-    <RefreshButton type="button" onClick={onRefresh} disabled={refreshing}>
+    <RefreshButton
+      type="button"
+      onClick={onRefresh}
+      disabled={refreshing}
+      title={labels.refresh}
+      aria-label={labels.refresh}
+    >
       <FontAwesomeIcon icon={faArrowsRotate} spin={refreshing} />
-      {refreshing ? labels.refreshing : labels.refresh}
+      <RefreshLabel>{refreshing ? labels.refreshing : labels.refresh}</RefreshLabel>
     </RefreshButton>
   );
 

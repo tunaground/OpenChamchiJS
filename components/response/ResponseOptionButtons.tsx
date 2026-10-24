@@ -30,6 +30,7 @@ const OptionButton = styled.button<{ $active: boolean; $overridden?: boolean }>`
   align-items: center;
   justify-content: center;
   width: 3.2rem;
+  min-width: 0;
   height: 3.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 0.4rem;
@@ -92,6 +93,7 @@ const ResetButton = styled.button<{ $hasOverrides: boolean }>`
   align-items: center;
   justify-content: center;
   width: 3.2rem;
+  min-width: 0;
   height: 3.2rem;
   border: 1px solid ${(props) => props.theme.surfaceBorder};
   border-radius: 0.4rem;
