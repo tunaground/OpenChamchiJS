@@ -495,7 +495,23 @@
       "noupModeTitle": "Noup 모드",
       "noupModeDescription": "답글을 작성해도 주제글이 목록 상단으로 올라가지 않습니다 (bump 방지). (전역/개별 스레드 설정)",
       "alwaysBottomTitle": "하단 고정",
-      "alwaysBottomDescription": "페이지를 항상 최하단으로 스크롤합니다. 실시간 채팅 시 유용합니다. (전역/개별 스레드 설정)"
+      "alwaysBottomDescription": "페이지를 항상 최하단으로 스크롤합니다. 실시간 채팅 시 유용합니다. (전역/개별 스레드 설정)",
+      "refreshTitle": "갱신",
+      "refreshDescription": "모드바 오른쪽 끝(종료된 주제글은 종료 안내 옆)에 있는 버튼입니다. 화면의 마지막 답글 다음부터 새 답글을 불러옵니다. 숨김·삭제된 답글은 건너뜁니다. 새로고침 버튼이 없는 홈 화면 앱에서 유용합니다."
+    },
+    "push": {
+      "title": "알림",
+      "description": "로그인하면 관심 있는 주제글에 새 답글이 달렸을 때 브라우저나 앱을 닫아 둔 상태에서도 알림을 받을 수 있습니다. 관리자가 기능을 켠 경우에만 표시됩니다.",
+      "watchTitle": "알림 받기",
+      "watchDescription": "주제글 사이드바의 '알림 받기'를 누르면 등록됩니다. 처음에는 이 기기의 알림 권한을 묻습니다. 다시 누르면 해제됩니다.",
+      "bellTitle": "알림 목록",
+      "bellDescription": "상단 바의 종 아이콘에서 등록한 주제글을 확인하고 제거할 수 있습니다. 등록할 수 있는 주제글 수에는 상한이 있습니다.",
+      "toggleTitle": "전체 / 개별 켜고 끄기",
+      "toggleDescription": "목록에서 주제글마다 알림을 잠시 끌 수 있고, 전체 알림도 한 번에 끌 수 있습니다. 전체를 다시 켜도 개별로 꺼 둔 설정은 그대로 유지됩니다.",
+      "rulesTitle": "알림 규칙",
+      "rulesDescription": "같은 주제글의 알림은 일정 간격에 한 번만 옵니다. 해당 주제글을 화면에 띄워 보고 있는 동안에는 오지 않습니다. 알림에는 작성자와 답글 앞부분이 표시되고, 누르면 해당 주제글로 이동합니다.",
+      "iosTitle": "iPhone / iPad",
+      "iosDescription": "Safari에서 공유 → '홈 화면에 추가'로 설치한 뒤, 홈 화면 아이콘으로 열어야 알림을 받을 수 있습니다."
     },
     "tom": {
       "title": "TOM 마크업",
@@ -567,7 +583,9 @@
       "scrollUpTitle": "위로",
       "scrollUpDescription": "페이지 최상단으로 스크롤합니다.",
       "scrollDownTitle": "아래로",
-      "scrollDownDescription": "페이지 최하단으로 스크롤합니다."
+      "scrollDownDescription": "페이지 최하단으로 스크롤합니다.",
+      "watchTitle": "알림 받기 / 해제",
+      "watchDescription": "이 주제글의 새 답글 알림을 등록하거나 해제합니다. (로그인 필요)"
     }
   },
   "push": {

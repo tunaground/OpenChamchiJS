@@ -495,7 +495,23 @@
       "noupModeTitle": "Noup Mode",
       "noupModeDescription": "The thread won't be bumped to the top when you write a response. (Global/Per-thread setting)",
       "alwaysBottomTitle": "Stay at Bottom",
-      "alwaysBottomDescription": "Always scroll to the bottom of the page. Useful for real-time chat. (Global/Per-thread setting)"
+      "alwaysBottomDescription": "Always scroll to the bottom of the page. Useful for real-time chat. (Global/Per-thread setting)",
+      "refreshTitle": "Refresh",
+      "refreshDescription": "The button at the right end of the mode bar (next to the notice on ended threads). Loads new replies after the last one on screen, skipping hidden or deleted ones. Handy in the home screen app, which has no reload button."
+    },
+    "push": {
+      "title": "Notifications",
+      "description": "When logged in, you can get notified of new replies in threads you follow, even with the browser or app closed. Shown only when an admin has enabled the feature.",
+      "watchTitle": "Get alerts",
+      "watchDescription": "Press 'Get alerts' in the thread sidebar to follow a thread. The first time, this device asks for notification permission. Press again to stop.",
+      "bellTitle": "Alert list",
+      "bellDescription": "The bell icon in the top bar lists the threads you follow and lets you remove them. The number of threads you can follow is limited.",
+      "toggleTitle": "All / per-thread on and off",
+      "toggleDescription": "Pause alerts for single threads in the list, or turn all alerts off at once. Turning all back on keeps the threads you paused individually.",
+      "rulesTitle": "Alert rules",
+      "rulesDescription": "Alerts for the same thread come at most once per interval, and not while that thread is on your screen. Each alert shows the author and the start of the reply; tapping it opens the thread.",
+      "iosTitle": "iPhone / iPad",
+      "iosDescription": "Install the site with Safari's Share → 'Add to Home Screen' and open it from the home screen icon to receive alerts."
     },
     "tom": {
       "title": "TOM Markup",
@@ -567,7 +583,9 @@
       "scrollUpTitle": "Scroll Up",
       "scrollUpDescription": "Scroll to the top of the page.",
       "scrollDownTitle": "Scroll Down",
-      "scrollDownDescription": "Scroll to the bottom of the page."
+      "scrollDownDescription": "Scroll to the bottom of the page.",
+      "watchTitle": "Get / stop alerts",
+      "watchDescription": "Follow or unfollow new replies in this thread. (Login required)"
     }
   },
   "push": {
