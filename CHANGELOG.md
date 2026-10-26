@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Manual covers web push notifications (shown only when the feature is enabled), the refresh button and the thread sidebar alert toggle
+
+### Fixed
+
+- Japanese manual was missing the "Response Interaction" section texts
+
 ## [0.4.0] - 2026-10-25
 
 ### Added

@@ -27,6 +27,11 @@ import {
   faCopy,
   faFilter,
   faXmark,
+  faArrowsRotate,
+  faBell,
+  faToggleOn,
+  faHourglassHalf,
+  faMobileScreen,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { PageLayout } from "@/components/layout";
@@ -195,6 +200,24 @@ interface Labels {
     noupModeDescription: string;
     alwaysBottomTitle: string;
     alwaysBottomDescription: string;
+    refreshTitle: string;
+    refreshDescription: string;
+  };
+  push?: {
+    title: string;
+    description: string;
+    watchTitle: string;
+    watchDescription: string;
+    bellTitle: string;
+    bellDescription: string;
+    toggleTitle: string;
+    toggleDescription: string;
+    rulesTitle: string;
+    rulesDescription: string;
+    iosTitle: string;
+    iosDescription: string;
+    sidebarWatchTitle: string;
+    sidebarWatchDescription: string;
   };
   tom: {
     title: string;
@@ -443,8 +466,48 @@ export function ManualContent({
               title={labels.settings.alwaysBottomTitle}
               description={labels.settings.alwaysBottomDescription}
             />
+            <SettingItem
+              icon={faArrowsRotate}
+              title={labels.settings.refreshTitle}
+              description={labels.settings.refreshDescription}
+            />
           </ItemList>
         </Section>
+
+        {/* Notifications (web push) */}
+        {labels.push && (
+          <Section>
+            <SectionTitle>{labels.push.title}</SectionTitle>
+            <SectionDescription>{labels.push.description}</SectionDescription>
+            <ItemList>
+              <SettingItem
+                icon={faBell}
+                title={labels.push.watchTitle}
+                description={labels.push.watchDescription}
+              />
+              <SettingItem
+                icon={faList}
+                title={labels.push.bellTitle}
+                description={labels.push.bellDescription}
+              />
+              <SettingItem
+                icon={faToggleOn}
+                title={labels.push.toggleTitle}
+                description={labels.push.toggleDescription}
+              />
+              <SettingItem
+                icon={faHourglassHalf}
+                title={labels.push.rulesTitle}
+                description={labels.push.rulesDescription}
+              />
+              <SettingItem
+                icon={faMobileScreen}
+                title={labels.push.iosTitle}
+                description={labels.push.iosDescription}
+              />
+            </ItemList>
+          </Section>
+        )}
 
         {/* Theme */}
         <Section>
@@ -601,6 +664,13 @@ export function ManualContent({
               title={labels.sidebar.manageTitle}
               description={labels.sidebar.manageDescription}
             />
+            {labels.push && (
+              <SettingItem
+                icon={faBell}
+                title={labels.push.sidebarWatchTitle}
+                description={labels.push.sidebarWatchDescription}
+              />
+            )}
             <SettingItem
               icon={faPersonRunning}
               title={labels.sidebar.viewAllTitle}

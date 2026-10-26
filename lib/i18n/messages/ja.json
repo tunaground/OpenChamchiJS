@@ -461,6 +461,18 @@
       "authorIdTitle": "投稿者ID",
       "authorIdDescription": "匿名掲示板でユーザーを識別するためにIPと日付に基づいて生成される識別子。日付が変わるとIDも変わります。"
     },
+    "responseInteraction": {
+      "title": "レスの操作",
+      "description": "レスカードで使える操作機能です。",
+      "seqCopyTitle": "レス番号のコピー",
+      "seqCopyDescription": "レスの番号(#1、#2など)をクリックすると、アンカーテキスト(例: board>123>5)がクリップボードにコピーされます。他の場所でこのレスを参照するときに使えます。",
+      "filterTitle": "投稿者フィルター",
+      "filterDescription": "レスの投稿者名または投稿者IDをクリックすると、その投稿者のレスだけを絞り込んで表示します。複数の投稿者を選ぶとOR条件で絞り込みます。",
+      "filterToggleTitle": "フィルターの一時停止",
+      "filterToggleDescription": "サイドバーのフィルター欄で目のアイコンをクリックすると、フィルターを一時的に無効にできます。フィルターの選択は保持され、もう一度クリックすると再び適用されます。",
+      "filterRemoveTitle": "フィルターの削除",
+      "filterRemoveDescription": "各フィルターチップのXボタンをクリックすると、そのフィルターだけが削除されます。"
+    },
     "threadSettings": {
       "title": "スレッド設定",
       "description": "スレッドに関連する設定と状態。",
@@ -483,7 +495,23 @@
       "noupModeTitle": "sageモード",
       "noupModeDescription": "レスを書いてもスレッドがトップにageされません。（グローバル/スレッド別設定）",
       "alwaysBottomTitle": "常に下部に表示",
-      "alwaysBottomDescription": "常にページの下部にスクロールします。リアルタイムチャットに便利です。（グローバル/スレッド別設定）"
+      "alwaysBottomDescription": "常にページの下部にスクロールします。リアルタイムチャットに便利です。（グローバル/スレッド別設定）",
+      "refreshTitle": "更新",
+      "refreshDescription": "モードバーの右端(終了したスレッドでは終了の案内の横)にあるボタンです。画面の最後のレスの次から新しいレスを読み込みます。非表示・削除されたレスは飛ばします。再読み込みボタンのないホーム画面アプリで便利です。"
+    },
+    "push": {
+      "title": "通知",
+      "description": "ログインすると、関心のあるスレッドに新しいレスが付いたとき、ブラウザやアプリを閉じていても通知を受け取れます。管理者が機能を有効にしている場合のみ表示されます。",
+      "watchTitle": "通知を受け取る",
+      "watchDescription": "スレッドのサイドバーで「通知を受け取る」を押すと登録されます。初回はこの端末の通知許可を求めます。もう一度押すと解除されます。",
+      "bellTitle": "通知リスト",
+      "bellDescription": "上部バーのベルアイコンから登録したスレッドを確認・削除できます。登録できるスレッド数には上限があります。",
+      "toggleTitle": "すべて / 個別のオン・オフ",
+      "toggleDescription": "リストでスレッドごとに通知を一時停止したり、すべての通知を一度にオフにしたりできます。すべてを再びオンにしても、個別にオフにした設定は保持されます。",
+      "rulesTitle": "通知のルール",
+      "rulesDescription": "同じスレッドの通知は一定間隔に一度だけ届き、そのスレッドを画面に表示している間は届きません。通知には投稿者とレスの冒頭が表示され、押すとスレッドに移動します。",
+      "iosTitle": "iPhone / iPad",
+      "iosDescription": "Safariの共有 →「ホーム画面に追加」でインストールし、ホーム画面のアイコンから開くと通知を受け取れます。"
     },
     "tom": {
       "title": "TOMマークアップ",
@@ -555,7 +583,9 @@
       "scrollUpTitle": "上にスクロール",
       "scrollUpDescription": "ページの上部にスクロールします。",
       "scrollDownTitle": "下にスクロール",
-      "scrollDownDescription": "ページの下部にスクロールします。"
+      "scrollDownDescription": "ページの下部にスクロールします。",
+      "watchTitle": "通知の登録 / 解除",
+      "watchDescription": "このスレッドの新しいレスの通知を登録または解除します。(ログインが必要)"
     }
   },
   "push": {

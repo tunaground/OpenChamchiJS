@@ -5,6 +5,7 @@ import { roleService } from "@/lib/services/role";
 import { boardService } from "@/lib/services/board";
 import { globalSettingsService } from "@/lib/services/global-settings";
 import { isRealtimeEnabled } from "@/lib/realtime/publisher";
+import { isPushFeatureEnabled } from "@/lib/push/feature";
 import { ManualContent } from "./manual-content";
 
 export default async function ManualPage() {
@@ -79,6 +80,8 @@ export default async function ManualPage() {
           noupModeDescription: t("settings.noupModeDescription"),
           alwaysBottomTitle: t("settings.alwaysBottomTitle"),
           alwaysBottomDescription: t("settings.alwaysBottomDescription"),
+          refreshTitle: t("settings.refreshTitle"),
+          refreshDescription: t("settings.refreshDescription"),
         },
         tom: {
           title: t("tom.title"),
@@ -132,6 +135,25 @@ export default async function ManualPage() {
               traceDescription: t("userCounter.traceDescription"),
               deduplicationTitle: t("userCounter.deduplicationTitle"),
               deduplicationDescription: t("userCounter.deduplicationDescription"),
+            }
+          : undefined,
+        // Hidden like the rest of the push UI while the feature is off
+        push: isPushFeatureEnabled(settings)
+          ? {
+              title: t("push.title"),
+              description: t("push.description"),
+              watchTitle: t("push.watchTitle"),
+              watchDescription: t("push.watchDescription"),
+              bellTitle: t("push.bellTitle"),
+              bellDescription: t("push.bellDescription"),
+              toggleTitle: t("push.toggleTitle"),
+              toggleDescription: t("push.toggleDescription"),
+              rulesTitle: t("push.rulesTitle"),
+              rulesDescription: t("push.rulesDescription"),
+              iosTitle: t("push.iosTitle"),
+              iosDescription: t("push.iosDescription"),
+              sidebarWatchTitle: t("sidebar.watchTitle"),
+              sidebarWatchDescription: t("sidebar.watchDescription"),
             }
           : undefined,
         sidebar: {
