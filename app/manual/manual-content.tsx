@@ -36,17 +36,9 @@ import {
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
+import { PageContainer } from "@/components/layout/PageContainer";
 
-const Container = styled.div`
-  width: 100%;
-  max-width: ${(props) => props.theme.contentMaxWidth};
-  margin: 0 auto;
-  padding: 1.6rem 2.4rem 3.2rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.2rem 1.4rem 2.4rem;
-  }
-`;
+const Container = PageContainer;
 
 const Description = styled.p`
   font-size: 1.4rem;

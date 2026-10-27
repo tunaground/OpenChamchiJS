@@ -8,8 +8,8 @@
 // Layout constants (shared across all themes)
 const layout = {
   breakpoint: "768px",
-  contentMaxWidth: "80rem",
-  adminMaxWidth: "96rem",
+  // Width cap for every page except thread views (see components/layout/PageContainer)
+  contentMaxWidth: "96rem",
   containerPadding: "1.6rem",
   // Floating panes: gap to the window edge and between panes
   paneGap: "0.8rem",

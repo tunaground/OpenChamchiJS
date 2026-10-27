@@ -3,18 +3,10 @@
 import Link from "next/link";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
-const Container = styled.div`
-  width: 100%;
-  max-width: 96rem;
-  margin: 0 auto;
-  padding: 2.8rem 2.8rem 3.2rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem 1.4rem 2.4rem;
-  }
-`;
+const Container = PageContainer;
 
 /* Typography for the admin-written homepage HTML */
 const ContentWrapper = styled.div`

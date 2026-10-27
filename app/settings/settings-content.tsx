@@ -16,6 +16,7 @@ import {
 import { useTranslations } from "next-intl";
 import { useThemeStore, type ThemePreference } from "@/lib/store/theme";
 import { PageLayout } from "@/components/layout";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import {
   useResponseOptionsStore,
@@ -23,15 +24,7 @@ import {
   QuickSubmitKey,
 } from "@/lib/store/responseOptions";
 
-const Container = styled.div`
-  width: 100%;
-  max-width: 80rem;
-  padding: 1.6rem 2.8rem 3.2rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.2rem 1.4rem 2.4rem;
-  }
-`;
+const Container = PageContainer;
 
 const Description = styled.p`
   font-size: 1.4rem;

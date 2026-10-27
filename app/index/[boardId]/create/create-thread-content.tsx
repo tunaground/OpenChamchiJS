@@ -12,16 +12,9 @@ import { CreateThreadOptionButtons, CreateThreadOptions } from "@/components/res
 import { ContentPreview } from "@/components/response/ContentPreview";
 import { formatBytes } from "@/lib/utils/format-bytes";
 import { applyShortcuts } from "@/lib/utils/shortcuts";
+import { PageContainer } from "@/components/layout/PageContainer";
 
-const Container = styled.div`
-  width: 100%;
-  max-width: 80rem;
-  padding: 2rem 2.8rem 3.2rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem 1.4rem 2.4rem;
-  }
-`;
+const Container = PageContainer;
 
 const Form = styled.form`
   display: flex;
