@@ -12,7 +12,7 @@ import {
   getDisplayedLastSeq,
   getRefreshRange,
 } from "@/lib/utils/load-more";
-import { ResponseCard } from "@/components/response";
+import { ResponseCard, ledgerGutterStyle } from "@/components/response";
 import { ResponseFormSection } from "@/components/response/ResponseFormSection";
 import { AnchorPreview, useAnchorStack } from "@/components/response/AnchorPreview";
 import { ImageAttachment } from "@/components/response/ImageAttachment";
@@ -1203,7 +1203,7 @@ export function ThreadDetailContent({
       authLabels={authLabels}
       userCount={showUserCount ? threadMemberCount : undefined}
       footer={
-        <ComposerDock>
+        <ComposerDock style={ledgerGutterStyle(currentLastSeq + 1)}>
           <ResponseFormSection
             thread={thread}
             defaultUsername={defaultUsername}
@@ -1229,7 +1229,7 @@ export function ThreadDetailContent({
         </ComposerDock>
       }
     >
-      <Container>
+      <Container style={ledgerGutterStyle(currentLastSeq)}>
         <ThreadOpener
           threadId={thread.id}
           title={thread.title}

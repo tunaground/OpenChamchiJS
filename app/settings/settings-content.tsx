@@ -477,6 +477,7 @@ export function SettingsContent({
                 [
                   { key: "system" as ThemePreference, label: t("themeSystem") },
                   { key: "light" as ThemePreference, label: t("themeLight") },
+                  { key: "grey" as ThemePreference, label: t("themeGrey") },
                   { key: "dark" as ThemePreference, label: t("themeDark") },
                 ],
                 mounted ? themePreference : "light",

@@ -19,6 +19,7 @@ import {
   faChevronDown,
   faSun,
   faMoon,
+  faCloud,
   faList,
   faComments,
   faFingerprint,
@@ -241,6 +242,8 @@ interface Labels {
     description: string;
     lightTitle: string;
     lightDescription: string;
+    greyTitle: string;
+    greyDescription: string;
     darkTitle: string;
     darkDescription: string;
   };
@@ -498,6 +501,11 @@ export function ManualContent({
               icon={faSun}
               title={labels.theme.lightTitle}
               description={labels.theme.lightDescription}
+            />
+            <SettingItem
+              icon={faCloud}
+              title={labels.theme.greyTitle}
+              description={labels.theme.greyDescription}
             />
             <SettingItem
               icon={faMoon}

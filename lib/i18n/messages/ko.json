@@ -460,10 +460,11 @@
     "deleteAccountButton": "탈퇴하기",
     "cancel": "취소",
     "theme": "테마",
-    "themeDescription": "화면을 밝게 또는 어둡게 봅니다. 시스템을 고르면 기기 설정을 따릅니다.",
+    "themeDescription": "화면 밝기를 고릅니다. 그레이는 라이트보다 덜 밝고 다크보다 덜 어둡습니다. 시스템을 고르면 기기 설정(라이트·다크)을 따릅니다.",
     "themeSystem": "시스템",
     "themeLight": "라이트",
-    "themeDark": "다크"
+    "themeDark": "다크",
+    "themeGrey": "그레이"
   },
   "manual": {
     "title": "사용 매뉴얼",
@@ -563,11 +564,13 @@
     },
     "theme": {
       "title": "테마",
-      "description": "화면을 밝게 또는 어둡게 볼 수 있습니다. 사이드바 아래쪽의 테마 버튼으로 바꾸거나, 설정에서 시스템·라이트·다크 중에 고를 수 있습니다.",
+      "description": "화면 밝기를 라이트·그레이·다크 중에 고를 수 있습니다. 사이드바 아래쪽의 테마 버튼을 누를 때마다 차례로 바뀌고, 설정에서 시스템·라이트·그레이·다크 중에 고를 수도 있습니다.",
       "lightTitle": "라이트",
       "lightDescription": "기본 밝은 테마입니다. 흰색 배경에 어두운 글씨를 사용합니다.",
       "darkTitle": "다크",
-      "darkDescription": "어두운 환경에 적합한 다크 테마입니다. 어두운 배경에 밝은 글씨를 사용합니다."
+      "darkDescription": "어두운 환경에 적합한 다크 테마입니다. 어두운 배경에 밝은 글씨를 사용합니다.",
+      "greyTitle": "그레이",
+      "greyDescription": "라이트는 너무 밝고 다크는 너무 어두울 때 쓰는 중간 밝기 테마입니다. 흰색과 검은색 없이 회색 톤만 씁니다."
     },
     "userCounter": {
       "title": "접속자 수",
@@ -624,6 +627,7 @@
   "theme": {
     "toggle": "테마 바꾸기",
     "switchToDark": "다크 모드로",
-    "switchToLight": "라이트 모드로"
+    "switchToLight": "라이트 모드로",
+    "switchToGrey": "그레이 모드로"
   }
 }

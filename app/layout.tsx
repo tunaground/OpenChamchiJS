@@ -47,7 +47,7 @@ export default async function RootLayout({
         <script dangerouslySetInnerHTML={{ __html:
           `try{var m=(JSON.parse(localStorage.getItem("theme")||"{}").state||{}).mode;` +
           `if(m==="system")m=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";` +
-          `document.documentElement.dataset.mode=m==="dark"?"dark":"light"}catch(e){}`
+          `document.documentElement.dataset.mode=m==="dark"||m==="grey"?m:"light"}catch(e){}`
         }} />
       </head>
       <body>

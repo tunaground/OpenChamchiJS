@@ -430,9 +430,9 @@ const DockBody = styled.div`
 `;
 
 /** Sits below the responses as the PageLayout footer */
-export function ComposerDock({ children }: { children: React.ReactNode }) {
+export function ComposerDock({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
   return (
-    <Dock>
+    <Dock style={style}>
       <DockBody>{children}</DockBody>
     </Dock>
   );

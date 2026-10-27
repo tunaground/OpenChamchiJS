@@ -460,10 +460,11 @@
     "deleteAccountButton": "Delete Account",
     "cancel": "Cancel",
     "theme": "Theme",
-    "themeDescription": "Show the site light or dark. System follows your device setting.",
+    "themeDescription": "Choose how bright the site looks. Grey is softer than light and lighter than dark. System follows your device (light or dark).",
     "themeSystem": "System",
     "themeLight": "Light",
-    "themeDark": "Dark"
+    "themeDark": "Dark",
+    "themeGrey": "Grey"
   },
   "manual": {
     "title": "User Manual",
@@ -563,11 +564,13 @@
     },
     "theme": {
       "title": "Theme",
-      "description": "View the site in light or dark. Switch with the theme button at the bottom of the sidebar, or choose System, Light or Dark in Settings.",
+      "description": "View the site in light, grey or dark. The theme button at the bottom of the sidebar steps through them, or choose System, Light, Grey or Dark in Settings.",
       "lightTitle": "Light",
       "lightDescription": "The default bright theme. Uses a white background with dark text.",
       "darkTitle": "Dark",
-      "darkDescription": "A dark theme suitable for low-light environments. Uses a dark background with light text."
+      "darkDescription": "A dark theme suitable for low-light environments. Uses a dark background with light text.",
+      "greyTitle": "Grey",
+      "greyDescription": "A middle brightness for when light is too bright and dark too dark. Uses only grey tones, no white or black."
     },
     "userCounter": {
       "title": "User Counter",
@@ -624,6 +627,7 @@
   "theme": {
     "toggle": "Change theme",
     "switchToDark": "Switch to dark mode",
-    "switchToLight": "Switch to light mode"
+    "switchToLight": "Switch to light mode",
+    "switchToGrey": "Switch to grey mode"
   }
 }

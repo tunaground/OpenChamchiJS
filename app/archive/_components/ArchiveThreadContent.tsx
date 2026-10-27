@@ -8,6 +8,7 @@ import { ArchiveResponseCard } from "./ArchiveResponseCard";
 import { formatDate } from "../_lib/utils";
 import { fetchArchiveThread } from "../_lib/api";
 import type { ArchiveThread } from "../_lib/types";
+import { ledgerGutterStyle } from "@/components/response";
 
 /* Same as the live thread page: full width, minimal side padding for AA */
 const Container = styled.div`
@@ -213,7 +214,7 @@ export function ArchiveThreadContent({
   }
 
   return (
-    <Container>
+    <Container style={ledgerGutterStyle(thread.size)}>
       <BackLink prefetch={false} href={`/archive/${boardId}`}>
         <svg
           width="16"

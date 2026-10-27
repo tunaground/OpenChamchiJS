@@ -120,6 +120,8 @@ export default async function ManualPage() {
           description: t("theme.description"),
           lightTitle: t("theme.lightTitle"),
           lightDescription: t("theme.lightDescription"),
+          greyTitle: t("theme.greyTitle"),
+          greyDescription: t("theme.greyDescription"),
           darkTitle: t("theme.darkTitle"),
           darkDescription: t("theme.darkDescription"),
         },

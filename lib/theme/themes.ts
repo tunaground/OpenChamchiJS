@@ -1,4 +1,4 @@
-// Theme definitions for light and dark modes
+// Theme definitions for light, grey and dark modes
 //
 // Surface colors point at CSS variables (declared in ThemeProvider's GlobalStyle,
 // keyed by html[data-mode]) so the mode applies before React mounts. Text and
@@ -18,8 +18,9 @@ const layout = {
   radiusPane: "10px",
   radiusControl: "6px",
   radiusChip: "4px",
-  // Thread pages: seq-number gutter and the minimal side padding (AA and wide text need the room)
-  ledgerGutter: "5.6rem",
+  // Thread pages: seq-number gutter (sized per thread by ledgerGutterStyle, 4 digits by
+  // default) and the minimal side padding (AA and wide text need the room)
+  ledgerGutter: "var(--ledger-gutter, 5.6rem)",
   ledgerPadding: "1.2rem",
   fontSans: '"IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif',
   fontMono: '"Google Sans Code", ui-monospace, monospace',
@@ -128,10 +129,50 @@ export const darkTheme = {
   ...layout,
 };
 
-export type ThemeMode = "light" | "dark";
+// Between the two: no white, no black, for readers who find light too bright
+// and dark too dark
+export const greyTheme = {
+  mode: "grey" as const,
+
+  foreground: "#1d2126",
+  primary: "#094c80",
+  secondary: "#3f464e",
+  accent: "#094c80",
+
+  topBarText: "#1d2126",
+  sidebarText: "#1d2126",
+
+  // Text colors
+  textPrimary: "#1d2126",
+  textSecondary: "#3f464e",
+  textMuted: "#4b5159",
+
+  // Button colors
+  buttonPrimary: "#094c80",
+  buttonPrimaryText: "#e9edf0",
+
+  // Status colors
+  success: "#22703f",
+  warning: "#8a5d00",
+  error: "#a82e2e",
+  info: "#094c80",
+
+  // TOM specific
+  calcExpColor: "#a82e2e",
+  anchorALinkColor: "#094c80",
+  spoilerBackground: "rgba(0, 0, 0, 0.8)",
+
+  toastText: "#e9edf0",
+
+  ...surfaces,
+  ...layout,
+};
+
+export type ThemeMode = "light" | "grey" | "dark";
 export type AppTheme = Omit<typeof lightTheme, "mode"> & { mode: ThemeMode };
 
 export const themes = {
   light: lightTheme,
+  grey: greyTheme,
   dark: darkTheme,
 } as const;
