@@ -30,10 +30,20 @@ const Opener = styled.header`
   padding: 0.6rem 0 1.6rem;
 `;
 
-const Chips = styled.div`
-  display: flex;
+/* Thread number leads the title in the same size, lighter and muted */
+const ThreadNo = styled.span`
+  margin-right: 0.6em;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: ${(props) => props.theme.textMuted};
+`;
+
+/* Status chips follow the title on its line */
+const TitleChips = styled.span`
+  display: inline-flex;
   gap: 0.6rem;
-  margin-bottom: 0.8rem;
+  margin-left: 1rem;
+  vertical-align: 0.4rem;
 `;
 
 export const Chip = styled.span<{ $tone?: "accent" | "muted" }>`
@@ -88,12 +98,16 @@ interface ThreadOpenerProps {
 export function ThreadOpener({ threadId, title, top, ended, meta, labels }: ThreadOpenerProps) {
   return (
     <Opener>
-      <Chips>
-        <Chip>#{threadId}</Chip>
-        {top && <Chip $tone="accent">{labels.top}</Chip>}
-        {ended && <Chip>{labels.ended}</Chip>}
-      </Chips>
-      <Title>{title}</Title>
+      <Title>
+        <ThreadNo>#{threadId}</ThreadNo>
+        {title}
+        {(top || ended) && (
+          <TitleChips>
+            {top && <Chip $tone="accent">{labels.top}</Chip>}
+            {ended && <Chip>{labels.ended}</Chip>}
+          </TitleChips>
+        )}
+      </Title>
       <Meta>
         {meta.map((item) => (
           <span key={item.label}>
