@@ -4,7 +4,8 @@
     "logout": "Logout",
     "home": "Home",
     "boards": "Boards",
-    "manual": "Manual"
+    "manual": "Manual",
+    "toggleSidebar": "Toggle sidebar"
   },
   "response": {
     "not_found": "Response not found."
@@ -169,8 +170,8 @@
   },
   "boardIndex": {
     "notices": "Notices",
-    "moreNotices": "More",
-    "createThread": "New Thread",
+    "moreNotices": "All notices",
+    "createThread": "New thread",
     "id": "ID",
     "threadTitle": "Title",
     "author": "Author",
@@ -183,7 +184,11 @@
     "top": "Top",
     "searchPlaceholder": "Search by title or author",
     "searchButton": "Search",
-    "globalNotice": "Global"
+    "globalNotice": "Global",
+    "number": "No.",
+    "responses": "Replies",
+    "lastResponse": "Last reply",
+    "viewAllResponses": "View the whole thread"
   },
   "threadDetail": {
     "backToList": "Back to list",
@@ -240,14 +245,20 @@
     "unban": "Unban",
     "show": "Show",
     "threadBanned": "You are banned from this thread.",
-    "banned": "Banned"
+    "banned": "Banned",
+    "filterUsername": "Name",
+    "filterAuthorId": "ID",
+    "filterPause": "Pause",
+    "filterResume": "Resume",
+    "filterRemove": "Remove from filter",
+    "quickSubmitHint": "{key} to post"
   },
   "traceSidebar": {
-    "navigation": "Navigation",
+    "navigation": "This thread",
     "backToBoard": "Back to Board",
-    "manageThread": "Manage Thread",
-    "viewAll": "View All",
-    "viewRecent": "View Recent",
+    "manageThread": "Manage responses",
+    "viewAll": "All",
+    "viewRecent": "Recent",
     "prev": "Previous",
     "next": "Next",
     "scrollUp": "Scroll Up",
@@ -447,7 +458,12 @@
     "deleteAccountDescription": "Once you delete your account, it cannot be recovered. Your responses will remain but author information will be removed.",
     "deleteAccountConfirm": "Are you sure you want to delete your account?",
     "deleteAccountButton": "Delete Account",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "theme": "Theme",
+    "themeDescription": "Show the site light or dark. System follows your device setting.",
+    "themeSystem": "System",
+    "themeLight": "Light",
+    "themeDark": "Dark"
   },
   "manual": {
     "title": "User Manual",
@@ -497,15 +513,15 @@
       "alwaysBottomTitle": "Stay at Bottom",
       "alwaysBottomDescription": "Always scroll to the bottom of the page. Useful for real-time chat. (Global/Per-thread setting)",
       "refreshTitle": "Refresh",
-      "refreshDescription": "The button at the right end of the mode bar (next to the notice on ended threads). Loads new replies after the last one on screen, skipping hidden or deleted ones. Handy in the home screen app, which has no reload button."
+      "refreshDescription": "The refresh icon next to the thread title (on ended threads, also next to the notice). Loads new replies after the last one on screen, skipping hidden or deleted ones. Handy in the home screen app, which has no reload button."
     },
     "push": {
       "title": "Notifications",
       "description": "When logged in, you can get notified of new replies in threads you follow, even with the browser or app closed. Shown only when an admin has enabled the feature.",
       "watchTitle": "Get alerts",
-      "watchDescription": "Press 'Get alerts' in the thread sidebar to follow a thread. The first time, this device asks for notification permission. Press again to stop.",
+      "watchDescription": "Press the bell icon next to the thread title to follow a thread. The first time, this device asks for notification permission. Press again to stop.",
       "bellTitle": "Alert list",
-      "bellDescription": "The bell icon in the top bar lists the threads you follow and lets you remove them. The number of threads you can follow is limited.",
+      "bellDescription": "The bell icon at the bottom of the sidebar lists the threads you follow and lets you remove them. Followed threads also appear in the sidebar. The number of threads you can follow is limited.",
       "toggleTitle": "All / per-thread on and off",
       "toggleDescription": "Pause alerts for single threads in the list, or turn all alerts off at once. Turning all back on keeps the threads you paused individually.",
       "rulesTitle": "Alert rules",
@@ -547,17 +563,15 @@
     },
     "theme": {
       "title": "Theme",
-      "description": "You can change the screen theme. Click the theme button in the top bar to cycle through themes.",
+      "description": "View the site in light or dark. Switch with the theme button at the bottom of the sidebar, or choose System, Light or Dark in Settings.",
       "lightTitle": "Light",
       "lightDescription": "The default bright theme. Uses a white background with dark text.",
-      "greyTitle": "Grey",
-      "greyDescription": "A grey-toned theme that reduces eye strain. Uses soft grey tones without any white.",
       "darkTitle": "Dark",
       "darkDescription": "A dark theme suitable for low-light environments. Uses a dark background with light text."
     },
     "userCounter": {
       "title": "User Counter",
-      "description": "The top bar displays the number of users currently viewing the page.",
+      "description": "The number of users currently viewing the page is shown next to the page title.",
       "indexTitle": "Board Page",
       "indexDescription": "Shows the number of users viewing that board. Always displayed.",
       "traceTitle": "Thread Page",
@@ -567,23 +581,23 @@
     },
     "sidebar": {
       "title": "Thread Page Menu",
-      "description": "Menu available in the sidebar on the thread detail page.",
+      "description": "Menus available on the thread page: in the sidebar, next to the title, and at the bottom right.",
       "backTitle": "Back to Board",
-      "backDescription": "Return to the board list.",
-      "manageTitle": "Manage Thread",
-      "manageDescription": "Open the thread management modal to hide/restore responses.",
-      "viewAllTitle": "View All",
+      "backDescription": "Click the board name to the left of the title to return to the board list.",
+      "manageTitle": "Manage responses",
+      "manageDescription": "The manage icon next to the title opens the thread management modal to hide/restore responses.",
+      "viewAllTitle": "All",
       "viewAllDescription": "Display all responses in the thread on one page.",
-      "viewRecentTitle": "View Recent",
+      "viewRecentTitle": "Recent",
       "viewRecentDescription": "Display only the most recent responses.",
       "prevTitle": "Previous",
       "prevDescription": "Display responses from the previous page.",
       "nextTitle": "Next",
       "nextDescription": "Display responses from the next page.",
       "scrollUpTitle": "Scroll Up",
-      "scrollUpDescription": "Scroll to the top of the page.",
+      "scrollUpDescription": "Scrolls to the top of the page. On mobile, the up arrow next to the title does the same.",
       "scrollDownTitle": "Scroll Down",
-      "scrollDownDescription": "Scroll to the bottom of the page.",
+      "scrollDownDescription": "Scrolls to the bottom of the page. On mobile, the down arrow next to the title does the same.",
       "watchTitle": "Get / stop alerts",
       "watchDescription": "Follow or unfollow new replies in this thread. (Login required)"
     }
@@ -604,6 +618,12 @@
     "limitExceeded": "You can watch up to {limit} threads. Clean up the 🔔 list first.",
     "deviceSubscribeFailed": "Could not subscribe this device to alerts. Please try again later.",
     "imageLabel": "(image)",
-    "navigateConfirm": "You have unsent text. Go to the thread with the new reply?"
+    "navigateConfirm": "You have unsent text. Go to the thread with the new reply?",
+    "sidebarTitle": "Threads with alerts"
+  },
+  "theme": {
+    "toggle": "Change theme",
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode"
   }
 }

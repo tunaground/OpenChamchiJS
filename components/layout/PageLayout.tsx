@@ -1,48 +1,99 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import styled, { css, useTheme } from "styled-components";
-import { TopBar } from "./TopBar";
+import { useState, useEffect } from "react";
+import styled, { useTheme } from "styled-components";
+import { useTranslations } from "next-intl";
+import { Toolbar } from "./Toolbar";
 import { Sidebar } from "./Sidebar";
 import { useSidebarStore } from "@/lib/store/sidebar";
 import { useResponseOptionsStore } from "@/lib/store/responseOptions";
+import { PAGE_SCROLL_ID } from "@/lib/utils/page-scroll";
 
-const Main = styled.main<{ $desktopOpen: boolean; $mobileOpen: boolean; $compactOnMobile?: boolean }>`
-  padding-top: 5.6rem;
-  min-height: 100vh;
-  transition: margin-left 0.2s ease-in-out;
-
-  @media (min-width: ${(props) => props.theme.breakpoint}) {
-    margin-left: ${(props) => (props.$desktopOpen ? "16.8rem" : "0")};
-  }
+/*
+ * Desktop pins the content area with insets rather than `height`: ad scripts
+ * (AdSense) write `height: auto !important` inline on every ancestor of an ad
+ * slot, which would let the pane grow to its content and scroll the window.
+ * With top/bottom/left/right all set, `height: auto` still fills the space.
+ */
+const Main = styled.main<{ $sidebarOpen: boolean }>`
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: ${(props) =>
+    props.$sidebarOpen ? `calc(${props.theme.sidebarWidth} + ${props.theme.paneGap})` : "0"};
+  transition: left 0.2s ease-in-out;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    margin-left: 0;
+    position: static;
   }
-
-  ${(props) =>
-    props.$compactOnMobile &&
-    css`
-      @media (max-width: ${props.theme.breakpoint}) {
-        margin-left: ${props.$mobileOpen ? "5.6rem" : "0"};
-      }
-    `}
 `;
 
-const Content = styled.div`
-  width: 100%;
+/**
+ * The content pane. On desktop it is pinned inside Main and only its middle
+ * (Scroll) scrolls, so the toolbar, the footer (thread composer) and the pane's
+ * edges always show. On mobile the window scrolls and toolbar/footer stick.
+ */
+const Pane = styled.div`
+  position: absolute;
+  inset: ${(props) => props.theme.paneGap};
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: ${(props) => props.theme.pane};
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusPane};
+  box-shadow: inset 0 1px 0 ${(props) => props.theme.paneEdge}, ${(props) => props.theme.paneShadow};
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    position: static;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow: visible;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+  }
+`;
+
+const Scroll = styled.div`
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    overflow-y: visible;
+  }
+`;
+
+const Footer = styled.div`
+  flex-shrink: 0;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    position: sticky;
+    bottom: 0;
+    z-index: 40;
+  }
 `;
 
 interface PageLayoutProps {
   title?: string;
+  /** Shown before the title as a link, e.g. the board above a thread */
+  parent?: { label: string; href: string };
+  /** Small text after the title, e.g. a response count */
+  subtitle?: React.ReactNode;
+  /** Page-specific buttons at the right of the toolbar */
+  toolbarActions?: React.ReactNode;
+  /** Pinned below the scrolling content (e.g. the thread composer) */
+  footer?: React.ReactNode;
   sidebar?: React.ReactNode;
   children: React.ReactNode;
-  /** 모바일에서 사이드바를 아이콘만 표시하고 본문과 겹치지 않게 함 */
-  compactSidebarOnMobile?: boolean;
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
   authLabels: { login: string; logout: string };
-  isHomePage?: boolean;
   isSettingsPage?: boolean;
   isAdminPage?: boolean;
   userCount?: number;
@@ -51,13 +102,15 @@ interface PageLayoutProps {
 
 export function PageLayout({
   title,
+  parent,
+  subtitle,
+  toolbarActions,
+  footer,
   sidebar,
   children,
-  compactSidebarOnMobile,
   isLoggedIn,
   canAccessAdmin,
   authLabels,
-  isHomePage,
   isSettingsPage,
   isAdminPage,
   userCount,
@@ -74,6 +127,7 @@ export function PageLayout({
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const theme = useTheme();
+  const tCommon = useTranslations("common");
 
   useEffect(() => {
     setMounted(true);
@@ -140,10 +194,6 @@ export function PageLayout({
     }
   };
 
-  const closeSidebar = () => {
-    setMobileOpen(false);
-  };
-
   // Determine effective open state based on screen size
   const effectiveDesktopOpen = mounted ? desktopOpen : true;
   const effectiveMobileOpen = mounted ? mobileOpen : false;
@@ -151,33 +201,34 @@ export function PageLayout({
 
   return (
     <>
-      <TopBar
-        title={title}
-        onMenuClick={handleMenuClick}
-        isLoggedIn={isLoggedIn}
-        canAccessAdmin={canAccessAdmin}
-        authLabels={authLabels}
-        isHomePage={isHomePage}
-        isSettingsPage={isSettingsPage}
-        isAdminPage={isAdminPage}
-        userCount={userCount}
-        userCountTitle={userCountTitle}
-      />
-      {mounted && sidebar && (
+      {mounted && (
         <Sidebar
           open={sidebarOpen}
-          onClose={closeSidebar}
-          compactOnMobile={compactSidebarOnMobile}
+          onClose={() => setMobileOpen(false)}
+          isLoggedIn={isLoggedIn}
+          canAccessAdmin={canAccessAdmin}
+          authLabels={authLabels}
+          isSettingsPage={isSettingsPage}
+          isAdminPage={isAdminPage}
         >
           {sidebar}
         </Sidebar>
       )}
-      <Main
-        $desktopOpen={sidebar ? (mounted ? desktopOpen : true) : false}
-        $mobileOpen={sidebar ? (compactSidebarOnMobile && mobileOpen ? true : (mounted ? mobileOpen : false)) : false}
-        $compactOnMobile={sidebar ? compactSidebarOnMobile : false}
-      >
-        <Content>{children}</Content>
+      <Main $sidebarOpen={effectiveDesktopOpen}>
+        <Pane>
+          <Toolbar
+            title={title}
+            parent={parent}
+            subtitle={subtitle}
+            userCount={userCount}
+            userCountTitle={userCountTitle}
+            actions={toolbarActions}
+            onMenuClick={handleMenuClick}
+            menuLabel={tCommon("toggleSidebar")}
+          />
+          <Scroll id={PAGE_SCROLL_ID}>{children}</Scroll>
+          {footer && <Footer>{footer}</Footer>}
+        </Pane>
       </Main>
     </>
   );

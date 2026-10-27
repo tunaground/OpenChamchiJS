@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBook } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -9,8 +8,11 @@ import {
   NavList,
   NavItem,
   NavLink,
-  SidebarDivider,
+  NavIcon,
+  NavLabel,
   EmptyState,
+  ExternalNavLink,
+  ExternalIcon,
 } from "./SidebarStyles";
 
 interface Board {
@@ -24,6 +26,61 @@ interface CustomLink {
   url: string;
 }
 
+interface BoardsNavProps {
+  boards: Board[];
+  title: string;
+  emptyMessage?: string;
+  /** Board to highlight when the path alone doesn't say (e.g. a thread page) */
+  currentBoardId?: string;
+}
+
+/** Board list group, shared by the board-list and thread sidebars */
+export function BoardsNav({ boards, title, emptyMessage = "No boards", currentBoardId }: BoardsNavProps) {
+  const pathname = usePathname();
+
+  return (
+    <>
+      <SidebarTitle>{title}</SidebarTitle>
+      {boards.length === 0 ? (
+        <EmptyState>{emptyMessage}</EmptyState>
+      ) : (
+        <NavList>
+          {boards.map((board) => {
+            const href = `/index/${board.id}`;
+            const isActive =
+              board.id === currentBoardId || pathname === href || pathname.startsWith(`${href}/`);
+            return (
+              <NavItem key={board.id}>
+                <NavLink href={href} $active={isActive}>
+                  <NavLabel>{board.name}</NavLabel>
+                </NavLink>
+              </NavItem>
+            );
+          })}
+        </NavList>
+      )}
+    </>
+  );
+}
+
+/** Admin-configured external links */
+export function CustomLinksNav({ links }: { links?: CustomLink[] }) {
+  if (!links || links.length === 0) return null;
+
+  return (
+    <NavList style={{ marginTop: "1.4rem" }}>
+      {links.map((link) => (
+        <NavItem key={link.id}>
+          <ExternalNavLink href={link.url} target="_blank" rel="noopener noreferrer">
+            <NavLabel>{link.label}</NavLabel>
+            <ExternalIcon />
+          </ExternalNavLink>
+        </NavItem>
+      ))}
+    </NavList>
+  );
+}
+
 interface BoardListSidebarProps {
   boards: Board[];
   customLinks?: CustomLink[];
@@ -31,37 +88,6 @@ interface BoardListSidebarProps {
   emptyMessage?: string;
   manualLabel?: string;
 }
-
-const ManualLinkContent = styled.span`
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-`;
-
-const ManualIcon = styled.span`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.6rem;
-  font-size: 1.4rem;
-`;
-
-const ExternalNavLink = styled.a`
-  display: block;
-  padding: 1rem 1.2rem;
-  border-radius: 0.6rem;
-  text-decoration: none;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  background: transparent;
-  font-weight: 400;
-  transition: background 0.15s, color 0.15s;
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-    color: ${(props) => props.theme.textPrimary};
-  }
-`;
 
 export function BoardListSidebar({
   boards,
@@ -71,59 +97,21 @@ export function BoardListSidebar({
   manualLabel = "Manual",
 }: BoardListSidebarProps) {
   const pathname = usePathname();
-  const isManualActive = pathname === "/manual";
 
   return (
     <div>
       <NavList>
         <NavItem>
-          <NavLink href="/manual" $active={isManualActive}>
-            <ManualLinkContent>
-              <ManualIcon>
-                <FontAwesomeIcon icon={faBook} />
-              </ManualIcon>
-              {manualLabel}
-            </ManualLinkContent>
+          <NavLink href="/manual" $active={pathname === "/manual"}>
+            <NavIcon>
+              <FontAwesomeIcon icon={faBook} />
+            </NavIcon>
+            <NavLabel>{manualLabel}</NavLabel>
           </NavLink>
         </NavItem>
       </NavList>
-      <SidebarDivider />
-      <SidebarTitle>{title}</SidebarTitle>
-      {boards.length === 0 ? (
-        <EmptyState>{emptyMessage}</EmptyState>
-      ) : (
-        <NavList>
-          {boards.map((board) => {
-            const href = `/index/${board.id}`;
-            const isActive = pathname === href || pathname.startsWith(`${href}/`);
-            return (
-              <NavItem key={board.id}>
-                <NavLink href={href} $active={isActive}>
-                  {board.name}
-                </NavLink>
-              </NavItem>
-            );
-          })}
-        </NavList>
-      )}
-      {customLinks && customLinks.length > 0 && (
-        <>
-          <SidebarDivider />
-          <NavList>
-            {customLinks.map((link) => (
-              <NavItem key={link.id}>
-                <ExternalNavLink
-                  href={link.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {link.label}
-                </ExternalNavLink>
-              </NavItem>
-            ))}
-          </NavList>
-        </>
-      )}
+      <BoardsNav boards={boards} title={title} emptyMessage={emptyMessage} />
+      <CustomLinksNav links={customLinks} />
     </div>
   );
 }

@@ -9,97 +9,108 @@ import { formatDate } from "../_lib/utils";
 import { fetchArchiveIndex } from "../_lib/api";
 import { ARCHIVE_THREADS_PER_PAGE } from "../_lib/config";
 import type { ArchiveThreadIndex } from "../_lib/types";
+import { scrollPageTo } from "@/lib/utils/page-scroll";
 
 const Container = styled.div`
-  padding: 1.6rem;
+  width: 100%;
+  max-width: ${(props) => props.theme.adminMaxWidth};
+  margin: 0 auto;
+  padding: 1.6rem 2.4rem 3.2rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: 1.2rem 1.4rem 2.4rem;
   }
 `;
 
 const SearchContainer = styled.div`
-  margin-bottom: 2.4rem;
+  margin-bottom: 1.6rem;
 `;
 
 const SearchInput = styled.input`
   width: 100%;
-  padding: 1.2rem 1.6rem;
+  max-width: 36rem;
+  height: 3.4rem;
+  padding: 0 1rem;
   font-size: 1.4rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  background: ${(props) => props.theme.surface};
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: ${(props) => props.theme.paneSunken};
   color: ${(props) => props.theme.textPrimary};
   outline: none;
   transition: border-color 0.15s;
 
   &:focus {
-    border-color: ${(props) => props.theme.primary};
+    border-color: ${(props) => props.theme.accent};
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
+    color: ${(props) => props.theme.textMuted};
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    max-width: none;
   }
 `;
 
+/* Same hairline rows as the live board index */
 const ThreadList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
+  border-top: 1px solid ${(props) => props.theme.line};
 `;
 
 const ThreadCard = styled.article`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.2rem;
-  transition: background 0.15s ease;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid ${(props) => props.theme.line};
 
   &:hover {
-    background: ${(props) => props.theme.surfaceHover};
+    background: ${(props) => props.theme.hover};
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding: 1.2rem 0.6rem;
   }
 `;
 
 const ThreadTitle = styled.h2`
-  font-size: 1.4rem;
+  font-size: 1.5rem;
   font-weight: 500;
-  margin-bottom: 0.8rem;
   word-break: break-all;
 
   a {
     color: ${(props) => props.theme.textPrimary};
-    text-decoration: none;
 
     &:hover {
-      text-decoration: underline;
+      color: ${(props) => props.theme.accent};
     }
   }
 `;
 
 const ThreadId = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  margin-right: 0.4rem;
+  color: ${(props) => props.theme.textMuted};
+  font-weight: 400;
+  margin-right: 0.6rem;
 `;
 
 const ThreadSize = styled.span`
   color: ${(props) => props.theme.textSecondary};
-  font-weight: 400;
+  font-weight: 600;
+  font-size: 1.4rem;
 `;
 
 const ThreadMeta = styled.div`
   display: flex;
   flex-wrap: wrap;
   gap: 0.8rem;
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
+  margin-top: 0.1rem;
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textMuted};
 `;
 
 const Pagination = styled.nav`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.4rem;
-  margin-top: 2.4rem;
+  gap: 0.2rem;
+  margin-top: 2rem;
   flex-wrap: wrap;
 `;
 
@@ -111,18 +122,17 @@ const PageButton = styled.button<{ $current?: boolean }>`
   height: 3.2rem;
   padding: 0 0.8rem;
   font-size: 1.4rem;
-  border-radius: 0.4rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  background: ${(props) =>
-    props.$current ? props.theme.buttonPrimary : props.theme.surface};
-  color: ${(props) =>
-    props.$current ? props.theme.buttonPrimaryText : props.theme.textPrimary};
+  border: none;
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: ${(props) => (props.$current ? props.theme.accentSoft : "transparent")};
+  color: ${(props) => (props.$current ? props.theme.accent : props.theme.textSecondary)};
+  font-weight: ${(props) => (props.$current ? 600 : 400)};
   cursor: pointer;
   transition: background 0.15s;
 
   &:hover:not(:disabled) {
-    background: ${(props) =>
-      props.$current ? props.theme.buttonPrimary : props.theme.surfaceHover};
+    background: ${(props) => (props.$current ? props.theme.accentSoft : props.theme.hover)};
+    color: ${(props) => (props.$current ? props.theme.accent : props.theme.textPrimary)};
   }
 
   &:disabled {
@@ -135,25 +145,24 @@ const PageEllipsis = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 3.2rem;
+  min-width: 2.4rem;
   height: 3.2rem;
   font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.textMuted};
 `;
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 4.8rem;
+  padding: 4.8rem 1.6rem;
   color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
+  border: 1px dashed ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
 `;
 
 const ResultCount = styled.div`
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-  margin-bottom: 1.2rem;
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textMuted};
+  margin: 0 0.4rem 0.8rem;
 `;
 
 const LoadingState = styled.div`
@@ -270,7 +279,7 @@ export function ArchiveBoardContent({ boardId, baseUrl }: ArchiveBoardContentPro
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    scrollPageTo("top");
   };
 
   const renderPagination = () => {

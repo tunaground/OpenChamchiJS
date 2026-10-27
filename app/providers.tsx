@@ -3,13 +3,16 @@
 import { SessionProvider } from "next-auth/react";
 import { ThemeProvider } from "@/lib/theme";
 import { ToastProvider } from "@/components/Toast";
+import { SiteProvider } from "@/components/layout/SiteContext";
 
-export function Providers({ children }: { children: React.ReactNode }) {
+export function Providers({ siteTitle, children }: { siteTitle: string; children: React.ReactNode }) {
   return (
     <SessionProvider>
-      <ThemeProvider>
-        <ToastProvider>{children}</ToastProvider>
-      </ThemeProvider>
+      <SiteProvider siteTitle={siteTitle}>
+        <ThemeProvider>
+          <ToastProvider>{children}</ToastProvider>
+        </ThemeProvider>
+      </SiteProvider>
     </SessionProvider>
   );
 }

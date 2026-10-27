@@ -13,51 +13,107 @@ import { applyShortcuts } from "@/lib/utils/shortcuts";
 import type { ResponseOptions } from "@/lib/store/responseOptions";
 
 const ResponseForm = styled.form`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.6rem;
-  margin-top: 2.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 `;
 
-const FormGroup = styled.div`
+/** Options, name, body and submit framed together as one editor */
+const Editor = styled.div<{ $open: boolean }>`
+  display: flex;
+  flex-direction: ${(props) => (props.$open ? "column" : "row")};
+  align-items: ${(props) => (props.$open ? "stretch" : "center")};
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusPane};
+  background: ${(props) => props.theme.paneSunken};
+  transition: border-color 0.15s;
+
+  &:focus-within {
+    border-color: ${(props) => props.theme.accent};
+  }
+`;
+
+const EditorHead = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid ${(props) => props.theme.line};
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    flex-wrap: wrap;
+  }
+`;
+
+const HeadDivider = styled.span`
+  width: 1px;
+  height: 1.8rem;
+  background: ${(props) => props.theme.lineStrong};
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
+`;
+
+const NameInput = styled.input`
   flex: 1;
-`;
-
-const FormInput = styled.input`
-  width: 100%;
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
+  min-width: 12rem;
+  height: 3rem;
+  padding: 0 0.6rem;
+  border: none;
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: transparent;
   font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
+  font-weight: 500;
   color: ${(props) => props.theme.textPrimary};
+
+  &:hover {
+    background: ${(props) => props.theme.hover};
+  }
 
   &:focus {
     outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
+    background: ${(props) => props.theme.hover};
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
+    color: ${(props) => props.theme.textMuted};
+    font-weight: 400;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    flex-basis: 100%;
+    border-top: 1px solid ${(props) => props.theme.line};
+    border-radius: 0;
+    padding: 0 0.4rem;
   }
 `;
 
-const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
-  width: 100%;
-  min-height: 12rem;
-  padding: 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
+const FormTextarea = styled.textarea<{ $aaMode?: boolean; $open: boolean }>`
+  /* Collapsed it fills the row's width; expanded it must not flex, or the
+     column layout would override the height autoResize sets */
+  flex: ${(props) => (props.$open ? "none" : "1")};
+  min-width: 0;
+  min-height: ${(props) => (props.$open ? "9.6rem" : "3.6rem")};
+  /* Grows with the text (AA works are often tall) up to nearly the whole pane */
+  max-height: calc(100vh - 22rem);
+  max-height: calc(100dvh - 22rem);
+  padding: ${(props) => (props.$open ? "1rem 1.2rem" : "0.7rem 1.2rem")};
+  border: none;
+  /* Expanded it sits square between the head and foot rows; folded it only
+     rounds the left edge, inset by the editor's 1px border. So the white AA
+     paper fills its slot instead of floating as a rounded card */
+  border-radius: ${(props) =>
+    props.$open ? "0" : `calc(${props.theme.radiusPane} - 1px) 0 0 calc(${props.theme.radiusPane} - 1px)`};
   font-size: 1.5rem;
-  background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : props.theme.background)};
+  background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : "transparent")};
   color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
   resize: none;
-  font-family: ${(props) => (props.$aaMode ? '"AAFont", "HeadKasen", "Saitamaar", sans-serif' : "inherit")};
+  font-family: ${(props) => (props.$aaMode ? props.theme.fontAA : "inherit")};
   line-height: ${(props) => (props.$aaMode ? "1.6rem" : "1.5")};
   white-space: ${(props) => (props.$aaMode ? "pre" : "pre-wrap")};
   overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
-  overflow-y: hidden;
+  overflow-y: auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     ${(props) => props.$aaMode && `
@@ -68,33 +124,60 @@ const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
 
   &:focus {
     outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
+    color: ${(props) => props.theme.textMuted};
+  }
+`;
+
+const EditorFoot = styled.div<{ $open: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: ${(props) => (props.$open ? "0.6rem 0.6rem 0.6rem 1rem" : "0 0.5rem 0 0")};
+  border-top: ${(props) => (props.$open ? `1px solid ${props.theme.line}` : "none")};
+  flex-wrap: wrap;
+`;
+
+const Hint = styled.span`
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.textMuted};
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
   }
 `;
 
 const SubmitButton = styled.button`
-  width: 100%;
-  height: 3.5rem;
+  flex-shrink: 0;
+  height: 3rem;
+  margin-left: auto;
+  padding: 0 1.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
-  border-radius: 4px;
+  border-radius: ${(props) => props.theme.radiusControl};
   font-size: 1.4rem;
   font-weight: 500;
   cursor: pointer;
 
   &:hover {
-    opacity: 0.9;
+    filter: brightness(1.06);
   }
 
   &:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
   }
+`;
+
+const PreviewArea = styled.div`
+  max-height: 30vh;
+  overflow-y: auto;
+  padding: 0 1rem;
+  border: 1px dashed ${(props) => props.theme.lineStrong};
+  border-radius: ${(props) => props.theme.radiusPane};
 `;
 
 const RefreshButton = styled.button`
@@ -103,34 +186,22 @@ const RefreshButton = styled.button`
   gap: 0.6rem;
   height: 3.2rem;
   padding: 0 1.2rem;
-  border: none;
-  border-radius: 0.4rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
+  border: 1px solid ${(props) => props.theme.lineStrong};
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: transparent;
+  color: ${(props) => props.theme.textPrimary};
   font-size: 1.3rem;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition: opacity 0.15s ease;
 
   &:hover {
-    opacity: 0.85;
+    background: ${(props) => props.theme.hover};
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 0 0.9rem;
-  }
-`;
-
-// Label hidden on narrow screens; the icon (and title) remain
-const RefreshLabel = styled.span`
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    display: none;
   }
 `;
 
@@ -140,13 +211,8 @@ const EndedNotice = styled.div`
   align-items: center;
   justify-content: center;
   gap: 1.2rem;
-  text-align: center;
-  padding: 2.4rem;
+  font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surfaceHover};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  margin-top: 2.4rem;
 `;
 
 interface FormLabels {
@@ -214,7 +280,22 @@ export function ResponseFormSection({
   const [content, setContent] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  // The dock stays one line until the user starts writing
+  const [focused, setFocused] = useState(false);
+  const open = focused || !!content || !!attachmentFile;
+
+  // Fold the empty form when the user clicks anywhere else on the page
+  useEffect(() => {
+    if (!focused) return;
+    const onPointerDown = (e: PointerEvent) => {
+      if (formRef.current?.contains(e.target as Node)) return;
+      if (!content && !attachmentFile) setFocused(false);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    return () => document.removeEventListener("pointerdown", onPointerDown);
+  }, [focused, content, attachmentFile]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   const tThread = useTranslations("threadDetail");
   const maxSizeLabel = tThread("maxSize", { size: formatBytes(uploadMaxSize) });
@@ -230,9 +311,10 @@ export function ResponseFormSection({
     }
   }, [alwaysBottomRef, isAtBottomRef, pageEndRef]);
 
+  // Re-measure on open/fold too: the two states have different minimum heights
   useEffect(() => {
     autoResize();
-  }, [content, autoResize]);
+  }, [content, open, autoResize]);
 
   // Load saved username from localStorage
   useEffect(() => {
@@ -351,7 +433,7 @@ export function ResponseFormSection({
       aria-label={labels.refresh}
     >
       <FontAwesomeIcon icon={faArrowsRotate} spin={refreshing} />
-      <RefreshLabel>{refreshing ? labels.refreshing : labels.refresh}</RefreshLabel>
+      <span>{refreshing ? labels.refreshing : labels.refresh}</span>
     </RefreshButton>
   );
 
@@ -364,57 +446,90 @@ export function ResponseFormSection({
     );
   }
 
-  return (
-    <>
-      {responseOptions.previewMode && (
-        <ResponsePreview
-          content={content}
-          boardId={thread.boardId}
-          threadId={thread.id}
-          lastSeq={currentLastSeq}
-          aaMode={responseOptions.aaMode}
-          username={username}
-          defaultUsername={defaultUsername}
-          tripcodeSalt={tripcodeSalt}
-        />
-      )}
+  // Folding back happens only on a click outside (or Esc), never because a
+  // button inside took focus: Safari doesn't focus buttons on click
+  const isBlank = !content && !attachmentFile;
+  const handleFocusOut = (e: React.FocusEvent<HTMLFormElement>) => {
+    const next = e.relatedTarget as Node | null;
+    if (next && !e.currentTarget.contains(next) && isBlank) setFocused(false);
+  };
 
-      <ResponseForm onSubmit={handleSubmit}>
-        <ResponseOptionButtons
-          options={responseOptions}
-          onToggle={toggleOption}
-          isOverridden={isGlobalActive}
-          hasThreadOverride={hasThreadOverride}
-          onResetThreadOptions={resetAllThreadOptions}
-          realtimeEnabled={realtimeEnabled}
-          trailing={refreshButton}
+  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Escape" && isBlank) {
+      setFocused(false);
+      e.currentTarget.blur();
+      return;
+    }
+    handleKeyDown(e);
+  };
+
+  const quickSubmitLabel =
+    responseOptions.quickSubmitKey === "ctrl"
+      ? "Ctrl+Enter"
+      : responseOptions.quickSubmitKey === "shift"
+        ? "Shift+Enter"
+        : null;
+
+  return (
+    <ResponseForm
+      ref={formRef}
+      onSubmit={handleSubmit}
+      onFocus={() => setFocused(true)}
+      onBlur={handleFocusOut}
+    >
+      {open && responseOptions.previewMode && (
+        <PreviewArea>
+          <ResponsePreview
+            content={content}
+            boardId={thread.boardId}
+            threadId={thread.id}
+            lastSeq={currentLastSeq}
+            aaMode={responseOptions.aaMode}
+            username={username}
+            defaultUsername={defaultUsername}
+            tripcodeSalt={tripcodeSalt}
+          />
+        </PreviewArea>
+      )}
+      <Editor $open={open}>
+        {open && (
+          <EditorHead>
+            <ResponseOptionButtons
+              options={responseOptions}
+              onToggle={toggleOption}
+              isOverridden={isGlobalActive}
+              hasThreadOverride={hasThreadOverride}
+              onResetThreadOptions={resetAllThreadOptions}
+              realtimeEnabled={realtimeEnabled}
+            />
+            <HeadDivider />
+            <NameInput
+              type="text"
+              name="username"
+              autoComplete="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              placeholder={labels.usernamePlaceholder}
+              aria-label={labels.usernamePlaceholder}
+              spellCheck={false}
+            />
+          </EditorHead>
+        )}
+        <FormTextarea
+          data-draft
+          ref={textareaRef}
+          rows={1}
+          value={content}
+          onChange={(e) => setContent(applyShortcuts(e.target.value))}
+          onKeyDown={handleTextareaKeyDown}
+          placeholder={labels.contentPlaceholder}
+          $aaMode={responseOptions.aaMode}
+          $open={open}
+          spellCheck={false}
+          required
         />
-        <FormGroup style={{ marginBottom: "1.6rem" }}>
-          <FormInput
-            type="text"
-            name="username"
-            autoComplete="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder={labels.usernamePlaceholder}
-            spellCheck={false}
-          />
-        </FormGroup>
-        <FormGroup style={{ marginBottom: "1.6rem" }}>
-          <FormTextarea
-            data-draft
-            ref={textareaRef}
-            value={content}
-            onChange={(e) => setContent(applyShortcuts(e.target.value))}
-            onKeyDown={handleKeyDown}
-            placeholder={labels.contentPlaceholder}
-            $aaMode={responseOptions.aaMode}
-            spellCheck={false}
-            required
-          />
-        </FormGroup>
-        {storageEnabled && (
-          <FormGroup style={{ marginBottom: "1.6rem" }}>
+        <EditorFoot $open={open}>
+          {open && storageEnabled && (
             <ImageUpload
               onFileSelect={setAttachmentFile}
               currentFile={attachmentFile}
@@ -425,15 +540,15 @@ export function ResponseFormSection({
                 removeImage: labels.removeImage,
               }}
             />
-          </FormGroup>
-        )}
-        <SubmitButton
-          type="submit"
-          disabled={submitting || !content.trim()}
-        >
-          {submitting ? labels.submitting : labels.submit}
-        </SubmitButton>
-      </ResponseForm>
-    </>
+          )}
+          {open && quickSubmitLabel && (
+            <Hint>{tThread("quickSubmitHint", { key: quickSubmitLabel })}</Hint>
+          )}
+          <SubmitButton type="submit" disabled={submitting || !content.trim()}>
+            {submitting ? labels.submitting : labels.submit}
+          </SubmitButton>
+        </EditorFoot>
+      </Editor>
+    </ResponseForm>
   );
 }

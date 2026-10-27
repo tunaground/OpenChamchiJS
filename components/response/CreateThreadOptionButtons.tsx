@@ -1,35 +1,23 @@
 "use client";
 
 import styled from "styled-components";
+import { iconButtonCss } from "@/components/layout/iconButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFont, faEye } from "@fortawesome/free-solid-svg-icons";
 
 const Container = styled.div`
   display: flex;
-  gap: 0.4rem;
-  margin-bottom: 0.8rem;
+  gap: 0.2rem;
 `;
 
 const OptionButton = styled.button<{ $active: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.2rem;
-  height: 3.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 0.4rem;
-  background: ${(props) =>
-    props.$active ? props.theme.buttonPrimary : props.theme.surface};
-  color: ${(props) =>
-    props.$active ? props.theme.buttonPrimaryText : props.theme.textSecondary};
-  cursor: pointer;
-  transition: all 0.15s ease;
-  position: relative;
+  ${iconButtonCss}
+  width: 3rem;
+  height: 3rem;
 
-  &:hover {
-    background: ${(props) =>
-      props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
-    opacity: ${(props) => (props.$active ? 0.9 : 1)};
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 `;
 
@@ -39,7 +27,8 @@ const Tooltip = styled.span`
   left: 50%;
   transform: translateX(-50%);
   padding: 0.4rem 0.8rem;
-  background: ${(props) => props.theme.surface};
+  background: ${(props) => props.theme.paneRaised};
+  border: 1px solid ${(props) => props.theme.lineStrong};
   color: ${(props) => props.theme.textPrimary};
   font-size: 1.2rem;
   border-radius: 0.4rem;

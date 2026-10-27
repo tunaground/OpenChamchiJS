@@ -11,11 +11,10 @@ import {
   faArrowUp,
   faArrowDown,
   faArrowLeft,
-  faKeyboard,
-  faHandPointer,
   faTrash,
-  faGlobe,
 } from "@fortawesome/free-solid-svg-icons";
+import { useTranslations } from "next-intl";
+import { useThemeStore, type ThemePreference } from "@/lib/store/theme";
 import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import {
@@ -25,186 +24,119 @@ import {
 } from "@/lib/store/responseOptions";
 
 const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.contentMaxWidth};
-  margin: 0 auto;
+  width: 100%;
+  max-width: 80rem;
+  padding: 1.6rem 2.8rem 3.2rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
+    padding: 1.2rem 1.4rem 2.4rem;
   }
-`;
-
-const Header = styled.div`
-  margin-bottom: 3.2rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin: 0 0 0.8rem 0;
 `;
 
 const Description = styled.p`
   font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
-  margin: 0;
+  padding: 0 0.4rem;
 `;
 
 const Section = styled.section`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 2.4rem;
-  margin-bottom: 2.4rem;
+  margin-top: 2.2rem;
 `;
 
-const SectionTitle = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin: 0 0 2rem 0;
+const SectionTitle = styled.h2<{ $danger?: boolean }>`
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: ${(props) => (props.$danger ? props.theme.error : props.theme.textMuted)};
+  margin: 0 0.4rem 0.8rem;
 `;
 
-const OptionList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.6rem;
+const OptionList = styled.div<{ $danger?: boolean }>`
+  border: 1px solid
+    ${(props) =>
+      props.$danger
+        ? `color-mix(in srgb, ${props.theme.error} 35%, transparent)`
+        : props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: ${(props) => props.theme.paneSunken};
 `;
 
 const OptionItem = styled.div`
   display: flex;
-  align-items: flex-start;
-  gap: 1.6rem;
-  padding: 1.2rem;
-  border-radius: 8px;
-  transition: background 0.15s ease;
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-`;
-
-const OptionIcon = styled.div<{ $active: boolean }>`
-  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 4rem;
-  height: 4rem;
-  border-radius: 8px;
-  background: ${(props) =>
-    props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
-  color: ${(props) =>
-    props.$active ? props.theme.buttonPrimaryText : props.theme.textSecondary};
-  flex-shrink: 0;
+  gap: 1.6rem;
+  padding: 1.2rem 1.4rem;
+
+  & + & {
+    border-top: 1px solid ${(props) => props.theme.line};
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    flex-wrap: wrap;
+    gap: 0.8rem;
+  }
 `;
 
 const OptionContent = styled.div`
   flex: 1;
+  min-width: 0;
 `;
 
 const OptionLabel = styled.div`
   font-size: 1.5rem;
   font-weight: 500;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.4rem;
 `;
 
 const OptionDescription = styled.div`
   font-size: 1.3rem;
-  color: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.textMuted};
   line-height: 1.5;
 `;
 
 const Toggle = styled.button<{ $active: boolean }>`
   position: relative;
-  width: 4.8rem;
-  height: 2.4rem;
-  border-radius: 1.2rem;
+  width: 3.8rem;
+  height: 2.2rem;
+  border-radius: 1.1rem;
   border: none;
   cursor: pointer;
-  background: ${(props) =>
-    props.$active ? props.theme.buttonPrimary : props.theme.surfaceBorder};
-  transition: background 0.2s ease;
+  background: ${(props) => (props.$active ? props.theme.accent : props.theme.lineStrong)};
+  transition: background 0.15s ease;
   flex-shrink: 0;
 
   &::after {
     content: "";
     position: absolute;
     top: 0.2rem;
-    left: ${(props) => (props.$active ? "2.4rem" : "0.2rem")};
-    width: 2rem;
-    height: 2rem;
+    left: ${(props) => (props.$active ? "1.8rem" : "0.2rem")};
+    width: 1.8rem;
+    height: 1.8rem;
     border-radius: 50%;
     background: white;
-    transition: left 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    transition: left 0.15s ease;
   }
 `;
 
 const ButtonGroup = styled.div`
   display: flex;
-  gap: 1.2rem;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.8rem;
+  margin-top: 1.2rem;
 `;
 
 const Button = styled.button`
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  height: 3.5rem;
-  padding: 0 1.6rem;
-  border-radius: 4px;
+  height: 3.4rem;
+  padding: 0 1.4rem;
+  border-radius: ${(props) => props.theme.radiusControl};
   font-size: 1.4rem;
   font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
-  transition: all 0.15s ease;
-`;
-
-const BackButton = styled(Button)`
-  background: transparent;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-`;
-
-const ResetButton = styled(Button)`
-  background: ${(props) => props.theme.error};
-  border: none;
-  color: white;
-
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
-const DangerSection = styled(Section)`
-  border-color: ${(props) => props.theme.error};
-  margin-top: 2.4rem;
-`;
-
-const DangerSectionTitle = styled(SectionTitle)`
-  color: ${(props) => props.theme.error};
-`;
-
-const DangerDescription = styled.p`
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  margin: 0 0 1.6rem 0;
-  line-height: 1.5;
-`;
-
-const DeleteAccountButton = styled(Button)`
-  background: transparent;
-  border: 1px solid ${(props) => props.theme.error};
-  color: ${(props) => props.theme.error};
-
-  &:hover {
-    background: ${(props) => props.theme.error};
-    color: white;
-  }
+  transition: background 0.15s ease;
 
   &:disabled {
     opacity: 0.5;
@@ -212,13 +144,32 @@ const DeleteAccountButton = styled(Button)`
   }
 `;
 
+const BackButton = styled(Button)`
+  background: transparent;
+  border: 1px solid ${(props) => props.theme.lineStrong};
+  color: ${(props) => props.theme.textPrimary};
+
+  &:hover {
+    background: ${(props) => props.theme.hover};
+  }
+`;
+
+const ResetButton = styled(BackButton)``;
+
+const DeleteAccountButton = styled(Button)`
+  background: transparent;
+  border: 1px solid color-mix(in srgb, ${(props) => props.theme.error} 45%, transparent);
+  color: ${(props) => props.theme.error};
+
+  &:hover {
+    background: color-mix(in srgb, ${(props) => props.theme.error} 10%, transparent);
+  }
+`;
+
 const ModalOverlay = styled.div`
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: ${(props) => props.theme.scrim};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -227,8 +178,10 @@ const ModalOverlay = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background: ${(props) => props.theme.surface};
-  border-radius: 8px;
+  background: ${(props) => props.theme.paneRaised};
+  border: 1px solid ${(props) => props.theme.lineStrong};
+  border-radius: ${(props) => props.theme.radiusPane};
+  box-shadow: ${(props) => props.theme.paneShadow};
   padding: 2.4rem;
   max-width: 40rem;
   width: 100%;
@@ -237,8 +190,8 @@ const ModalContent = styled.div`
 const ModalTitle = styled.h3`
   font-size: 1.8rem;
   font-weight: 600;
-  color: ${(props) => props.theme.error};
-  margin: 0 0 1.6rem 0;
+  color: ${(props) => props.theme.textPrimary};
+  margin: 0 0 1.2rem 0;
 `;
 
 const ModalDescription = styled.p`
@@ -250,19 +203,11 @@ const ModalDescription = styled.p`
 
 const ModalButtons = styled.div`
   display: flex;
-  gap: 1.2rem;
+  gap: 0.8rem;
   justify-content: flex-end;
 `;
 
-const CancelButton = styled(Button)`
-  background: transparent;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-`;
+const CancelButton = styled(BackButton)``;
 
 const ConfirmDeleteButton = styled(Button)`
   background: ${(props) => props.theme.error};
@@ -270,40 +215,30 @@ const ConfirmDeleteButton = styled(Button)`
   color: white;
 
   &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+    filter: brightness(1.06);
   }
 `;
 
-const QuickSubmitOptions = styled.div`
-  display: flex;
-  gap: 0.8rem;
+const Segmented = styled.div`
+  display: inline-flex;
   flex-wrap: wrap;
+  padding: 0.2rem;
+  border-radius: 7px;
+  background: ${(props) => props.theme.paneSunken};
+  border: 1px solid ${(props) => props.theme.line};
 `;
 
-const QuickSubmitOption = styled.button<{ $active: boolean }>`
-  padding: 0.8rem 1.6rem;
-  border-radius: 4px;
+const SegmentOption = styled.button<{ $active: boolean }>`
+  padding: 0.4rem 1rem;
+  border: none;
+  border-radius: 5px;
   font-size: 1.3rem;
-  font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
-  transition: all 0.15s ease;
-  border: 1px solid
-    ${(props) =>
-      props.$active ? props.theme.buttonPrimary : props.theme.surfaceBorder};
-  background: ${(props) =>
-    props.$active ? props.theme.buttonPrimary : "transparent"};
-  color: ${(props) =>
-    props.$active ? props.theme.buttonPrimaryText : props.theme.textPrimary};
-
-  &:hover {
-    background: ${(props) =>
-      props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
-  }
+  background: ${(props) => (props.$active ? props.theme.paneRaised : "transparent")};
+  color: ${(props) => (props.$active ? props.theme.textPrimary : props.theme.textSecondary)};
+  font-weight: ${(props) => (props.$active ? 500 : 400)};
+  box-shadow: ${(props) => (props.$active ? "0 1px 2px rgba(0, 0, 0, 0.08)" : "none")};
 `;
 
 // Options available in global settings (excludes chatMode which is thread-specific, quickSubmitKey and sidebarSwipe which have separate UI)
@@ -383,6 +318,11 @@ export function SettingsContent({
   customLinks,
 }: SettingsContentProps) {
   const router = useRouter();
+  const t = useTranslations("settings");
+  const themePreference = useThemeStore((state) => state.mode);
+  const setThemePreference = useThemeStore((state) => state.setMode);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [currentLocale, setCurrentLocale] = useState<string | null>(null);
@@ -493,6 +433,26 @@ export function SettingsContent({
 
   const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
 
+  const segmented = <T extends string | null>(
+    items: { key: T; label: string }[],
+    current: T,
+    onSelect: (key: T) => void
+  ) => (
+    <Segmented role="radiogroup">
+      {items.map((item) => (
+        <SegmentOption
+          key={item.key ?? "auto"}
+          role="radio"
+          aria-checked={current === item.key}
+          $active={current === item.key}
+          onClick={() => onSelect(item.key)}
+        >
+          {item.label}
+        </SegmentOption>
+      ))}
+    </Segmented>
+  );
+
   return (
     <PageLayout
       title={labels.title}
@@ -503,111 +463,99 @@ export function SettingsContent({
       isSettingsPage
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-          <Description>{labels.description}</Description>
-        </Header>
+        <Description>{labels.description}</Description>
 
         <Section>
+          <SectionTitle>{labels.siteSettings}</SectionTitle>
           <OptionList>
-            {/* Site Settings */}
-            <SectionTitle>{labels.siteSettings}</SectionTitle>
-            {/* Language */}
             <OptionItem>
-              <OptionIcon $active={currentLocale !== null}>
-                <FontAwesomeIcon icon={faGlobe} />
-              </OptionIcon>
+              <OptionContent>
+                <OptionLabel>{t("theme")}</OptionLabel>
+                <OptionDescription>{t("themeDescription")}</OptionDescription>
+              </OptionContent>
+              {segmented(
+                [
+                  { key: "system" as ThemePreference, label: t("themeSystem") },
+                  { key: "light" as ThemePreference, label: t("themeLight") },
+                  { key: "dark" as ThemePreference, label: t("themeDark") },
+                ],
+                mounted ? themePreference : "light",
+                setThemePreference
+              )}
+            </OptionItem>
+            <OptionItem>
               <OptionContent>
                 <OptionLabel>{labels.language}</OptionLabel>
                 <OptionDescription>{labels.languageDescription}</OptionDescription>
-                <QuickSubmitOptions style={{ marginTop: "1rem" }}>
-                  {languageOptions.map((option) => (
-                    <QuickSubmitOption
-                      key={option.key ?? "auto"}
-                      $active={currentLocale === option.key}
-                      onClick={() => handleLanguageChange(option.key)}
-                    >
-                      {option.label}
-                    </QuickSubmitOption>
-                  ))}
-                </QuickSubmitOptions>
               </OptionContent>
+              {segmented(languageOptions, currentLocale, handleLanguageChange)}
             </OptionItem>
-            {/* Sidebar swipe */}
             <OptionItem>
-              <OptionIcon $active={sidebarSwipe}>
-                <FontAwesomeIcon icon={faHandPointer} />
-              </OptionIcon>
               <OptionContent>
                 <OptionLabel>{labels.sidebarSwipe}</OptionLabel>
                 <OptionDescription>{labels.sidebarSwipeDescription}</OptionDescription>
               </OptionContent>
               <Toggle
+                role="switch"
+                aria-checked={sidebarSwipe}
                 $active={sidebarSwipe}
                 onClick={() => toggleOption("sidebarSwipe")}
-                aria-label={`Toggle ${labels.sidebarSwipe}`}
+                aria-label={labels.sidebarSwipe}
               />
             </OptionItem>
-            {/* Global Writing Settings */}
-            <SectionTitle style={{ marginTop: "1.6rem" }}>{labels.responseOptions}</SectionTitle>
-            {/* Quick Submit */}
+          </OptionList>
+        </Section>
+
+        <Section>
+          <SectionTitle>{labels.responseOptions}</SectionTitle>
+          <OptionList>
             <OptionItem>
-              <OptionIcon $active={quickSubmitKey !== "none"}>
-                <FontAwesomeIcon icon={faKeyboard} />
-              </OptionIcon>
               <OptionContent>
                 <OptionLabel>{labels.quickSubmit}</OptionLabel>
                 <OptionDescription>{labels.quickSubmitDescription}</OptionDescription>
-                <QuickSubmitOptions style={{ marginTop: "1rem" }}>
-                  {quickSubmitOptions.map((option) => (
-                    <QuickSubmitOption
-                      key={option.key}
-                      $active={quickSubmitKey === option.key}
-                      onClick={() => setOption("quickSubmitKey", option.key)}
-                    >
-                      {option.label}
-                    </QuickSubmitOption>
-                  ))}
-                </QuickSubmitOptions>
               </OptionContent>
+              {segmented(quickSubmitOptions, quickSubmitKey, (key) => setOption("quickSubmitKey", key))}
             </OptionItem>
-            {/* Mode options */}
             {optionConfigs.map((config) => (
               <OptionItem key={config.key}>
-                <OptionIcon $active={options[config.key]}>
-                  <FontAwesomeIcon icon={config.icon} />
-                </OptionIcon>
                 <OptionContent>
                   <OptionLabel>{config.label}</OptionLabel>
                   <OptionDescription>{config.description}</OptionDescription>
                 </OptionContent>
                 <Toggle
+                  role="switch"
+                  aria-checked={options[config.key]}
                   $active={options[config.key]}
                   onClick={() => toggleOption(config.key)}
-                  aria-label={`Toggle ${config.label}`}
+                  aria-label={config.label}
                 />
               </OptionItem>
             ))}
           </OptionList>
+          <ButtonGroup>
+            <BackButton onClick={() => router.back()}>
+              <FontAwesomeIcon icon={faArrowLeft} />
+              {labels.back}
+            </BackButton>
+            <ResetButton onClick={resetOptions}>{labels.reset}</ResetButton>
+          </ButtonGroup>
         </Section>
 
-        <ButtonGroup>
-          <BackButton onClick={() => router.back()}>
-            <FontAwesomeIcon icon={faArrowLeft} />
-            {labels.back}
-          </BackButton>
-          <ResetButton onClick={resetOptions}>{labels.reset}</ResetButton>
-        </ButtonGroup>
-
         {isLoggedIn && (
-          <DangerSection>
-            <DangerSectionTitle>{labels.deleteAccount}</DangerSectionTitle>
-            <DangerDescription>{labels.deleteAccountDescription}</DangerDescription>
-            <DeleteAccountButton onClick={() => setShowDeleteModal(true)}>
-              <FontAwesomeIcon icon={faTrash} />
-              {labels.deleteAccountButton}
-            </DeleteAccountButton>
-          </DangerSection>
+          <Section>
+            <SectionTitle $danger>{labels.deleteAccount}</SectionTitle>
+            <OptionList $danger>
+              <OptionItem>
+                <OptionContent>
+                  <OptionDescription>{labels.deleteAccountDescription}</OptionDescription>
+                </OptionContent>
+                <DeleteAccountButton onClick={() => setShowDeleteModal(true)}>
+                  <FontAwesomeIcon icon={faTrash} />
+                  {labels.deleteAccountButton}
+                </DeleteAccountButton>
+              </OptionItem>
+            </OptionList>
+          </Section>
         )}
       </Container>
 
