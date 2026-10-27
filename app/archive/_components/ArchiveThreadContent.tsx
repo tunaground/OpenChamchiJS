@@ -43,25 +43,14 @@ const ThreadHeader = styled.header`
   padding: 0.6rem 0 1.6rem;
 `;
 
-const Chips = styled.div`
-  display: flex;
-  gap: 0.6rem;
-  margin-bottom: 0.8rem;
+/* Thread number sits above the title as quiet text */
+/* Thread number leads the title in the same size, lighter and muted */
+const ThreadNo = styled.span`
+  margin-right: 0.6em;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  color: ${(props) => props.theme.textMuted};
 `;
-
-const Chip = styled.span`
-  display: inline-flex;
-  align-items: center;
-  height: 2rem;
-  padding: 0 0.6rem;
-  border-radius: ${(props) => props.theme.radiusChip};
-  font-size: 1.2rem;
-  font-weight: 500;
-  background: ${(props) => props.theme.paneSunken};
-  color: ${(props) => props.theme.textSecondary};
-  border: 1px solid ${(props) => props.theme.line};
-`;
-
 const ThreadTitle = styled.h1`
   font-size: 2.6rem;
   line-height: 1.3;
@@ -230,10 +219,10 @@ export function ArchiveThreadContent({
       </BackLink>
 
       <ThreadHeader>
-        <Chips>
-          <Chip>#{thread.threadId}</Chip>
-        </Chips>
-        <ThreadTitle>{thread.title}</ThreadTitle>
+        <ThreadTitle>
+          <ThreadNo>#{thread.threadId}</ThreadNo>
+          {thread.title}
+        </ThreadTitle>
         <ThreadMeta>
           <MetaItem>
             <MetaLabel>Author:</MetaLabel>
