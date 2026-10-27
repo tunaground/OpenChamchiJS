@@ -4,18 +4,11 @@ import Link from "next/link";
 import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 
-const Container = styled.div`
-  width: 100%;
-  max-width: 80rem;
-  padding: 1.6rem 2.8rem 3.2rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.2rem 1.4rem 2.4rem;
-  }
-`;
+const Container = PageContainer;
 
 const BackLink = styled(Link)`
   display: inline-block;

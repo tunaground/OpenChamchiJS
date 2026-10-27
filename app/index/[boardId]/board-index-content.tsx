@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { usePresence } from "@/lib/hooks/usePresence";
 import { CHANNELS } from "@/lib/realtime";
@@ -16,16 +17,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass, faPlus } from "@fortawesome/free-solid-svg-icons";
 import CustomHtml from "@/components/CustomHtml";
 
-const Container = styled.div`
-  width: 100%;
-  max-width: 96rem;
-  margin: 0 auto;
-  padding: 1.6rem 2.4rem 3.2rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.2rem 1.4rem 2.4rem;
-  }
-`;
+const Container = PageContainer;
 
 const Notices = styled.ul`
   list-style: none;

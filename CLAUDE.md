@@ -103,7 +103,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - `ThemeToggleButton` (sidebar footer) steps light → grey → dark; Settings offers System/Light/Grey/Dark
 - Fonts: IBM Plex Sans KR (UI/body, Google Fonts link in `app/layout.tsx`), AAFont (HeadKasen + Nanum Gothic Coding) for AA, Google Sans Code for dice/calc
 - Responsive breakpoint: `props.theme.breakpoint` (768px)
-- Content max width: `props.theme.contentMaxWidth` (80rem)
+- Content max width: `props.theme.contentMaxWidth` (96rem) via `components/layout/PageContainer` (centered) for every page except thread views, which use the full width
 
 ### Board System
 - **Board** - 게시판 설정 (threadsPerPage, responsesPerPage, blockForeignIp, writeLocked, uploadMaxSize, uploadMimeTypes, showUserCount 등)

@@ -7,19 +7,11 @@ import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 
-const Container = styled.div`
-  width: 100%;
-  max-width: 96rem;
-  margin: 0 auto;
-  padding: 1.6rem 2.4rem 3.2rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.2rem 1.4rem 2.4rem;
-  }
-`;
+const Container = PageContainer;
 
 const SearchForm = styled.form`
   display: flex;

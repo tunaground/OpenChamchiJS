@@ -14,16 +14,7 @@ import styled, { css } from "styled-components";
 /* Page                                                                */
 /* ------------------------------------------------------------------ */
 
-export const Container = styled.div`
-  width: 100%;
-  max-width: ${(props) => props.theme.adminMaxWidth};
-  margin: 0 auto;
-  padding: 1.6rem 2.4rem 3.2rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.2rem 1.4rem 2.4rem;
-  }
-`;
+export { PageContainer as Container } from "@/components/layout/PageContainer";
 
 /** Small context line above the page content (breadcrumb, intro text) */
 export const Breadcrumb = styled.div`
