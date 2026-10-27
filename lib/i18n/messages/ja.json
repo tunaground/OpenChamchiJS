@@ -5,7 +5,8 @@
     "home": "ホーム",
     "boards": "掲示板",
     "manual": "マニュアル",
-    "toggleSidebar": "サイドバーの開閉"
+    "toggleSidebar": "サイドバーの開閉",
+    "links": "リンク"
   },
   "response": {
     "not_found": "レスが見つかりません。"

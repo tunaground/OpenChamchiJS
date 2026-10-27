@@ -5,7 +5,8 @@
     "home": "Home",
     "boards": "Boards",
     "manual": "Manual",
-    "toggleSidebar": "Toggle sidebar"
+    "toggleSidebar": "Toggle sidebar",
+    "links": "Links"
   },
   "response": {
     "not_found": "Response not found."

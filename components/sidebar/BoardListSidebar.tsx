@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBook } from "@fortawesome/free-solid-svg-icons";
 import {
@@ -65,19 +66,23 @@ export function BoardsNav({ boards, title, emptyMessage = "No boards", currentBo
 
 /** Admin-configured external links */
 export function CustomLinksNav({ links }: { links?: CustomLink[] }) {
+  const t = useTranslations("common");
   if (!links || links.length === 0) return null;
 
   return (
-    <NavList style={{ marginTop: "1.4rem" }}>
-      {links.map((link) => (
-        <NavItem key={link.id}>
-          <ExternalNavLink href={link.url} target="_blank" rel="noopener noreferrer">
-            <NavLabel>{link.label}</NavLabel>
-            <ExternalIcon />
-          </ExternalNavLink>
-        </NavItem>
-      ))}
-    </NavList>
+    <>
+      <SidebarTitle>{t("links")}</SidebarTitle>
+      <NavList>
+        {links.map((link) => (
+          <NavItem key={link.id}>
+            <ExternalNavLink href={link.url} target="_blank" rel="noopener noreferrer">
+              <NavLabel>{link.label}</NavLabel>
+              <ExternalIcon />
+            </ExternalNavLink>
+          </NavItem>
+        ))}
+      </NavList>
+    </>
   );
 }
 

@@ -3,12 +3,12 @@
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faList,
+  faPersonRunning,
   faClock,
   faChevronLeft,
   faChevronRight,
-  faArrowUp,
-  faArrowDown,
+  faChevronUp,
+  faChevronDown,
 } from "@fortawesome/free-solid-svg-icons";
 import type { IconDefinition } from "@fortawesome/fontawesome-svg-core";
 import {
@@ -139,7 +139,7 @@ export function TraceSidebar({
         <NavItem>
           <NavItemWithIcon
             href={viewHref("all")}
-            icon={faList}
+            icon={faPersonRunning}
             label={labels.viewAll}
             active={currentView === "all"}
           />
@@ -160,14 +160,14 @@ export function TraceSidebar({
         <PageRow>
           <NavButton type="button" onClick={() => scrollTo("top")}>
             <NavIcon>
-              <FontAwesomeIcon icon={faArrowUp} />
+              <FontAwesomeIcon icon={faChevronUp} />
             </NavIcon>
             <NavLabel>{labels.scrollUp}</NavLabel>
           </NavButton>
           <NavButton type="button" onClick={() => scrollTo("bottom")}>
             <NavLabel style={{ textAlign: "right" }}>{labels.scrollDown}</NavLabel>
             <NavIcon>
-              <FontAwesomeIcon icon={faArrowDown} />
+              <FontAwesomeIcon icon={faChevronDown} />
             </NavIcon>
           </NavButton>
         </PageRow>
