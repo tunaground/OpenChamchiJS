@@ -8,134 +8,27 @@ import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
+import {
+  Container,
+  Breadcrumb,
+  ActionsBar,
+  Button,
+  SecondaryButton,
+  Badge,
+  List,
+  Item,
+  ItemMeta,
+  ItemActions,
+  SmallButton,
+  EmptyState,
+  SearchForm as BaseSearchForm,
+  SearchSelect,
+  SearchInput,
+  Muted,
+} from "../../../_components/admin-ui";
 
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.adminMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
-
-const Header = styled.div`
-  margin-bottom: 2.4rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.4rem;
-`;
-
-const Breadcrumb = styled.div`
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-
-  a {
-    color: ${(props) => props.theme.textSecondary};
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const ActionsBar = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1.6rem;
-  margin-bottom: 2.4rem;
+const SearchForm = styled(BaseSearchForm)`
   flex-wrap: wrap;
-`;
-
-const SearchForm = styled.form`
-  display: flex;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    width: 100%;
-  }
-`;
-
-const SearchSelect = styled.select`
-  height: 3.5rem;
-  padding: 0 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  min-width: 20rem;
-  max-width: 30rem;
-  padding: 0.8rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    max-width: none;
-    min-width: 0;
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-
-  &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
-  }
-`;
-
-const Button = styled.button`
-  height: 3.5rem;
-  padding: 0 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const ResponseCards = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-`;
-
-const ResponseCard = styled.div<{ $deleted?: boolean }>`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.2rem;
-  opacity: ${(props) => (props.$deleted ? 0.5 : 1)};
 `;
 
 const CardHeader = styled.div`
@@ -143,64 +36,53 @@ const CardHeader = styled.div`
   align-items: center;
   gap: 0.8rem;
   flex-wrap: wrap;
-  margin-bottom: 0.8rem;
+  margin-bottom: 0.4rem;
 `;
 
 const ThreadLink = styled(Link)`
-  color: ${(props) => props.theme.textPrimary};
+  font-size: 1.5rem;
   font-weight: 500;
-  text-decoration: none;
+  color: ${(props) => props.theme.textPrimary};
+  word-break: break-word;
 
   &:hover {
-    text-decoration: underline;
+    color: ${(props) => props.theme.accent};
   }
 `;
 
-const SeqBadge = styled.span`
-  background: ${(props) => props.theme.surfaceHover};
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 1.2rem;
-  font-weight: 500;
-`;
-
-const CardMeta = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-  margin-bottom: 0.8rem;
-`;
-
-const UserBadge = styled.span`
-  background: ${(props) => props.theme.buttonPrimary}20;
-  color: ${(props) => props.theme.buttonPrimary};
-  padding: 0.1rem 0.6rem;
-  border-radius: 4px;
-  font-size: 1.1rem;
+const CardMeta = styled(ItemMeta)`
+  & + & {
+    margin-top: 0.2rem;
+  }
 `;
 
 const ClickableText = styled.span`
   cursor: pointer;
 
   &:hover {
+    color: ${(props) => props.theme.accent};
     text-decoration: underline;
   }
 `;
 
-const ClickableUserBadge = styled(UserBadge)`
+const MonoClickable = styled(ClickableText)`
+  font-family: ${(props) => props.theme.fontMono};
+  font-size: 1.2rem;
+`;
+
+const ClickableUserBadge = styled(Badge)`
   cursor: pointer;
 
   &:hover {
-    opacity: 0.8;
+    filter: brightness(1.1);
   }
 `;
 
 const CardContent = styled.div<{ $expanded?: boolean }>`
-  font-size: 1.3rem;
+  margin-top: 0.8rem;
+  font-size: 1.4rem;
+  line-height: 1.55;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.8rem;
   word-break: break-word;
   white-space: pre-wrap;
   ${(props) => !props.$expanded && `
@@ -210,84 +92,17 @@ const CardContent = styled.div<{ $expanded?: boolean }>`
 `;
 
 const ExpandButton = styled.button`
+  margin-top: 0.4rem;
+  padding: 0;
   background: none;
   border: none;
   color: ${(props) => props.theme.textSecondary};
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   cursor: pointer;
-  padding: 0;
-  margin-bottom: 0.8rem;
 
   &:hover {
-    text-decoration: underline;
+    color: ${(props) => props.theme.accent};
   }
-`;
-
-const CardActions = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  align-items: center;
-`;
-
-const Badge = styled.span<{ $variant?: "visible" | "hidden" | "deleted" }>`
-  display: inline-block;
-  padding: 0.2rem 0.8rem;
-  border-radius: 4px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  background: ${(props) => {
-    switch (props.$variant) {
-      case "visible":
-        return "#22c55e";
-      case "hidden":
-        return "#f59e0b";
-      case "deleted":
-        return props.theme.textSecondary + "30";
-      default:
-        return props.theme.textSecondary;
-    }
-  }};
-  color: ${(props) => {
-    switch (props.$variant) {
-      case "visible":
-        return "white";
-      case "hidden":
-        return "white";
-      case "deleted":
-        return props.theme.textSecondary;
-      default:
-        return props.theme.background;
-    }
-  }};
-`;
-
-const SmallButton = styled.button`
-  padding: 0.4rem 0.8rem;
-  font-size: 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  background: transparent;
-  color: ${(props) => props.theme.textPrimary};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 4.8rem;
-  color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
 `;
 
 const LoadMoreContainer = styled.div`
@@ -561,12 +376,9 @@ export function AdminResponsesContent({
       isAdminPage
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-          <Breadcrumb>
-            <Link prefetch={false} href="/admin/boards">Boards</Link> / {boardName}
-          </Breadcrumb>
-        </Header>
+        <Breadcrumb>
+          <Link prefetch={false} href="/admin/boards">Boards</Link> / {boardName}
+        </Breadcrumb>
 
         <ActionsBar>
           <SearchForm onSubmit={handleSearch}>
@@ -586,7 +398,7 @@ export function AdminResponsesContent({
               onChange={(e) => setSearch(e.target.value)}
               placeholder={labels.searchPlaceholder}
             />
-            <Button type="submit">{labels.searchButton}</Button>
+            <SecondaryButton type="submit">{labels.searchButton}</SecondaryButton>
           </SearchForm>
         </ActionsBar>
 
@@ -596,9 +408,9 @@ export function AdminResponsesContent({
           </EmptyState>
         ) : (
           <>
-            <ResponseCards>
+            <List>
               {responses.map((response) => (
-                <ResponseCard key={response.id} $deleted={response.deleted}>
+                <Item key={response.id} $deleted={response.deleted}>
                   <CardHeader>
                     <ThreadLink
                       prefetch={false}
@@ -606,41 +418,39 @@ export function AdminResponsesContent({
                     >
                       #{response.threadId} {response.threadTitle}
                     </ThreadLink>
-                    <SeqBadge>#{response.seq}</SeqBadge>
+                    <Badge>#{response.seq}</Badge>
                     {response.deleted ? (
-                      <Badge $variant="deleted">{labels.deleted}</Badge>
+                      <Badge $tone="danger">{labels.deleted}</Badge>
                     ) : !response.visible ? (
-                      <Badge $variant="hidden">{labels.hidden}</Badge>
+                      <Badge $tone="warning">{labels.hidden}</Badge>
                     ) : (
-                      <Badge $variant="visible">{labels.visible}</Badge>
+                      <Badge $tone="success">{labels.visible}</Badge>
                     )}
                   </CardHeader>
                   <CardMeta>
                     <ClickableText onClick={() => handleSearchBy("username", response.username)}>
                       {response.username}
                     </ClickableText>
-                    <ClickableText
-                      style={{ fontFamily: "monospace", fontSize: "1.1rem" }}
+                    <MonoClickable
                       onClick={() => handleSearchBy("authorId", response.authorId)}
                     >
                       ({response.authorId})
-                    </ClickableText>
-                    <ClickableText
-                      style={{ fontFamily: "monospace", fontSize: "1.1rem" }}
+                    </MonoClickable>
+                    <MonoClickable
                       onClick={() => handleSearchBy("ip", response.ip)}
                     >
                       {response.ip}{response.country ? ` [${response.country}]` : ""}
-                    </ClickableText>
+                    </MonoClickable>
                     {response.userId && response.userEmail ? (
-                      <ClickableUserBadge onClick={() => handleSearchBy("email", response.userEmail!)}>
+                      <ClickableUserBadge $tone="accent" onClick={() => handleSearchBy("email", response.userEmail!)}>
                         {labels.user}: {response.userName ?? response.userId}
                       </ClickableUserBadge>
                     ) : response.userId ? (
-                      <UserBadge>
+                      <Badge $tone="accent">
                         {labels.user}: {response.userName ?? response.userId}
-                      </UserBadge>
+                      </Badge>
                     ) : (
-                      <span style={{ opacity: 0.6 }}>{labels.anonymous}</span>
+                      <Muted>{labels.anonymous}</Muted>
                     )}
                   </CardMeta>
                   <CardMeta>
@@ -657,7 +467,7 @@ export function AdminResponsesContent({
                       {expandedIds.has(response.id) ? "▲ 접기" : "▼ 펼치기"}
                     </ExpandButton>
                   )}
-                  <CardActions>
+                  <ItemActions>
                     {canEdit && !response.deleted && response.seq !== 0 && (
                       <SmallButton
                         onClick={() => handleToggleVisible(response)}
@@ -674,10 +484,10 @@ export function AdminResponsesContent({
                         {response.deleted ? labels.restore : labels.delete}
                       </SmallButton>
                     )}
-                  </CardActions>
-                </ResponseCard>
+                  </ItemActions>
+                </Item>
               ))}
-            </ResponseCards>
+            </List>
 
             <LoadMoreContainer>
               {showScanned && (

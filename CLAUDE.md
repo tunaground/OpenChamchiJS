@@ -44,7 +44,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - `lib/schemas/` - Zod validation schemas with input sanitization
 - `lib/api/` - API utilities (auth, csrf, foreign-ip-check, write-lock-check, error-handler)
 - `lib/tom/` - TOM (Tunaground Object Markup) parser/renderer
-- `lib/theme/` - Theme definitions (light, dark, grey)
+- `lib/theme/` - Theme definitions (light, dark) and global styles
 - `lib/store/` - Zustand stores (theme, sidebar, responseOptions, threadResponseOptions)
 - `lib/hooks/` - Client hooks (useChatMode, usePresence, useResponseOptions)
 - `lib/i18n/messages/` - Translation files (ko.json, en.json, ja.json)
@@ -55,7 +55,8 @@ npx prisma studio      # Open Prisma Studio GUI
 - `lib/types/` - Type definitions (pagination, response-range)
 - `lib/cache.ts` - Tag-based cache invalidation (unstable_cache wrapper)
 - `lib/ip.ts` - GeoIP detection (MaxMind GeoLite2)
-- `components/layout/` - PageLayout, TopBar, Sidebar, buttons
+- `components/layout/` - PageLayout, Toolbar, Sidebar, buttons
+- `components/thread/` - Thread page chrome (opener, view/filter bars, toolbar actions, composer dock)
 - `components/sidebar/` - AdminSidebar, AdminBoardSidebar, BoardListSidebar, TraceSidebar
 - `components/response/` - ResponseCard, ResponseFormSection, ImageUpload, AnchorPreview
 - `ws-server/` - Standalone WebSocket server (Node.js, separate Docker image)
@@ -96,13 +97,13 @@ npx prisma studio      # Open Prisma Studio GUI
 
 ### Styling & Theming
 - **styled-components** - Primary styling method for Client Components (requires `'use client'`)
-- Three themes: light, dark, grey (defined in `lib/theme/themes.ts`)
-- Theme state via Zustand store (`lib/store/theme.ts`)
-- Use `props.theme.textPrimary`, `props.theme.buttonPrimary`, etc.
-- `ThemeToggleButton` component cycles through light → dark → grey
-- Fonts: Saitamaar, Nanum Gothic loaded in ThemeProvider
+- Three modes: light, grey, dark (`lib/theme/themes.ts`; grey = mid tones, no white/black). Preference `system | light | grey | dark` in `lib/store/theme.ts` (system resolves to light/dark); `useResolvedThemeMode()` gives the shown mode
+- Surface tokens (`pane`, `paneRaised`, `paneSunken`, `line`, `lineStrong`, `hover`, `accentSoft`, `scrim`, and legacy `surface*`/`background`) are CSS variables declared in `ThemeProvider`'s GlobalStyle, keyed by `html[data-mode]`. `app/layout.tsx` sets `data-mode` before paint. Text/button tokens stay hex because some code appends hex alpha (`theme.textSecondary + "60"`)
+- Radii: `radiusPane` 10px, `radiusControl` 6px, `radiusChip` 4px. Shared icon button style: `components/layout/iconButton.ts`
+- `ThemeToggleButton` (sidebar footer) steps light → grey → dark; Settings offers System/Light/Grey/Dark
+- Fonts: IBM Plex Sans KR (UI/body, Google Fonts link in `app/layout.tsx`), AAFont (HeadKasen + Nanum Gothic Coding) for AA, Google Sans Code for dice/calc
 - Responsive breakpoint: `props.theme.breakpoint` (768px)
-- Content max width: `props.theme.contentMaxWidth` (80rem)
+- Content max width: `props.theme.contentMaxWidth` (96rem) via `components/layout/PageContainer` (centered) for every page except thread views, which use the full width
 
 ### Board System
 - **Board** - 게시판 설정 (threadsPerPage, responsesPerPage, blockForeignIp, writeLocked, uploadMaxSize, uploadMimeTypes, showUserCount 등)
@@ -246,11 +247,13 @@ npx prisma studio      # Open Prisma Studio GUI
 - Provider 선택: `GlobalSettings.storageProvider` (DB) 또는 `STORAGE_PROVIDER` 환경변수
 
 ### Page Layout Pattern
-- Use `PageLayout` component with `sidebar` and topbar integration
+- `PageLayout`: floating sidebar pane (fixed) + content pane. On desktop the pane has a fixed height and only its middle (`#page-scroll`) scrolls, so the toolbar, the `footer` slot (thread composer dock) and the pane's edges always show; on mobile the window scrolls and toolbar/footer are `position: sticky`. Use `lib/utils/page-scroll.ts` (`isPageNearBottom`, `scrollPageTo`, `onPageScroll`) instead of `window.scroll*`. Desktop pins `<main>` (`position: fixed`) and the pane (`position: absolute; inset`) by insets, never by `height`: AdSense in custom HTML writes `height: auto !important` inline on every ancestor of an ad slot Keep `body { overflow-x: clip }` — `hidden` makes body a scroll container and breaks sticky on mobile
+- Toolbar props: `title`, `parent` (crumb link), `subtitle`, `toolbarActions`, `userCount`
+- Sidebar pane: site name (links home) / page sidebar content / watched threads (logged in) / footer with ThemeToggleButton, SettingsButton, PushBellButton, AdminButton, AuthButton
 - Admin pages: `AdminSidebar` or `AdminBoardSidebar`
-- Index pages: `BoardListSidebar`
-- Thread pages: `TraceSidebar`
-- TopBar: HomeButton, ThemeToggleButton, SettingsButton, AdminButton, AuthButton, UserCounter
+- Index pages: `BoardListSidebar` (exports `BoardsNav`, `CustomLinksNav`)
+- Thread pages: `TraceSidebar` (recent/all, prev/next via `lib/utils/trace-range.ts`, scroll top/bottom; on mobile scroll top/bottom are also in the toolbar); the thread toolbar holds refresh, alert toggle and response management; filters show above the responses
+- Archive pages use `PageLayout` too (`ArchiveLayout`)
 
 ### Caching
 - Tag-based cache invalidation via `lib/cache.ts`

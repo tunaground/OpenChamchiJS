@@ -4,7 +4,9 @@
     "logout": "로그아웃",
     "home": "홈",
     "boards": "게시판",
-    "manual": "매뉴얼"
+    "manual": "매뉴얼",
+    "toggleSidebar": "사이드바 열고 닫기",
+    "links": "링크"
   },
   "response": {
     "not_found": "응답을 찾을 수 없습니다."
@@ -169,8 +171,8 @@
   },
   "boardIndex": {
     "notices": "공지사항",
-    "moreNotices": "더보기",
-    "createThread": "글쓰기",
+    "moreNotices": "공지 전체 보기",
+    "createThread": "새 스레드",
     "id": "ID",
     "threadTitle": "제목",
     "author": "작성자",
@@ -183,7 +185,11 @@
     "top": "상단",
     "searchPlaceholder": "제목 또는 작성자로 검색",
     "searchButton": "검색",
-    "globalNotice": "전체"
+    "globalNotice": "전체",
+    "number": "번호",
+    "responses": "응답",
+    "lastResponse": "마지막 응답",
+    "viewAllResponses": "처음부터 전부 보기"
   },
   "threadDetail": {
     "backToList": "목록으로",
@@ -240,14 +246,20 @@
     "unban": "차단해제",
     "show": "보이기",
     "threadBanned": "이 주제글에서 차단되었습니다.",
-    "banned": "차단됨"
+    "banned": "차단됨",
+    "filterUsername": "이름",
+    "filterAuthorId": "ID",
+    "filterPause": "잠시 끄기",
+    "filterResume": "다시 켜기",
+    "filterRemove": "필터에서 빼기",
+    "quickSubmitHint": "{key}로 작성"
   },
   "traceSidebar": {
-    "navigation": "네비게이션",
+    "navigation": "이 스레드",
     "backToBoard": "게시판으로",
-    "manageThread": "주제글 관리",
-    "viewAll": "전부 보기",
-    "viewRecent": "최신 보기",
+    "manageThread": "응답 관리",
+    "viewAll": "전체",
+    "viewRecent": "최신",
     "prev": "이전",
     "next": "다음",
     "scrollUp": "위로",
@@ -447,7 +459,13 @@
     "deleteAccountDescription": "계정을 삭제하면 복구할 수 없습니다. 작성한 응답은 유지되지만 작성자 정보가 제거됩니다.",
     "deleteAccountConfirm": "정말로 탈퇴하시겠습니까?",
     "deleteAccountButton": "탈퇴하기",
-    "cancel": "취소"
+    "cancel": "취소",
+    "theme": "테마",
+    "themeDescription": "화면 밝기를 고릅니다. 그레이는 라이트보다 덜 밝고 다크보다 덜 어둡습니다. 시스템을 고르면 기기 설정(라이트·다크)을 따릅니다.",
+    "themeSystem": "시스템",
+    "themeLight": "라이트",
+    "themeDark": "다크",
+    "themeGrey": "그레이"
   },
   "manual": {
     "title": "사용 매뉴얼",
@@ -497,15 +515,15 @@
       "alwaysBottomTitle": "하단 고정",
       "alwaysBottomDescription": "페이지를 항상 최하단으로 스크롤합니다. 실시간 채팅 시 유용합니다. (전역/개별 스레드 설정)",
       "refreshTitle": "갱신",
-      "refreshDescription": "모드바 오른쪽 끝(종료된 주제글은 종료 안내 옆)에 있는 버튼입니다. 화면의 마지막 답글 다음부터 새 답글을 불러옵니다. 숨김·삭제된 답글은 건너뜁니다. 새로고침 버튼이 없는 홈 화면 앱에서 유용합니다."
+      "refreshDescription": "주제글 제목 오른쪽의 새로고침 아이콘입니다(종료된 주제글은 종료 안내 옆에도 있습니다). 화면의 마지막 답글 다음부터 새 답글을 불러옵니다. 숨김·삭제된 답글은 건너뜁니다. 새로고침 버튼이 없는 홈 화면 앱에서 유용합니다."
     },
     "push": {
       "title": "알림",
       "description": "로그인하면 관심 있는 주제글에 새 답글이 달렸을 때 브라우저나 앱을 닫아 둔 상태에서도 알림을 받을 수 있습니다. 관리자가 기능을 켠 경우에만 표시됩니다.",
       "watchTitle": "알림 받기",
-      "watchDescription": "주제글 사이드바의 '알림 받기'를 누르면 등록됩니다. 처음에는 이 기기의 알림 권한을 묻습니다. 다시 누르면 해제됩니다.",
+      "watchDescription": "주제글 제목 오른쪽의 종 아이콘을 누르면 등록됩니다. 처음에는 이 기기의 알림 권한을 묻습니다. 다시 누르면 해제됩니다.",
       "bellTitle": "알림 목록",
-      "bellDescription": "상단 바의 종 아이콘에서 등록한 주제글을 확인하고 제거할 수 있습니다. 등록할 수 있는 주제글 수에는 상한이 있습니다.",
+      "bellDescription": "사이드바 아래쪽의 종 아이콘에서 등록한 주제글을 확인하고 제거할 수 있습니다. 등록한 주제글은 사이드바 목록에도 표시됩니다. 등록할 수 있는 주제글 수에는 상한이 있습니다.",
       "toggleTitle": "전체 / 개별 켜고 끄기",
       "toggleDescription": "목록에서 주제글마다 알림을 잠시 끌 수 있고, 전체 알림도 한 번에 끌 수 있습니다. 전체를 다시 켜도 개별로 꺼 둔 설정은 그대로 유지됩니다.",
       "rulesTitle": "알림 규칙",
@@ -547,17 +565,17 @@
     },
     "theme": {
       "title": "테마",
-      "description": "화면 테마를 변경할 수 있습니다. 상단 바의 테마 버튼을 클릭하면 순환합니다.",
+      "description": "화면 밝기를 라이트·그레이·다크 중에 고를 수 있습니다. 사이드바 아래쪽의 테마 버튼을 누를 때마다 차례로 바뀌고, 설정에서 시스템·라이트·그레이·다크 중에 고를 수도 있습니다.",
       "lightTitle": "라이트",
       "lightDescription": "기본 밝은 테마입니다. 흰색 배경에 어두운 글씨를 사용합니다.",
-      "greyTitle": "그레이",
-      "greyDescription": "눈의 피로를 줄여주는 회색조 테마입니다. 흰색을 사용하지 않고 부드러운 회색 톤을 사용합니다.",
       "darkTitle": "다크",
-      "darkDescription": "어두운 환경에 적합한 다크 테마입니다. 어두운 배경에 밝은 글씨를 사용합니다."
+      "darkDescription": "어두운 환경에 적합한 다크 테마입니다. 어두운 배경에 밝은 글씨를 사용합니다.",
+      "greyTitle": "그레이",
+      "greyDescription": "라이트는 너무 밝고 다크는 너무 어두울 때 쓰는 중간 밝기 테마입니다. 흰색과 검은색 없이 회색 톤만 씁니다."
     },
     "userCounter": {
       "title": "접속자 수",
-      "description": "상단 바에 현재 페이지를 보고 있는 사용자 수가 표시됩니다.",
+      "description": "페이지 제목 오른쪽에 현재 페이지를 보고 있는 사용자 수가 표시됩니다.",
       "indexTitle": "게시판 페이지",
       "indexDescription": "해당 게시판을 보고 있는 접속자 수가 항상 표시됩니다.",
       "traceTitle": "주제글 페이지",
@@ -567,23 +585,23 @@
     },
     "sidebar": {
       "title": "주제글 페이지 메뉴",
-      "description": "주제글 상세 페이지의 사이드바에서 사용할 수 있는 메뉴입니다.",
+      "description": "주제글 페이지의 사이드바, 제목 옆 아이콘, 오른쪽 아래 버튼에서 사용할 수 있는 메뉴입니다.",
       "backTitle": "게시판으로",
-      "backDescription": "게시판 목록으로 돌아갑니다.",
-      "manageTitle": "주제글 관리",
-      "manageDescription": "주제글 관리 모달을 열어 답글 숨기기/복구 등을 할 수 있습니다.",
-      "viewAllTitle": "전부 보기",
+      "backDescription": "제목 왼쪽의 게시판 이름을 누르면 게시판 목록으로 돌아갑니다.",
+      "manageTitle": "응답 관리",
+      "manageDescription": "제목 오른쪽의 관리 아이콘으로 응답 관리 창을 열어 응답을 숨기거나 복구하고, 작성자를 차단할 수 있습니다.",
+      "viewAllTitle": "전체",
       "viewAllDescription": "주제글의 모든 답글을 한 페이지에 표시합니다.",
-      "viewRecentTitle": "최신 보기",
+      "viewRecentTitle": "최신",
       "viewRecentDescription": "최신 답글만 표시합니다.",
       "prevTitle": "이전",
       "prevDescription": "이전 페이지의 답글을 표시합니다.",
       "nextTitle": "다음",
       "nextDescription": "다음 페이지의 답글을 표시합니다.",
       "scrollUpTitle": "위로",
-      "scrollUpDescription": "페이지 최상단으로 스크롤합니다.",
+      "scrollUpDescription": "페이지 최상단으로 스크롤합니다. 모바일에서는 제목 오른쪽의 위쪽 화살표 버튼으로도 할 수 있습니다.",
       "scrollDownTitle": "아래로",
-      "scrollDownDescription": "페이지 최하단으로 스크롤합니다.",
+      "scrollDownDescription": "페이지 최하단으로 스크롤합니다. 모바일에서는 제목 오른쪽의 아래쪽 화살표 버튼으로도 할 수 있습니다.",
       "watchTitle": "알림 받기 / 해제",
       "watchDescription": "이 주제글의 새 답글 알림을 등록하거나 해제합니다. (로그인 필요)"
     }
@@ -604,6 +622,13 @@
     "limitExceeded": "알림은 최대 {limit}개까지 등록할 수 있어요. 🔔 목록에서 정리해 주세요.",
     "deviceSubscribeFailed": "이 기기에서 알림 구독에 실패했어요. 잠시 후 다시 시도해 주세요.",
     "imageLabel": "(이미지)",
-    "navigateConfirm": "작성 중인 내용이 있어요. 새 답글이 있는 스레드로 이동할까요?"
+    "navigateConfirm": "작성 중인 내용이 있어요. 새 답글이 있는 스레드로 이동할까요?",
+    "sidebarTitle": "알림 받는 스레드"
+  },
+  "theme": {
+    "toggle": "테마 바꾸기",
+    "switchToDark": "다크 모드로",
+    "switchToLight": "라이트 모드로",
+    "switchToGrey": "그레이 모드로"
   }
 }

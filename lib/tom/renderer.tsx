@@ -22,6 +22,7 @@ import {
   TomDiceResult,
   TomCalcResult,
 } from "./prerenderer";
+import { copyText } from "@/lib/utils/clipboard";
 
 // CSS color validation to prevent injection attacks
 const CSS_COLOR_REGEX =
@@ -42,6 +43,7 @@ const ColorSpan = styled.span<{ $color?: string; $textShadow?: string }>`
 `;
 
 const Spoiler = styled.span`
+  /* Fully invisible, no hint of where it is (used for guessing games); select to read */
   color: rgba(0, 0, 0, 0);
 
   ::selection {
@@ -77,11 +79,15 @@ const AA = styled.div.attrs({
   white-space: nowrap;
   overflow-x: auto;
   overflow-y: hidden;
-  font-family: "AAFont", "HeadKasen", "Saitamaar", sans-serif;
+  font-family: ${(props) => props.theme.fontAA};
   color: black;
   width: 100%;
+  /* AA always draws on paper so coloured art keeps its look in dark mode */
   background: rgba(255, 255, 255);
   line-height: 1.6rem;
+  padding: 0.8rem 1rem;
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     font-size: 1.2rem;
@@ -100,6 +106,8 @@ const Italic = styled.span`
 const AnchorA = styled.a`
   color: ${(props) => props.theme.anchorALinkColor};
   cursor: pointer;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.3rem;
 `;
 
 const YoutubeWrapper = styled.div`
@@ -447,8 +455,7 @@ function renderNode(node: PrerenderedNode, key: number, ctx: RenderContext): Rea
     const copy = `[dice ${dice.min} ${dice.max}]`;
 
     const handleClick = async () => {
-      await navigator.clipboard.writeText(copy);
-      ctx.onCopy?.(copy);
+      if (await copyText(copy)) ctx.onCopy?.(copy);
     };
 
     return (
@@ -469,8 +476,7 @@ function renderNode(node: PrerenderedNode, key: number, ctx: RenderContext): Rea
         : `[calcn ${copyExpr}][/calcn]`;
 
     const handleClick = async () => {
-      await navigator.clipboard.writeText(copy);
-      ctx.onCopy?.(copy);
+      if (await copyText(copy)) ctx.onCopy?.(copy);
     };
 
     return (

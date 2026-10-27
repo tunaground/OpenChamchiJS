@@ -9,10 +9,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- New look across the site: the sidebar and the content area float as panes on a quiet background, with IBM Plex Sans KR type and squarer corners
+- The top bar is gone: theme, settings, alerts, admin and login sit at the bottom of the sidebar, and each page has its own toolbar (thread pages: refresh, alerts, response management)
+- Thread pages read as one continuous list with the response number in the left margin (click to copy the anchor, as before), using the full width with minimal side margins so AA and other wide posts have room (archive threads too)
+- The reply form stays docked at the bottom of thread pages as one editor box: a single line until you start writing, then options and name on top, the body, and image, shortcut hint and the post button below, with the live preview above (an empty form folds back on Esc or a click outside). The body grows with what you type, up to nearly the full pane, so long AA stays visible while you write. On desktop only the content between the toolbar and the reply form scrolls, so the pane's edges always show
+- Recent/all and previous/next sit above the responses as well as in the sidebar; scroll to top/bottom sit in the thread sidebar (and in the toolbar on mobile); active name/ID filters show above the responses on every screen size
+- On mobile the thread sidebar no longer stays pinned as an icon strip; it opens as a drawer like on other pages, and the content uses the full width
+- Board lists show threads as a table with the reply count and how long ago the last reply came; notices and settings use the same row style
+- Every page except thread views shares one centered content width (board list, new thread, settings, notices, manual, archive, admin)
+- Themes are light, grey and dark; grey is redone as a softer middle (no white or black) for readers who find light too bright and dark too dark. The theme button steps light → grey → dark, Settings adds a theme choice that can also follow the system (light/dark), and the saved mode applies before the page draws
+- Toasts appear at the top of the window
+- The sidebar lists the threads you get alerts for (logged-in users)
 - Manual covers web push notifications (shown only when the feature is enabled), the refresh button and the thread sidebar alert toggle
 
 ### Fixed
 
+- Thread pages no longer crash when the site is opened over plain HTTP on a local address (e.g. a phone on http://192.168.x.x): the anonymous ID and copy-to-clipboard fall back to methods that work outside HTTPS
+- The home page no longer logs a hydration warning when its admin HTML contains ad scripts (e.g. AdSense)
 - Japanese manual was missing the "Response Interaction" section texts
 
 ## [0.4.0] - 2026-10-25

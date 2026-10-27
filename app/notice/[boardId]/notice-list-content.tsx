@@ -7,149 +7,106 @@ import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.contentMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
-
-const BoardLink = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  text-decoration: none;
-  font-size: 1.4rem;
-  margin-bottom: 1.6rem;
-
-  &:hover {
-    color: ${(props) => props.theme.textPrimary};
-  }
-`;
-
-const ActionsBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.6rem;
-  margin-bottom: 1.6rem;
-  flex-wrap: wrap;
-`;
-
-const PageTitle = styled.span`
-  font-size: 1.6rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-`;
+const Container = PageContainer;
 
 const SearchForm = styled.form`
   display: flex;
-  gap: 0.8rem;
+  gap: 0.6rem;
+  margin-bottom: 1.6rem;
 `;
 
 const SearchInput = styled.input`
   flex: 1;
-  max-width: 300px;
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
+  max-width: 32rem;
+  height: 3.4rem;
+  padding: 0 1rem;
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
   font-size: 1.4rem;
-  background: ${(props) => props.theme.surface};
+  background: ${(props) => props.theme.paneSunken};
   color: ${(props) => props.theme.textPrimary};
 
   &:focus {
     outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
+    border-color: ${(props) => props.theme.accent};
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
+    color: ${(props) => props.theme.textMuted};
   }
 `;
 
 const SearchButton = styled.button`
-  padding: 0.8rem 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
+  height: 3.4rem;
+  padding: 0 1.4rem;
+  border: 1px solid ${(props) => props.theme.lineStrong};
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: transparent;
+  color: ${(props) => props.theme.textPrimary};
   font-size: 1.4rem;
   cursor: pointer;
 
   &:hover {
-    opacity: 0.9;
+    background: ${(props) => props.theme.hover};
   }
 `;
 
-const PinnedBadge = styled.span`
-  display: inline-block;
-  padding: 0.2rem 0.8rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border-radius: 4px;
+const Chip = styled.span<{ $tone?: "accent" }>`
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border-radius: ${(props) => props.theme.radiusChip};
   font-size: 1.2rem;
   font-weight: 500;
-  margin-right: 0.8rem;
+  background: ${(props) => (props.$tone === "accent" ? props.theme.accentSoft : props.theme.paneSunken)};
+  color: ${(props) => (props.$tone === "accent" ? props.theme.accent : props.theme.textSecondary)};
+  border: 1px solid ${(props) => (props.$tone === "accent" ? "transparent" : props.theme.line)};
 `;
 
-const GlobalBadge = styled.span`
-  display: inline-block;
-  padding: 0.2rem 0.8rem;
-  background: ${(props) => props.theme.textSecondary};
-  color: ${(props) => props.theme.background};
-  border-radius: 4px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  margin-right: 0.8rem;
+const NoticeRows = styled.ul`
+  list-style: none;
+  border-top: 1px solid ${(props) => props.theme.line};
 `;
 
-const NoticeCards = styled.div`
+const NoticeRow = styled.li<{ $pinned?: boolean }>`
   display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-`;
-
-const NoticeCard = styled.div<{ $pinned?: boolean }>`
-  background: ${(props) => props.$pinned ? props.theme.surfaceHover : props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.2rem;
-`;
-
-const CardTitle = styled.div`
-  font-size: 1.4rem;
-  font-weight: 500;
-  margin-bottom: 0.6rem;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1.1rem 1.2rem;
+  border-bottom: 1px solid ${(props) => props.theme.line};
+  background: ${(props) => (props.$pinned ? props.theme.accentSoft : "transparent")};
 
   a {
+    flex: 1;
+    min-width: 0;
+    font-weight: 500;
     color: ${(props) => props.theme.textPrimary};
-    text-decoration: none;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 
     &:hover {
-      text-decoration: underline;
+      color: ${(props) => props.theme.accent};
     }
   }
-`;
 
-const CardMeta = styled.div`
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
+  time {
+    flex-shrink: 0;
+    font-size: 1.3rem;
+    color: ${(props) => props.theme.textMuted};
+  }
 `;
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 4.8rem;
+  padding: 4.8rem 0;
   color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
 `;
 
 interface NoticeData {
@@ -255,26 +212,22 @@ export function NoticeListContent({
   return (
     <PageLayout
       title={labels.title}
+      parent={{ label: boardName, href: `/index/${boardId}` }}
       sidebar={sidebar}
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}
       authLabels={authLabels}
     >
       <Container>
-        <BoardLink prefetch={false} href={`/index/${boardId}`}>&larr; {labels.goToBoard}</BoardLink>
-
-        <ActionsBar>
-          <PageTitle>{labels.title} : {boardName}</PageTitle>
-          <SearchForm onSubmit={handleSearch}>
-            <SearchInput
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder={labels.searchPlaceholder}
-            />
-            <SearchButton type="submit">{labels.searchButton}</SearchButton>
-          </SearchForm>
-        </ActionsBar>
+        <SearchForm onSubmit={handleSearch} role="search">
+          <SearchInput
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder={labels.searchPlaceholder}
+          />
+          <SearchButton type="submit">{labels.searchButton}</SearchButton>
+        </SearchForm>
 
         {notices.length === 0 ? (
           <EmptyState>
@@ -282,20 +235,18 @@ export function NoticeListContent({
           </EmptyState>
         ) : (
           <>
-            <NoticeCards>
+            <NoticeRows>
               {notices.map((notice) => (
-                <NoticeCard key={notice.id} $pinned={notice.pinned}>
-                  <CardTitle>
-                    {notice.isGlobal && <GlobalBadge>{labels.globalNotice}</GlobalBadge>}
-                    {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
-                    <Link prefetch={false} href={`/notice/${boardId}/${notice.id}`}>
-                      {notice.title}
-                    </Link>
-                  </CardTitle>
-                  <CardMeta>{formatDateTime(notice.createdAt, locale)}</CardMeta>
-                </NoticeCard>
+                <NoticeRow key={notice.id} $pinned={notice.pinned}>
+                  {notice.pinned && <Chip $tone="accent">{labels.pinned}</Chip>}
+                  {notice.isGlobal && <Chip>{labels.globalNotice}</Chip>}
+                  <Link prefetch={false} href={`/notice/${boardId}/${notice.id}`}>
+                    {notice.title}
+                  </Link>
+                  <time dateTime={notice.createdAt}>{formatDateTime(notice.createdAt, locale)}</time>
+                </NoticeRow>
               ))}
-            </NoticeCards>
+            </NoticeRows>
 
             <Pagination
               currentPage={pagination.page}

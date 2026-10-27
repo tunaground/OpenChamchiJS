@@ -6,7 +6,7 @@ import styled, { keyframes } from "styled-components";
 // Animation
 const slideIn = keyframes`
   from {
-    transform: translateY(100%);
+    transform: translateY(-100%);
     opacity: 0;
   }
   to {
@@ -21,15 +21,16 @@ const slideOut = keyframes`
     opacity: 1;
   }
   to {
-    transform: translateY(100%);
+    transform: translateY(-100%);
     opacity: 0;
   }
 `;
 
 // Styled Components
 const ToastContainer = styled.div`
+  /* Top of the window: the bottom belongs to the thread composer dock */
   position: fixed;
-  bottom: 2rem;
+  top: 1.6rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -39,8 +40,9 @@ const ToastContainer = styled.div`
 const ToastItem = styled.div<{ $isExiting: boolean }>`
   background: ${(props) => props.theme.toastBackground || "rgba(0, 0, 0, 0.8)"};
   color: ${(props) => props.theme.toastText || "#fff"};
-  padding: 1rem 1.6rem;
-  border-radius: 0.8rem;
+  padding: 0.9rem 1.6rem;
+  border-radius: ${(props) => props.theme.radiusControl};
+  box-shadow: ${(props) => props.theme.paneShadow};
   font-size: 1.4rem;
   animation: ${(props) => (props.$isExiting ? slideOut : slideIn)} 0.2s ease-out forwards;
   pointer-events: auto;

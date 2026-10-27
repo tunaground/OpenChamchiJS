@@ -4,7 +4,9 @@
     "logout": "ログアウト",
     "home": "ホーム",
     "boards": "掲示板",
-    "manual": "マニュアル"
+    "manual": "マニュアル",
+    "toggleSidebar": "サイドバーの開閉",
+    "links": "リンク"
   },
   "response": {
     "not_found": "レスが見つかりません。"
@@ -169,7 +171,7 @@
   },
   "boardIndex": {
     "notices": "お知らせ",
-    "moreNotices": "もっと見る",
+    "moreNotices": "お知らせ一覧",
     "createThread": "新規スレッド",
     "id": "ID",
     "threadTitle": "タイトル",
@@ -183,7 +185,11 @@
     "top": "トップ",
     "searchPlaceholder": "タイトルまたは投稿者で検索",
     "searchButton": "検索",
-    "globalNotice": "全体"
+    "globalNotice": "全体",
+    "number": "番号",
+    "responses": "レス",
+    "lastResponse": "最終レス",
+    "viewAllResponses": "最初からすべて表示"
   },
   "threadDetail": {
     "backToList": "一覧に戻る",
@@ -240,14 +246,20 @@
     "unban": "BAN解除",
     "show": "表示",
     "threadBanned": "このスレッドでBANされています。",
-    "banned": "BAN済"
+    "banned": "BAN済",
+    "filterUsername": "名前",
+    "filterAuthorId": "ID",
+    "filterPause": "一時停止",
+    "filterResume": "再開",
+    "filterRemove": "フィルターから外す",
+    "quickSubmitHint": "{key}で投稿"
   },
   "traceSidebar": {
-    "navigation": "ナビゲーション",
+    "navigation": "このスレッド",
     "backToBoard": "掲示板に戻る",
-    "manageThread": "スレッド管理",
-    "viewAll": "すべて表示",
-    "viewRecent": "最新を表示",
+    "manageThread": "レス管理",
+    "viewAll": "すべて",
+    "viewRecent": "最新",
     "prev": "前へ",
     "next": "次へ",
     "scrollUp": "上にスクロール",
@@ -447,7 +459,13 @@
     "deleteAccountDescription": "アカウントを削除すると復元できません。レスは残りますが、投稿者情報は削除されます。",
     "deleteAccountConfirm": "本当にアカウントを削除しますか？",
     "deleteAccountButton": "アカウント削除",
-    "cancel": "キャンセル"
+    "cancel": "キャンセル",
+    "theme": "テーマ",
+    "themeDescription": "画面の明るさを選びます。グレーはライトより暗く、ダークより明るい表示です。システムは端末の設定（ライト・ダーク）に従います。",
+    "themeSystem": "システム",
+    "themeLight": "ライト",
+    "themeDark": "ダーク",
+    "themeGrey": "グレー"
   },
   "manual": {
     "title": "ユーザーマニュアル",
@@ -497,15 +515,15 @@
       "alwaysBottomTitle": "常に下部に表示",
       "alwaysBottomDescription": "常にページの下部にスクロールします。リアルタイムチャットに便利です。（グローバル/スレッド別設定）",
       "refreshTitle": "更新",
-      "refreshDescription": "モードバーの右端(終了したスレッドでは終了の案内の横)にあるボタンです。画面の最後のレスの次から新しいレスを読み込みます。非表示・削除されたレスは飛ばします。再読み込みボタンのないホーム画面アプリで便利です。"
+      "refreshDescription": "スレッドタイトルの右にある更新アイコンです(終了したスレッドでは終了の案内の横にもあります)。画面の最後のレスの次から新しいレスを読み込みます。非表示・削除されたレスは飛ばします。再読み込みボタンのないホーム画面アプリで便利です。"
     },
     "push": {
       "title": "通知",
       "description": "ログインすると、関心のあるスレッドに新しいレスが付いたとき、ブラウザやアプリを閉じていても通知を受け取れます。管理者が機能を有効にしている場合のみ表示されます。",
       "watchTitle": "通知を受け取る",
-      "watchDescription": "スレッドのサイドバーで「通知を受け取る」を押すと登録されます。初回はこの端末の通知許可を求めます。もう一度押すと解除されます。",
+      "watchDescription": "スレッドタイトルの右にあるベルアイコンを押すと登録されます。初回はこの端末の通知許可を求めます。もう一度押すと解除されます。",
       "bellTitle": "通知リスト",
-      "bellDescription": "上部バーのベルアイコンから登録したスレッドを確認・削除できます。登録できるスレッド数には上限があります。",
+      "bellDescription": "サイドバー下部のベルアイコンから登録したスレッドを確認・削除できます。登録したスレッドはサイドバーの一覧にも表示されます。登録できるスレッド数には上限があります。",
       "toggleTitle": "すべて / 個別のオン・オフ",
       "toggleDescription": "リストでスレッドごとに通知を一時停止したり、すべての通知を一度にオフにしたりできます。すべてを再びオンにしても、個別にオフにした設定は保持されます。",
       "rulesTitle": "通知のルール",
@@ -547,17 +565,17 @@
     },
     "theme": {
       "title": "テーマ",
-      "description": "画面のテーマを変更できます。トップバーのテーマボタンをクリックしてテーマを切り替えます。",
+      "description": "画面をライト・グレー・ダークから選べます。サイドバー下部のテーマボタンを押すたびに順に切り替わり、設定でシステム・ライト・グレー・ダークから選ぶこともできます。",
       "lightTitle": "ライト",
       "lightDescription": "デフォルトの明るいテーマ。白い背景に暗いテキストを使用します。",
-      "greyTitle": "グレー",
-      "greyDescription": "目の疲れを軽減するグレートーンのテーマ。白を使わない柔らかいグレートーンを使用します。",
       "darkTitle": "ダーク",
-      "darkDescription": "暗い環境に適したダークテーマ。暗い背景に明るいテキストを使用します。"
+      "darkDescription": "暗い環境に適したダークテーマ。暗い背景に明るいテキストを使用します。",
+      "greyTitle": "グレー",
+      "greyDescription": "ライトは明るすぎ、ダークは暗すぎるときの中間の明るさのテーマ。白と黒を使わずグレーのトーンだけで表示します。"
     },
     "userCounter": {
       "title": "ユーザーカウンター",
-      "description": "トップバーに現在ページを閲覧しているユーザー数が表示されます。",
+      "description": "ページタイトルの右に、現在ページを閲覧しているユーザー数が表示されます。",
       "indexTitle": "掲示板ページ",
       "indexDescription": "その掲示板を閲覧しているユーザー数を表示します。常に表示されます。",
       "traceTitle": "スレッドページ",
@@ -567,23 +585,23 @@
     },
     "sidebar": {
       "title": "スレッドページメニュー",
-      "description": "スレッド詳細ページのサイドバーで利用可能なメニュー。",
+      "description": "スレッドページのサイドバー、タイトル横のアイコン、右下のボタンで利用できるメニューです。",
       "backTitle": "掲示板に戻る",
-      "backDescription": "掲示板一覧に戻ります。",
-      "manageTitle": "スレッド管理",
-      "manageDescription": "スレッド管理モーダルを開き、レスの非表示/復元を行います。",
-      "viewAllTitle": "すべて表示",
+      "backDescription": "タイトル左の掲示板名を押すと掲示板一覧に戻ります。",
+      "manageTitle": "レス管理",
+      "manageDescription": "タイトル右の管理アイコンからレス管理を開き、レスの非表示/復元や投稿者のブロックを行います。",
+      "viewAllTitle": "すべて",
       "viewAllDescription": "スレッド内のすべてのレスを1ページに表示します。",
-      "viewRecentTitle": "最新を表示",
+      "viewRecentTitle": "最新",
       "viewRecentDescription": "最新のレスのみを表示します。",
       "prevTitle": "前へ",
       "prevDescription": "前のページのレスを表示します。",
       "nextTitle": "次へ",
       "nextDescription": "次のページのレスを表示します。",
       "scrollUpTitle": "上にスクロール",
-      "scrollUpDescription": "ページの上部にスクロールします。",
+      "scrollUpDescription": "ページの上部にスクロールします。モバイルではタイトル右の上矢印ボタンでも操作できます。",
       "scrollDownTitle": "下にスクロール",
-      "scrollDownDescription": "ページの下部にスクロールします。",
+      "scrollDownDescription": "ページの下部にスクロールします。モバイルではタイトル右の下矢印ボタンでも操作できます。",
       "watchTitle": "通知の登録 / 解除",
       "watchDescription": "このスレッドの新しいレスの通知を登録または解除します。(ログインが必要)"
     }
@@ -604,6 +622,13 @@
     "limitExceeded": "通知は最大{limit}件まで登録できます。🔔リストを整理してください。",
     "deviceSubscribeFailed": "この端末で通知の登録に失敗しました。しばらくしてから再度お試しください。",
     "imageLabel": "(画像)",
-    "navigateConfirm": "入力中の内容があります。新しいレスのあるスレッドへ移動しますか？"
+    "navigateConfirm": "入力中の内容があります。新しいレスのあるスレッドへ移動しますか？",
+    "sidebarTitle": "通知中のスレッド"
+  },
+  "theme": {
+    "toggle": "テーマ切り替え",
+    "switchToDark": "ダークモードへ",
+    "switchToLight": "ライトモードへ",
+    "switchToGrey": "グレーモードへ"
   }
 }

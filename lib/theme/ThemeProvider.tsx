@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, ReactNode } from "react";
+import { useEffect, useState, ReactNode, useSyncExternalStore } from "react";
 import { ThemeProvider as StyledThemeProvider, createGlobalStyle } from "styled-components";
 import { useThemeStore } from "@/lib/store/theme";
-import { themes } from "./themes";
+import { themes, ThemeMode } from "./themes";
 
 const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -21,6 +21,58 @@ const GlobalStyle = createGlobalStyle`
     unicode-range: U+AC00-D7A3, U+3130-318F;
   }
 
+  /* Surface palette per mode. data-mode is set before paint (see app/layout.tsx) */
+  :root {
+    --c-canvas: #e9ecef;
+    --c-pane: #fbfbfa;
+    --c-raised: #ffffff;
+    --c-sunken: rgba(27, 31, 36, 0.035);
+    --c-field: #f3f4f5;
+    --c-hover: rgba(27, 31, 36, 0.05);
+    --c-hover-solid: #f1f2f3;
+    --c-line: rgba(27, 31, 36, 0.1);
+    --c-line-strong: rgba(27, 31, 36, 0.18);
+    --c-accent-soft: rgba(10, 108, 176, 0.1);
+    --c-edge: rgba(255, 255, 255, 0.9);
+    --c-shadow: 0 1px 2px rgba(27, 31, 36, 0.06), 0 8px 24px -12px rgba(27, 31, 36, 0.18);
+    --c-scrim: rgba(0, 0, 0, 0.25);
+    --c-toast: rgba(27, 31, 36, 0.92);
+  }
+
+  :root[data-mode="grey"] {
+    --c-canvas: #989ca1;
+    --c-pane: #c3c7cb;
+    --c-raised: #d0d3d6;
+    --c-sunken: rgba(29, 33, 38, 0.06);
+    --c-field: #b9bdc2;
+    --c-hover: rgba(29, 33, 38, 0.07);
+    --c-hover-solid: #b9bdc1;
+    --c-line: rgba(29, 33, 38, 0.15);
+    --c-line-strong: rgba(29, 33, 38, 0.26);
+    --c-accent-soft: rgba(9, 76, 128, 0.14);
+    --c-edge: rgba(255, 255, 255, 0.3);
+    --c-shadow: 0 1px 2px rgba(29, 33, 38, 0.1), 0 8px 24px -12px rgba(29, 33, 38, 0.3);
+    --c-scrim: rgba(0, 0, 0, 0.3);
+    --c-toast: rgba(40, 45, 51, 0.94);
+  }
+
+  :root[data-mode="dark"] {
+    --c-canvas: #141518;
+    --c-pane: #1e2024;
+    --c-raised: #26292e;
+    --c-sunken: rgba(0, 0, 0, 0.18);
+    --c-field: #17191c;
+    --c-hover: rgba(255, 255, 255, 0.05);
+    --c-hover-solid: #25282c;
+    --c-line: rgba(255, 255, 255, 0.08);
+    --c-line-strong: rgba(255, 255, 255, 0.14);
+    --c-accent-soft: rgba(90, 169, 240, 0.14);
+    --c-edge: rgba(255, 255, 255, 0.05);
+    --c-shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 28px -12px rgba(0, 0, 0, 0.6);
+    --c-scrim: rgba(0, 0, 0, 0.45);
+    --c-toast: rgba(38, 41, 46, 0.96);
+  }
+
   * {
     box-sizing: border-box;
     padding: 0;
@@ -29,22 +81,25 @@ const GlobalStyle = createGlobalStyle`
 
   html {
     font-size: 62.5%;
-    color-scheme: ${(props) => props.theme.mode};
+    color-scheme: ${(props) => (props.theme.mode === "dark" ? "dark" : "light")};
   }
 
+  /* clip, not hidden: hidden would make body a scroll container and break
+     the sticky toolbar and composer dock */
   html, body {
     max-width: 100vw;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
 
   body {
-    font-size: 1.6rem;
-    background: ${(props) => props.theme.background};
+    font-size: 1.5rem;
+    line-height: 1.6;
+    background: var(--c-canvas);
     color: ${(props) => props.theme.foreground};
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: ${(props) => props.theme.fontSans};
+    font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    transition: background 0.2s, color 0.2s;
 
     @media (max-width: ${(props) => props.theme.breakpoint}) {
       font-size: 1.4rem;
@@ -53,18 +108,43 @@ const GlobalStyle = createGlobalStyle`
     }
   }
 
+  button, input, textarea, select {
+    font-family: inherit;
+  }
+
   a {
     color: inherit;
     text-decoration: none;
   }
+
+  :focus-visible {
+    outline: 2px solid ${(props) => props.theme.accent};
+    outline-offset: 2px;
+  }
 `;
+
+function subscribeSystemScheme(onChange: () => void) {
+  const query = window.matchMedia("(prefers-color-scheme: dark)");
+  query.addEventListener("change", onChange);
+  return () => query.removeEventListener("change", onChange);
+}
+
+const systemIsDark = () => window.matchMedia("(prefers-color-scheme: dark)").matches;
+
+/** The mode actually shown, with "system" resolved against the OS */
+export function useResolvedThemeMode(): ThemeMode {
+  const preference = useThemeStore((state) => state.mode);
+  const dark = useSyncExternalStore(subscribeSystemScheme, systemIsDark, () => false);
+  if (preference === "system") return dark ? "dark" : "light";
+  return preference;
+}
 
 interface Props {
   children: ReactNode;
 }
 
 export function ThemeProvider({ children }: Props) {
-  const mode = useThemeStore((state) => state.mode);
+  const resolved = useResolvedThemeMode();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -72,7 +152,12 @@ export function ThemeProvider({ children }: Props) {
   }, []);
 
   // Prevent hydration mismatch by using default theme on server
-  const theme = mounted ? themes[mode] : themes.light;
+  const theme = mounted ? themes[resolved] : themes.light;
+
+  // Surface variables follow data-mode; keep it in sync after mount
+  useEffect(() => {
+    if (mounted) document.documentElement.dataset.mode = resolved;
+  }, [mounted, resolved]);
 
   return (
     <StyledThemeProvider theme={theme}>

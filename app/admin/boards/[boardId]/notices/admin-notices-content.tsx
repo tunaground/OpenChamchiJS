@@ -4,291 +4,40 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
-import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
 import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
-
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.adminMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
-
-const Header = styled.div`
-  margin-bottom: 2.4rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.4rem;
-`;
-
-const Breadcrumb = styled.div`
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-
-  a {
-    color: ${(props) => props.theme.textSecondary};
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const ActionsBar = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.6rem;
-  margin-bottom: 2.4rem;
-  flex-wrap: wrap;
-`;
-
-const Button = styled.button`
-  height: 3.5rem;
-  padding: 0 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const SecondaryButton = styled(Button)`
-  background: transparent;
-  color: ${(props) => props.theme.textPrimary};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-`;
-
-const DangerButton = styled(Button)`
-  background: #dc2626;
-  color: white;
-
-  &:hover {
-    background: #b91c1c;
-  }
-`;
-
-const PinnedBadge = styled.span`
-  display: inline-block;
-  padding: 0.2rem 0.8rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border-radius: 4px;
-  font-size: 1.2rem;
-  font-weight: 500;
-`;
-
-const NoticeCards = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-`;
-
-const NoticeCard = styled.div`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.2rem;
-`;
-
-const CardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.8rem;
-  margin-bottom: 0.8rem;
-`;
-
-const CardTitle = styled.div`
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
-  flex: 1;
-`;
-
-const CardMeta = styled.div`
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-  margin-bottom: 1rem;
-`;
-
-const CardActions = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-`;
-
-const SmallButton = styled.button`
-  padding: 0.4rem 0.8rem;
-  font-size: 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  background: transparent;
-  color: ${(props) => props.theme.textPrimary};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 4.8rem;
-  color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-`;
-
-const SearchForm = styled.form`
-  display: flex;
-  gap: 0.8rem;
-`;
-
-const SearchInput = styled.input`
-  width: 100%;
-  max-width: 30rem;
-  padding: 0.8rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-
-  &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
-  }
-`;
-
-const SearchButton = styled(Button)`
-  flex-shrink: 0;
-  white-space: nowrap;
-`;
-
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 2.4rem;
-  width: 100%;
-  max-width: 60rem;
-  max-height: 90vh;
-  overflow-y: auto;
-`;
-
-const ModalTitle = styled.h2`
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 2.4rem;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 1.6rem;
-`;
-
-const Label = styled.label`
-  display: block;
-  margin-bottom: 0.8rem;
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-`;
-
-const Textarea = styled.textarea`
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-  min-height: 15rem;
-  resize: vertical;
-  font-family: inherit;
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-`;
-
-const Checkbox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-
-  input {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-`;
-
-const ModalActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.8rem;
-  margin-top: 2.4rem;
-`;
+import {
+  Breadcrumb,
+  Container,
+  ActionsBar,
+  Button,
+  SecondaryButton,
+  DangerButton,
+  Badge,
+  List,
+  Item,
+  ItemHeader,
+  ItemTitle,
+  ItemMeta,
+  ItemActions,
+  SmallButton,
+  DangerSmallButton,
+  EmptyState,
+  SearchForm,
+  SearchInput,
+  SearchButton,
+  Modal,
+  ModalContent,
+  ModalTitle,
+  FormGroup,
+  Label,
+  Input,
+  Textarea,
+  Checkbox,
+  ModalActions,
+} from "../../../_components/admin-ui";
 
 interface NoticeData {
   id: number;
@@ -521,12 +270,9 @@ export function AdminNoticesContent({
       isAdminPage
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-          <Breadcrumb>
-            <Link prefetch={false} href="/admin/boards">Boards</Link> / {boardName}
-          </Breadcrumb>
-        </Header>
+        <Breadcrumb>
+          <Link prefetch={false} href="/admin/boards">Boards</Link> / {boardName}
+        </Breadcrumb>
 
         <ActionsBar>
           {canCreate && (
@@ -549,29 +295,29 @@ export function AdminNoticesContent({
         </EmptyState>
       ) : (
         <>
-          <NoticeCards>
+          <List>
             {notices.map((notice) => (
-              <NoticeCard key={notice.id}>
-                <CardHeader>
-                  <CardTitle>{notice.title}</CardTitle>
-                  {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
-                </CardHeader>
-                <CardMeta>{formatDateTime(notice.createdAt, locale)}</CardMeta>
-                <CardActions>
+              <Item key={notice.id}>
+                <ItemHeader>
+                  <ItemTitle>{notice.title}</ItemTitle>
+                  {notice.pinned && <Badge $tone="accent">{labels.pinned}</Badge>}
+                </ItemHeader>
+                <ItemMeta>{formatDateTime(notice.createdAt, locale)}</ItemMeta>
+                <ItemActions>
                   {canUpdate && (
                     <SmallButton onClick={() => openEditModal(notice)}>
                       {labels.edit}
                     </SmallButton>
                   )}
                   {canDelete && (
-                    <SmallButton onClick={() => openDeleteModal(notice)}>
+                    <DangerSmallButton onClick={() => openDeleteModal(notice)}>
                       {labels.delete}
-                    </SmallButton>
+                    </DangerSmallButton>
                   )}
-                </CardActions>
-              </NoticeCard>
+                </ItemActions>
+              </Item>
             ))}
-          </NoticeCards>
+          </List>
 
           <Pagination
             currentPage={pagination.page}

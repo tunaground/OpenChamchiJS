@@ -2,238 +2,35 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
-
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.adminMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
-
-const Header = styled.div`
-  margin-bottom: 2.4rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const ActionsBar = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1.6rem;
-  margin-bottom: 2.4rem;
-  flex-wrap: wrap;
-`;
-
-const Button = styled.button`
-  height: 3.5rem;
-  padding: 0 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const SecondaryButton = styled(Button)`
-  background: transparent;
-  color: ${(props) => props.theme.textPrimary};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-`;
-
-const DangerButton = styled(Button)`
-  background: #dc2626;
-  color: white;
-
-  &:hover {
-    background: #b91c1c;
-  }
-`;
-
-const StatusBadge = styled.span<{ $active: boolean }>`
-  display: inline-block;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  background: ${(props) => (props.$active ? "#22c55e20" : "#ef444420")};
-  color: ${(props) => (props.$active ? "#22c55e" : "#ef4444")};
-`;
-
-const BoardCards = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-`;
-
-const BoardCard = styled.div`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.2rem;
-`;
-
-const CardHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 0.8rem;
-`;
-
-const CardTitle = styled.div`
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const CardMeta = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-  margin-bottom: 1rem;
-`;
-
-const CardActions = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-`;
-
-const SmallButton = styled.button`
-  padding: 0.4rem 0.8rem;
-  font-size: 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  background: transparent;
-  color: ${(props) => props.theme.textPrimary};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 4.8rem;
-  color: ${(props) => props.theme.textSecondary};
-`;
-
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 2.4rem;
-  width: 100%;
-  max-width: 50rem;
-  max-height: 90vh;
-  overflow-y: auto;
-`;
-
-const ModalTitle = styled.h2`
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 2.4rem;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 1.6rem;
-`;
-
-const Label = styled.label`
-  display: block;
-  margin-bottom: 0.8rem;
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const Input = styled.input<{ $error?: boolean }>`
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid ${(props) => props.$error ? "#dc2626" : props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.$error ? "#dc2626" : props.theme.textSecondary};
-  }
-`;
-
-const ErrorText = styled.span`
-  color: #dc2626;
-  font-size: 1.2rem;
-  margin-top: 0.4rem;
-  display: block;
-`;
-
-const Checkbox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-
-  input {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-`;
-
-const ModalActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.8rem;
-  margin-top: 2.4rem;
-`;
-
-const BoardId = styled.code`
-  font-family: monospace;
-  background: ${(props) => props.theme.surfaceHover};
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-`;
+import {
+  Container,
+  ActionsBar,
+  Button,
+  SecondaryButton,
+  DangerButton,
+  Badge,
+  List,
+  Item,
+  ItemHeader,
+  ItemTitle,
+  ItemMeta,
+  ItemActions,
+  SmallButton,
+  DangerSmallButton,
+  EmptyState,
+  Modal,
+  ModalContent,
+  ModalTitle,
+  FormGroup,
+  Label,
+  Input,
+  ErrorText,
+  Checkbox,
+  ModalActions,
+  Code as BoardId,
+} from "../_components/admin-ui";
 
 interface BoardData {
   id: string;
@@ -527,10 +324,6 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
       isAdminPage
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-        </Header>
-
         <ActionsBar>
           {canCreate && (
             <Button onClick={openCreateModal}>{labels.createBoard}</Button>
@@ -540,21 +333,21 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
       {boards.length === 0 ? (
         <EmptyState>{labels.noBoards}</EmptyState>
       ) : (
-        <BoardCards>
+        <List>
           {boards.map((board) => (
-            <BoardCard key={board.id}>
-              <CardHeader>
-                <CardTitle>
+            <Item key={board.id}>
+              <ItemHeader>
+                <ItemTitle>
                   <BoardId>{board.id}</BoardId> {board.name}
-                </CardTitle>
-                <StatusBadge $active={!board.deleted}>
+                </ItemTitle>
+                <Badge $tone={board.deleted ? "danger" : "success"}>
                   {board.deleted ? labels.deleted : labels.active}
-                </StatusBadge>
-              </CardHeader>
-              <CardMeta>
+                </Badge>
+              </ItemHeader>
+              <ItemMeta>
                 <span>{labels.threads}: {board.threadCount}</span>
-              </CardMeta>
-              <CardActions>
+              </ItemMeta>
+              <ItemActions>
                 <Link prefetch={false} href={`/admin/boards/${board.id}/threads`}>
                   <SmallButton>{labels.manageThreads}</SmallButton>
                 </Link>
@@ -589,19 +382,19 @@ export function BoardsContent({ boards: initialBoards, authLabels, sidebarLabels
                   </SmallButton>
                 )}
                 {canUpdate && !board.deleted && (
-                  <SmallButton onClick={() => openDeleteModal(board)}>
+                  <DangerSmallButton onClick={() => openDeleteModal(board)}>
                     {labels.delete}
-                  </SmallButton>
+                  </DangerSmallButton>
                 )}
                 {canUpdate && board.deleted && (
                   <SmallButton onClick={() => openRestoreModal(board)}>
                     {labels.restore}
                   </SmallButton>
                 )}
-              </CardActions>
-            </BoardCard>
+              </ItemActions>
+            </Item>
           ))}
-        </BoardCards>
+        </List>
       )}
 
       {/* Create/Edit Modal */}

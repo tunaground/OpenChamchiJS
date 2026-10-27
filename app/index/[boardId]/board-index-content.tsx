@@ -3,256 +3,318 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import styled from "styled-components";
 import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { usePresence } from "@/lib/hooks/usePresence";
 import { CHANNELS } from "@/lib/realtime";
-import { formatDateTime } from "@/lib/utils/date-formatter";
+import { formatDate, formatDateTime } from "@/lib/utils/date-formatter";
+import { formatRelativeTime } from "@/lib/utils/relative-time";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass, faPlus } from "@fortawesome/free-solid-svg-icons";
 import CustomHtml from "@/components/CustomHtml";
 
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.contentMaxWidth};
-  margin: 0 auto;
+const Container = PageContainer;
 
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
-
-const NoticesSection = styled.section`
-  margin-bottom: 2.4rem;
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  overflow: hidden;
-`;
-
-const NoticesHeader = styled.div`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1.2rem 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-`;
-
-const NoticesTitle = styled.h2`
-  font-size: 1.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin: 0;
-`;
-
-const MoreLink = styled(Link)`
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const NoticeList = styled.ul`
+const Notices = styled.ul`
   list-style: none;
-  margin: 0;
-  padding: 0;
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: ${(props) => props.theme.paneSunken};
+  font-size: 1.4rem;
 `;
 
 const NoticeItem = styled.li`
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  padding: 0.8rem 1.6rem;
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
-  font-size: 1.4rem;
+  padding: 0.8rem 1.2rem;
+  border-top: 1px solid ${(props) => props.theme.line};
 
-  &:last-child {
-    border-bottom: none;
+  &:first-child {
+    border-top: none;
   }
 
   a {
-    color: ${(props) => props.theme.textPrimary};
-    text-decoration: none;
     flex: 1;
+    min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    color: ${(props) => props.theme.textPrimary};
 
     &:hover {
-      text-decoration: underline;
+      color: ${(props) => props.theme.accent};
     }
   }
 `;
 
-const PinnedBadge = styled.span`
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
+const NoticeDate = styled.time`
   flex-shrink: 0;
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textMuted};
 `;
 
-const GlobalBadge = styled.span`
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  background: ${(props) => props.theme.textSecondary};
-  color: ${(props) => props.theme.background};
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
-  flex-shrink: 0;
-`;
-
-const NoticeDate = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-size: 1.2rem;
-  flex-shrink: 0;
-`;
-
-const ActionsBar = styled.div`
+const NoticesFoot = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1.6rem;
-  margin-bottom: 1.6rem;
-  flex-wrap: wrap;
-`;
-
-const CreateButton = styled(Link)`
-  display: inline-block;
-  padding: 0.8rem 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  text-decoration: none;
-
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
-const Badge = styled.span<{ $variant?: "top" | "ended" }>`
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-size: 1rem;
-  font-weight: 500;
-  margin-right: 0.8rem;
-  background: ${(props) =>
-    props.$variant === "ended"
-      ? props.theme.textSecondary + "30"
-      : props.theme.textPrimary};
-  color: ${(props) =>
-    props.$variant === "ended"
-      ? props.theme.textSecondary
-      : props.theme.background};
-`;
-
-const ThreadCards = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-`;
-
-const ThreadCard = styled.div<{ $isTop?: boolean }>`
-  background: ${(props) => props.$isTop ? props.theme.surfaceHover : props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.2rem;
-`;
-
-const CardTitle = styled.div`
-  font-size: 1.4rem;
-  font-weight: 500;
-  margin-bottom: 0.8rem;
+  justify-content: flex-end;
+  margin-top: 0.4rem;
 
   a {
-    color: ${(props) => props.theme.textPrimary};
-    text-decoration: none;
+    padding: 0.2rem 0.4rem;
+    font-size: 1.3rem;
+    color: ${(props) => props.theme.textSecondary};
 
     &:hover {
-      text-decoration: underline;
+      color: ${(props) => props.theme.accent};
     }
   }
 `;
 
-const CardMeta = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-`;
-
-const CardMetaItem = styled.span`
-  display: flex;
+const Chip = styled.span<{ $tone?: "accent" | "muted" }>`
+  display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
+  flex-shrink: 0;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border-radius: ${(props) => props.theme.radiusChip};
+  font-size: 1.2rem;
+  font-weight: 500;
+  vertical-align: 0.1rem;
+  background: ${(props) => (props.$tone === "accent" ? props.theme.accentSoft : props.theme.paneSunken)};
+  color: ${(props) => (props.$tone === "accent" ? props.theme.accent : props.theme.textSecondary)};
+  border: 1px solid ${(props) => (props.$tone === "accent" ? "transparent" : props.theme.line)};
 `;
 
-const ResponseCountLink = styled(Link)`
-  color: ${(props) => props.theme.textSecondary};
-  text-decoration: none;
+const CustomHtmlSlot = styled.div`
+  margin: 1.6rem 0;
+`;
+
+const columns = "5.6rem minmax(0, 1fr) 7.2rem 11.2rem";
+
+const ListHead = styled.div`
+  display: grid;
+  grid-template-columns: ${columns};
+  gap: 1.2rem;
+  margin-top: 1.6rem;
+  padding: 0 1.2rem 0.8rem;
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.textMuted};
+  border-bottom: 1px solid ${(props) => props.theme.line};
+
+  span:nth-child(n + 3) {
+    text-align: right;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
+`;
+
+const Row = styled.div<{ $top?: boolean; $ended?: boolean }>`
+  display: grid;
+  grid-template-columns: ${columns};
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1rem 1.2rem;
+  border-bottom: 1px solid ${(props) => props.theme.line};
+  background: ${(props) => (props.$top ? props.theme.accentSoft : "transparent")};
 
   &:hover {
-    text-decoration: underline;
+    background: ${(props) => (props.$top ? props.theme.accentSoft : props.theme.hover)};
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 0.2rem;
+    padding: 1.2rem 0.6rem;
+  }
+`;
+
+const RowNo = styled.span<{ $top?: boolean }>`
+  font-size: 1.3rem;
+  color: ${(props) => (props.$top ? props.theme.accent : props.theme.textMuted)};
+  font-weight: ${(props) => (props.$top ? 500 : 400)};
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
+`;
+
+const RowMain = styled.div`
+  min-width: 0;
+`;
+
+const RowTitle = styled(Link)<{ $ended?: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-width: 0;
+  font-weight: 500;
+  color: ${(props) => (props.$ended ? props.theme.textMuted : props.theme.textPrimary)};
+
+  span:last-child {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &:hover {
+    color: ${(props) => props.theme.accent};
+  }
+
+  /* On desktop the number column already says "top" */
+  .m-top {
+    display: none;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    span:last-child {
+      white-space: normal;
+    }
+
+    .m-top {
+      display: inline-flex;
+    }
+  }
+`;
+
+const RowSub = styled.div`
+  display: flex;
+  gap: 1rem;
+  margin-top: 0.1rem;
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textMuted};
+`;
+
+const RowCount = styled(Link)`
+  justify-self: end;
+  padding: 0.2rem 0.6rem;
+  margin-right: -0.6rem;
+  border-radius: ${(props) => props.theme.radiusChip};
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: ${(props) => props.theme.textPrimary};
+
+  &:hover {
+    background: ${(props) => props.theme.accentSoft};
+    color: ${(props) => props.theme.accent};
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    grid-row: 1;
+    grid-column: 2;
+    align-self: start;
+  }
+`;
+
+const RowWhen = styled.time`
+  justify-self: end;
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textSecondary};
+  white-space: nowrap;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    justify-self: start;
+    grid-column: 1 / -1;
+    font-size: 1.2rem;
+    color: ${(props) => props.theme.textMuted};
   }
 `;
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 4.8rem;
+  padding: 4.8rem 0;
   color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
 `;
 
 const SearchForm = styled.form`
+  position: relative;
   display: flex;
-  gap: 0.8rem;
+  align-items: center;
+
+  svg {
+    position: absolute;
+    left: 0.9rem;
+    width: 1.4rem;
+    color: ${(props) => props.theme.textMuted};
+    pointer-events: none;
+  }
 `;
 
 const SearchInput = styled.input`
-  flex: 1;
-  max-width: 300px;
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
+  width: 22rem;
+  height: 3.2rem;
+  padding: 0 1rem 0 3rem;
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
   font-size: 1.4rem;
-  background: ${(props) => props.theme.surface};
+  background: ${(props) => props.theme.paneSunken};
   color: ${(props) => props.theme.textPrimary};
 
   &:focus {
     outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
+    border-color: ${(props) => props.theme.accent};
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
+    color: ${(props) => props.theme.textMuted};
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    width: 100%;
   }
 `;
 
-const SearchButton = styled.button`
-  padding: 0.8rem 1.6rem;
+/** Search sits in the toolbar on desktop and above the list on mobile */
+const DesktopOnly = styled.div`
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
+`;
+
+const MobileOnly = styled.div`
+  display: none;
+  margin-bottom: 1.2rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: block;
+  }
+`;
+
+const CreateButton = styled(Link)`
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  height: 3.2rem;
+  margin-left: 0.6rem;
+  padding: 0 1.2rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
+  border-radius: ${(props) => props.theme.radiusControl};
   font-size: 1.4rem;
-  cursor: pointer;
+  font-weight: 500;
+  white-space: nowrap;
 
   &:hover {
-    opacity: 0.9;
+    filter: brightness(1.06);
+  }
+
+  svg {
+    width: 1.4rem;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    width: 3.2rem;
+    padding: 0;
+    justify-content: center;
+
+    span {
+      display: none;
+    }
   }
 `;
 
@@ -356,6 +418,7 @@ export function BoardIndexContent({
 }: BoardIndexContentProps) {
   const router = useRouter();
   const locale = useLocale();
+  const t = useTranslations("boardIndex");
   const [search, setSearch] = useState(initialSearch);
 
   // Presence tracking for user counter (board level for /index page)
@@ -383,9 +446,31 @@ export function BoardIndexContent({
 
   const sidebar = <BoardListSidebar boards={boards} customLinks={customLinks} title={boardsTitle} manualLabel={manualLabel} />;
 
+  const searchForm = (
+    <SearchForm onSubmit={handleSearch} role="search">
+      <FontAwesomeIcon icon={faMagnifyingGlass} />
+      <SearchInput
+        type="search"
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        placeholder={labels.searchPlaceholder}
+        aria-label={labels.searchButton}
+      />
+    </SearchForm>
+  );
+
   return (
     <PageLayout
       title={boardName}
+      toolbarActions={
+        <>
+          <DesktopOnly>{searchForm}</DesktopOnly>
+          <CreateButton prefetch={false} href={`/index/${boardId}/create`} title={labels.createThread}>
+            <FontAwesomeIcon icon={faPlus} />
+            <span>{labels.createThread}</span>
+          </CreateButton>
+        </>
+      }
       sidebar={sidebar}
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}
@@ -393,82 +478,77 @@ export function BoardIndexContent({
       userCount={realtimeEnabled ? boardMemberCount : undefined}
     >
       <Container>
+        <MobileOnly>{searchForm}</MobileOnly>
+
         {notices.length > 0 && (
-        <NoticesSection>
-          <NoticesHeader>
-            <NoticesTitle>{labels.notices}</NoticesTitle>
-            <MoreLink prefetch={false} href={`/notice/${boardId}`}>{labels.moreNotices}</MoreLink>
-          </NoticesHeader>
-          <NoticeList>
-            {notices.map((notice) => (
-              <NoticeItem key={notice.id}>
-                {notice.isGlobal && <GlobalBadge>{labels.globalNotice}</GlobalBadge>}
-                {notice.pinned && <PinnedBadge>{labels.pinned}</PinnedBadge>}
-                <Link prefetch={false} href={`/notice/${boardId}/${notice.id}`}>
-                  {notice.title}
-                </Link>
-                <NoticeDate>{formatDateTime(notice.createdAt, locale)}</NoticeDate>
-              </NoticeItem>
-            ))}
-          </NoticeList>
-        </NoticesSection>
-      )}
-
-      {indexCustomHtml && (
-        <CustomHtml html={indexCustomHtml} style={{ marginBottom: '2.4rem' }} />
-      )}
-
-      <ActionsBar>
-        <CreateButton prefetch={false} href={`/index/${boardId}/create`}>
-          {labels.createThread}
-        </CreateButton>
-        <SearchForm onSubmit={handleSearch}>
-          <SearchInput
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder={labels.searchPlaceholder}
-          />
-          <SearchButton type="submit">{labels.searchButton}</SearchButton>
-        </SearchForm>
-      </ActionsBar>
-
-      {threads.length === 0 ? (
-        <EmptyState>{initialSearch ? labels.noResults : labels.noThreads}</EmptyState>
-      ) : (
-        <>
-          <ThreadCards>
-            {threads.map((thread) => (
-              <ThreadCard key={thread.id} $isTop={thread.top}>
-                <CardTitle>
-                  {thread.top && <Badge $variant="top">{labels.top}</Badge>}
-                  {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
-                  <span>#{thread.id} </span>
-                  <Link prefetch={false} href={`/trace/${boardId}/${thread.id}/recent`}>
-                    {thread.title}
+          <section aria-label={labels.notices}>
+            <Notices>
+              {notices.map((notice) => (
+                <NoticeItem key={notice.id}>
+                  {notice.pinned && <Chip $tone="accent">{labels.pinned}</Chip>}
+                  {notice.isGlobal && <Chip>{labels.globalNotice}</Chip>}
+                  <Link prefetch={false} href={`/notice/${boardId}/${notice.id}`}>
+                    {notice.title}
                   </Link>
-                  {" "}
-                  <ResponseCountLink prefetch={false} href={`/trace/${boardId}/${thread.id}/`}>
-                    ({Math.max(0, thread.responseCount - 1)})
-                  </ResponseCountLink>
-                </CardTitle>
-                <CardMeta>
-                  <CardMetaItem>{thread.username}</CardMetaItem>
-                </CardMeta>
-                <CardMeta>
-                  <CardMetaItem>{formatDateTime(thread.createdAt, locale)} - {formatDateTime(thread.updatedAt, locale)}</CardMetaItem>
-                </CardMeta>
-              </ThreadCard>
-            ))}
-          </ThreadCards>
+                  <NoticeDate dateTime={notice.createdAt} suppressHydrationWarning>
+                    {formatRelativeTime(notice.createdAt, locale)}
+                  </NoticeDate>
+                </NoticeItem>
+              ))}
+            </Notices>
+            <NoticesFoot>
+              <Link prefetch={false} href={`/notice/${boardId}`}>{labels.moreNotices}</Link>
+            </NoticesFoot>
+          </section>
+        )}
 
-          <Pagination
-            currentPage={pagination.page}
-            totalPages={pagination.totalPages}
-            baseUrl={getBaseUrl()}
-          />
-        </>
-      )}
+        {indexCustomHtml && (
+          <CustomHtmlSlot>
+            <CustomHtml html={indexCustomHtml} />
+          </CustomHtmlSlot>
+        )}
+
+        {threads.length === 0 ? (
+          <EmptyState>{initialSearch ? labels.noResults : labels.noThreads}</EmptyState>
+        ) : (
+          <>
+            <ListHead aria-hidden>
+              <span>{t("number")}</span>
+              <span>{labels.threadTitle}</span>
+              <span>{t("responses")}</span>
+              <span>{t("lastResponse")}</span>
+            </ListHead>
+            {threads.map((thread) => (
+              <Row key={thread.id} $top={thread.top}>
+                <RowNo $top={thread.top}>{thread.top ? labels.top : thread.id}</RowNo>
+                <RowMain>
+                  {/* Title opens the latest responses; the count opens the whole thread */}
+                  <RowTitle prefetch={false} href={`/trace/${boardId}/${thread.id}/recent`} $ended={thread.ended}>
+                    {thread.top && <Chip $tone="accent" className="m-top">{labels.top}</Chip>}
+                    {thread.ended && <Chip>{labels.ended}</Chip>}
+                    <span>{thread.title}</span>
+                  </RowTitle>
+                  <RowSub>
+                    <span>{thread.username}</span>
+                    <time dateTime={thread.createdAt}>{formatDate(thread.createdAt)}</time>
+                  </RowSub>
+                </RowMain>
+                <RowCount prefetch={false} href={`/trace/${boardId}/${thread.id}/`} title={t("viewAllResponses")}>
+                  {Math.max(0, thread.responseCount - 1)}
+                </RowCount>
+                <RowWhen dateTime={thread.updatedAt} title={formatDateTime(thread.updatedAt, locale)} suppressHydrationWarning>
+                  {formatRelativeTime(thread.updatedAt, locale)}
+                </RowWhen>
+              </Row>
+            ))}
+
+            <Pagination
+              currentPage={pagination.page}
+              totalPages={pagination.totalPages}
+              baseUrl={getBaseUrl()}
+            />
+          </>
+        )}
       </Container>
     </PageLayout>
   );

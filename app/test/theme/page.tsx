@@ -136,7 +136,7 @@ function ThemeDemo() {
 
       <Section>
         <SectionTitle>Theme Control</SectionTitle>
-        <ThemeToggleButton onClick={toggleMode}>
+        <ThemeToggleButton onClick={() => toggleMode(mode === "dark" ? "dark" : "light")}>
           Toggle Theme
         </ThemeToggleButton>
         <ThemeInfo>

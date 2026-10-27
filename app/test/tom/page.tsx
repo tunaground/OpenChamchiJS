@@ -205,7 +205,7 @@ function TomDemo() {
     <Container>
       <Header>
         <Title>TOM (Tunaground Object Markup) 테스트</Title>
-        <ThemeToggle onClick={toggleMode}>
+        <ThemeToggle onClick={() => toggleMode(mode === "dark" ? "dark" : "light")}>
           {mode === "light" ? "🌙 Dark" : "☀️ Light"}
         </ThemeToggle>
       </Header>

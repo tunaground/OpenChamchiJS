@@ -4,10 +4,11 @@ import { CSSProperties, useEffect, useRef } from 'react';
 import styled from 'styled-components';
 
 const Container = styled.div`
-  background: ${(props) => props.theme.responseCard};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.6rem;
+  background: ${(props) => props.theme.paneSunken};
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
+  padding: 1.2rem 1.4rem;
+  font-size: 1.4rem;
   & > ins,
   & > iframe {
     max-width: 100% !important;
