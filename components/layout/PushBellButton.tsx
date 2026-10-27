@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styled from "styled-components";
+import { iconButtonCss } from "./iconButton";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { useLocale, useTranslations } from "next-intl";
@@ -23,41 +24,19 @@ const Wrapper = styled.div`
 `;
 
 const Button = styled.button<{ $active?: boolean }>`
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 4rem;
-  height: 4rem;
-  border: none;
-  border-radius: 0.8rem;
-  cursor: pointer;
-  color: ${(props) => props.theme.topBarText};
-  opacity: ${(props) => (props.$active ? 1 : 0.8)};
-  background: ${(props) => (props.$active ? props.theme.topBarHover : "transparent")};
-  transition: background 0.15s, opacity 0.15s;
-
-  &:hover {
-    background: ${(props) => props.theme.topBarHover};
-    opacity: 1;
-  }
-
-  svg {
-    width: 2rem;
-    height: 2rem;
-  }
+  ${iconButtonCss}
 `;
 
 const Badge = styled.span`
   position: absolute;
-  top: 0.2rem;
-  right: 0.2rem;
+  top: -0.3rem;
+  right: -0.4rem;
   min-width: 1.6rem;
   height: 1.6rem;
   padding: 0 0.4rem;
   border-radius: 0.8rem;
   background: ${(props) => props.theme.accent};
-  color: #fff;
+  color: ${(props) => props.theme.buttonPrimaryText};
   font-size: 1rem;
   font-weight: 700;
   line-height: 1.6rem;
@@ -65,26 +44,28 @@ const Badge = styled.span`
 `;
 
 const Panel = styled.div`
+  /* The bell sits in the sidebar footer, so the panel opens upward */
   position: absolute;
-  top: calc(100% + 0.6rem);
-  right: 0;
+  bottom: calc(100% + 0.6rem);
+  left: 0;
   width: 32rem;
   max-height: 70vh;
   display: flex;
   flex-direction: column;
-  background: ${(props) => props.theme.surface};
+  background: ${(props) => props.theme.paneRaised};
   color: ${(props) => props.theme.textPrimary};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 0.8rem;
-  box-shadow: 0 0.4rem 1.6rem rgba(0, 0, 0, 0.18);
+  border: 1px solid ${(props) => props.theme.lineStrong};
+  border-radius: ${(props) => props.theme.radiusPane};
+  box-shadow: ${(props) => props.theme.paneShadow};
   overflow: hidden;
   z-index: 200;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     position: fixed;
-    top: 6.2rem;
-    left: 0.8rem;
-    right: 0.8rem;
+    top: auto;
+    bottom: 6.4rem;
+    left: 1.6rem;
+    right: 1.6rem;
     width: auto;
   }
 `;

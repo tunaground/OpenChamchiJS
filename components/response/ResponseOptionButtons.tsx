@@ -11,11 +11,12 @@ import {
   faRotateLeft,
 } from "@fortawesome/free-solid-svg-icons";
 import { ResponseOptions } from "@/lib/store/responseOptions";
+import { iconButtonCss } from "@/components/layout/iconButton";
 
 const Container = styled.div`
   display: flex;
-  gap: 0.4rem;
-  margin-bottom: 0.8rem;
+  align-items: center;
+  gap: 0.2rem;
 `;
 
 // Actions that are not options (e.g. refresh) sit apart on the right
@@ -26,36 +27,24 @@ const Trailing = styled.div`
 `;
 
 const OptionButton = styled.button<{ $active: boolean; $overridden?: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.2rem;
-  min-width: 0;
-  height: 3.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 0.4rem;
-  background: ${(props) =>
-    props.$active ? props.theme.buttonPrimary : props.theme.surface};
-  color: ${(props) =>
-    props.$active ? props.theme.buttonPrimaryText : props.theme.textSecondary};
-  cursor: pointer;
-  transition: all 0.15s ease;
-  position: relative;
+  ${iconButtonCss}
+  width: 3rem;
+  height: 3rem;
 
-  &:hover {
-    background: ${(props) =>
-      props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
-    opacity: ${(props) => (props.$active ? 0.9 : 1)};
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 
+  /* The option is on in the global settings */
   ${(props) =>
     props.$overridden &&
     `
     &::after {
       content: "";
       position: absolute;
-      top: 0.2rem;
-      right: 0.2rem;
+      top: 0.3rem;
+      right: 0.3rem;
       width: 0.5rem;
       height: 0.5rem;
       border-radius: 50%;
@@ -66,21 +55,21 @@ const OptionButton = styled.button<{ $active: boolean; $overridden?: boolean }>`
 
 const Tooltip = styled.span`
   position: absolute;
-  bottom: 100%;
+  bottom: calc(100% + 0.4rem);
   left: 50%;
   transform: translateX(-50%);
-  padding: 0.4rem 0.8rem;
-  background: ${(props) => props.theme.surface};
+  padding: 0.3rem 0.8rem;
+  background: ${(props) => props.theme.paneRaised};
   color: ${(props) => props.theme.textPrimary};
+  border: 1px solid ${(props) => props.theme.lineStrong};
   font-size: 1.2rem;
-  border-radius: 0.4rem;
+  border-radius: ${(props) => props.theme.radiusChip};
   white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.15s, visibility 0.15s;
   pointer-events: none;
   z-index: 10;
-  margin-bottom: 0.4rem;
 
   ${OptionButton}:hover & {
     opacity: 1;
@@ -88,29 +77,16 @@ const Tooltip = styled.span`
   }
 `;
 
-const ResetButton = styled.button<{ $hasOverrides: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 3.2rem;
-  min-width: 0;
-  height: 3.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 0.4rem;
-  background: ${(props) => props.theme.surface};
+const ResetButton = styled.button<{ $hasOverrides: boolean; $active?: boolean }>`
+  ${iconButtonCss}
+  width: 3rem;
+  height: 3rem;
   color: ${(props) =>
     props.$hasOverrides ? props.theme.warning : props.theme.textSecondary};
-  cursor: pointer;
-  transition: all 0.15s ease;
-  position: relative;
-  opacity: ${(props) => (props.$hasOverrides ? 1 : 0.5)};
 
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-
-  &:disabled {
-    cursor: not-allowed;
+  svg {
+    width: 1.5rem;
+    height: 1.5rem;
   }
 `;
 

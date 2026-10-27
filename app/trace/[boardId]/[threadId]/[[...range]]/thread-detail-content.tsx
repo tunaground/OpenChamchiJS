@@ -29,103 +29,43 @@ import { formatDateTime } from "@/lib/utils/date-formatter";
 import { useThreadViewingHeartbeat } from "@/lib/hooks/useThreadViewingHeartbeat";
 import { usePushWatchStore } from "@/lib/store/pushWatch";
 import { getAnonId } from "@/lib/utils/anon-id";
+import { isPageNearBottom, onPageScroll } from "@/lib/utils/page-scroll";
 import CustomHtml from "@/components/CustomHtml";
+import { iconButtonCss } from "@/components/layout/iconButton";
+import { useThreadWatchToggle } from "@/components/sidebar/ThreadWatchButton";
+import {
+  ComposerDock,
+  LoadMoreButton,
+  LoadMoreRow,
+  ThreadFilterBar,
+  ThreadOpener,
+  ThreadToolbarActions,
+  ThreadViewBar,
+} from "@/components/thread/ThreadChrome";
 
+/* Full width with minimal side padding: AA and other wide posts need every column */
 const Container = styled.div`
-  padding: 1.6rem;
+  width: 100%;
+  padding: 1.6rem ${(props) => props.theme.ledgerPadding} 2.4rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: 1.2rem 1rem 2rem;
   }
-`;
-
-
-const ThreadHeader = styled.div`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 2.4rem;
-  margin-bottom: 2.4rem;
-`;
-
-const ThreadTitle = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin: 0 0 1.6rem 0;
-  word-break: break-all;
-`;
-
-const BadgeContainer = styled.div`
-  display: flex;
-  gap: 0.8rem;
-  margin-bottom: 1.6rem;
-`;
-
-const Badge = styled.span<{ $variant?: "top" | "ended" }>`
-  display: inline-block;
-  padding: 0.4rem 0.8rem;
-  border-radius: 4px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  background: ${(props) =>
-    props.$variant === "ended"
-      ? props.theme.textSecondary + "30"
-      : props.theme.textPrimary};
-  color: ${(props) =>
-    props.$variant === "ended"
-      ? props.theme.textSecondary
-      : props.theme.background};
-`;
-
-const ThreadMeta = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-`;
-
-const MetaItem = styled.div`
-  display: flex;
-  gap: 0.8rem;
-`;
-
-const MetaLabel = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-`;
-
-const MetaValue = styled.span`
-  color: ${(props) => props.theme.textPrimary};
 `;
 
 const ResponsesSection = styled.section`
   display: flex;
   flex-direction: column;
-  gap: 1.6rem;
 `;
 
-
 const RawContentButton = styled.button<{ $active: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 2.4rem;
-  height: 2.4rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 0.4rem;
-  background: ${(props) =>
-    props.$active ? props.theme.buttonPrimary : "transparent"};
-  color: ${(props) =>
-    props.$active ? props.theme.buttonPrimaryText : props.theme.textSecondary};
-  cursor: pointer;
-  transition: all 0.15s ease;
-  margin-left: 0.8rem;
+  ${iconButtonCss}
+  width: 2.6rem;
+  height: 2.6rem;
 
-  &:hover {
-    background: ${(props) =>
-      props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
-    opacity: ${(props) => (props.$active ? 0.9 : 1)};
+  svg {
+    width: 1.4rem;
+    height: 1.4rem;
   }
 `;
 
@@ -148,11 +88,8 @@ const AttachmentLink = styled.a`
 
 const EmptyState = styled.div`
   text-align: center;
-  padding: 4.8rem;
+  padding: 4.8rem 0;
   color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
 `;
 
 const Modal = styled.div`
@@ -161,7 +98,7 @@ const Modal = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: ${(props) => props.theme.scrim};
   display: flex;
   align-items: center;
   justify-content: center;
@@ -169,8 +106,10 @@ const Modal = styled.div`
 `;
 
 const ModalContent = styled.div`
-  background: ${(props) => props.theme.surface};
-  border-radius: 8px;
+  background: ${(props) => props.theme.paneRaised};
+  border: 1px solid ${(props) => props.theme.lineStrong};
+  border-radius: ${(props) => props.theme.radiusPane};
+  box-shadow: ${(props) => props.theme.paneShadow};
   padding: 2.4rem;
   max-width: 40rem;
   width: 90%;
@@ -356,56 +295,6 @@ const UnlockButton = styled(ConfirmButton)`
   background: ${(props) => props.theme.buttonPrimary};
 `;
 
-const LoadMoreSection = styled.div`
-  display: flex;
-  align-items: stretch;
-  gap: 0.8rem;
-  padding: 1.2rem 1.6rem;
-  margin-top: 1.6rem;
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    gap: 0.4rem;
-    padding: 0.8rem;
-  }
-`;
-
-const LoadMoreButton = styled.button<{ $primary?: boolean }>`
-  flex: 1;
-  padding: 0.6rem 1.2rem;
-  background: ${(props) =>
-    props.$primary ? props.theme.buttonPrimary : "transparent"};
-  color: ${(props) =>
-    props.$primary ? props.theme.buttonPrimaryText : props.theme.textSecondary};
-  border: 1px solid
-    ${(props) =>
-      props.$primary ? "transparent" : props.theme.surfaceBorder};
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 1.3rem;
-  font-weight: 500;
-  white-space: nowrap;
-  transition: all 0.15s ease;
-
-  &:hover {
-    opacity: 0.8;
-    background: ${(props) =>
-      props.$primary ? props.theme.buttonPrimary : props.theme.surfaceHover};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 0.6rem 0.4rem;
-    font-size: 1.2rem;
-  }
-`;
-
 interface ThreadData {
   id: number;
   boardId: string;
@@ -573,10 +462,7 @@ export function ThreadDetailContent({
 
   // Capture scroll position before DOM changes, then update responses
   const addResponses = useCallback((updater: (prev: ResponseData[]) => ResponseData[]) => {
-    const scrollTop = window.scrollY;
-    const windowHeight = window.innerHeight;
-    const documentHeight = document.documentElement.scrollHeight;
-    wasAtBottomRef.current = scrollTop + windowHeight >= documentHeight - 100;
+    wasAtBottomRef.current = isPageNearBottom(100);
     setResponses(updater);
   }, []);
 
@@ -830,20 +716,13 @@ export function ThreadDetailContent({
   // Track scroll position to detect if user is at bottom
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const windowHeight = window.innerHeight;
-      const documentHeight = document.documentElement.scrollHeight;
       // Consider "at bottom" if within 100px of the bottom
-      isAtBottomRef.current = scrollTop + windowHeight >= documentHeight - 100;
+      isAtBottomRef.current = isPageNearBottom(100);
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
     // Check initial position
     handleScroll();
-
-    return () => {
-      window.removeEventListener("scroll", handleScroll);
-    };
+    return onPageScroll(handleScroll);
   }, []);
 
   // alwaysBottom: scroll to bottom on initial page load
@@ -1291,54 +1170,103 @@ export function ThreadDetailContent({
       boards={boards}
       customLinks={customLinks}
       labels={sidebarLabels}
-      onManageClick={openManageModal}
-      isLoggedIn={isLoggedIn}
       filter={filter}
       filterActive={filterActive}
-      onRemoveUsernameFilter={handleRemoveUsernameFilter}
-      onRemoveAuthorIdFilter={handleRemoveAuthorIdFilter}
-      onToggleFilterActive={handleToggleFilterActive}
     />
   );
+
+  const watchToggle = useThreadWatchToggle(thread.id, isLoggedIn);
+  const boardName = boards.find((board) => board.id === thread.boardId)?.name ?? thread.boardId;
 
   return (
     <PageLayout
       title={thread.title}
+      parent={{ label: boardName, href: `/index/${thread.boardId}` }}
+      subtitle={lastSeq}
+      toolbarActions={
+        <ThreadToolbarActions
+          onRefresh={handleRefresh}
+          refreshing={isRefreshing}
+          watch={watchToggle}
+          onManage={openManageModal}
+          labels={{
+            refresh: labels.refresh,
+            manage: sidebarLabels.manageThread,
+            scrollUp: sidebarLabels.scrollUp,
+            scrollDown: sidebarLabels.scrollDown,
+          }}
+        />
+      }
       sidebar={sidebar}
-      compactSidebarOnMobile
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}
       authLabels={authLabels}
       userCount={showUserCount ? threadMemberCount : undefined}
+      footer={
+        <ComposerDock>
+          <ResponseFormSection
+            thread={thread}
+            defaultUsername={defaultUsername}
+            tripcodeSalt={tripcodeSalt}
+            responseOptions={responseOptions}
+            toggleOption={toggleOption}
+            isGlobalActive={isGlobalActive}
+            hasThreadOverride={hasThreadOverride}
+            resetAllThreadOptions={resetAllThreadOptions}
+            realtimeEnabled={realtimeEnabled}
+            storageEnabled={storageEnabled}
+            uploadMaxSize={uploadMaxSize}
+            currentLastSeq={currentLastSeq}
+            anonId={anonId}
+            labels={labels}
+            alwaysBottomRef={alwaysBottomRef}
+            isAtBottomRef={isAtBottomRef}
+            pageEndRef={pageEndRef}
+            onSubmitSuccess={fetchNewResponses}
+            onRefresh={handleRefresh}
+            refreshing={isRefreshing}
+          />
+        </ComposerDock>
+      }
     >
       <Container>
-        <ThreadHeader>
-          <ThreadTitle>
-            #{thread.id} {thread.title} ({lastSeq})
-          </ThreadTitle>
-
-          {(thread.top || thread.ended) && (
-            <BadgeContainer>
-              {thread.top && <Badge $variant="top">{labels.top}</Badge>}
-              {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
-            </BadgeContainer>
-          )}
-
-          <ThreadMeta>
-            <MetaItem>
-              <MetaLabel>{labels.author}:</MetaLabel>
-              <MetaValue>{thread.username}</MetaValue>
-            </MetaItem>
-            <MetaItem>
-              <MetaLabel>{labels.createdAt}:</MetaLabel>
-              <MetaValue>{formatDateTime(thread.createdAt)}</MetaValue>
-            </MetaItem>
-            <MetaItem>
-              <MetaLabel>{labels.updatedAt}:</MetaLabel>
-              <MetaValue>{formatDateTime(thread.updatedAt)}</MetaValue>
-            </MetaItem>
-          </ThreadMeta>
-        </ThreadHeader>
+        <ThreadOpener
+          threadId={thread.id}
+          title={thread.title}
+          top={thread.top}
+          ended={thread.ended}
+          meta={[
+            { label: labels.author, value: thread.username },
+            { label: labels.createdAt, value: formatDateTime(thread.createdAt) },
+            { label: labels.updatedAt, value: formatDateTime(thread.updatedAt) },
+          ]}
+          labels={{ top: labels.top, ended: labels.ended }}
+        />
+        <ThreadViewBar
+          boardId={thread.boardId}
+          threadId={thread.id}
+          currentView={currentView}
+          lastSeq={lastSeq}
+          responsesPerPage={responsesPerPage}
+          filter={filter}
+          filterActive={filterActive}
+          labels={sidebarLabels}
+        />
+        <ThreadFilterBar
+          filter={filter}
+          filterActive={filterActive}
+          onRemoveUsername={handleRemoveUsernameFilter}
+          onRemoveAuthorId={handleRemoveAuthorIdFilter}
+          onToggleActive={handleToggleFilterActive}
+          labels={{
+            filter: sidebarLabels.filter,
+            username: t("threadDetail.filterUsername"),
+            authorId: t("threadDetail.filterAuthorId"),
+            pause: t("threadDetail.filterPause"),
+            resume: t("threadDetail.filterResume"),
+            remove: t("threadDetail.filterRemove"),
+          }}
+        />
 
         <ResponsesSection>
         {responses.length === 0 ? (
@@ -1382,11 +1310,11 @@ export function ThreadDetailContent({
               />
               {/* Custom HTML slot - shown after seq 0 */}
               {response.seq === 0 && threadCustomHtml && (
-                <CustomHtml html={threadCustomHtml} style={{ marginTop: '1.6rem' }} />
+                <CustomHtml html={threadCustomHtml} style={{ margin: "1.2rem 0" }} />
               )}
               {/* Load More button - shown after seq 0 */}
               {response.seq === 0 && hasMoreToLoad && (
-                <LoadMoreSection>
+                <LoadMoreRow>
                   <LoadMoreButton
                     $primary
                     onClick={() => loadMoreResponses(10)}
@@ -1403,7 +1331,7 @@ export function ThreadDetailContent({
                       {count}
                     </LoadMoreButton>
                   ))}
-                </LoadMoreSection>
+                </LoadMoreRow>
               )}
             </div>
             );
@@ -1411,30 +1339,9 @@ export function ThreadDetailContent({
         )}
       </ResponsesSection>
 
-      <ResponseFormSection
-        thread={thread}
-        defaultUsername={defaultUsername}
-        tripcodeSalt={tripcodeSalt}
-        responseOptions={responseOptions}
-        toggleOption={toggleOption}
-        isGlobalActive={isGlobalActive}
-        hasThreadOverride={hasThreadOverride}
-        resetAllThreadOptions={resetAllThreadOptions}
-        realtimeEnabled={realtimeEnabled}
-        storageEnabled={storageEnabled}
-        uploadMaxSize={uploadMaxSize}
-        currentLastSeq={currentLastSeq}
-        anonId={anonId}
-        labels={labels}
-        alwaysBottomRef={alwaysBottomRef}
-        isAtBottomRef={isAtBottomRef}
-        pageEndRef={pageEndRef}
-        onSubmitSuccess={fetchNewResponses}
-        onRefresh={handleRefresh}
-        refreshing={isRefreshing}
-      />
-      <div ref={pageEndRef} />
       </Container>
+
+      <div ref={pageEndRef} />
 
       {/* Manage Responses Modal */}
       {manageModalOpen && (

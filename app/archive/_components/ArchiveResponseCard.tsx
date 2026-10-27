@@ -3,78 +3,119 @@
 import { forwardRef, useMemo } from "react";
 import Link from "next/link";
 import { useLocale } from "next-intl";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 import { extractYoutubeId, formatDate } from "../_lib/utils";
 import { getAttachmentUrl } from "../_lib/api";
 import type { ArchiveResponse } from "../_lib/types";
 
+/*
+ * Same ledger look as the live thread (components/response/ResponseCard):
+ * the seq number sits large in a left gutter, rows split by hairlines.
+ */
+
 const Card = styled.article<{ $highlighted?: boolean }>`
-  background: ${(props) =>
-    props.$highlighted ? props.theme.surfaceHover : props.theme.responseCard};
-  border: 1px solid
-    ${(props) =>
-      props.$highlighted ? props.theme.primary : props.theme.surfaceBorder};
-  border-radius: 8px;
-  overflow: hidden;
+  display: grid;
+  grid-template-columns: ${(props) => props.theme.ledgerGutter} minmax(0, 1fr);
+  padding: 1.4rem 0 1.6rem;
+  border-bottom: 1px solid ${(props) => props.theme.line};
   scroll-margin-top: 7rem;
+
+  ${(props) =>
+    props.$highlighted &&
+    css`
+      margin: 0 -1.2rem;
+      padding-left: 1.2rem;
+      padding-right: 1.2rem;
+      background: ${props.theme.accentSoft};
+      border-radius: ${props.theme.radiusControl};
+    `}
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 1.2rem;
+    padding-bottom: 1.2rem;
+  }
 `;
 
-const Header = styled.header<{ $highlighted?: boolean }>`
-  padding: 1.2rem 1.6rem;
-  background: ${(props) =>
-    props.$highlighted ? "transparent" : props.theme.surfaceHover};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
+const Gutter = styled(Link)<{ $op?: boolean }>`
+  /* Sit on the same baseline as the name line, not flush with its top */
+  align-self: baseline;
+  padding: 0 1.2rem 0 0;
+  font-size: 2rem;
+  font-weight: ${(props) => (props.$op ? 500 : 300)};
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-align: right;
+  color: ${(props) => (props.$op ? props.theme.accent : props.theme.textMuted)};
+  transition: color 0.15s;
+
+  &:hover {
+    color: ${(props) => props.theme.accent};
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: none;
+  }
+`;
+
+const Main = styled.div`
+  align-self: baseline;
+  min-width: 0;
+`;
+
+const Header = styled.header`
   display: flex;
-  align-items: center;
-  gap: 1.2rem;
+  align-items: baseline;
   flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  font-size: 1.4rem;
 `;
 
-const ResponseSeq = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-weight: 500;
+/** Inline seq, shown on mobile where the gutter hides */
+const ResponseSeq = styled(Link)<{ $op?: boolean }>`
+  display: none;
+  font-weight: 600;
+  color: ${(props) => (props.$op ? props.theme.accent : props.theme.textSecondary)};
 
-  a {
-    color: ${(props) => props.theme.textSecondary};
-    text-decoration: none;
+  &:hover {
+    color: ${(props) => props.theme.accent};
+  }
 
-    &:hover {
-      color: ${(props) => props.theme.anchorALinkColor};
-    }
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: inline;
   }
 `;
 
 const Username = styled.span`
   color: ${(props) => props.theme.textPrimary};
-  font-weight: 500;
+  font-weight: 600;
   word-break: break-all;
 `;
 
 const AuthorId = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-size: 1.2rem;
+  color: ${(props) => props.theme.textMuted};
+  font-size: 1.3rem;
 `;
 
 const ResponseDate = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-  font-size: 1.2rem;
-  margin-left: auto;
+  color: ${(props) => props.theme.textMuted};
+  font-size: 1.3rem;
 
+  /* Mobile: always on its own second line */
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    margin-left: 0;
-    width: 100%;
-    order: 10;
+    flex-basis: 100%;
+    order: 1;
   }
 `;
 
 const Attachment = styled.div`
-  padding: 1.6rem 1.6rem 0;
+  margin-top: 0.8rem;
 `;
 
 const AttachmentImage = styled.img`
   max-width: 100%;
   max-height: 400px;
-  border-radius: 4px;
+  border-radius: ${(props) => props.theme.radiusControl};
   cursor: pointer;
 `;
 
@@ -82,16 +123,16 @@ const AttachmentLink = styled.a`
   display: inline-flex;
   align-items: center;
   gap: 0.8rem;
-  padding: 0.8rem 1.2rem;
-  background: ${(props) => props.theme.surfaceHover};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
+  padding: 0.6rem 1rem;
+  background: ${(props) => props.theme.paneSunken};
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
   color: ${(props) => props.theme.textPrimary};
   font-size: 1.4rem;
   text-decoration: none;
 
   &:hover {
-    background: ${(props) => props.theme.surface};
+    background: ${(props) => props.theme.hover};
     text-decoration: none;
   }
 `;
@@ -110,14 +151,14 @@ const YoutubeEmbed = styled.div`
     width: 100%;
     height: 100%;
     border: none;
-    border-radius: 4px;
+    border-radius: ${(props) => props.theme.radiusControl};
   }
 `;
 
 const Content = styled.div`
-  padding: 1.6rem;
+  margin-top: 0.6rem;
   font-size: 1.5rem;
-  line-height: 1.6;
+  line-height: 1.75;
   color: ${(props) => props.theme.textPrimary};
   word-break: break-word;
 
@@ -133,7 +174,7 @@ const Content = styled.div`
 
   hr {
     border: none;
-    border-top: 1px solid ${(props) => props.theme.surfaceBorder};
+    border-top: 1px solid ${(props) => props.theme.line};
     margin: 1.6rem 0;
   }
 
@@ -142,11 +183,15 @@ const Content = styled.div`
     white-space: nowrap;
     overflow-x: auto;
     overflow-y: hidden;
-    font-family: "AAFont", "HeadKasen", "Saitamaar", sans-serif;
+    font-family: ${(props) => props.theme.fontAA};
+    /* AA always draws on paper so coloured art keeps its look in dark mode */
     color: black;
     width: 100%;
-    background: rgba(255, 255, 255);
+    background: white;
     line-height: 1.8rem;
+    padding: 0.8rem 1rem;
+    border: 1px solid ${(props) => props.theme.line};
+    border-radius: ${(props) => props.theme.radiusControl};
 
     @media (max-width: ${(props) => props.theme.breakpoint}) {
       font-size: 1.2rem;
@@ -172,6 +217,8 @@ export const ArchiveResponseCard = forwardRef<HTMLDivElement, ArchiveResponseCar
     const attachmentUrl = hasAttachment
       ? getAttachmentUrl(baseUrl, boardId, response.attachment)
       : null;
+    const seqHref = `/archive/${boardId}/${threadId}/${response.sequence}`;
+    const isOp = response.sequence === 0;
     const isImage =
       hasAttachment && /\.(jpg|jpeg|png|gif|webp)$/i.test(response.attachment);
 
@@ -182,58 +229,61 @@ export const ArchiveResponseCard = forwardRef<HTMLDivElement, ArchiveResponseCar
 
     return (
       <Card ref={ref} $highlighted={highlighted} id={`response-${response.sequence}`}>
-        <Header $highlighted={highlighted}>
-          <ResponseSeq>
-            <Link prefetch={false} href={`/archive/${boardId}/${threadId}/${response.sequence}`}>
+        <Gutter prefetch={false} href={seqHref} $op={isOp} aria-hidden tabIndex={-1}>
+          {response.sequence}
+        </Gutter>
+        <Main>
+          <Header>
+            <ResponseSeq prefetch={false} href={seqHref} $op={isOp}>
               #{response.sequence}
-            </Link>
-          </ResponseSeq>
-          <Username dangerouslySetInnerHTML={{ __html: response.username }} />
-          <AuthorId>({response.userId})</AuthorId>
-          <ResponseDate>{formatDate(response.createdAt, locale)}</ResponseDate>
-        </Header>
+            </ResponseSeq>
+            <Username dangerouslySetInnerHTML={{ __html: response.username }} />
+            <AuthorId>({response.userId})</AuthorId>
+            <ResponseDate>{formatDate(response.createdAt, locale)}</ResponseDate>
+          </Header>
 
-        {hasAttachment && (
-          <Attachment>
-            {isImage ? (
-              <a href={attachmentUrl!} target="_blank" rel="noopener noreferrer">
-                <AttachmentImage
-                  src={attachmentUrl!}
-                  alt="Attachment"
+          {hasAttachment && (
+            <Attachment>
+              {isImage ? (
+                <a href={attachmentUrl!} target="_blank" rel="noopener noreferrer">
+                  <AttachmentImage
+                    src={attachmentUrl!}
+                    alt="Attachment"
+                    loading="lazy"
+                  />
+                </a>
+              ) : (
+                <AttachmentLink href={attachmentUrl!} target="_blank" rel="noopener noreferrer">
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                  >
+                    <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                  </svg>
+                  {response.attachment}
+                </AttachmentLink>
+              )}
+            </Attachment>
+          )}
+
+          {hasYoutube && (
+            <Attachment>
+              <YoutubeEmbed>
+                <iframe
+                  src={`https://www.youtube.com/embed/${youtubeId}`}
+                  allowFullScreen
                   loading="lazy"
                 />
-              </a>
-            ) : (
-              <AttachmentLink href={attachmentUrl!} target="_blank" rel="noopener noreferrer">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
-                </svg>
-                {response.attachment}
-              </AttachmentLink>
-            )}
-          </Attachment>
-        )}
+              </YoutubeEmbed>
+            </Attachment>
+          )}
 
-        {hasYoutube && (
-          <Attachment>
-            <YoutubeEmbed>
-              <iframe
-                src={`https://www.youtube.com/embed/${youtubeId}`}
-                allowFullScreen
-                loading="lazy"
-              />
-            </YoutubeEmbed>
-          </Attachment>
-        )}
-
-        <Content dangerouslySetInnerHTML={{ __html: processedContent }} />
+          <Content dangerouslySetInnerHTML={{ __html: processedContent }} />
+        </Main>
       </Card>
     );
   }

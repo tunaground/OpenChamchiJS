@@ -3,21 +3,18 @@
 import styled from "styled-components";
 
 const Container = styled.div`
-  padding: 1.6rem;
+  width: 100%;
+  max-width: ${(props) => props.theme.contentMaxWidth};
+  margin: 0 auto;
+  padding: 1.6rem 2.4rem 3.2rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: 1.2rem 1.4rem 2.4rem;
   }
 `;
 
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 1.6rem;
-`;
-
 const Description = styled.p`
+  padding: 0 0.4rem;
   font-size: 1.4rem;
   color: ${(props) => props.theme.textSecondary};
   line-height: 1.6;
@@ -26,7 +23,6 @@ const Description = styled.p`
 export function ArchiveHomeContent() {
   return (
     <Container>
-      <Title>Archive</Title>
       <Description>
         Select a board from the sidebar to view archived threads.
       </Description>

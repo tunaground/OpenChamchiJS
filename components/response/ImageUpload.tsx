@@ -15,24 +15,25 @@ const HiddenInput = styled.input`
 `;
 
 const UploadButton = styled.button`
-  padding: 0.6rem 1.2rem;
-  background: ${(props) => props.theme.surfaceHover};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  height: 3rem;
+  padding: 0 1rem;
+  background: transparent;
+  border: 1px solid ${(props) => props.theme.lineStrong};
+  border-radius: ${(props) => props.theme.radiusControl};
   font-size: 1.3rem;
   cursor: pointer;
-  color: ${(props) => props.theme.textPrimary};
-
+  color: ${(props) => props.theme.textSecondary};
   &:hover {
-    background: ${(props) => props.theme.surface};
+    background: ${(props) => props.theme.hover};
+    color: ${(props) => props.theme.textPrimary};
   }
-
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 `;
-
 const Preview = styled.img`
   max-width: 40px;
   max-height: 40px;
@@ -41,11 +42,12 @@ const Preview = styled.img`
 `;
 
 const RemoveButton = styled.button`
-  padding: 0.4rem 0.8rem;
+  height: 3rem;
+  padding: 0 1rem;
   background: transparent;
   border: 1px solid ${(props) => props.theme.error || "#dc2626"};
   color: ${(props) => props.theme.error || "#dc2626"};
-  border-radius: 4px;
+  border-radius: ${(props) => props.theme.radiusControl};
   font-size: 1.2rem;
   cursor: pointer;
 

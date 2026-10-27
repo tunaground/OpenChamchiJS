@@ -34,7 +34,7 @@ const StyledLink = styled(Link)`
   padding: 1.2rem 2.4rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
-  border-radius: 0.4rem;
+  border-radius: ${(props) => props.theme.radiusControl};
   text-decoration: none;
   font-size: 1.4rem;
 

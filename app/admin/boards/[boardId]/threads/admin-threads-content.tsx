@@ -9,380 +9,97 @@ import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
 import { AdminBoardSidebar } from "@/components/sidebar/AdminBoardSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
+import {
+  Container,
+  Breadcrumb,
+  ActionsBar,
+  Button,
+  SecondaryButton,
+  DangerButton,
+  Badge,
+  Badges,
+  List,
+  Item,
+  ItemHeader,
+  ItemTitle,
+  ItemMeta,
+  ItemActions,
+  SmallButton,
+  DangerSmallButton,
+  EmptyState,
+  SearchForm,
+  SearchInput,
+  SearchButton,
+  Modal,
+  ModalContent,
+  ModalTitle,
+  FormGroup,
+  Label,
+  Input,
+  Checkbox,
+  ModalActions,
+  Muted,
+} from "../../../_components/admin-ui";
 
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.adminMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
-
-const Header = styled.div`
-  margin-bottom: 2.4rem;
-`;
-
-const ActionsBar = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1.6rem;
-  margin-bottom: 2.4rem;
-  flex-wrap: wrap;
-`;
-
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.4rem;
-`;
-
-const Breadcrumb = styled.div`
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-
-  a {
-    color: ${(props) => props.theme.textSecondary};
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const Button = styled.button`
-  height: 3.5rem;
-  padding: 0 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const SecondaryButton = styled(Button)`
-  background: transparent;
-  color: ${(props) => props.theme.textPrimary};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-`;
-
-const DangerButton = styled(Button)`
-  background: #dc2626;
-  color: white;
-
-  &:hover {
-    background: #b91c1c;
-  }
-`;
-
-const ThreadCards = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-`;
-
-const ResponseCards = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+/** Responses inside the "manage responses" modal scroll on their own */
+const ResponseList = styled(List)`
   max-height: 60vh;
   overflow-y: auto;
 `;
 
-const ResponseCard = styled.div<{ $deleted?: boolean }>`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.2rem;
-  opacity: ${(props) => props.$deleted ? 0.5 : 1};
-`;
-
-const ResponseCardHeader = styled.div`
+const ResponseHeader = styled.div`
   display: flex;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.8rem;
+  gap: 0.8rem;
   flex-wrap: wrap;
+  margin-bottom: 0.4rem;
+  font-size: 1.4rem;
 `;
 
-const ResponseCardContent = styled.div`
+const ResponseContent = styled.div`
+  margin-top: 0.6rem;
   font-size: 1.3rem;
+  line-height: 1.5;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.8rem;
   word-break: break-word;
   white-space: pre-wrap;
   max-height: 8rem;
   overflow: hidden;
 `;
 
-const ResponseCardMeta = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-  margin-bottom: 0.8rem;
-`;
-
-const ResponseCardActions = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  align-items: center;
-`;
-
-const ThreadCard = styled.div<{ $deleted?: boolean }>`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.2rem;
-  opacity: ${(props) => props.$deleted ? 0.5 : 1};
-`;
-
-const CardTitle = styled.div`
+const BulkBar = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.8rem;
-  font-size: 1.4rem;
-  font-weight: 500;
-  margin-bottom: 0.8rem;
+  gap: 1rem;
+  margin-bottom: 1.2rem;
+  min-height: 3.4rem;
 
-  a {
-    color: ${(props) => props.theme.textPrimary};
-    text-decoration: none;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const CardBadges = styled.div`
-  display: flex;
-  gap: 0.4rem;
-  margin-left: auto;
-`;
-
-const CardMeta = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-  margin-bottom: 1rem;
-`;
-
-const CardActions = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.8rem;
-`;
-
-const Badge = styled.span<{ $variant?: "top" | "ended" | "active" }>`
-  display: inline-block;
-  padding: 0.2rem 0.8rem;
-  border-radius: 4px;
-  font-size: 1.2rem;
-  font-weight: 500;
-  background: ${(props) => {
-    switch (props.$variant) {
-      case "top":
-        return props.theme.textPrimary;
-      case "ended":
-        return props.theme.textSecondary + "30";
-      case "active":
-        return "#22c55e";
-      default:
-        return props.theme.textSecondary;
-    }
-  }};
-  color: ${(props) => {
-    switch (props.$variant) {
-      case "top":
-        return props.theme.background;
-      case "ended":
-        return props.theme.textSecondary;
-      case "active":
-        return "white";
-      default:
-        return props.theme.background;
-    }
-  }};
-`;
-
-const ActionButtons = styled.div`
-  display: flex;
-  gap: 0.8rem;
-  flex-wrap: wrap;
-`;
-
-const SmallButton = styled.button`
-  padding: 0.4rem 0.8rem;
-  font-size: 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  background: transparent;
-  color: ${(props) => props.theme.textPrimary};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 4.8rem;
-  color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-`;
-
-const SearchForm = styled.form`
-  display: flex;
-  gap: 0.8rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    width: 100%;
-  }
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  max-width: 30rem;
-  padding: 0.8rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    max-width: none;
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-
-  &::placeholder {
+  label {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    font-size: 1.3rem;
     color: ${(props) => props.theme.textSecondary};
   }
-`;
-
-const SearchButton = styled(Button)`
-  flex-shrink: 0;
-  white-space: nowrap;
-`;
-
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 2.4rem;
-  width: 100%;
-  max-width: 50rem;
-  max-height: 90vh;
-  overflow-y: auto;
-`;
-
-const ModalTitle = styled.h2`
-  font-size: 2rem;
-  font-weight: 600;
-  margin-bottom: 2.4rem;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 1.6rem;
-`;
-
-const Label = styled.label`
-  display: block;
-  margin-bottom: 0.8rem;
-  font-size: 1.4rem;
-  font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 0.8rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-`;
-
-const Checkbox = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
 
   input {
     width: 1.6rem;
     height: 1.6rem;
+    accent-color: ${(props) => props.theme.accent};
   }
 `;
 
-const ModalActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.8rem;
-  margin-top: 2.4rem;
+const RowCheckbox = styled.input`
+  width: 1.6rem;
+  height: 1.6rem;
+  cursor: pointer;
+  accent-color: ${(props) => props.theme.accent};
 `;
 
-const TitleLink = styled(Link)`
-  color: ${(props) => props.theme.textPrimary};
-  text-decoration: none;
-
-  &:hover {
-    text-decoration: underline;
-  }
+const Mono = styled.span`
+  font-family: ${(props) => props.theme.fontMono};
+  font-size: 1.2rem;
 `;
 
 interface ThreadData {
@@ -817,12 +534,9 @@ export function AdminThreadsContent({
       isAdminPage
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-          <Breadcrumb>
-            <Link prefetch={false} href="/admin/boards">Boards</Link> / {boardName}
-          </Breadcrumb>
-        </Header>
+        <Breadcrumb>
+          <Link prefetch={false} href="/admin/boards">Boards</Link> / {boardName}
+        </Breadcrumb>
 
         <ActionsBar>
           <SearchForm onSubmit={handleSearch}>
@@ -842,32 +556,32 @@ export function AdminThreadsContent({
         </EmptyState>
       ) : (
         <>
-          <ThreadCards>
+          <List>
             {threads.map((thread) => (
-              <ThreadCard key={thread.id} $deleted={thread.deleted}>
-                <CardTitle>
-                  <span>#{thread.id} </span>
-                  <TitleLink prefetch={false} href={`/trace/${boardId}/${thread.id}`}>
-                    {thread.title}
-                  </TitleLink>
-                  <CardBadges>
+              <Item key={thread.id} $deleted={thread.deleted}>
+                <ItemHeader>
+                  <ItemTitle>
+                    <Muted>#{thread.id}</Muted>
+                    <Link prefetch={false} href={`/trace/${boardId}/${thread.id}`}>
+                      {thread.title}
+                    </Link>
+                  </ItemTitle>
+                  <Badges>
                     {thread.deleted ? (
-                      <Badge $variant="ended">{labels.deleted}</Badge>
+                      <Badge $tone="danger">{labels.deleted}</Badge>
                     ) : (
                       <>
-                        {thread.top && <Badge $variant="top">{labels.top}</Badge>}
-                        {thread.ended && <Badge $variant="ended">{labels.ended}</Badge>}
+                        {thread.top && <Badge $tone="accent">{labels.top}</Badge>}
+                        {thread.ended && <Badge>{labels.ended}</Badge>}
                       </>
                     )}
-                  </CardBadges>
-                </CardTitle>
-                <CardMeta>
+                  </Badges>
+                </ItemHeader>
+                <ItemMeta>
                   <span>{thread.username}</span>
-                </CardMeta>
-                <CardMeta>
                   <span>{formatDateTime(thread.createdAt, locale)} - {formatDateTime(thread.updatedAt, locale)}</span>
-                </CardMeta>
-                <CardActions>
+                </ItemMeta>
+                <ItemActions>
                   {!thread.deleted && (
                     <SmallButton onClick={() => openResponsesModal(thread)}>
                       {labels.manageResponses}
@@ -893,19 +607,19 @@ export function AdminThreadsContent({
                     </>
                   )}
                   {canDelete && !thread.deleted && (
-                    <SmallButton onClick={() => openDeleteModal(thread)}>
+                    <DangerSmallButton onClick={() => openDeleteModal(thread)}>
                       {labels.delete}
-                    </SmallButton>
+                    </DangerSmallButton>
                   )}
                   {canDelete && thread.deleted && (
                     <SmallButton onClick={() => openRestoreModal(thread)}>
                       {labels.restore}
                     </SmallButton>
                   )}
-                </CardActions>
-              </ThreadCard>
+                </ItemActions>
+              </Item>
             ))}
-          </ThreadCards>
+          </List>
 
           <Pagination
             currentPage={pagination.page}
@@ -1028,16 +742,15 @@ export function AdminThreadsContent({
               <EmptyState>{labels.noResponses}</EmptyState>
             ) : (
               <>
-                <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "1.6rem" }}>
+                <BulkBar>
                   {canDelete && (
-                    <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", cursor: "pointer" }}>
+                    <label>
                       <input
                         type="checkbox"
                         checked={selectedResponseIds.size === responses.length && responses.length > 0}
                         onChange={toggleAllResponses}
-                        style={{ width: "1.6rem", height: "1.6rem" }}
                       />
-                      <span style={{ fontSize: "1.2rem" }}>전체 선택</span>
+                      <span>전체 선택</span>
                     </label>
                   )}
                   {canDelete && selectedResponseIds.size > 0 && (
@@ -1045,44 +758,39 @@ export function AdminThreadsContent({
                       {labels.delete} ({selectedResponseIds.size})
                     </DangerButton>
                   )}
-                </div>
-                <ResponseCards>
+                </BulkBar>
+                <ResponseList>
                   {responses.map((response, index) => (
-                    <ResponseCard key={response.id} $deleted={response.deleted}>
-                      <ResponseCardHeader>
+                    <Item key={response.id} $deleted={response.deleted}>
+                      <ResponseHeader>
                         {canDelete && (
-                          <input
+                          <RowCheckbox
                             type="checkbox"
                             checked={selectedResponseIds.has(response.id)}
                             onClick={(e) => handleResponseCheckboxClick(index, e)}
                             readOnly
-                            style={{ width: "1.6rem", height: "1.6rem", cursor: "pointer" }}
                           />
                         )}
-                        <span style={{ fontWeight: 500 }}>#{response.seq}</span>
+                        <span style={{ fontWeight: 600 }}>#{response.seq}</span>
                         <span>{response.username}</span>
-                        <span style={{ fontSize: "1.1rem", color: "gray" }}>({response.authorId})</span>
+                        <Muted style={{ fontSize: "1.2rem" }}>({response.authorId})</Muted>
                         {response.deleted ? (
-                          <Badge $variant="ended">{labels.deleted}</Badge>
+                          <Badge $tone="danger">{labels.deleted}</Badge>
                         ) : !response.visible ? (
-                          <Badge style={{ background: "#f59e0b", color: "white" }}>{labels.hidden}</Badge>
+                          <Badge $tone="warning">{labels.hidden}</Badge>
                         ) : (
-                          <Badge $variant="active">{labels.visible}</Badge>
+                          <Badge $tone="success">{labels.visible}</Badge>
                         )}
-                      </ResponseCardHeader>
-                      {response.ip && (
-                        <ResponseCardMeta>
-                          <span style={{ fontFamily: "monospace" }}>{response.ip}</span>
-                        </ResponseCardMeta>
-                      )}
-                      <ResponseCardMeta>
+                      </ResponseHeader>
+                      <ItemMeta>
+                        {response.ip && <Mono>{response.ip}</Mono>}
                         <span>{formatDateTime(response.createdAt, locale)}</span>
-                      </ResponseCardMeta>
-                      <ResponseCardContent>
+                      </ItemMeta>
+                      <ResponseContent>
                         {response.content.substring(0, 200)}
                         {response.content.length > 200 && "..."}
-                      </ResponseCardContent>
-                      <ResponseCardActions>
+                      </ResponseContent>
+                      <ItemActions>
                         {canEdit && !response.deleted && (
                           <SmallButton
                             onClick={() => handleToggleVisible(response)}
@@ -1099,10 +807,10 @@ export function AdminThreadsContent({
                             {response.deleted ? labels.restore : labels.delete}
                           </SmallButton>
                         )}
-                      </ResponseCardActions>
-                    </ResponseCard>
+                      </ItemActions>
+                    </Item>
                   ))}
-                </ResponseCards>
+                </ResponseList>
               </>
             )}
 

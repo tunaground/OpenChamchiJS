@@ -9,74 +9,94 @@ import { formatDate } from "../_lib/utils";
 import { fetchArchiveThread } from "../_lib/api";
 import type { ArchiveThread } from "../_lib/types";
 
+/* Same as the live thread page: full width, minimal side padding for AA */
 const Container = styled.div`
-  padding: 1.6rem;
+  width: 100%;
+  padding: 1.6rem ${(props) => props.theme.ledgerPadding} 3.2rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.6rem;
+    padding: 1.2rem 1rem 2.4rem;
   }
 `;
 
 const BackLink = styled(Link)`
   display: inline-flex;
   align-items: center;
-  gap: 0.8rem;
-  padding: 0.8rem 1.6rem;
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  color: ${(props) => props.theme.textPrimary};
-  font-size: 1.4rem;
-  margin-bottom: 2.4rem;
-  text-decoration: none;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textSecondary};
 
   &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-    text-decoration: none;
+    color: ${(props) => props.theme.accent};
+  }
+
+  svg {
+    width: 1.4rem;
+    height: 1.4rem;
   }
 `;
 
+/* Same opener as the live thread (components/thread/ThreadChrome) */
 const ThreadHeader = styled.header`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 2.4rem;
-  margin-bottom: 2.4rem;
+  padding: 0.6rem 0 1.6rem;
+`;
+
+const Chips = styled.div`
+  display: flex;
+  gap: 0.6rem;
+  margin-bottom: 0.8rem;
+`;
+
+const Chip = styled.span`
+  display: inline-flex;
+  align-items: center;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border-radius: ${(props) => props.theme.radiusChip};
+  font-size: 1.2rem;
+  font-weight: 500;
+  background: ${(props) => props.theme.paneSunken};
+  color: ${(props) => props.theme.textSecondary};
+  border: 1px solid ${(props) => props.theme.line};
 `;
 
 const ThreadTitle = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
+  font-size: 2.6rem;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 1.6rem;
   word-break: break-all;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    font-size: 2.2rem;
+  }
 `;
 
 const ThreadMeta = styled.div`
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
+  gap: 0.4rem 1.6rem;
+  margin-top: 0.8rem;
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textMuted};
+`;
+
+const MetaItem = styled.span`
+  display: inline-flex;
   gap: 0.4rem;
-  font-size: 1.4rem;
+`;
+
+const MetaLabel = styled.span``;
+
+const MetaValue = styled.b`
   color: ${(props) => props.theme.textSecondary};
-`;
-
-const MetaItem = styled.div`
-  display: flex;
-  gap: 0.8rem;
-`;
-
-const MetaLabel = styled.span`
-  color: ${(props) => props.theme.textSecondary};
-`;
-
-const MetaValue = styled.span`
-  color: ${(props) => props.theme.textPrimary};
+  font-weight: 500;
 `;
 
 const ResponseList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.6rem;
+  border-top: 1px solid ${(props) => props.theme.line};
 `;
 
 const LoadingState = styled.div`
@@ -87,11 +107,10 @@ const LoadingState = styled.div`
 
 const ErrorState = styled.div`
   text-align: center;
-  padding: 4.8rem;
+  padding: 4.8rem 1.6rem;
   color: ${(props) => props.theme.textSecondary};
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
+  border: 1px dashed ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
 `;
 
 interface ArchiveThreadContentProps {
@@ -210,6 +229,9 @@ export function ArchiveThreadContent({
       </BackLink>
 
       <ThreadHeader>
+        <Chips>
+          <Chip>#{thread.threadId}</Chip>
+        </Chips>
         <ThreadTitle>{thread.title}</ThreadTitle>
         <ThreadMeta>
           <MetaItem>

@@ -18,7 +18,6 @@ import {
   faChevronUp,
   faChevronDown,
   faSun,
-  faCloud,
   faMoon,
   faList,
   faComments,
@@ -38,72 +37,61 @@ import { PageLayout } from "@/components/layout";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 
 const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
+  width: 100%;
   max-width: ${(props) => props.theme.contentMaxWidth};
   margin: 0 auto;
+  padding: 1.6rem 2.4rem 3.2rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
+    padding: 1.2rem 1.4rem 2.4rem;
   }
-`;
-
-const Header = styled.div`
-  margin-bottom: 3.2rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin: 0 0 0.8rem 0;
 `;
 
 const Description = styled.p`
   font-size: 1.4rem;
+  line-height: 1.6;
   color: ${(props) => props.theme.textSecondary};
   margin: 0;
-  line-height: 1.6;
+  padding: 0 0.4rem;
 `;
 
 const Section = styled.section`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 2.4rem;
-  margin-bottom: 2.4rem;
+  margin-top: 2.8rem;
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin: 0 0 1.2rem 0;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: ${(props) => props.theme.textMuted};
+  margin: 0 0.4rem 0.6rem;
 `;
 
 const SectionDescription = styled.p`
   font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  margin: 0 0 2rem 0;
   line-height: 1.6;
+  color: ${(props) => props.theme.textSecondary};
+  margin: 0 0.4rem 1rem;
 `;
 
 const ItemList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.6rem;
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: ${(props) => props.theme.paneSunken};
 `;
 
 const Item = styled.div`
-  padding: 1.2rem;
-  border-radius: 8px;
-  background: ${(props) => props.theme.surfaceHover};
+  padding: 1.2rem 1.4rem;
+
+  & + & {
+    border-top: 1px solid ${(props) => props.theme.line};
+  }
 `;
 
 const ItemHeader = styled.div`
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  margin-bottom: 0.4rem;
+  margin-bottom: 0.2rem;
 `;
 
 const ItemIcon = styled.span`
@@ -112,7 +100,7 @@ const ItemIcon = styled.span`
   justify-content: center;
   width: 2rem;
   font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.textMuted};
 `;
 
 const ItemTitle = styled.h3`
@@ -124,28 +112,25 @@ const ItemTitle = styled.h3`
 
 const ItemDescription = styled.p`
   font-size: 1.3rem;
+  line-height: 1.5;
   color: ${(props) => props.theme.textSecondary};
   margin: 0;
-  line-height: 1.5;
 `;
 
 const Code = styled.code`
-  background: ${(props) => props.theme.background};
-  padding: 0.2rem 0.6rem;
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 1.2rem;
+  font-family: ${(props) => props.theme.fontMono};
+  font-size: 1.3rem;
   color: ${(props) => props.theme.textPrimary};
+  white-space: pre-wrap;
+  word-break: break-word;
 `;
 
 const TomExample = styled.div`
-  margin-top: 0.8rem;
-  padding: 0.8rem;
-  background: ${(props) => props.theme.background};
-  border-radius: 4px;
-  font-family: monospace;
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
+  margin-top: 0.6rem;
+  padding: 0.6rem 1rem;
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusChip};
+  background: ${(props) => props.theme.pane};
 `;
 
 interface BoardData {
@@ -256,8 +241,6 @@ interface Labels {
     description: string;
     lightTitle: string;
     lightDescription: string;
-    greyTitle: string;
-    greyDescription: string;
     darkTitle: string;
     darkDescription: string;
   };
@@ -353,10 +336,7 @@ export function ManualContent({
       authLabels={authLabels}
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-          <Description>{labels.description}</Description>
-        </Header>
+        <Description>{labels.description}</Description>
 
         {/* Basics */}
         <Section>
@@ -518,11 +498,6 @@ export function ManualContent({
               icon={faSun}
               title={labels.theme.lightTitle}
               description={labels.theme.lightDescription}
-            />
-            <SettingItem
-              icon={faCloud}
-              title={labels.theme.greyTitle}
-              description={labels.theme.greyDescription}
             />
             <SettingItem
               icon={faMoon}

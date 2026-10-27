@@ -1,178 +1,137 @@
 // Theme definitions for light and dark modes
+//
+// Surface colors point at CSS variables (declared in ThemeProvider's GlobalStyle,
+// keyed by html[data-mode]) so the mode applies before React mounts. Text and
+// button colors stay hex because some components append a hex alpha suffix to
+// them (e.g. `theme.textSecondary + "60"`).
 
 // Layout constants (shared across all themes)
 const layout = {
   breakpoint: "768px",
   contentMaxWidth: "80rem",
-  adminMaxWidth: "80rem",
+  adminMaxWidth: "96rem",
   containerPadding: "1.6rem",
+  // Floating panes: gap to the window edge and between panes
+  paneGap: "0.8rem",
+  sidebarWidth: "23.2rem",
+  toolbarHeight: "5.2rem",
+  radiusPane: "10px",
+  radiusControl: "6px",
+  radiusChip: "4px",
+  // Thread pages: seq-number gutter and the minimal side padding (AA and wide text need the room)
+  ledgerGutter: "5.6rem",
+  ledgerPadding: "1.2rem",
+  fontSans: '"IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif',
+  fontMono: '"Google Sans Code", ui-monospace, monospace',
+  fontAA: '"AAFont", "HeadKasen", "Saitamaar", sans-serif',
+};
+
+// Shared surface tokens (values live in CSS variables per mode)
+const surfaces = {
+  canvas: "var(--c-canvas)",
+  pane: "var(--c-pane)",
+  paneRaised: "var(--c-raised)",
+  paneSunken: "var(--c-sunken)",
+  line: "var(--c-line)",
+  lineStrong: "var(--c-line-strong)",
+  hover: "var(--c-hover)",
+  accentSoft: "var(--c-accent-soft)",
+  paneEdge: "var(--c-edge)",
+  paneShadow: "var(--c-shadow)",
+  scrim: "var(--c-scrim)",
+
+  // Legacy names mapped onto the pane system
+  background: "var(--c-field)",
+  surface: "var(--c-pane)",
+  surfaceHover: "var(--c-hover-solid)",
+  surfaceBorder: "var(--c-line)",
+  topBar: "var(--c-pane)",
+  topBarHover: "var(--c-hover)",
+  sidebar: "var(--c-pane)",
+  sidebarHover: "var(--c-hover)",
+  sidebarActive: "var(--c-accent-soft)",
+  responseCard: "var(--c-pane)",
+  toastBackground: "var(--c-toast)",
 };
 
 export const lightTheme = {
   mode: "light" as const,
 
-  // Colors - Tunaground blue accent
-  background: "#f8fafc",
-  foreground: "#171717",
-  primary: "#0077b6",
-  secondary: "#6c757d",
-  accent: "#00b4d8",
+  foreground: "#1b1f24",
+  primary: "#0a6cb0",
+  secondary: "#5b6470",
+  accent: "#0a6cb0",
 
-  // Surface colors
-  surface: "#ffffff",
-  surfaceHover: "#f0f7fa",
-  surfaceBorder: "#d0e4ed",
-
-  // Specific surface colors - blue tinted
-  topBar: "#0077b6",
-  topBarText: "#ffffff",
-  topBarHover: "#006298",
-  sidebar: "#e8f4f8",
-  sidebarText: "#171717",
-  sidebarHover: "#b8d8e8",
-  sidebarActive: "#b8dae8",
-  responseCard: "#ffffff",
+  topBarText: "#1b1f24",
+  sidebarText: "#1b1f24",
 
   // Text colors
-  textPrimary: "#171717",
-  textSecondary: "#4a6572",
-  textMuted: "#7a9aaa",
+  textPrimary: "#1b1f24",
+  textSecondary: "#5b6470",
+  textMuted: "#8b939d",
 
   // Button colors
-  buttonPrimary: "#0077b6",
+  buttonPrimary: "#0a6cb0",
   buttonPrimaryText: "#ffffff",
 
   // Status colors
-  success: "#28a745",
-  warning: "#ffc107",
-  error: "#dc3545",
-  info: "#00b4d8",
+  success: "#2f8a57",
+  warning: "#c98a12",
+  error: "#c43d3d",
+  info: "#0a6cb0",
 
   // TOM specific
-  calcExpColor: "#d64545",
-  anchorALinkColor: "#0077b6",
+  calcExpColor: "#c43d3d",
+  anchorALinkColor: "#0a6cb0",
   spoilerBackground: "rgba(0, 0, 0, 0.8)",
 
-  // Toast
-  toastBackground: "rgba(0, 50, 80, 0.9)",
   toastText: "#ffffff",
 
-  // Layout
+  ...surfaces,
   ...layout,
 };
 
 export const darkTheme = {
   mode: "dark" as const,
 
-  // Colors
-  background: "#0a0a0a",
-  foreground: "#ededed",
-  primary: "#4da6ff",
-  secondary: "#adb5bd",
-  accent: "#5a9cff",
+  foreground: "#e7e8ea",
+  primary: "#5aa9f0",
+  secondary: "#9aa1ab",
+  accent: "#5aa9f0",
 
-  // Surface colors
-  surface: "#1a1a1a",
-  surfaceHover: "#2a2a2a",
-  surfaceBorder: "#333333",
-
-  // Specific surface colors (same as surface for dark theme)
-  topBar: "#1a1a1a",
-  topBarText: "#ededed",
-  topBarHover: "#2a2a2a",
-  sidebar: "#1a1a1a",
-  sidebarText: "#ededed",
-  sidebarHover: "#2a2a2a",
-  sidebarActive: "#2a2a2a",
-  responseCard: "#1a1a1a",
+  topBarText: "#e7e8ea",
+  sidebarText: "#e7e8ea",
 
   // Text colors
-  textPrimary: "#ededed",
-  textSecondary: "#a0a0a0",
-  textMuted: "#666666",
+  textPrimary: "#e7e8ea",
+  textSecondary: "#9aa1ab",
+  textMuted: "#6b727c",
 
   // Button colors
-  buttonPrimary: "#3a3a3a",
-  buttonPrimaryText: "#ededed",
+  buttonPrimary: "#5aa9f0",
+  buttonPrimaryText: "#0d1a26",
 
   // Status colors
-  success: "#34c759",
-  warning: "#ffcc00",
-  error: "#ff453a",
-  info: "#5ac8fa",
+  success: "#4cc38a",
+  warning: "#e0b341",
+  error: "#f07070",
+  info: "#5aa9f0",
 
   // TOM specific
-  calcExpColor: "#e57373",
-  anchorALinkColor: "#4da6ff",
+  calcExpColor: "#ef7b7b",
+  anchorALinkColor: "#5aa9f0",
   spoilerBackground: "rgba(255, 255, 255, 0.8)",
 
-  // Toast
-  toastBackground: "rgba(50, 50, 50, 0.95)",
   toastText: "#ffffff",
 
-  // Layout
+  ...surfaces,
   ...layout,
 };
 
-export const greyTheme = {
-  mode: "grey" as const,
-
-  // Colors - darker grey tones, no white
-  // Order: topBar (darkest) > sidebar > background > responseCard (lightest)
-  background: "#b0b0b0",
-  foreground: "#1a1a1a",
-  primary: "#0055aa",
-  secondary: "#5a6570",
-  accent: "#0a5ebd",
-
-  // Surface colors (used by topBar/sidebar by default, we override with specific ones)
-  surface: "#909090",
-  surfaceHover: "#808080",
-  surfaceBorder: "#707070",
-
-  // Specific surface colors for grey theme
-  topBar: "#606060",
-  topBarText: "#e8e8e8",
-  topBarHover: "#505050",
-  sidebar: "#989898",
-  sidebarText: "#1a1a1a",
-  sidebarHover: "#888888",
-  sidebarActive: "#808080",
-  responseCard: "#d0d0d0",
-
-  // Text colors
-  textPrimary: "#1a1a1a",
-  textSecondary: "#303030",
-  textMuted: "#505050",
-
-  // Button colors
-  buttonPrimary: "#3a3a3a",
-  buttonPrimaryText: "#d8d8d8",
-
-  // Status colors
-  success: "#228b22",
-  warning: "#d4a000",
-  error: "#c42020",
-  info: "#0088a8",
-
-  // TOM specific
-  calcExpColor: "#c42020",
-  anchorALinkColor: "#0055aa",
-  spoilerBackground: "rgba(0, 0, 0, 0.8)",
-
-  // Toast
-  toastBackground: "rgba(30, 30, 30, 0.92)",
-  toastText: "#e0e0e0",
-
-  // Layout
-  ...layout,
-};
-
-export type ThemeMode = "light" | "dark" | "grey";
+export type ThemeMode = "light" | "dark";
 export type AppTheme = Omit<typeof lightTheme, "mode"> & { mode: ThemeMode };
 
 export const themes = {
   light: lightTheme,
   dark: darkTheme,
-  grey: greyTheme,
 } as const;

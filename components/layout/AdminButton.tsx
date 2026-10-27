@@ -2,28 +2,10 @@
 
 import Link from "next/link";
 import styled from "styled-components";
+import { iconButtonCss } from "./iconButton";
 
 const Button = styled(Link)<{ $active?: boolean }>`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 4rem;
-  height: 4rem;
-  border-radius: 0.8rem;
-  color: ${(props) => props.theme.topBarText};
-  opacity: ${(props) => (props.$active ? 1 : 0.8)};
-  background: ${(props) => (props.$active ? props.theme.topBarHover : "transparent")};
-  transition: background 0.15s, opacity 0.15s;
-
-  &:hover {
-    background: ${(props) => props.theme.topBarHover};
-    opacity: 1;
-  }
-
-  svg {
-    width: 2rem;
-    height: 2rem;
-  }
+  ${iconButtonCss}
 `;
 
 interface AdminButtonProps {
