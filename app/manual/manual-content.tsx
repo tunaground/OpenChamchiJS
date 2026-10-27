@@ -10,7 +10,7 @@ import {
   faArrowDown,
   faKeyboard,
   faArrowLeft,
-  faGear,
+  faListCheck,
   faPersonRunning,
   faClock,
   faChevronLeft,
@@ -635,7 +635,7 @@ export function ManualContent({
               description={labels.sidebar.backDescription}
             />
             <SettingItem
-              icon={faGear}
+              icon={faListCheck}
               title={labels.sidebar.manageTitle}
               description={labels.sidebar.manageDescription}
             />
