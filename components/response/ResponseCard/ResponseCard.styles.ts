@@ -1,6 +1,17 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import styled, { css } from "styled-components";
+
+/**
+ * Size the seq gutter to the thread's largest number: about 1.1rem per digit
+ * plus the 1.2rem gap before the name. Set it on the container that holds the
+ * responses so cards, anchor previews and the load-more row line up.
+ */
+export function ledgerGutterStyle(maxSeq: number): CSSProperties {
+  const digits = String(Math.max(0, Math.floor(maxSeq))).length;
+  return { "--ledger-gutter": `calc(${digits} * 1.1rem + 1.2rem)` } as CSSProperties;
+}
 
 /*
  * Responses read as one continuous ledger: the seq number sits large in a left

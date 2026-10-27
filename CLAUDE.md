@@ -97,10 +97,10 @@ npx prisma studio      # Open Prisma Studio GUI
 
 ### Styling & Theming
 - **styled-components** - Primary styling method for Client Components (requires `'use client'`)
-- Two modes: light, dark (`lib/theme/themes.ts`). Preference `system | light | dark` in `lib/store/theme.ts` (old `grey` migrates to light); `useResolvedThemeMode()` gives the shown mode
+- Three modes: light, grey, dark (`lib/theme/themes.ts`; grey = mid tones, no white/black). Preference `system | light | grey | dark` in `lib/store/theme.ts` (system resolves to light/dark); `useResolvedThemeMode()` gives the shown mode
 - Surface tokens (`pane`, `paneRaised`, `paneSunken`, `line`, `lineStrong`, `hover`, `accentSoft`, `scrim`, and legacy `surface*`/`background`) are CSS variables declared in `ThemeProvider`'s GlobalStyle, keyed by `html[data-mode]`. `app/layout.tsx` sets `data-mode` before paint. Text/button tokens stay hex because some code appends hex alpha (`theme.textSecondary + "60"`)
 - Radii: `radiusPane` 10px, `radiusControl` 6px, `radiusChip` 4px. Shared icon button style: `components/layout/iconButton.ts`
-- `ThemeToggleButton` (sidebar footer) flips light ↔ dark; Settings offers System/Light/Dark
+- `ThemeToggleButton` (sidebar footer) steps light → grey → dark; Settings offers System/Light/Grey/Dark
 - Fonts: IBM Plex Sans KR (UI/body, Google Fonts link in `app/layout.tsx`), AAFont (HeadKasen + Nanum Gothic Coding) for AA, Google Sans Code for dice/calc
 - Responsive breakpoint: `props.theme.breakpoint` (768px)
 - Content max width: `props.theme.contentMaxWidth` (80rem)

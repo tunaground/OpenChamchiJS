@@ -460,10 +460,11 @@
     "deleteAccountButton": "アカウント削除",
     "cancel": "キャンセル",
     "theme": "テーマ",
-    "themeDescription": "画面を明るく、または暗く表示します。システムは端末の設定に従います。",
+    "themeDescription": "画面の明るさを選びます。グレーはライトより暗く、ダークより明るい表示です。システムは端末の設定（ライト・ダーク）に従います。",
     "themeSystem": "システム",
     "themeLight": "ライト",
-    "themeDark": "ダーク"
+    "themeDark": "ダーク",
+    "themeGrey": "グレー"
   },
   "manual": {
     "title": "ユーザーマニュアル",
@@ -563,11 +564,13 @@
     },
     "theme": {
       "title": "テーマ",
-      "description": "画面を明るく、または暗く表示できます。サイドバー下部のテーマボタンで切り替えるか、設定でシステム・ライト・ダークから選べます。",
+      "description": "画面をライト・グレー・ダークから選べます。サイドバー下部のテーマボタンを押すたびに順に切り替わり、設定でシステム・ライト・グレー・ダークから選ぶこともできます。",
       "lightTitle": "ライト",
       "lightDescription": "デフォルトの明るいテーマ。白い背景に暗いテキストを使用します。",
       "darkTitle": "ダーク",
-      "darkDescription": "暗い環境に適したダークテーマ。暗い背景に明るいテキストを使用します。"
+      "darkDescription": "暗い環境に適したダークテーマ。暗い背景に明るいテキストを使用します。",
+      "greyTitle": "グレー",
+      "greyDescription": "ライトは明るすぎ、ダークは暗すぎるときの中間の明るさのテーマ。白と黒を使わずグレーのトーンだけで表示します。"
     },
     "userCounter": {
       "title": "ユーザーカウンター",
@@ -624,6 +627,7 @@
   "theme": {
     "toggle": "テーマ切り替え",
     "switchToDark": "ダークモードへ",
-    "switchToLight": "ライトモードへ"
+    "switchToLight": "ライトモードへ",
+    "switchToGrey": "グレーモードへ"
   }
 }

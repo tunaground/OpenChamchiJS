@@ -21,7 +21,7 @@ const GlobalStyle = createGlobalStyle`
     unicode-range: U+AC00-D7A3, U+3130-318F;
   }
 
-  /* Surface palette. data-mode is set before paint (see app/layout.tsx) */
+  /* Surface palette per mode. data-mode is set before paint (see app/layout.tsx) */
   :root {
     --c-canvas: #e9ecef;
     --c-pane: #fbfbfa;
@@ -37,6 +37,23 @@ const GlobalStyle = createGlobalStyle`
     --c-shadow: 0 1px 2px rgba(27, 31, 36, 0.06), 0 8px 24px -12px rgba(27, 31, 36, 0.18);
     --c-scrim: rgba(0, 0, 0, 0.25);
     --c-toast: rgba(27, 31, 36, 0.92);
+  }
+
+  :root[data-mode="grey"] {
+    --c-canvas: #989ca1;
+    --c-pane: #c3c7cb;
+    --c-raised: #d0d3d6;
+    --c-sunken: rgba(29, 33, 38, 0.06);
+    --c-field: #b9bdc2;
+    --c-hover: rgba(29, 33, 38, 0.07);
+    --c-hover-solid: #b9bdc1;
+    --c-line: rgba(29, 33, 38, 0.15);
+    --c-line-strong: rgba(29, 33, 38, 0.26);
+    --c-accent-soft: rgba(9, 76, 128, 0.14);
+    --c-edge: rgba(255, 255, 255, 0.3);
+    --c-shadow: 0 1px 2px rgba(29, 33, 38, 0.1), 0 8px 24px -12px rgba(29, 33, 38, 0.3);
+    --c-scrim: rgba(0, 0, 0, 0.3);
+    --c-toast: rgba(40, 45, 51, 0.94);
   }
 
   :root[data-mode="dark"] {
@@ -64,7 +81,7 @@ const GlobalStyle = createGlobalStyle`
 
   html {
     font-size: 62.5%;
-    color-scheme: ${(props) => props.theme.mode};
+    color-scheme: ${(props) => (props.theme.mode === "dark" ? "dark" : "light")};
   }
 
   /* clip, not hidden: hidden would make body a scroll container and break
