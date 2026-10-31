@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
 import { signOutWithPush } from "@/lib/push/client";
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
@@ -12,10 +12,35 @@ import { formatBytes } from "@/lib/utils/format-bytes";
 import { applyShortcuts } from "@/lib/utils/shortcuts";
 import type { ResponseOptions } from "@/lib/store/responseOptions";
 
-const ResponseForm = styled.form`
+const ResponseForm = styled.form``;
+
+/* Height animation target for open/fold; driven inline from the component */
+const Shell = styled.div``;
+
+const Inner = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
+`;
+
+const reveal = keyframes`
+  from {
+    opacity: 0;
+    transform: translateY(0.4rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+`;
+
+/** Parts that appear when the form opens fade in rather than pop */
+const revealCss = css`
+  animation: ${reveal} 0.2s ease-out both;
+
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
 `;
 
 /** Options, name, body and submit framed together as one editor */
@@ -34,6 +59,7 @@ const Editor = styled.div<{ $open: boolean }>`
 `;
 
 const EditorHead = styled.div`
+  ${revealCss}
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -141,6 +167,7 @@ const EditorFoot = styled.div<{ $open: boolean }>`
 `;
 
 const Hint = styled.span`
+  ${revealCss}
   font-size: 1.2rem;
   color: ${(props) => props.theme.textMuted};
 
@@ -173,6 +200,7 @@ const SubmitButton = styled.button`
 `;
 
 const PreviewArea = styled.div`
+  ${revealCss}
   max-height: 30vh;
   overflow-y: auto;
   padding: 0 1rem;
@@ -284,18 +312,72 @@ export function ResponseFormSection({
   const [focused, setFocused] = useState(false);
   const open = focused || !!content || !!attachmentFile;
 
-  // Fold the empty form when the user clicks anywhere else on the page
+  // Fold the empty form after a click elsewhere has finished. Folding on
+  // pointerdown would shrink the dock mid-click and shift the page, so the
+  // pointer would be released over something else (e.g. a link misses)
+  const pointerDownAt = useRef(0);
   useEffect(() => {
     if (!focused) return;
-    const onPointerDown = (e: PointerEvent) => {
+    const onPointerDown = () => {
+      pointerDownAt.current = Date.now();
+    };
+    const onClick = (e: MouseEvent) => {
       if (formRef.current?.contains(e.target as Node)) return;
       if (!content && !attachmentFile) setFocused(false);
     };
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => document.removeEventListener("pointerdown", onPointerDown);
+    document.addEventListener("pointerdown", onPointerDown, true);
+    document.addEventListener("click", onClick);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown, true);
+      document.removeEventListener("click", onClick);
+    };
   }, [focused, content, attachmentFile]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  // Animate the dock's height around open/fold only. The shell is normally
+  // height: auto; on a toggle it is pinned to the old height, then eased to the
+  // new one and released, so typing still grows the box instantly.
+  const lastHeight = useRef<number | null>(null);
+  const wasOpen = useRef(open);
+  useLayoutEffect(() => {
+    const shell = innerRef.current?.parentElement;
+    const inner = innerRef.current;
+    if (!shell || !inner) return;
+    const from = lastHeight.current;
+    // Size the textarea for the new state first, or "to" would include its old height
+    autoResize();
+    const to = inner.offsetHeight;
+    const toggled = wasOpen.current !== open;
+    wasOpen.current = open;
+    lastHeight.current = to;
+    if (!toggled || from === null || from === to) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    shell.style.overflow = "hidden";
+    shell.style.height = `${from}px`;
+    void shell.offsetHeight; // commit the start height before transitioning
+    shell.style.transition = "height 0.22s cubic-bezier(0.2, 0, 0, 1)";
+    shell.style.height = `${to}px`;
+    const release = () => {
+      shell.style.removeProperty("height");
+      shell.style.removeProperty("transition");
+      shell.style.removeProperty("overflow");
+    };
+    const timer = window.setTimeout(release, 260);
+    return () => {
+      window.clearTimeout(timer);
+      release();
+    };
+    // autoResize is stable enough here; re-running on its identity would re-animate
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
+
+  // Keep the last natural height current for the next toggle
+  useLayoutEffect(() => {
+    if (innerRef.current) lastHeight.current = innerRef.current.offsetHeight;
+  });
 
   const tThread = useTranslations("threadDetail");
   const maxSizeLabel = tThread("maxSize", { size: formatBytes(uploadMaxSize) });
@@ -446,11 +528,13 @@ export function ResponseFormSection({
     );
   }
 
-  // Folding back happens only on a click outside (or Esc), never because a
-  // button inside took focus: Safari doesn't focus buttons on click
+  // Folding back happens on a finished click outside (see above), Esc, or
+  // tabbing out. Focus moves caused by a pointer are left to the click
+  // handler: Chrome focuses links on pointerdown, which would fold too early
   const isBlank = !content && !attachmentFile;
   const handleFocusOut = (e: React.FocusEvent<HTMLFormElement>) => {
     const next = e.relatedTarget as Node | null;
+    if (Date.now() - pointerDownAt.current < 1000) return;
     if (next && !e.currentTarget.contains(next) && isBlank) setFocused(false);
   };
 
@@ -477,6 +561,8 @@ export function ResponseFormSection({
       onFocus={() => setFocused(true)}
       onBlur={handleFocusOut}
     >
+      <Shell>
+      <Inner ref={innerRef}>
       {open && responseOptions.previewMode && (
         <PreviewArea>
           <ResponsePreview
@@ -549,6 +635,8 @@ export function ResponseFormSection({
           </SubmitButton>
         </EditorFoot>
       </Editor>
+      </Inner>
+      </Shell>
     </ResponseForm>
   );
 }
