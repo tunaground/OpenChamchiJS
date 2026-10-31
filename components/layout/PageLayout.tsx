@@ -32,7 +32,8 @@ const Main = styled.main<{ $sidebarOpen: boolean }>`
 /**
  * The content pane. On desktop it is pinned inside Main and only its middle
  * (Scroll) scrolls, so the toolbar, the footer (thread composer) and the pane's
- * edges always show. On mobile the window scrolls and toolbar/footer stick.
+ * edges always show. On mobile the window scrolls, the toolbar sticks and the
+ * footer follows the content.
  */
 const Pane = styled.div`
   position: absolute;
@@ -69,21 +70,9 @@ const Scroll = styled.div`
   }
 `;
 
-/*
- * On mobile the footer sticks to the bottom of the layout viewport. With the
- * keyboard open iOS Safari pans the page under it, and the visible area can
- * end above that bottom, which left the composer under the keyboard.
- * --keyboard-inset (set from visualViewport below) lifts it to the visible
- * bottom.
- */
+/* On mobile the footer sits after the content (below the last response) */
 const Footer = styled.div`
   flex-shrink: 0;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    position: sticky;
-    bottom: var(--keyboard-inset, 0px);
-    z-index: 40;
-  }
 `;
 
 interface PageLayoutProps {
@@ -138,11 +127,10 @@ export function PageLayout({
   const footerRef = useRef<HTMLDivElement>(null);
   const hasFooter = !!footer;
 
-  // A growing footer (the composer opening, or a longer draft) takes its
-  // height from the bottom of the view: on mobile the page grows under a
-  // sticky footer, on desktop the scroll pane shrinks. Either way the gap below
-  // the view widens by the growth, so if it was at the bottom before, keep it
-  // there and the last response stays visible above the footer.
+  // A growing footer (a longer draft, the preview) takes its height from the
+  // bottom of the view: on mobile the page grows below it, on desktop the
+  // scroll pane shrinks. Either way the gap below the view widens by the
+  // growth, so if it was at the bottom before, keep it there.
   useEffect(() => {
     const footer = footerRef.current;
     if (!footer) return;
@@ -158,28 +146,6 @@ export function PageLayout({
     });
     observer.observe(footer);
     return () => observer.disconnect();
-  }, [hasFooter]);
-
-  // Publish how far the visible area (visualViewport) ends above the layout
-  // viewport, and its height, for the sticky footer and the composer's max height
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv || !hasFooter) return;
-    const root = document.documentElement;
-    const update = () => {
-      const inset = root.clientHeight - (vv.offsetTop + vv.height);
-      root.style.setProperty("--keyboard-inset", `${Math.max(0, Math.round(inset))}px`);
-      root.style.setProperty("--visible-height", `${Math.round(vv.height)}px`);
-    };
-    update();
-    vv.addEventListener("resize", update);
-    vv.addEventListener("scroll", update);
-    return () => {
-      vv.removeEventListener("resize", update);
-      vv.removeEventListener("scroll", update);
-      root.style.removeProperty("--keyboard-inset");
-      root.style.removeProperty("--visible-height");
-    };
   }, [hasFooter]);
 
   useEffect(() => {

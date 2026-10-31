@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect, useRef, useCallback, useSyncExternalStore } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { signOutWithPush } from "@/lib/push/client";
-import styled, { css, keyframes, useTheme } from "styled-components";
+import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
@@ -14,40 +14,16 @@ import type { ResponseOptions } from "@/lib/store/responseOptions";
 
 const ResponseForm = styled.form``;
 
-/* Height animation target for open/fold; driven inline from the component */
-const Shell = styled.div``;
-
 const Inner = styled.div`
   display: flex;
   flex-direction: column;
   gap: 0.8rem;
 `;
 
-const reveal = keyframes`
-  from {
-    opacity: 0;
-    transform: translateY(0.4rem);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-`;
-
-/** Parts that appear when the form opens fade in rather than pop */
-const revealCss = css`
-  animation: ${reveal} 0.2s ease-out both;
-
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-  }
-`;
-
 /** Options, name, body and submit framed together as one editor */
-const Editor = styled.div<{ $open: boolean }>`
+const Editor = styled.div`
   display: flex;
-  flex-direction: ${(props) => (props.$open ? "column" : "row")};
-  align-items: ${(props) => (props.$open ? "stretch" : "center")};
+  flex-direction: column;
   border: 1px solid ${(props) => props.theme.line};
   border-radius: ${(props) => props.theme.radiusPane};
   background: ${(props) => props.theme.paneSunken};
@@ -59,7 +35,6 @@ const Editor = styled.div<{ $open: boolean }>`
 `;
 
 const EditorHead = styled.div`
-  ${revealCss}
   display: flex;
   align-items: center;
   gap: 0.6rem;
@@ -115,22 +90,19 @@ const NameInput = styled.input`
   }
 `;
 
-const FormTextarea = styled.textarea<{ $aaMode?: boolean; $open: boolean }>`
-  /* Collapsed it fills the row's width; expanded it must not flex, or the
-     column layout would override the height autoResize sets */
-  flex: ${(props) => (props.$open ? "none" : "1")};
+const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
+  /* Must not flex, or the column layout would override the height autoResize sets */
+  flex: none;
   min-width: 0;
-  min-height: ${(props) => (props.$open ? "9.6rem" : "3.6rem")};
+  min-height: 9.6rem;
   /* Grows with the text (AA works are often tall) up to nearly the whole pane */
   max-height: calc(100vh - 22rem);
   max-height: calc(100dvh - 22rem);
-  padding: ${(props) => (props.$open ? "1rem 1.2rem" : "0.7rem 1.2rem")};
+  padding: 1rem 1.2rem;
   border: none;
-  /* Expanded it sits square between the head and foot rows; folded it only
-     rounds the left edge, inset by the editor's 1px border. So the white AA
-     paper fills its slot instead of floating as a rounded card */
-  border-radius: ${(props) =>
-    props.$open ? "0" : `calc(${props.theme.radiusPane} - 1px) 0 0 calc(${props.theme.radiusPane} - 1px)`};
+  /* Square between the head and foot rows, so the white AA paper fills its
+     slot instead of floating as a rounded card */
+  border-radius: 0;
   font-size: 1.5rem;
   background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : "transparent")};
   color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
@@ -157,17 +129,16 @@ const FormTextarea = styled.textarea<{ $aaMode?: boolean; $open: boolean }>`
   }
 `;
 
-const EditorFoot = styled.div<{ $open: boolean }>`
+const EditorFoot = styled.div`
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: ${(props) => (props.$open ? "0.6rem 0.6rem 0.6rem 1rem" : "0 0.5rem 0 0")};
-  border-top: ${(props) => (props.$open ? `1px solid ${props.theme.line}` : "none")};
+  padding: 0.6rem 0.6rem 0.6rem 1rem;
+  border-top: 1px solid ${(props) => props.theme.line};
   flex-wrap: wrap;
 `;
 
 const Hint = styled.span`
-  ${revealCss}
   font-size: 1.2rem;
   color: ${(props) => props.theme.textMuted};
 
@@ -200,7 +171,6 @@ const SubmitButton = styled.button`
 `;
 
 const PreviewArea = styled.div`
-  ${revealCss}
   max-height: 30vh;
   overflow-y: auto;
   padding: 0 1rem;
@@ -282,20 +252,6 @@ interface ResponseFormSectionProps {
   refreshing: boolean;
 }
 
-/** True when the viewport is at least `px` wide (false during SSR) */
-function useMinWidth(px: number): boolean {
-  const query = `(min-width: ${px}px)`;
-  return useSyncExternalStore(
-    (onChange) => {
-      const list = window.matchMedia(query);
-      list.addEventListener("change", onChange);
-      return () => list.removeEventListener("change", onChange);
-    },
-    () => window.matchMedia(query).matches,
-    () => false
-  );
-}
-
 export function ResponseFormSection({
   thread,
   defaultUsername,
@@ -322,83 +278,24 @@ export function ResponseFormSection({
   const [content, setContent] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  // Desktop keeps the form open; on mobile it stays one line until the user
-  // starts writing (folding on desktop shifted the page under the pointer)
-  const theme = useTheme();
-  const desktop = useMinWidth(parseInt(theme.breakpoint, 10) + 1);
-  const [focused, setFocused] = useState(false);
-  const open = desktop || focused || !!content || !!attachmentFile;
-
-  // Fold the empty form after a click elsewhere has finished. Folding on
-  // pointerdown would shrink the dock mid-click and shift the page, so the
-  // pointer would be released over something else (e.g. a link misses)
-  const pointerDownAt = useRef(0);
-  useEffect(() => {
-    if (!focused) return;
-    const onPointerDown = () => {
-      pointerDownAt.current = Date.now();
-    };
-    const onClick = (e: MouseEvent) => {
-      if (formRef.current?.contains(e.target as Node)) return;
-      if (!content && !attachmentFile) setFocused(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    document.addEventListener("click", onClick);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true);
-      document.removeEventListener("click", onClick);
-    };
-  }, [focused, content, attachmentFile]);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
 
-  // Animate the dock's height around open/fold only. The shell is normally
-  // height: auto; on a toggle it is pinned to the old height, then eased to the
-  // new one and released, so typing still grows the box instantly.
-  const lastHeight = useRef<number | null>(null);
-  const wasOpen = useRef(open);
-  const wasDesktop = useRef(desktop);
-  useLayoutEffect(() => {
-    const shell = innerRef.current?.parentElement;
-    const inner = innerRef.current;
-    if (!shell || !inner) return;
-    const from = lastHeight.current;
-    // Size the textarea for the new state first, or "to" would include its old height
-    autoResize();
-    const to = inner.offsetHeight;
-    const toggled = wasOpen.current !== open;
-    // Opening because the screen is wide (first paint, window resize) isn't animated
-    const byWidth = wasDesktop.current !== desktop;
-    wasOpen.current = open;
-    wasDesktop.current = desktop;
-    lastHeight.current = to;
-    if (!toggled || byWidth || from === null || from === to) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    shell.style.overflow = "hidden";
-    shell.style.height = `${from}px`;
-    void shell.offsetHeight; // commit the start height before transitioning
-    shell.style.transition = "height 0.22s cubic-bezier(0.2, 0, 0, 1)";
-    shell.style.height = `${to}px`;
-    const release = () => {
-      shell.style.removeProperty("height");
-      shell.style.removeProperty("transition");
-      shell.style.removeProperty("overflow");
+  // When the on-screen keyboard opens, iOS scrolls only far enough to show the
+  // caret, leaving the rest of the form (and the post button) under the
+  // keyboard. Scroll the whole form into the visible area instead
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      const form = formRef.current;
+      if (!form || !form.contains(document.activeElement)) return;
+      const overlap = form.getBoundingClientRect().bottom - (vv.offsetTop + vv.height);
+      if (overlap > 0) window.scrollBy({ top: overlap, behavior: "instant" });
     };
-    const timer = window.setTimeout(release, 260);
-    return () => {
-      window.clearTimeout(timer);
-      release();
-    };
-    // autoResize is stable enough here; re-running on its identity would re-animate
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, desktop]);
-
-  // Keep the last natural height current for the next toggle
-  useLayoutEffect(() => {
-    if (innerRef.current) lastHeight.current = innerRef.current.offsetHeight;
-  });
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, []);
 
   const tThread = useTranslations("threadDetail");
   const maxSizeLabel = tThread("maxSize", { size: formatBytes(uploadMaxSize) });
@@ -414,10 +311,9 @@ export function ResponseFormSection({
     }
   }, [alwaysBottomRef, isAtBottomRef, pageEndRef]);
 
-  // Re-measure on open/fold too: the two states have different minimum heights
   useEffect(() => {
     autoResize();
-  }, [content, open, autoResize]);
+  }, [content, autoResize]);
 
   // Load saved username from localStorage
   useEffect(() => {
@@ -549,25 +445,6 @@ export function ResponseFormSection({
     );
   }
 
-  // Folding back happens on a finished click outside (see above), Esc, or
-  // tabbing out. Focus moves caused by a pointer are left to the click
-  // handler: Chrome focuses links on pointerdown, which would fold too early
-  const isBlank = !content && !attachmentFile;
-  const handleFocusOut = (e: React.FocusEvent<HTMLFormElement>) => {
-    const next = e.relatedTarget as Node | null;
-    if (Date.now() - pointerDownAt.current < 1000) return;
-    if (next && !e.currentTarget.contains(next) && isBlank) setFocused(false);
-  };
-
-  const handleTextareaKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Escape" && isBlank) {
-      setFocused(false);
-      e.currentTarget.blur();
-      return;
-    }
-    handleKeyDown(e);
-  };
-
   const quickSubmitLabel =
     responseOptions.quickSubmitKey === "ctrl"
       ? "Ctrl+Enter"
@@ -576,15 +453,9 @@ export function ResponseFormSection({
         : null;
 
   return (
-    <ResponseForm
-      ref={formRef}
-      onSubmit={handleSubmit}
-      onFocus={() => setFocused(true)}
-      onBlur={handleFocusOut}
-    >
-      <Shell>
-      <Inner ref={innerRef}>
-      {open && responseOptions.previewMode && (
+    <ResponseForm ref={formRef} onSubmit={handleSubmit}>
+      <Inner>
+      {responseOptions.previewMode && (
         <PreviewArea>
           <ResponsePreview
             content={content}
@@ -598,45 +469,42 @@ export function ResponseFormSection({
           />
         </PreviewArea>
       )}
-      <Editor $open={open}>
-        {open && (
-          <EditorHead>
-            <ResponseOptionButtons
-              options={responseOptions}
-              onToggle={toggleOption}
-              isOverridden={isGlobalActive}
-              hasThreadOverride={hasThreadOverride}
-              onResetThreadOptions={resetAllThreadOptions}
-              realtimeEnabled={realtimeEnabled}
-            />
-            <HeadDivider />
-            <NameInput
-              type="text"
-              name="username"
-              autoComplete="username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              placeholder={labels.usernamePlaceholder}
-              aria-label={labels.usernamePlaceholder}
-              spellCheck={false}
-            />
-          </EditorHead>
-        )}
+      <Editor>
+        <EditorHead>
+          <ResponseOptionButtons
+            options={responseOptions}
+            onToggle={toggleOption}
+            isOverridden={isGlobalActive}
+            hasThreadOverride={hasThreadOverride}
+            onResetThreadOptions={resetAllThreadOptions}
+            realtimeEnabled={realtimeEnabled}
+          />
+          <HeadDivider />
+          <NameInput
+            type="text"
+            name="username"
+            autoComplete="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder={labels.usernamePlaceholder}
+            aria-label={labels.usernamePlaceholder}
+            spellCheck={false}
+          />
+        </EditorHead>
         <FormTextarea
           data-draft
           ref={textareaRef}
           rows={1}
           value={content}
           onChange={(e) => setContent(applyShortcuts(e.target.value))}
-          onKeyDown={handleTextareaKeyDown}
+          onKeyDown={handleKeyDown}
           placeholder={labels.contentPlaceholder}
           $aaMode={responseOptions.aaMode}
-          $open={open}
           spellCheck={false}
           required
         />
-        <EditorFoot $open={open}>
-          {open && storageEnabled && (
+        <EditorFoot>
+          {storageEnabled && (
             <ImageUpload
               onFileSelect={setAttachmentFile}
               currentFile={attachmentFile}
@@ -648,7 +516,7 @@ export function ResponseFormSection({
               }}
             />
           )}
-          {open && quickSubmitLabel && (
+          {quickSubmitLabel && (
             <Hint>{tThread("quickSubmitHint", { key: quickSubmitLabel })}</Hint>
           )}
           <SubmitButton type="submit" disabled={submitting || !content.trim()}>
@@ -657,7 +525,6 @@ export function ResponseFormSection({
         </EditorFoot>
       </Editor>
       </Inner>
-      </Shell>
     </ResponseForm>
   );
 }

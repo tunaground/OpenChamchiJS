@@ -431,15 +431,13 @@ const Dock = styled.div`
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     padding: 0.8rem;
-    backdrop-filter: saturate(160%) blur(24px);
-    -webkit-backdrop-filter: saturate(160%) blur(24px);
   }
 `;
 
 /* A tall composer (long AA plus preview) scrolls itself instead of pushing past the pane */
 const DockBody = styled.div`
   max-height: calc(100vh - 12rem);
-  max-height: min(calc(100dvh - 12rem), calc(var(--visible-height, 100dvh) - 6rem));
+  max-height: calc(100dvh - 12rem);
   overflow-y: auto;
 `;
 
