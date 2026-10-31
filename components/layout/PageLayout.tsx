@@ -69,12 +69,19 @@ const Scroll = styled.div`
   }
 `;
 
+/*
+ * On mobile the footer sticks to the bottom of the layout viewport. With the
+ * keyboard open iOS Safari pans the page under it, and the visible area can
+ * end above that bottom, which left the composer under the keyboard.
+ * --keyboard-inset (set from visualViewport below) lifts it to the visible
+ * bottom.
+ */
 const Footer = styled.div`
   flex-shrink: 0;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     position: sticky;
-    bottom: 0;
+    bottom: var(--keyboard-inset, 0px);
     z-index: 40;
   }
 `;
@@ -151,6 +158,28 @@ export function PageLayout({
     });
     observer.observe(footer);
     return () => observer.disconnect();
+  }, [hasFooter]);
+
+  // Publish how far the visible area (visualViewport) ends above the layout
+  // viewport, and its height, for the sticky footer and the composer's max height
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv || !hasFooter) return;
+    const root = document.documentElement;
+    const update = () => {
+      const inset = root.clientHeight - (vv.offsetTop + vv.height);
+      root.style.setProperty("--keyboard-inset", `${Math.max(0, Math.round(inset))}px`);
+      root.style.setProperty("--visible-height", `${Math.round(vv.height)}px`);
+    };
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    return () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+      root.style.removeProperty("--keyboard-inset");
+      root.style.removeProperty("--visible-height");
+    };
   }, [hasFooter]);
 
   useEffect(() => {

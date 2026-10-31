@@ -439,7 +439,7 @@ const Dock = styled.div`
 /* A tall composer (long AA plus preview) scrolls itself instead of pushing past the pane */
 const DockBody = styled.div`
   max-height: calc(100vh - 12rem);
-  max-height: calc(100dvh - 12rem);
+  max-height: min(calc(100dvh - 12rem), calc(var(--visible-height, 100dvh) - 6rem));
   overflow-y: auto;
 `;
 
