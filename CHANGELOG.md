@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Service unit tests used outdated board/thread fixtures and repository mocks, which Next.js 16.4's build type check rejects
+- On mobile, opening the reply form (or writing a longer reply) at the bottom of a thread covered the last response; the page now moves up with the form when you're at the bottom, and stays put when you're in the middle
 - Closing an anchor preview (or clicking its anchor again) closed every preview opened after it, even ones from other responses; now only that preview and the ones opened inside it close
 - Thread pages no longer crash when the site is opened over plain HTTP on a local address (e.g. a phone on http://192.168.x.x): the anonymous ID and copy-to-clipboard fall back to methods that work outside HTTPS
 - The home page no longer logs a hydration warning when its admin HTML contains ad scripts (e.g. AdSense)

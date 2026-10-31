@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import styled, { useTheme } from "styled-components";
 import { useTranslations } from "next-intl";
 import { Toolbar } from "./Toolbar";
 import { Sidebar } from "./Sidebar";
 import { useSidebarStore } from "@/lib/store/sidebar";
 import { useResponseOptionsStore } from "@/lib/store/responseOptions";
-import { PAGE_SCROLL_ID } from "@/lib/utils/page-scroll";
+import { PAGE_SCROLL_ID, getPageScrollMetrics, scrollPageTo } from "@/lib/utils/page-scroll";
 
 /*
  * Desktop pins the content area with insets rather than `height`: ad scripts
@@ -128,6 +128,30 @@ export function PageLayout({
   const [isMobile, setIsMobile] = useState(false);
   const theme = useTheme();
   const tCommon = useTranslations("common");
+  const footerRef = useRef<HTMLDivElement>(null);
+  const hasFooter = !!footer;
+
+  // A growing footer (the composer opening, or a longer draft) takes its
+  // height from the bottom of the view: on mobile the page grows under a
+  // sticky footer, on desktop the scroll pane shrinks. Either way the gap below
+  // the view widens by the growth, so if it was at the bottom before, keep it
+  // there and the last response stays visible above the footer.
+  useEffect(() => {
+    const footer = footerRef.current;
+    if (!footer) return;
+    let lastHeight = footer.offsetHeight;
+    const observer = new ResizeObserver(() => {
+      const height = footer.offsetHeight;
+      const growth = height - lastHeight;
+      lastHeight = height;
+      if (growth <= 0) return;
+      const { top, viewport, total } = getPageScrollMetrics();
+      const gapBefore = total - (top + viewport) - growth;
+      if (gapBefore <= 100) scrollPageTo("bottom", "instant");
+    });
+    observer.observe(footer);
+    return () => observer.disconnect();
+  }, [hasFooter]);
 
   useEffect(() => {
     setMounted(true);
@@ -227,7 +251,7 @@ export function PageLayout({
             menuLabel={tCommon("toggleSidebar")}
           />
           <Scroll id={PAGE_SCROLL_ID}>{children}</Scroll>
-          {footer && <Footer>{footer}</Footer>}
+          {footer && <Footer ref={footerRef}>{footer}</Footer>}
         </Pane>
       </Main>
     </>
