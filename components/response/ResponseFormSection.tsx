@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useLayoutEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useLayoutEffect, useRef, useCallback, useSyncExternalStore } from "react";
 import { signOutWithPush } from "@/lib/push/client";
-import styled, { css, keyframes } from "styled-components";
+import styled, { css, keyframes, useTheme } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowsRotate } from "@fortawesome/free-solid-svg-icons";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
@@ -282,6 +282,20 @@ interface ResponseFormSectionProps {
   refreshing: boolean;
 }
 
+/** True when the viewport is at least `px` wide (false during SSR) */
+function useMinWidth(px: number): boolean {
+  const query = `(min-width: ${px}px)`;
+  return useSyncExternalStore(
+    (onChange) => {
+      const list = window.matchMedia(query);
+      list.addEventListener("change", onChange);
+      return () => list.removeEventListener("change", onChange);
+    },
+    () => window.matchMedia(query).matches,
+    () => false
+  );
+}
+
 export function ResponseFormSection({
   thread,
   defaultUsername,
@@ -308,9 +322,12 @@ export function ResponseFormSection({
   const [content, setContent] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  // The dock stays one line until the user starts writing
+  // Desktop keeps the form open; on mobile it stays one line until the user
+  // starts writing (folding on desktop shifted the page under the pointer)
+  const theme = useTheme();
+  const desktop = useMinWidth(parseInt(theme.breakpoint, 10) + 1);
   const [focused, setFocused] = useState(false);
-  const open = focused || !!content || !!attachmentFile;
+  const open = desktop || focused || !!content || !!attachmentFile;
 
   // Fold the empty form after a click elsewhere has finished. Folding on
   // pointerdown would shrink the dock mid-click and shift the page, so the
@@ -341,6 +358,7 @@ export function ResponseFormSection({
   // new one and released, so typing still grows the box instantly.
   const lastHeight = useRef<number | null>(null);
   const wasOpen = useRef(open);
+  const wasDesktop = useRef(desktop);
   useLayoutEffect(() => {
     const shell = innerRef.current?.parentElement;
     const inner = innerRef.current;
@@ -350,9 +368,12 @@ export function ResponseFormSection({
     autoResize();
     const to = inner.offsetHeight;
     const toggled = wasOpen.current !== open;
+    // Opening because the screen is wide (first paint, window resize) isn't animated
+    const byWidth = wasDesktop.current !== desktop;
     wasOpen.current = open;
+    wasDesktop.current = desktop;
     lastHeight.current = to;
-    if (!toggled || from === null || from === to) return;
+    if (!toggled || byWidth || from === null || from === to) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
     shell.style.overflow = "hidden";
@@ -372,7 +393,7 @@ export function ResponseFormSection({
     };
     // autoResize is stable enough here; re-running on its identity would re-animate
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
+  }, [open, desktop]);
 
   // Keep the last natural height current for the next toggle
   useLayoutEffect(() => {

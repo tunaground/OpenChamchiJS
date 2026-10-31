@@ -12,7 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New look across the site: the sidebar and the content area float as panes on a quiet background, with IBM Plex Sans KR type and squarer corners
 - The top bar is gone: theme, settings, alerts, admin and login sit at the bottom of the sidebar, and each page has its own toolbar (thread pages: refresh, alerts, response management)
 - Thread pages read as one continuous list with the response number in the left margin (click to copy the anchor, as before), using the full width with minimal side margins so AA and other wide posts have room (archive threads too)
-- The reply form stays docked at the bottom of thread pages as one editor box: a single line until you start writing, then options and name on top, the body, and image, shortcut hint and the post button below, with the live preview above (an empty form folds back on Esc or a click outside, once that click has gone through, so links clicked while it is open don't miss). It opens and folds with a short height animation (none with reduced motion). The body grows with what you type, up to nearly the full pane, so long AA stays visible while you write. On desktop only the content between the toolbar and the reply form scrolls, so the pane's edges always show
+- The reply form stays docked at the bottom of thread pages as one editor box: options and name on top, the body, and image, shortcut hint and the post button below, with the live preview above. On desktop it is always open; on mobile it is a single line until you start writing and an empty form folds back on Esc or a click outside (once that click has gone through, so links don't miss), with a short height animation (none with reduced motion). The body grows with what you type, up to nearly the full pane, so long AA stays visible while you write. On desktop only the content between the toolbar and the reply form scrolls, so the pane's edges always show
 - Recent/all and previous/next sit above the responses as well as in the sidebar; scroll to top/bottom sit in the thread sidebar (and in the toolbar on mobile); active name/ID filters show above the responses on every screen size
 - On mobile the thread sidebar no longer stays pinned as an icon strip; it opens as a drawer like on other pages, and the content uses the full width
 - Board lists show threads as a table with the reply count and how long ago the last reply came; notices and settings use the same row style
@@ -30,6 +30,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Service unit tests used outdated board/thread fixtures and repository mocks, which Next.js 16.4's build type check rejects
+- Closing an anchor preview (or clicking its anchor again) closed every preview opened after it, even ones from other responses; now only that preview and the ones opened inside it close
 - Thread pages no longer crash when the site is opened over plain HTTP on a local address (e.g. a phone on http://192.168.x.x): the anonymous ID and copy-to-clipboard fall back to methods that work outside HTTPS
 - The home page no longer logs a hydration warning when its admin HTML contains ad scripts (e.g. AdSense)
 - Japanese manual was missing the "Response Interaction" section texts
