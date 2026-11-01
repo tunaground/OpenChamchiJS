@@ -429,8 +429,11 @@ const Dock = styled.div`
   background: ${(props) => props.theme.pane};
   border-top: 1px solid ${(props) => props.theme.line};
 
+  /* On mobile the composer floats over the screen; the dock only holds its spacer */
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 0.8rem;
+    padding: 0;
+    border-top: none;
+    background: transparent;
   }
 `;
 
@@ -439,6 +442,11 @@ const DockBody = styled.div`
   max-height: calc(100vh - 12rem);
   max-height: calc(100dvh - 12rem);
   overflow-y: auto;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    max-height: none;
+    overflow-y: visible;
+  }
 `;
 
 /** Sits below the responses as the PageLayout footer */

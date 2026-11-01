@@ -252,7 +252,9 @@
     "filterPause": "一時停止",
     "filterResume": "再開",
     "filterRemove": "フィルターから外す",
-    "quickSubmitHint": "{key}で投稿"
+    "quickSubmitHint": "{key}で投稿",
+    "compose": "書き込む",
+    "collapseComposer": "入力欄を畳む"
   },
   "traceSidebar": {
     "navigation": "このスレッド",

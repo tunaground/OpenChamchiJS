@@ -252,7 +252,9 @@
     "filterPause": "Pause",
     "filterResume": "Resume",
     "filterRemove": "Remove from filter",
-    "quickSubmitHint": "{key} to post"
+    "quickSubmitHint": "{key} to post",
+    "compose": "Write",
+    "collapseComposer": "Collapse composer"
   },
   "traceSidebar": {
     "navigation": "This thread",
