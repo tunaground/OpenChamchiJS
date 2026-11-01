@@ -99,6 +99,9 @@ const Inner = styled.div<{ $hidden: boolean }>`
     z-index: 100;
     padding: 0.8rem 0.8rem calc(0.8rem + env(safe-area-inset-bottom));
     background: ${(props) => props.theme.pane};
+    /* Opaque screen around the composer: Safari shows the page between the
+       visual viewport and its keyboard accessory bar */
+    box-shadow: 0 0 0 100vmax ${(props) => props.theme.pane};
     overscroll-behavior: contain;
   }
 `;
