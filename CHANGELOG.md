@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- Update dependencies to fix Dependabot alerts: Next.js 16.4.3 (image optimization RCE, middleware/proxy bypass, SSRF, cache poisoning, DoS), next-auth 4.24.15 and `@auth/core` 0.41.3 (forced under next-auth through a scoped `overrides`), zod 4.6.7, next-intl 4.14.9, mathjs 15.2.0, uuid 13.0.2, ws 8.22.1 in the WebSocket server, and transitive packages (sharp, hono, handlebars, js-yaml, postcss, lodash, brace-expansion and others). Production dependencies now report 0 vulnerabilities in `npm audit`
+- Update dependencies to fix Dependabot alerts: Next.js 16.4.3 (image optimization RCE, middleware/proxy bypass, SSRF, cache poisoning, DoS), next-auth 4.24.15 and `@auth/core` 0.41.3 (forced under next-auth through a scoped `overrides`), zod 4.6.7, next-intl 4.14.9, mathjs 15.2.0, uuid 13.0.2, ws 8.22.1 in the WebSocket server, and transitive packages (sharp, handlebars, js-yaml, postcss, lodash, brace-expansion and others; hono and `@hono/node-server` are no longer installed now that `@prisma/dev` dropped them). Production dependencies now report 0 vulnerabilities in `npm audit`
 
 ### Fixed
 
