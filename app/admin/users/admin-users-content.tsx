@@ -8,268 +8,78 @@ import { Pagination } from "@/components/Pagination";
 import { PageLayout } from "@/components/layout";
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
 import { ROLE, boardAdminRole } from "@/lib/auth/roles";
-
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.adminMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
-
-const Header = styled.div`
-  margin-bottom: 2.4rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const ActionsBar = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  gap: 1.6rem;
-  margin-bottom: 2.4rem;
-  flex-wrap: wrap;
-`;
-
-const SearchForm = styled.form`
-  display: flex;
-  gap: 0.8rem;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    width: 100%;
-  }
-`;
-
-const SearchInput = styled.input`
-  flex: 1;
-  max-width: 30rem;
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    max-width: none;
-  }
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-`;
-
-const Button = styled.button`
-  height: 3.5rem;
-  padding: 0 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const SearchButton = styled(Button)`
-  flex-shrink: 0;
-  white-space: nowrap;
-`;
-
-const UserCards = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 1.2rem;
-`;
-
-const UserCard = styled.div`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 1.2rem;
-`;
+import {
+  Container,
+  ActionsBar,
+  Button,
+  SecondaryButton,
+  DangerButton,
+  Badge,
+  List,
+  Item,
+  ItemActions,
+  SmallButton,
+  DangerSmallButton,
+  EmptyState,
+  SearchForm,
+  SearchInput,
+  SearchButton,
+  Modal,
+  ModalContent,
+  ModalTitle,
+  ModalActions,
+  ErrorText,
+  SectionTitle,
+} from "../_components/admin-ui";
 
 const CardUserInfo = styled.div`
   display: flex;
   align-items: center;
   gap: 1.2rem;
-  margin-bottom: 1rem;
 `;
 
 const CardRoles = styled.div`
-  margin-bottom: 1rem;
-`;
-
-const CardActions = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 0.8rem;
-`;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
 
-const UserCell = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
+  &:empty {
+    display: none;
+  }
 `;
 
 const Avatar = styled.div`
   width: 3.2rem;
   height: 3.2rem;
+  flex-shrink: 0;
   border-radius: 50%;
   overflow: hidden;
-  background: ${(props) => props.theme.surfaceHover};
+  background: ${(props) => props.theme.hover};
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.2rem;
+  font-size: 1.3rem;
+  font-weight: 500;
   color: ${(props) => props.theme.textSecondary};
-`;
-
-const UserInfo = styled.div`
-  display: flex;
-  flex-direction: column;
 `;
 
 const UserName = styled.span`
+  font-size: 1.5rem;
   font-weight: 500;
-`;
-
-const UserEmail = styled.span`
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-`;
-
-const RoleBadge = styled.span`
-  display: inline-block;
-  padding: 0.2rem 0.8rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border-radius: 4px;
-  font-size: 1.2rem;
-  margin-right: 0.4rem;
-  margin-bottom: 0.4rem;
-`;
-
-const ActionButtons = styled.div`
-  display: flex;
-  gap: 0.8rem;
-`;
-
-const SmallButton = styled.button`
-  padding: 0.4rem 0.8rem;
-  font-size: 1.2rem;
-  border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  background: transparent;
   color: ${(props) => props.theme.textPrimary};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
 `;
 
-const DangerSmallButton = styled(SmallButton)`
-  border-color: #dc2626;
-  color: #dc2626;
-
-  &:hover {
-    background: #dc262610;
-  }
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 4.8rem;
-  color: ${(props) => props.theme.textSecondary};
-`;
-
-const Modal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-`;
-
-const ModalContent = styled.div`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 8px;
-  padding: 2.4rem;
-  width: 100%;
-  max-width: 40rem;
-`;
-
-const ModalTitle = styled.h2`
-  font-size: 2rem;
-  font-weight: 600;
+const SelectedName = styled.p`
   margin-bottom: 1.6rem;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
-const ModalActions = styled.div`
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.8rem;
-  margin-top: 2.4rem;
-`;
-
-const SecondaryButton = styled(Button)`
-  background: transparent;
-  color: ${(props) => props.theme.textPrimary};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-`;
-
-const DangerButton = styled(Button)`
-  background: #dc2626;
-  color: white;
-
-  &:hover {
-    background: #b91c1c;
-  }
+  font-weight: 500;
 `;
 
 const RoleSection = styled.div`
   margin-bottom: 1.6rem;
 `;
 
-const RoleSectionTitle = styled.div`
-  font-size: 1.3rem;
-  font-weight: 500;
-  color: ${(props) => props.theme.textSecondary};
-  margin-bottom: 0.8rem;
-`;
-
-const RoleCheckboxList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
+const RoleCheckboxList = styled(List)`
   max-height: 24rem;
   overflow-y: auto;
 `;
@@ -278,21 +88,24 @@ const RoleCheckbox = styled.label`
   display: flex;
   align-items: center;
   gap: 0.8rem;
+  padding: 0.9rem 1.2rem;
   font-size: 1.4rem;
   color: ${(props) => props.theme.textPrimary};
   cursor: pointer;
 
+  & + & {
+    border-top: 1px solid ${(props) => props.theme.line};
+  }
+
+  &:hover {
+    background: ${(props) => props.theme.hover};
+  }
+
   input {
     width: 1.6rem;
     height: 1.6rem;
+    accent-color: ${(props) => props.theme.accent};
   }
-`;
-
-const ErrorText = styled.span`
-  color: #dc2626;
-  font-size: 1.2rem;
-  margin-top: 0.4rem;
-  display: block;
 `;
 
 interface UserData {
@@ -481,10 +294,6 @@ export function AdminUsersContent({
       isAdminPage
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-        </Header>
-
         <ActionsBar>
           <SearchForm onSubmit={handleSearch}>
             <SearchInput
@@ -503,9 +312,9 @@ export function AdminUsersContent({
           </EmptyState>
         ) : (
           <>
-            <UserCards>
+            <List>
               {users.map((user) => (
-                <UserCard key={user.id}>
+                <Item key={user.id}>
                   <CardUserInfo>
                     <Avatar>
                       {user.image ? (
@@ -519,16 +328,14 @@ export function AdminUsersContent({
                         user.name?.charAt(0).toUpperCase() || "?"
                       )}
                     </Avatar>
-                    <UserInfo>
-                      <UserName>{user.name || "Unknown"}</UserName>
-                    </UserInfo>
+                    <UserName>{user.name || "Unknown"}</UserName>
                   </CardUserInfo>
                   <CardRoles>
                     {user.roles.map((role) => (
-                      <RoleBadge key={role}>{role}</RoleBadge>
+                      <Badge key={role} $tone="accent">{role}</Badge>
                     ))}
                   </CardRoles>
-                  <CardActions>
+                  <ItemActions>
                     <SmallButton onClick={() => openRolesModal(user)}>
                       {labels.editRoles}
                     </SmallButton>
@@ -537,10 +344,10 @@ export function AdminUsersContent({
                         {labels.delete}
                       </DangerSmallButton>
                     )}
-                  </CardActions>
-                </UserCard>
+                  </ItemActions>
+                </Item>
               ))}
-            </UserCards>
+            </List>
 
             <Pagination
               currentPage={pagination.page}
@@ -576,12 +383,10 @@ export function AdminUsersContent({
           <Modal onClick={closeModal}>
             <ModalContent onClick={(e) => e.stopPropagation()}>
               <ModalTitle>{labels.rolesTitle}</ModalTitle>
-              <p style={{ marginBottom: "1.6rem", fontWeight: 500 }}>
-                {selectedUser.name}
-              </p>
+              <SelectedName>{selectedUser.name}</SelectedName>
 
               <RoleSection>
-                <RoleSectionTitle>{labels.globalRoles}</RoleSectionTitle>
+                <SectionTitle>{labels.globalRoles}</SectionTitle>
                 <RoleCheckboxList>
                   <RoleCheckbox>
                     <input
@@ -604,7 +409,7 @@ export function AdminUsersContent({
 
               {boards.length > 0 && (
                 <RoleSection>
-                  <RoleSectionTitle>{labels.boardRoles}</RoleSectionTitle>
+                  <SectionTitle>{labels.boardRoles}</SectionTitle>
                   <RoleCheckboxList>
                     {boards.map((board) => {
                       const role = boardAdminRole(board.id);

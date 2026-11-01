@@ -5,6 +5,18 @@ import styled from "styled-components";
 import { nanoid } from "nanoid";
 import { PageLayout } from "@/components/layout";
 import { AdminSidebar } from "@/components/sidebar/AdminSidebar";
+import {
+  Container,
+  Button,
+  SecondaryButton,
+  DangerSmallButton,
+  List,
+  EmptyState as BaseEmptyState,
+  Label as BaseLabel,
+  Input as BaseInput,
+  Textarea,
+  Select as BaseSelect,
+} from "../_components/admin-ui";
 
 interface CustomLink {
   id: string;
@@ -17,232 +29,125 @@ interface ArchiveBoard {
   name: string;
 }
 
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.adminMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
-
-const Header = styled.div`
-  margin-bottom: 2.4rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-`;
-
 const FormGroup = styled.div`
-  margin-bottom: 2.4rem;
+  margin-bottom: 2rem;
 `;
 
-const Label = styled.label`
-  display: block;
+const Label = styled(BaseLabel)`
+  margin-bottom: 0.6rem;
   font-size: 1.4rem;
-  font-weight: 500;
-  margin-bottom: 0.8rem;
   color: ${(props) => props.theme.textPrimary};
+
+  input[type="checkbox"] {
+    accent-color: ${(props) => props.theme.accent};
+  }
 `;
 
-const Input = styled.input`
-  width: 100%;
+const Input = styled(BaseInput)`
   max-width: 12rem;
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
   text-transform: uppercase;
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
 `;
 
-const TitleInput = styled.input`
-  width: 100%;
+const TitleInput = styled(BaseInput)`
   max-width: 40rem;
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
 `;
 
-const SaltInput = styled.input`
-  width: 100%;
+const SaltInput = styled(BaseInput)`
   max-width: 40rem;
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  font-family: monospace;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
+  font-family: ${(props) => props.theme.fontMono};
 `;
 
-const TextArea = styled.textarea`
-  width: 100%;
+const TextArea = styled(Textarea)`
   min-height: 20rem;
-  padding: 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  font-family: inherit;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-  resize: vertical;
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
 `;
 
 const Description = styled.p`
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
-  margin-top: 0.8rem;
-`;
-
-const Button = styled.button`
-  height: 3.5rem;
-  padding: 0 1.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border: none;
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 0.9;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  margin-top: 0.6rem;
+  font-size: 1.3rem;
+  line-height: 1.5;
+  color: ${(props) => props.theme.textMuted};
 `;
 
 const SuccessMessage = styled.span`
   display: inline-block;
-  margin-left: 1.6rem;
-  color: #16a34a;
+  margin-left: 1.2rem;
+  color: ${(props) => props.theme.success};
   font-size: 1.4rem;
 `;
 
 const StatusBox = styled.div<{ $available: boolean }>`
-  padding: 1.6rem;
-  border-radius: 6px;
-  margin-bottom: 2.4rem;
+  padding: 1.2rem 1.4rem;
+  border-radius: ${(props) => props.theme.radiusControl};
+  margin-bottom: 2rem;
   background: ${(props) =>
-    props.$available ? "#16a34a15" : "#dc262615"};
+    `color-mix(in srgb, ${props.$available ? props.theme.success : props.theme.error} 8%, transparent)`};
   border: 1px solid ${(props) =>
-    props.$available ? "#16a34a40" : "#dc262640"};
+    `color-mix(in srgb, ${props.$available ? props.theme.success : props.theme.error} 35%, transparent)`};
 `;
 
 const StatusTitle = styled.div<{ $available: boolean }>`
   font-size: 1.4rem;
   font-weight: 500;
-  color: ${(props) =>
-    props.$available ? "#16a34a" : "#dc2626"};
-  margin-bottom: 0.4rem;
+  color: ${(props) => (props.$available ? props.theme.success : props.theme.error)};
 `;
 
 const StatusDescription = styled.div`
-  font-size: 1.2rem;
+  margin-top: 0.4rem;
+  font-size: 1.3rem;
   color: ${(props) => props.theme.textSecondary};
 `;
 
 const SectionTitle = styled.h2`
-  font-size: 1.8rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.8rem;
+  margin: 0 0 0.4rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+  color: ${(props) => props.theme.textMuted};
 `;
 
 const SectionDescription = styled.p`
-  font-size: 1.3rem;
+  margin-bottom: 1.4rem;
+  font-size: 1.4rem;
+  line-height: 1.5;
   color: ${(props) => props.theme.textSecondary};
-  margin-bottom: 1.6rem;
 `;
 
-const LinkList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 0.8rem;
-  margin-bottom: 1.6rem;
+const LinkList = styled(List)`
+  margin-bottom: 1.2rem;
 `;
 
 const LinkItem = styled.div`
   display: flex;
   align-items: center;
   gap: 1.2rem;
-  padding: 1rem 1.2rem;
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
+  padding: 0.9rem 1.2rem;
+
+  & + & {
+    border-top: 1px solid ${(props) => props.theme.line};
+  }
 `;
 
 const LinkLabel = styled.span`
+  min-width: 10rem;
   font-size: 1.4rem;
   font-weight: 500;
   color: ${(props) => props.theme.textPrimary};
-  min-width: 10rem;
 `;
 
 const LinkUrl = styled.span`
-  font-size: 1.3rem;
-  color: ${(props) => props.theme.textSecondary};
   flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-`;
-
-const DeleteButton = styled.button`
-  padding: 0.4rem 0.8rem;
-  background: transparent;
+  font-size: 1.3rem;
   color: ${(props) => props.theme.textSecondary};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.2rem;
-  cursor: pointer;
-
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-    color: #dc2626;
-    border-color: #dc2626;
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
+
+const DeleteButton = DangerSmallButton;
 
 const AddLinkForm = styled.div`
   display: flex;
-  gap: 1rem;
+  gap: 0.8rem;
   align-items: flex-end;
   flex-wrap: wrap;
 
@@ -260,58 +165,25 @@ const InputGroup = styled.div`
 
 const InputLabel = styled.label`
   font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.textMuted};
 `;
 
-const LinkInput = styled.input`
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
+const LinkInput = styled(BaseInput)`
+  width: auto;
+  height: 3.4rem;
 `;
 
-const AddButton = styled.button`
-  height: 3.5rem;
-  padding: 0 1.6rem;
-  background: ${(props) => props.theme.surface};
-  color: ${(props) => props.theme.textPrimary};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  cursor: pointer;
+const AddButton = SecondaryButton;
 
-  &:hover {
-    background: ${(props) => props.theme.surfaceHover};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const EmptyState = styled.div`
-  padding: 2rem;
-  text-align: center;
-  color: ${(props) => props.theme.textSecondary};
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.surface};
-  border: 1px dashed ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  margin-bottom: 1.6rem;
+const EmptyState = styled(BaseEmptyState)`
+  padding: 2rem 1.6rem;
+  margin-bottom: 1.2rem;
 `;
 
 const Divider = styled.hr`
   border: none;
-  border-top: 1px solid ${(props) => props.theme.surfaceBorder};
-  margin: 3.2rem 0;
+  border-top: 1px solid ${(props) => props.theme.line};
+  margin: 2.8rem 0;
 `;
 
 interface AuthLabels {
@@ -379,25 +251,8 @@ interface Labels {
   invalidated: string;
 }
 
-const Select = styled.select`
-  width: 100%;
+const Select = styled(BaseSelect)`
   max-width: 20rem;
-  padding: 0.8rem 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.4rem;
-  background: ${(props) => props.theme.background};
-  color: ${(props) => props.theme.textPrimary};
-
-  &:focus {
-    outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 interface AdminSettingsContentProps {
@@ -629,10 +484,6 @@ export function AdminSettingsContent({
       isAdminPage
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-        </Header>
-
         <FormGroup>
           <Label htmlFor="siteTitle">{labels.siteTitle}</Label>
           <TitleInput

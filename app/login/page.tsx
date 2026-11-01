@@ -17,7 +17,7 @@ const Container = styled.div`
 const Card = styled.div`
   background: ${(props) => props.theme.surface};
   border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 0.8rem;
+  border-radius: ${(props) => props.theme.radiusPane};
   padding: 1.6rem;
   width: 100%;
   max-width: 40rem;
@@ -36,7 +36,7 @@ const Button = styled.button`
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
-  border-radius: 0.4rem;
+  border-radius: ${(props) => props.theme.radiusControl};
   font-size: 1.6rem;
   font-weight: 500;
   cursor: pointer;

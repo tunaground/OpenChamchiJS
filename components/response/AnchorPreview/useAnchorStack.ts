@@ -3,48 +3,28 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { parse, prerender, type AnchorInfo, type PrerenderedRoot } from "@/lib/tom";
 import type { AnchorStackItem, AnchorResponseData, UseAnchorStackReturn } from "./types";
+import { closeAnchor, toggleAnchor } from "./anchorStackOps";
 
 export function useAnchorStack(): UseAnchorStackReturn {
   const [anchorStack, setAnchorStack] = useState<AnchorStackItem[]>([]);
 
-  // Handle anchor click - toggle or replace existing, or push new
+  // Same anchor again closes, another anchor in the same response replaces,
+  // anything else opens. Only the touched preview and what is nested in it
+  // change; previews opened from other responses stay open.
   const handleAnchorClick = useCallback((info: AnchorInfo) => {
-    setAnchorStack((prev) => {
-      const existingIndex = prev.findIndex(
-        (item) => item.info.sourceResponseId === info.sourceResponseId
-      );
-
-      if (existingIndex !== -1) {
-        const existing = prev[existingIndex];
-        // 같은 앵커면 토글 (닫기)
-        if (
-          existing.info.boardId === info.boardId &&
-          existing.info.threadId === info.threadId &&
-          existing.info.start === info.start &&
-          existing.info.end === info.end
-        ) {
-          return prev.slice(0, existingIndex);
-        }
-        // 다른 앵커면 교체 (기존 responses 유지하여 loading 표시 방지)
-        const newStack = [...prev.slice(0, existingIndex + 1)];
-        newStack[existingIndex] = { info, responses: existing.responses, loading: true };
-        return newStack;
-      }
-
-      // 새 아이템 추가
-      return [...prev, { info, responses: [], loading: true }];
-    });
+    setAnchorStack((prev) =>
+      toggleAnchor(prev, info, (next, previous) => ({
+        info: next,
+        // Keep the old responses while loading so the box doesn't flash empty
+        responses: previous?.responses ?? [],
+        loading: true,
+      }))
+    );
   }, []);
 
-  // Close specific anchor preview (and all nested ones after it)
+  // Close one preview and the previews nested inside it
   const closeAnchorPreview = useCallback((sourceResponseId: string) => {
-    setAnchorStack((prev) => {
-      const index = prev.findIndex((item) => item.info.sourceResponseId === sourceResponseId);
-      if (index !== -1) {
-        return prev.slice(0, index);
-      }
-      return prev;
-    });
+    setAnchorStack((prev) => closeAnchor(prev, sourceResponseId));
   }, []);
 
   // Fetch anchor responses when a loading item exists

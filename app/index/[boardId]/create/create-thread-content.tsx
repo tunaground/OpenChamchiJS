@@ -12,80 +12,83 @@ import { CreateThreadOptionButtons, CreateThreadOptions } from "@/components/res
 import { ContentPreview } from "@/components/response/ContentPreview";
 import { formatBytes } from "@/lib/utils/format-bytes";
 import { applyShortcuts } from "@/lib/utils/shortcuts";
+import { PageContainer } from "@/components/layout/PageContainer";
 
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.contentMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
-
-const Header = styled.div`
-  margin-bottom: 3.2rem;
-`;
-
-const Title = styled.h1`
-  font-size: 2.4rem;
-  font-weight: 600;
-  color: ${(props) => props.theme.textPrimary};
-  margin-bottom: 0.8rem;
-`;
-
-const BoardName = styled.span`
-  font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-`;
+const Container = PageContainer;
 
 const Form = styled.form`
   display: flex;
   flex-direction: column;
-  gap: 2.4rem;
+  gap: 2rem;
 `;
 
 const FormGroup = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.6rem;
 `;
 
 const Label = styled.label`
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   font-weight: 500;
-  color: ${(props) => props.theme.textPrimary};
+  color: ${(props) => props.theme.textSecondary};
 `;
 
-const Input = styled.input`
-  padding: 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
-  font-size: 1.6rem;
-  background: ${(props) => props.theme.surface};
+const Input = styled.input<{ $large?: boolean }>`
+  height: ${(props) => (props.$large ? "4.4rem" : "3.8rem")};
+  padding: 0 1.2rem;
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
+  font-size: ${(props) => (props.$large ? "1.8rem" : "1.5rem")};
+  font-weight: ${(props) => (props.$large ? 600 : 400)};
+  background: ${(props) => props.theme.paneSunken};
   color: ${(props) => props.theme.textPrimary};
 
   &:focus {
     outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
+    border-color: ${(props) => props.theme.accent};
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
+    color: ${(props) => props.theme.textMuted};
+    font-weight: 400;
   }
 `;
 
+/** Toolbar + textarea framed together like one editor */
+const Editor = styled.div`
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: ${(props) => props.theme.paneSunken};
+  overflow: hidden;
+
+  &:focus-within {
+    border-color: ${(props) => props.theme.accent};
+  }
+`;
+
+const EditorBar = styled.div`
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid ${(props) => props.theme.line};
+`;
+
+const EditorPreview = styled.div`
+  padding: 0 1.2rem;
+  border-bottom: 1px dashed ${(props) => props.theme.lineStrong};
+`;
+
 const Textarea = styled.textarea<{ $aaMode?: boolean }>`
+  display: block;
+  width: 100%;
   padding: 1.2rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 4px;
+  border: none;
   font-size: 1.5rem;
-  background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : props.theme.surface)};
+  background: ${(props) => (props.$aaMode ? "rgba(255, 255, 255)" : "transparent")};
   color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
-  min-height: 20rem;
+  min-height: 24rem;
   resize: none;
-  font-family: ${(props) => (props.$aaMode ? '"AAFont", "HeadKasen", "Saitamaar", sans-serif' : "inherit")};
-  line-height: ${(props) => (props.$aaMode ? "1.6rem" : "1.5")};
+  font-family: ${(props) => (props.$aaMode ? props.theme.fontAA : "inherit")};
+  line-height: ${(props) => (props.$aaMode ? "1.6rem" : "1.7")};
   white-space: ${(props) => (props.$aaMode ? "pre" : "pre-wrap")};
   overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
   overflow-y: hidden;
@@ -99,18 +102,17 @@ const Textarea = styled.textarea<{ $aaMode?: boolean }>`
 
   &:focus {
     outline: none;
-    border-color: ${(props) => props.theme.textSecondary};
   }
 
   &::placeholder {
-    color: ${(props) => props.theme.textSecondary};
+    color: ${(props) => props.theme.textMuted};
   }
 `;
 
 const Row = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.6rem;
+  gap: 1.2rem;
 
   @media (max-width: 60rem) {
     grid-template-columns: 1fr;
@@ -119,18 +121,17 @@ const Row = styled.div`
 
 const Actions = styled.div`
   display: flex;
-  gap: 1.6rem;
+  gap: 0.8rem;
   justify-content: flex-end;
 `;
 
 const Button = styled.button`
-  height: 3.5rem;
-  padding: 0 2.4rem;
-  border-radius: 4px;
+  height: 3.6rem;
+  padding: 0 1.6rem;
+  border-radius: ${(props) => props.theme.radiusControl};
   font-size: 1.4rem;
   font-weight: 500;
   cursor: pointer;
-  transition: opacity 0.2s;
 
   &:disabled {
     opacity: 0.5;
@@ -144,29 +145,29 @@ const PrimaryButton = styled(Button)`
   border: none;
 
   &:hover:not(:disabled) {
-    opacity: 0.9;
+    filter: brightness(1.06);
   }
 `;
 
 const SecondaryButton = styled(Button)`
   background: transparent;
   color: ${(props) => props.theme.textPrimary};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
+  border: 1px solid ${(props) => props.theme.lineStrong};
 
   &:hover:not(:disabled) {
-    background: ${(props) => props.theme.surfaceHover};
+    background: ${(props) => props.theme.hover};
   }
 `;
 
 const ErrorMessage = styled.div`
-  padding: 1.6rem;
-  background: #ef444420;
-  border: 1px solid #ef4444;
-  border-radius: 4px;
-  color: #ef4444;
+  margin-bottom: 1.6rem;
+  padding: 1rem 1.2rem;
+  background: color-mix(in srgb, ${(props) => props.theme.error} 8%, transparent);
+  border: 1px solid color-mix(in srgb, ${(props) => props.theme.error} 40%, transparent);
+  border-radius: ${(props) => props.theme.radiusControl};
+  color: ${(props) => props.theme.error};
   font-size: 1.4rem;
 `;
-
 
 interface Labels {
   title: string;
@@ -384,23 +385,21 @@ export function CreateThreadContent({
   return (
     <PageLayout
       title={labels.title}
+      parent={{ label: boardName, href: `/index/${boardId}` }}
       sidebar={sidebar}
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}
       authLabels={authLabels}
     >
       <Container>
-        <Header>
-          <Title>{labels.title}</Title>
-          <BoardName>{boardName}</BoardName>
-        </Header>
-
         {error && <ErrorMessage>{error}</ErrorMessage>}
 
         <Form onSubmit={handleSubmit}>
           <FormGroup>
-            <Label>{labels.threadTitle}</Label>
+            <Label htmlFor="thread-title">{labels.threadTitle}</Label>
             <Input
+              id="thread-title"
+              $large
               type="text"
               value={formData.title}
               onChange={(e) =>
@@ -447,36 +446,42 @@ export function CreateThreadContent({
 
           <FormGroup>
             <Label>{labels.content}</Label>
-            <CreateThreadOptionButtons
-              options={options}
-              onToggle={handleToggleOption}
-              labels={{
-                aaMode: labels.aaMode,
-                previewMode: labels.previewMode,
-              }}
-            />
-            {options.previewMode && (
-              <ContentPreview
-                content={previewContent}
-                emptyLabel={labels.preview}
-                boardId={boardId}
-                username={formData.username}
-                defaultUsername={defaultUsername}
-                tripcodeSalt={tripcodeSalt}
+            <Editor>
+              <EditorBar>
+                <CreateThreadOptionButtons
+                  options={options}
+                  onToggle={handleToggleOption}
+                  labels={{
+                    aaMode: labels.aaMode,
+                    previewMode: labels.previewMode,
+                  }}
+                />
+              </EditorBar>
+              {options.previewMode && (
+                <EditorPreview>
+                  <ContentPreview
+                    content={previewContent}
+                    emptyLabel={labels.preview}
+                    boardId={boardId}
+                    username={formData.username}
+                    defaultUsername={defaultUsername}
+                    tripcodeSalt={tripcodeSalt}
+                  />
+                </EditorPreview>
+              )}
+              <Textarea
+                data-draft
+                ref={textareaRef}
+                $aaMode={options.aaMode}
+                value={formData.content}
+                onChange={(e) =>
+                  setFormData({ ...formData, content: applyShortcuts(e.target.value) })
+                }
+                placeholder={labels.contentPlaceholder}
+                spellCheck={false}
+                required
               />
-            )}
-            <Textarea
-              data-draft
-              ref={textareaRef}
-              $aaMode={options.aaMode}
-              value={formData.content}
-              onChange={(e) =>
-                setFormData({ ...formData, content: applyShortcuts(e.target.value) })
-              }
-              placeholder={labels.contentPlaceholder}
-              spellCheck={false}
-              required
-            />
+            </Editor>
           </FormGroup>
 
           {storageEnabled && (

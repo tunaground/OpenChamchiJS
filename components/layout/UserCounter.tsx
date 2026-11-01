@@ -1,30 +1,23 @@
 "use client";
 
 import styled from "styled-components";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser } from "@fortawesome/free-solid-svg-icons";
 
 const Container = styled.div`
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.8rem;
-  background: ${(props) => props.theme.topBarHover};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 0.4rem;
+  gap: 0.6rem;
+  padding: 0 0.8rem;
   font-size: 1.3rem;
-  color: ${(props) => props.theme.topBarText};
-  opacity: 0.9;
-`;
+  color: ${(props) => props.theme.textSecondary};
+  white-space: nowrap;
 
-const Icon = styled.span`
-  display: flex;
-  align-items: center;
-  font-size: 1.2rem;
-`;
-
-const Count = styled.span`
-  font-weight: 500;
+  &::before {
+    content: "";
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: ${(props) => props.theme.success};
+  }
 `;
 
 interface UserCounterProps {
@@ -32,13 +25,11 @@ interface UserCounterProps {
   title?: string;
 }
 
+/** Live viewer count, shown in the page toolbar */
 export function UserCounter({ count, title }: UserCounterProps) {
   return (
-    <Container title={title}>
-      <Icon>
-        <FontAwesomeIcon icon={faUser} />
-      </Icon>
-      <Count>{count}</Count>
+    <Container title={title} aria-label={title}>
+      {count}
     </Container>
   );
 }

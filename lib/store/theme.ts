@@ -2,28 +2,36 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { ThemeMode } from "@/lib/theme/themes";
 
-const themeModes: ThemeMode[] = ["light", "grey", "dark"];
+/** What the user picked; "system" follows the OS color scheme (light or dark) */
+export type ThemePreference = ThemeMode | "system";
+
+const cycle: ThemeMode[] = ["light", "grey", "dark"];
+
+/** The mode the theme button switches to from the one shown now */
+export function nextThemeMode(resolved: ThemeMode): ThemeMode {
+  return cycle[(cycle.indexOf(resolved) + 1) % cycle.length];
+}
 
 interface ThemeState {
-  mode: ThemeMode;
-  setMode: (mode: ThemeMode) => void;
-  toggleMode: () => void;
+  mode: ThemePreference;
+  setMode: (mode: ThemePreference) => void;
+  /** Step light → grey → dark, starting from what is shown now */
+  toggleMode: (resolved: ThemeMode) => void;
 }
 
 export const useThemeStore = create<ThemeState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       mode: "light",
       setMode: (mode) => set({ mode }),
-      toggleMode: () => {
-        const currentIndex = themeModes.indexOf(get().mode);
-        const nextIndex = (currentIndex + 1) % themeModes.length;
-        set({ mode: themeModes[nextIndex] });
-      },
+      toggleMode: (resolved) => set({ mode: nextThemeMode(resolved) }),
     }),
     {
       name: "theme",
+      // v1 adds "system"; older saved values (light/grey/dark) carry over as is
+      version: 1,
       storage: createJSONStorage(() => localStorage),
+      migrate: (persisted) => persisted as ThemeState,
     }
   )
 );

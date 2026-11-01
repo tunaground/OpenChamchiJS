@@ -7,8 +7,8 @@ const PaginationWrapper = styled.nav`
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0.4rem;
-  margin-top: 2.4rem;
+  gap: 0.2rem;
+  margin-top: 2rem;
 `;
 
 const PageLink = styled(Link)<{ $active?: boolean }>`
@@ -20,16 +20,14 @@ const PageLink = styled(Link)<{ $active?: boolean }>`
   padding: 0 0.8rem;
   font-size: 1.4rem;
   text-decoration: none;
-  border-radius: 0.4rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  background: ${(props) =>
-    props.$active ? props.theme.buttonPrimary : props.theme.surface};
-  color: ${(props) =>
-    props.$active ? props.theme.buttonPrimaryText : props.theme.textPrimary};
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: ${(props) => (props.$active ? props.theme.accentSoft : "transparent")};
+  color: ${(props) => (props.$active ? props.theme.accent : props.theme.textSecondary)};
+  font-weight: ${(props) => (props.$active ? 600 : 400)};
 
   &:hover {
-    background: ${(props) =>
-      props.$active ? props.theme.buttonPrimary : props.theme.surfaceHover};
+    background: ${(props) => (props.$active ? props.theme.accentSoft : props.theme.hover)};
+    color: ${(props) => (props.$active ? props.theme.accent : props.theme.textPrimary)};
   }
 `;
 
@@ -37,11 +35,10 @@ const PageSpan = styled.span`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 3.2rem;
+  min-width: 2.4rem;
   height: 3.2rem;
-  padding: 0 0.8rem;
   font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.textMuted};
 `;
 
 const DisabledLink = styled.span`
@@ -52,10 +49,7 @@ const DisabledLink = styled.span`
   height: 3.2rem;
   padding: 0 0.8rem;
   font-size: 1.4rem;
-  border-radius: 0.4rem;
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  background: ${(props) => props.theme.surface};
-  color: ${(props) => props.theme.textSecondary};
+  color: ${(props) => props.theme.textMuted};
   opacity: 0.5;
   cursor: not-allowed;
 `;

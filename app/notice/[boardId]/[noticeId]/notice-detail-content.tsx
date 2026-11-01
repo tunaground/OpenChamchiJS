@@ -4,83 +4,72 @@ import Link from "next/link";
 import { useLocale } from "next-intl";
 import styled from "styled-components";
 import { PageLayout } from "@/components/layout";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { formatDateTime } from "@/lib/utils/date-formatter";
 
-const Container = styled.div`
-  padding: ${(props) => props.theme.containerPadding};
-  max-width: ${(props) => props.theme.contentMaxWidth};
-  margin: 0 auto;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: ${(props) => props.theme.containerPadding};
-  }
-`;
+const Container = PageContainer;
 
 const BackLink = styled(Link)`
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  display: inline-block;
+  margin-bottom: 1.6rem;
+  font-size: 1.3rem;
   color: ${(props) => props.theme.textSecondary};
-  text-decoration: none;
-  font-size: 1.4rem;
-  margin-bottom: 2.4rem;
 
   &:hover {
-    color: ${(props) => props.theme.textPrimary};
+    color: ${(props) => props.theme.accent};
   }
 `;
 
-const Article = styled.article`
-  background: ${(props) => props.theme.surface};
-  border: 1px solid ${(props) => props.theme.surfaceBorder};
-  border-radius: 0.8rem;
-  overflow: hidden;
-`;
+const Article = styled.article``;
 
 const Header = styled.header`
-  padding: 1.2rem 1.6rem;
-  background: ${(props) => props.theme.surfaceHover};
-  border-bottom: 1px solid ${(props) => props.theme.surfaceBorder};
+  padding-bottom: 1.6rem;
+  border-bottom: 1px solid ${(props) => props.theme.line};
 `;
 
 const TitleRow = styled.div`
   display: flex;
   align-items: center;
   gap: 0.8rem;
-  margin-bottom: 0.4rem;
+  flex-wrap: wrap;
 `;
 
 const Title = styled.h1`
-  font-size: 1.6rem;
-  font-weight: 600;
+  font-size: 2.4rem;
+  line-height: 1.3;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   color: ${(props) => props.theme.textPrimary};
-  margin: 0;
 `;
 
 const PinnedBadge = styled.span`
-  display: inline-block;
-  padding: 0.2rem 0.6rem;
-  background: ${(props) => props.theme.buttonPrimary};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  border-radius: 0.4rem;
+  display: inline-flex;
+  align-items: center;
+  height: 2rem;
+  padding: 0 0.6rem;
+  border-radius: ${(props) => props.theme.radiusChip};
   font-size: 1.2rem;
   font-weight: 500;
+  background: ${(props) => props.theme.accentSoft};
+  color: ${(props) => props.theme.accent};
 `;
 
 const Meta = styled.div`
   display: flex;
-  gap: 1.2rem;
-  font-size: 1.2rem;
-  color: ${(props) => props.theme.textSecondary};
+  flex-wrap: wrap;
+  gap: 0.4rem 1.6rem;
+  margin-top: 0.8rem;
+  font-size: 1.3rem;
+  color: ${(props) => props.theme.textMuted};
 `;
 
 const MetaItem = styled.span``;
 
 const Content = styled.div`
-  padding: 1.6rem;
+  padding-top: 1.6rem;
   font-size: 1.5rem;
-  line-height: 1.6;
+  line-height: 1.75;
   color: ${(props) => props.theme.textPrimary};
   white-space: pre-wrap;
   word-break: break-word;
@@ -151,7 +140,8 @@ export function NoticeDetailContent({
 
   return (
     <PageLayout
-      title={`${notice.title} - ${boardName}`}
+      title={notice.title}
+      parent={{ label: boardName, href: `/index/${boardId}` }}
       sidebar={sidebar}
       isLoggedIn={isLoggedIn}
       canAccessAdmin={canAccessAdmin}

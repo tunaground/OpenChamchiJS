@@ -1,15 +1,22 @@
 "use client";
 
-import styled, { css } from "styled-components";
+import Link from "next/link";
+import styled, { ThemeProvider, useTheme } from "styled-components";
+import { sidebarThemes } from "@/lib/theme/themes";
 import { SidebarContext } from "@/components/sidebar/SidebarContext";
+import { WatchedThreadsNav } from "@/components/sidebar/WatchedThreadsNav";
+import { useSite } from "./SiteContext";
+import { ThemeToggleButton } from "./ThemeToggleButton";
+import { SettingsButton } from "./SettingsButton";
+import { PushBellButton } from "./PushBellButton";
+import { AdminButton } from "./AdminButton";
+import { AuthButton } from "./AuthButton";
+import { SidebarToggleButton } from "./SidebarToggleButton";
 
-const Overlay = styled.div<{ $open: boolean; $compact?: boolean }>`
+const Overlay = styled.div<{ $open: boolean }>`
   position: fixed;
-  top: 5.6rem;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  inset: 0;
+  background: ${(props) => props.theme.scrim};
   opacity: ${(props) => (props.$open ? 1 : 0)};
   visibility: ${(props) => (props.$open ? "visible" : "hidden")};
   transition: opacity 0.2s, visibility 0.2s;
@@ -18,69 +25,137 @@ const Overlay = styled.div<{ $open: boolean; $compact?: boolean }>`
   @media (min-width: ${(props) => props.theme.breakpoint}) {
     display: none;
   }
-
-  ${(props) =>
-    props.$compact &&
-    css`
-      display: none;
-    `}
 `;
 
-const SidebarContainer = styled.aside<{ $open: boolean; $compact?: boolean }>`
+const Pane = styled.aside<{ $open: boolean }>`
   position: fixed;
-  top: 5.6rem;
-  left: 0;
-  bottom: 0;
-  width: 16.8rem;
-  background: ${(props) => props.theme.sidebar};
-  border-right: 1px solid ${(props) => props.theme.surfaceBorder};
-  transform: translateX(${(props) => (props.$open ? "0" : "-100%")});
-  transition: transform 0.2s ease-in-out, width 0.2s ease-in-out;
+  top: ${(props) => props.theme.paneGap};
+  bottom: ${(props) => props.theme.paneGap};
+  left: ${(props) => props.theme.paneGap};
+  width: ${(props) => props.theme.sidebarWidth};
+  display: flex;
+  flex-direction: column;
+  background: ${(props) => props.theme.pane};
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: ${(props) => props.theme.radiusPane};
+  box-shadow: inset 0 1px 0 ${(props) => props.theme.paneEdge}, ${(props) => props.theme.paneShadow};
+  color: ${(props) => props.theme.textPrimary};
+  transform: translateX(
+    ${(props) => (props.$open ? "0" : `calc(-100% - ${props.theme.paneGap} * 2)`)}
+  );
+  transition: transform 0.2s ease-in-out;
   z-index: 95;
-  overflow-y: auto;
-  color: ${(props) => props.theme.sidebarText};
-
-  @media (min-width: ${(props) => props.theme.breakpoint}) {
-    transform: translateX(${(props) => (props.$open ? "0" : "-100%")});
-  }
-
-  ${(props) =>
-    props.$compact &&
-    css`
-      @media (max-width: ${props.theme.breakpoint}) {
-        width: 5.6rem;
-        transform: translateX(${props.$open ? "0" : "-100%"});
-      }
-    `}
 `;
 
-const SidebarContent = styled.div<{ $compact?: boolean }>`
-  padding: 1.6rem;
+/* Sized and padded like the toolbar, so the toggle lands where the toolbar's
+   own toggle sits while the sidebar is closed */
+const Head = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: ${(props) => props.theme.toolbarHeight};
+  padding: 0.8rem 1rem 0.8rem 1.2rem;
 
-  ${(props) =>
-    props.$compact &&
-    css`
-      @media (max-width: ${props.theme.breakpoint}) {
-        padding: 0.8rem;
-      }
-    `}
+  /* The drawer starts a gap in from the screen's corner, the toolbar right at it */
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    min-height: 3.6rem;
+    padding: 0.2rem 1rem 0.2rem 0.4rem;
+  }
+`;
+
+const Home = styled(Link)`
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+`;
+
+const HeadTitle = styled.span`
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+`;
+
+const Scroll = styled.div`
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0.4rem 0.8rem 1.2rem;
+`;
+
+const Foot = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.8rem;
+  border-top: 1px solid ${(props) => props.theme.line};
+`;
+
+const FootEnd = styled.div`
+  margin-left: auto;
 `;
 
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
+  onToggle: () => void;
+  toggleLabel: string;
   children: React.ReactNode;
-  /** 모바일에서 아이콘만 표시하고 본문과 겹치지 않게 함 */
-  compactOnMobile?: boolean;
+  isLoggedIn: boolean;
+  canAccessAdmin: boolean;
+  authLabels: { login: string; logout: string };
+  isSettingsPage?: boolean;
+  isAdminPage?: boolean;
 }
 
-export function Sidebar({ open, onClose, children, compactOnMobile }: SidebarProps) {
+export function Sidebar({
+  open,
+  onClose,
+  onToggle,
+  toggleLabel,
+  children,
+  isLoggedIn,
+  canAccessAdmin,
+  authLabels,
+  isSettingsPage,
+  isAdminPage,
+}: SidebarProps) {
+  const { siteTitle } = useSite();
+  const theme = useTheme();
+
   return (
-    <SidebarContext.Provider value={{ onClose, compactOnMobile }}>
-      <Overlay $open={open} $compact={compactOnMobile} onClick={onClose} />
-      <SidebarContainer $open={open} $compact={compactOnMobile}>
-        <SidebarContent $compact={compactOnMobile}>{children}</SidebarContent>
-      </SidebarContainer>
+    <SidebarContext.Provider value={{ onClose }}>
+      <Overlay $open={open} onClick={onClose} />
+      <ThemeProvider theme={sidebarThemes[theme.mode]}>
+        <Pane $open={open} data-pane="sidebar">
+          <Head>
+            <SidebarToggleButton onClick={onToggle} label={toggleLabel} />
+            <Home prefetch={false} href="/" onClick={onClose}>
+              <HeadTitle>{siteTitle}</HeadTitle>
+            </Home>
+          </Head>
+          <Scroll>
+            {children}
+            {isLoggedIn && <WatchedThreadsNav />}
+          </Scroll>
+          <Foot>
+            <ThemeToggleButton />
+            <SettingsButton active={isSettingsPage} />
+            {isLoggedIn && <PushBellButton />}
+            {canAccessAdmin && <AdminButton active={isAdminPage} />}
+            <FootEnd>
+              <AuthButton
+                isLoggedIn={isLoggedIn}
+                loginLabel={authLabels.login}
+                logoutLabel={authLabels.logout}
+              />
+            </FootEnd>
+          </Foot>
+        </Pane>
+      </ThemeProvider>
     </SidebarContext.Provider>
   );
 }
