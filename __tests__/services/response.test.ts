@@ -24,11 +24,13 @@ describe("ResponseService", () => {
     responsesPerPage: 50,
     maxResponsesPerThread: 1000,
     blockForeignIp: false,
+    writeLocked: false,
     deleted: false,
     defaultUsername: "anonymous",
     showUserCount: false,
     uploadMaxSize: 5242880,
     uploadMimeTypes: "image/png,image/jpeg,image/gif,image/webp",
+    threadCount: 1,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -46,6 +48,7 @@ describe("ResponseService", () => {
     createdAt: new Date(),
     updatedAt: new Date(),
     top: false,
+    responseCount: 1,
   };
 
   const mockResponse: ResponseData = {
@@ -81,6 +84,7 @@ describe("ResponseService", () => {
   const createMockThreadRepo = (): jest.Mocked<ThreadRepository> => ({
     findByBoardId: jest.fn(),
     findByBoardIdWithResponseCount: jest.fn(),
+    findByBoardIdWithCount: jest.fn(),
     countByBoardId: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
@@ -121,6 +125,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -141,6 +146,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -159,6 +165,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -177,6 +184,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -199,6 +207,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -220,6 +229,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -238,6 +248,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -256,6 +267,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -276,6 +288,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -298,6 +311,7 @@ describe("ResponseService", () => {
         const service = createResponseService({
           responseRepository: mockResponseRepo,
           threadRepository: mockThreadRepo,
+          boardRepository: createMockBoardRepo(),
           roleService: createMockRoleService(),
         });
         return { service, mockResponseRepo };
@@ -361,6 +375,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: createMockRoleService(),
       });
       const filter = { authorIds: ["a"] };
@@ -387,6 +402,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -405,6 +421,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -423,6 +440,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -441,6 +459,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -461,6 +480,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -518,6 +538,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -537,6 +558,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -563,6 +585,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -585,6 +608,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -606,6 +630,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -625,6 +650,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -651,6 +677,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -673,6 +700,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -693,6 +721,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -715,6 +744,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -733,6 +763,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: mockRoleService,
       });
 
@@ -752,6 +783,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: createMockRoleService({
           canManageBoard: jest.fn().mockResolvedValue(false),
         }),
@@ -773,6 +805,7 @@ describe("ResponseService", () => {
       const service = createResponseService({
         responseRepository: mockResponseRepo,
         threadRepository: mockThreadRepo,
+        boardRepository: createMockBoardRepo(),
         roleService: createMockRoleService({
           canManageBoard: jest.fn().mockResolvedValue(true),
         }),
