@@ -15,7 +15,8 @@ export function ledgerGutterStyle(maxSeq: number): CSSProperties {
 
 /*
  * Responses read as one continuous ledger: the seq number sits large in a left
- * gutter and each response starts with a tinted header band (no lines between rows).
+ * gutter and each response starts with a tinted header band, closed by a line that runs
+ * along its bottom edge and on under the seq number (no lines between rows).
  * The band also carries the inline seq on mobile, where the gutter hides.
  * The "anchor" variant (inside anchor previews) is compact with an inline seq.
  */
@@ -89,9 +90,30 @@ export const Header = styled.div<{ $variant?: "main" | "anchor"; $op?: boolean }
   ${(props) =>
     props.$variant !== "anchor" &&
     css`
+      position: relative;
       padding: 0.6rem 1rem;
-      border-radius: ${props.theme.radiusControl};
+      /* Only the top-right corner is rounded: the left side meets the line coming in
+         from the gutter, and the line runs straight along the bottom */
+      border-radius: 0 ${props.theme.radiusControl} 0 0;
       background: ${props.$op ? props.theme.accentSoft : props.theme.hover};
+
+      /* The line under the band reaches back under the gutter's seq number */
+      &::after {
+        content: "";
+        position: absolute;
+        left: calc(-1 * ${props.theme.ledgerGutter});
+        right: 0;
+        bottom: 0;
+        height: 1px;
+        background: ${props.theme.lineStrong};
+        pointer-events: none;
+      }
+
+      @media (max-width: ${props.theme.breakpoint}) {
+        &::after {
+          left: 0;
+        }
+      }
     `}
 `;
 

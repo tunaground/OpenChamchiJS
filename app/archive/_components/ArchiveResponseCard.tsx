@@ -10,7 +10,8 @@ import type { ArchiveResponse } from "../_lib/types";
 
 /*
  * Same ledger look as the live thread (components/response/ResponseCard):
- * the seq number sits large in a left gutter, each response opens with a tinted header band.
+ * the seq number sits large in a left gutter, each response opens with a tinted header band
+ * closed by a line that runs on under the seq number.
  */
 
 const Card = styled.article<{ $highlighted?: boolean }>`
@@ -67,9 +68,30 @@ const Header = styled.header<{ $op?: boolean }>`
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.2rem 1rem;
+  position: relative;
   padding: 0.6rem 1rem;
-  border-radius: ${(props) => props.theme.radiusControl};
+  /* Only the top-right corner is rounded: the left side meets the line coming in
+     from the gutter, and the line runs straight along the bottom */
+  border-radius: 0 ${(props) => props.theme.radiusControl} 0 0;
   background: ${(props) => (props.$op ? props.theme.accentSoft : props.theme.hover)};
+
+  /* The line under the band reaches back under the gutter's seq number */
+  &::after {
+    content: "";
+    position: absolute;
+    left: calc(-1 * ${(props) => props.theme.ledgerGutter});
+    right: 0;
+    bottom: 0;
+    height: 1px;
+    background: ${(props) => props.theme.lineStrong};
+    pointer-events: none;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    &::after {
+      left: 0;
+    }
+  }
   font-size: 1.4rem;
 `;
 
