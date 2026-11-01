@@ -23,20 +23,37 @@ const GlobalStyle = createGlobalStyle`
 
   /* Surface palette per mode. data-mode is set before paint (see app/layout.tsx) */
   :root {
-    --c-canvas: #e9ecef;
-    --c-pane: #fbfbfa;
-    --c-raised: #ffffff;
-    --c-sunken: rgba(27, 31, 36, 0.035);
-    --c-field: #f3f4f5;
-    --c-hover: rgba(27, 31, 36, 0.05);
-    --c-hover-solid: #f1f2f3;
-    --c-line: rgba(27, 31, 36, 0.1);
-    --c-line-strong: rgba(27, 31, 36, 0.18);
-    --c-accent-soft: rgba(10, 108, 176, 0.1);
-    --c-edge: rgba(255, 255, 255, 0.9);
-    --c-shadow: 0 1px 2px rgba(27, 31, 36, 0.06), 0 8px 24px -12px rgba(27, 31, 36, 0.18);
+    --c-canvas: #d6e1ec;
+    --c-pane: #f5f8fb;
+    --c-raised: #fcfdfe;
+    --c-sunken: rgba(20, 50, 90, 0.04);
+    --c-field: #e8eef5;
+    --c-hover: rgba(20, 60, 110, 0.06);
+    --c-hover-solid: #eaf0f6;
+    --c-line: rgba(20, 50, 90, 0.11);
+    --c-line-strong: rgba(20, 50, 90, 0.2);
+    --c-accent-soft: rgba(10, 108, 176, 0.12);
+    --c-edge: rgba(255, 255, 255, 0.85);
+    --c-shadow: 0 1px 2px rgba(20, 50, 90, 0.08), 0 8px 24px -12px rgba(20, 50, 90, 0.25);
     --c-scrim: rgba(0, 0, 0, 0.25);
-    --c-toast: rgba(27, 31, 36, 0.92);
+    --c-toast: rgba(23, 33, 48, 0.92);
+  }
+
+  /* Light mode only: the sidebar pane is deep sea blue (text colors come from
+     sidebarThemes.light, see components/layout/Sidebar) */
+  :root:not([data-mode="grey"]):not([data-mode="dark"]) [data-pane="sidebar"] {
+    --c-pane: #173a5e;
+    --c-raised: #1f4670;
+    --c-sunken: rgba(0, 0, 0, 0.15);
+    --c-field: #12304f;
+    --c-hover: rgba(255, 255, 255, 0.07);
+    --c-hover-solid: #1e4368;
+    --c-line: rgba(255, 255, 255, 0.1);
+    --c-line-strong: rgba(255, 255, 255, 0.18);
+    --c-accent-soft: rgba(120, 185, 245, 0.2);
+    --c-edge: rgba(255, 255, 255, 0.08);
+    --c-shadow: 0 1px 2px rgba(10, 30, 60, 0.15), 0 8px 24px -12px rgba(10, 30, 60, 0.45);
+    color-scheme: dark;
   }
 
   :root[data-mode="grey"] {

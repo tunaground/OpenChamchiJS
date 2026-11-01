@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import styled from "styled-components";
+import styled, { ThemeProvider, useTheme } from "styled-components";
+import { sidebarThemes } from "@/lib/theme/themes";
 import { SidebarContext } from "@/components/sidebar/SidebarContext";
 import { WatchedThreadsNav } from "@/components/sidebar/WatchedThreadsNav";
 import { useSite } from "./SiteContext";
@@ -123,35 +124,38 @@ export function Sidebar({
   isAdminPage,
 }: SidebarProps) {
   const { siteTitle } = useSite();
+  const theme = useTheme();
 
   return (
     <SidebarContext.Provider value={{ onClose }}>
       <Overlay $open={open} onClick={onClose} />
-      <Pane $open={open}>
-        <Head>
-          <SidebarToggleButton onClick={onToggle} label={toggleLabel} />
-          <Home prefetch={false} href="/" onClick={onClose}>
-            <HeadTitle>{siteTitle}</HeadTitle>
-          </Home>
-        </Head>
-        <Scroll>
-          {children}
-          {isLoggedIn && <WatchedThreadsNav />}
-        </Scroll>
-        <Foot>
-          <ThemeToggleButton />
-          <SettingsButton active={isSettingsPage} />
-          {isLoggedIn && <PushBellButton />}
-          {canAccessAdmin && <AdminButton active={isAdminPage} />}
-          <FootEnd>
-            <AuthButton
-              isLoggedIn={isLoggedIn}
-              loginLabel={authLabels.login}
-              logoutLabel={authLabels.logout}
-            />
-          </FootEnd>
-        </Foot>
-      </Pane>
+      <ThemeProvider theme={sidebarThemes[theme.mode]}>
+        <Pane $open={open} data-pane="sidebar">
+          <Head>
+            <SidebarToggleButton onClick={onToggle} label={toggleLabel} />
+            <Home prefetch={false} href="/" onClick={onClose}>
+              <HeadTitle>{siteTitle}</HeadTitle>
+            </Home>
+          </Head>
+          <Scroll>
+            {children}
+            {isLoggedIn && <WatchedThreadsNav />}
+          </Scroll>
+          <Foot>
+            <ThemeToggleButton />
+            <SettingsButton active={isSettingsPage} />
+            {isLoggedIn && <PushBellButton />}
+            {canAccessAdmin && <AdminButton active={isAdminPage} />}
+            <FootEnd>
+              <AuthButton
+                isLoggedIn={isLoggedIn}
+                loginLabel={authLabels.login}
+                logoutLabel={authLabels.logout}
+              />
+            </FootEnd>
+          </Foot>
+        </Pane>
+      </ThemeProvider>
     </SidebarContext.Provider>
   );
 }

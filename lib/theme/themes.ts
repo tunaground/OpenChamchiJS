@@ -58,18 +58,18 @@ const surfaces = {
 export const lightTheme = {
   mode: "light" as const,
 
-  foreground: "#1b1f24",
+  foreground: "#18212c",
   primary: "#0a6cb0",
-  secondary: "#5b6470",
+  secondary: "#52606f",
   accent: "#0a6cb0",
 
-  topBarText: "#1b1f24",
-  sidebarText: "#1b1f24",
+  topBarText: "#18212c",
+  sidebarText: "#18212c",
 
   // Text colors
-  textPrimary: "#1b1f24",
-  textSecondary: "#5b6470",
-  textMuted: "#8b939d",
+  textPrimary: "#18212c",
+  textSecondary: "#52606f",
+  textMuted: "#8592a1",
 
   // Button colors
   buttonPrimary: "#0a6cb0",
@@ -168,6 +168,36 @@ export const greyTheme = {
   ...layout,
 };
 
+// Light mode's sidebar pane is deep sea blue, so its text and accents need the
+// light-on-dark set (surfaces follow [data-pane="sidebar"] in ThemeProvider)
+const lightSidebarTheme = {
+  ...lightTheme,
+
+  foreground: "#e6eef7",
+  primary: "#7cc0f5",
+  secondary: "#a9bdd3",
+  accent: "#7cc0f5",
+
+  topBarText: "#e6eef7",
+  sidebarText: "#e6eef7",
+
+  textPrimary: "#e6eef7",
+  textSecondary: "#a9bdd3",
+  textMuted: "#7f97b2",
+
+  buttonPrimary: "#7cc0f5",
+  buttonPrimaryText: "#0d2236",
+
+  success: "#5fcf96",
+  warning: "#e8bb4f",
+  error: "#f58a8a",
+  info: "#7cc0f5",
+
+  calcExpColor: "#f58a8a",
+  anchorALinkColor: "#7cc0f5",
+  spoilerBackground: "rgba(255, 255, 255, 0.8)",
+};
+
 export type ThemeMode = "light" | "grey" | "dark";
 export type AppTheme = Omit<typeof lightTheme, "mode"> & { mode: ThemeMode };
 
@@ -176,3 +206,10 @@ export const themes = {
   grey: greyTheme,
   dark: darkTheme,
 } as const;
+
+/** Theme for the sidebar pane in each mode */
+export const sidebarThemes: Record<ThemeMode, AppTheme> = {
+  light: lightSidebarTheme,
+  grey: greyTheme,
+  dark: darkTheme,
+};
