@@ -38,7 +38,8 @@ export const Card = styled.article<{ $variant?: "main" | "anchor"; $op?: boolean
         `
       : css`
           padding: 1.8rem 0 2rem;
-          border-bottom: 1px solid ${props.theme.line};
+          /* The stronger line: the faint one vanishes on low-contrast monitors */
+          border-bottom: 1px solid ${props.theme.lineStrong};
 
           @media (max-width: ${props.theme.breakpoint}) {
             padding: 1.5rem 0;
