@@ -5,7 +5,7 @@ import { flushSync } from "react-dom";
 import { signOutWithPush } from "@/lib/push/client";
 import styled, { useTheme } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowsRotate, faChevronDown, faCompress, faExpand } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate, faCompress, faExpand } from "@fortawesome/free-solid-svg-icons";
 import { iconButtonCss } from "@/components/layout/iconButton";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
 import { ImageUpload } from "@/components/response/ImageUpload";
@@ -16,34 +16,7 @@ import type { ResponseOptions } from "@/lib/store/responseOptions";
 
 const ResponseForm = styled.form``;
 
-/*
- * Desktop: folded, the composer is just a bar of options, refresh and
- * "write". Mobile: the composer always sits open after the responses, and a
- * button opens it over the whole screen.
- */
-const ComposeBar = styled.div<{ $hidden: boolean }>`
-  display: ${(props) => (props.$hidden ? "none" : "flex")};
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.4rem 0.6rem;
-  border: 1px solid ${(props) => props.theme.line};
-  border-radius: ${(props) => props.theme.radiusPane};
-  background: ${(props) => props.theme.paneSunken};
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    display: none;
-  }
-`;
-
-const BarActions = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  flex-shrink: 0;
-  margin-left: auto;
-`;
-
-const IconButton = styled.button<{ $active?: boolean; $only?: "desktop" | "mobile" }>`
+const IconButton = styled.button<{ $active?: boolean; $mobileOnly?: boolean }>`
   ${iconButtonCss}
   width: 3rem;
   height: 3rem;
@@ -53,23 +26,20 @@ const IconButton = styled.button<{ $active?: boolean; $only?: "desktop" | "mobil
     height: 1.5rem;
   }
 
-  ${(props) => props.$only === "mobile" && "display: none;"}
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    display: ${(props) => (props.$only === "desktop" ? "none" : "flex")};
-  }
-`;
-
-/* Mobile full screen: --vv-top/--vv-height follow the visual viewport, so the
-   composer ends at the on-screen keyboard instead of under it */
-const Inner = styled.div<{ $hidden: boolean; $fullscreen: boolean }>`
-  display: ${(props) => (props.$hidden ? "none" : "flex")};
-  flex-direction: column;
-  gap: 0.8rem;
+  ${(props) => props.$mobileOnly && "display: none;"}
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     display: flex;
   }
+`;
+
+/* The composer sits open after the responses. On mobile a button opens it
+   over the whole screen: --vv-top/--vv-height follow the visual viewport, so
+   it ends at the on-screen keyboard instead of under it */
+const Inner = styled.div<{ $fullscreen: boolean }>`
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 
   ${(props) => props.$fullscreen && `@media (max-width: ${props.theme.breakpoint}) {
     position: fixed;
@@ -373,8 +343,6 @@ export function ResponseFormSection({
   const [content, setContent] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  // Desktop: folded when the thread opens; stays open until folded again
-  const [expanded, setExpanded] = useState(false);
   // Mobile: the composer over the whole screen, until closed or posted
   const [fullscreen, setFullscreen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -387,18 +355,8 @@ export function ResponseFormSection({
     [theme.breakpoint]
   );
 
-  // Open synchronously, so the textarea is visible in time to be focused
+  // Open synchronously, so the textarea is in place in time to be focused
   // within the tap (iOS only raises the keyboard for a focus inside a gesture)
-  const expand = () => {
-    flushSync(() => setExpanded(true));
-    textareaRef.current?.focus();
-  };
-
-  const collapse = () => {
-    textareaRef.current?.blur();
-    setExpanded(false);
-  };
-
   const openFullscreen = () => {
     flushSync(() => setFullscreen(true));
     textareaRef.current?.focus();
@@ -470,7 +428,7 @@ export function ResponseFormSection({
 
   useEffect(() => {
     autoResize();
-  }, [content, expanded, autoResize]);
+  }, [content, autoResize]);
 
   // Load saved username from localStorage
   useEffect(() => {
@@ -636,16 +594,7 @@ export function ResponseFormSection({
 
   return (
     <ResponseForm ref={formRef} onSubmit={handleSubmit}>
-      <ComposeBar $hidden={expanded}>
-        {optionButtons}
-        <BarActions>
-          {refreshIconButton}
-          <SubmitButton type="button" onClick={expand}>
-            {tThread("compose")}
-          </SubmitButton>
-        </BarActions>
-      </ComposeBar>
-      <Inner ref={innerRef} $hidden={!expanded} $fullscreen={fullscreen}>
+      <Inner ref={innerRef} $fullscreen={fullscreen}>
       {responseOptions.previewMode && (
         <PreviewArea>
           <ResponsePreview
@@ -678,16 +627,7 @@ export function ResponseFormSection({
             {refreshIconButton}
             <IconButton
               type="button"
-              $only="desktop"
-              onClick={collapse}
-              title={tThread("collapseComposer")}
-              aria-label={tThread("collapseComposer")}
-            >
-              <FontAwesomeIcon icon={faChevronDown} />
-            </IconButton>
-            <IconButton
-              type="button"
-              $only="mobile"
+              $mobileOnly
               onClick={fullscreen ? closeFullscreen : openFullscreen}
               title={tThread(fullscreen ? "exitFullscreen" : "fullscreen")}
               aria-label={tThread(fullscreen ? "exitFullscreen" : "fullscreen")}

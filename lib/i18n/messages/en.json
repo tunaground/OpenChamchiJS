@@ -253,8 +253,6 @@
     "filterResume": "Resume",
     "filterRemove": "Remove from filter",
     "quickSubmitHint": "{key} to post",
-    "compose": "Write",
-    "collapseComposer": "Collapse composer",
     "fullscreen": "Full screen",
     "exitFullscreen": "Exit full screen"
   },

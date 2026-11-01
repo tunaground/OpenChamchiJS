@@ -31,9 +31,9 @@ const Main = styled.main<{ $sidebarOpen: boolean }>`
 
 /**
  * The content pane. On desktop it is pinned inside Main and only its middle
- * (Scroll) scrolls, so the toolbar, the footer (thread composer) and the pane's
- * edges always show. On mobile the window scrolls, the toolbar sticks and the
- * footer follows the content.
+ * (Scroll) scrolls, so the toolbar and the pane's edges always show. On mobile
+ * the window scrolls and the toolbar sticks. Either way the footer follows the
+ * content.
  */
 const Pane = styled.div`
   position: absolute;
@@ -70,9 +70,10 @@ const Scroll = styled.div`
   }
 `;
 
-/* On mobile the footer sits after the content (below the last response) */
+/* After the content (below the last response); at the bottom when the content is short */
 const Footer = styled.div`
   flex-shrink: 0;
+  margin-top: auto;
 `;
 
 interface PageLayoutProps {
@@ -83,7 +84,7 @@ interface PageLayoutProps {
   subtitle?: React.ReactNode;
   /** Page-specific buttons at the right of the toolbar */
   toolbarActions?: React.ReactNode;
-  /** Pinned below the scrolling content (e.g. the thread composer) */
+  /** After the content, at the end of the scroll (e.g. the thread composer) */
   footer?: React.ReactNode;
   sidebar?: React.ReactNode;
   children: React.ReactNode;
@@ -127,10 +128,9 @@ export function PageLayout({
   const footerRef = useRef<HTMLDivElement>(null);
   const hasFooter = !!footer;
 
-  // A growing footer (a longer draft, the preview) takes its height from the
-  // bottom of the view: on mobile the page grows below it, on desktop the
-  // scroll pane shrinks. Either way the gap below the view widens by the
-  // growth, so if it was at the bottom before, keep it there.
+  // A growing footer (a longer draft, the preview) grows the page below the
+  // view, widening the gap below it by the growth, so if it was at the
+  // bottom before, keep it there.
   useEffect(() => {
     const footer = footerRef.current;
     if (!footer) return;
@@ -245,8 +245,10 @@ export function PageLayout({
             onMenuClick={handleMenuClick}
             menuLabel={tCommon("toggleSidebar")}
           />
-          <Scroll id={PAGE_SCROLL_ID}>{children}</Scroll>
-          {footer && <Footer ref={footerRef}>{footer}</Footer>}
+          <Scroll id={PAGE_SCROLL_ID}>
+            {children}
+            {footer && <Footer ref={footerRef}>{footer}</Footer>}
+          </Scroll>
         </Pane>
       </Main>
     </>
