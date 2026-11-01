@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-11-01
+
 ### Changed
 
 - New look across the site: the sidebar and the content area float as panes on a quiet background, with IBM Plex Sans KR type and squarer corners
@@ -230,7 +232,8 @@ Initial tagged release. See git history for details.
 
 ## [0.1.0]
 
-[Unreleased]: https://github.com/tunaground/OpenChamchiJS/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/tunaground/OpenChamchiJS/compare/v0.5.0...HEAD
+[0.5.0]: https://github.com/tunaground/OpenChamchiJS/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/tunaground/OpenChamchiJS/compare/v0.3.1...v0.4.0
 [0.3.1]: https://github.com/tunaground/OpenChamchiJS/compare/v0.3.0...v0.3.1
 [0.3.0]: https://github.com/tunaground/OpenChamchiJS/compare/v0.2.0...v0.3.0
