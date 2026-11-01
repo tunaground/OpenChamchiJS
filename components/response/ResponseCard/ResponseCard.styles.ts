@@ -31,16 +31,22 @@ export const Card = styled.article<{ $variant?: "main" | "anchor"; $op?: boolean
           & + & {
             border-top: 1px solid ${props.theme.line};
           }
+
+          @media (max-width: ${props.theme.breakpoint}) {
+            padding: 1.2rem 0;
+          }
         `
       : css`
-          padding: 1.4rem 0 1.6rem;
+          padding: 1.8rem 0 2rem;
           border-bottom: 1px solid ${props.theme.line};
+
+          @media (max-width: ${props.theme.breakpoint}) {
+            padding: 1.5rem 0;
+          }
         `}
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     grid-template-columns: minmax(0, 1fr);
-    padding-top: 1.2rem;
-    padding-bottom: 1.2rem;
   }
 `;
 

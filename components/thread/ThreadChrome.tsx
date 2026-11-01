@@ -341,38 +341,48 @@ export function ThreadFilterBar({
 
 /* ───────── Load more ───────── */
 
+/* Spread across the row as solid buttons, so loading earlier responses stands out */
 export const LoadMoreRow = styled.div`
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 0.6rem;
-  padding: 1.2rem 0 1.2rem ${(props) => props.theme.ledgerGutter};
+  gap: 0.8rem;
+  padding: 1.4rem 0 1.4rem ${(props) => props.theme.ledgerGutter};
   border-bottom: 1px solid ${(props) => props.theme.line};
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
+    gap: 0.6rem;
     padding-left: 0;
   }
 `;
 
 export const LoadMoreButton = styled.button<{ $primary?: boolean }>`
-  height: 2.8rem;
-  padding: 0 1rem;
+  flex: 1;
+  min-width: 0;
+  height: 4rem;
+  padding: 0 0.8rem;
   border-radius: ${(props) => props.theme.radiusControl};
-  border: 1px solid ${(props) => (props.$primary ? props.theme.lineStrong : "transparent")};
-  background: transparent;
-  color: ${(props) => (props.$primary ? props.theme.textPrimary : props.theme.textSecondary)};
-  font-size: 1.3rem;
-  font-weight: ${(props) => (props.$primary ? 500 : 400)};
+  border: 1px solid ${(props) => (props.$primary ? "transparent" : props.theme.line)};
+  background: ${(props) => (props.$primary ? props.theme.accentSoft : props.theme.paneSunken)};
+  color: ${(props) => (props.$primary ? props.theme.accent : props.theme.textPrimary)};
+  font-size: 1.4rem;
+  font-weight: ${(props) => (props.$primary ? 600 : 500)};
+  white-space: nowrap;
   cursor: pointer;
+  transition: filter 0.15s, background 0.15s;
 
   &:hover {
-    background: ${(props) => props.theme.hover};
-    color: ${(props) => props.theme.textPrimary};
+    filter: brightness(0.96);
   }
 
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    height: 3.6rem;
+    padding: 0 0.4rem;
+    font-size: 1.3rem;
   }
 `;
 

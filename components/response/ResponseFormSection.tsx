@@ -104,7 +104,7 @@ const HeadDivider = styled.span`
   }
 `;
 
-/* Name with refresh and fold at its right; its own line on mobile */
+/* Name, with the full-screen button at its right on mobile; its own line on mobile */
 const NameRow = styled.div`
   flex: 1;
   display: flex;
@@ -582,18 +582,6 @@ export function ResponseFormSection({
     }
   };
 
-  const refreshIconButton = (
-    <IconButton
-      type="button"
-      onClick={onRefresh}
-      disabled={refreshing}
-      title={labels.refresh}
-      aria-label={labels.refresh}
-    >
-      <FontAwesomeIcon icon={faArrowsRotate} spin={refreshing} />
-    </IconButton>
-  );
-
   const optionButtons = (
     <ResponseOptionButtons
       options={responseOptions}
@@ -669,7 +657,6 @@ export function ResponseFormSection({
               aria-label={labels.usernamePlaceholder}
               spellCheck={false}
             />
-            {refreshIconButton}
             <IconButton
               type="button"
               $mobileOnly
