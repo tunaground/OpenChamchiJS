@@ -216,9 +216,9 @@ const Hint = styled.span`
 
 const SubmitButton = styled.button`
   flex-shrink: 0;
-  height: 3rem;
+  height: 3.6rem;
   margin-left: auto;
-  padding: 0 1.6rem;
+  padding: 0 2.6rem;
   background: ${(props) => props.theme.buttonPrimary};
   color: ${(props) => props.theme.buttonPrimaryText};
   border: none;
