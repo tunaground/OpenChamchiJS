@@ -16,7 +16,7 @@ import type { ArchiveResponse } from "../_lib/types";
 const Card = styled.article<{ $highlighted?: boolean }>`
   display: grid;
   grid-template-columns: ${(props) => props.theme.ledgerGutter} minmax(0, 1fr);
-  padding: 1.2rem 0;
+  padding: 2rem 0;
   scroll-margin-top: 7rem;
 
   ${(props) =>
@@ -31,8 +31,8 @@ const Card = styled.article<{ $highlighted?: boolean }>`
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     grid-template-columns: minmax(0, 1fr);
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    padding-top: 1.6rem;
+    padding-bottom: 1.6rem;
   }
 `;
 

@@ -38,10 +38,10 @@ export const Card = styled.article<{ $variant?: "main" | "anchor"; $op?: boolean
           }
         `
       : css`
-          padding: 1.2rem 0;
+          padding: 2rem 0;
 
           @media (max-width: ${props.theme.breakpoint}) {
-            padding: 1rem 0;
+            padding: 1.6rem 0;
           }
         `}
 
