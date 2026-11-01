@@ -254,7 +254,9 @@
     "filterRemove": "필터에서 빼기",
     "quickSubmitHint": "{key}로 작성",
     "compose": "글작성",
-    "collapseComposer": "입력폼 접기"
+    "collapseComposer": "입력폼 접기",
+    "fullscreen": "전체화면으로 쓰기",
+    "exitFullscreen": "전체화면 닫기"
   },
   "traceSidebar": {
     "navigation": "이 스레드",

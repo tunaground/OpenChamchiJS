@@ -254,7 +254,9 @@
     "filterRemove": "フィルターから外す",
     "quickSubmitHint": "{key}で投稿",
     "compose": "書き込む",
-    "collapseComposer": "入力欄を畳む"
+    "collapseComposer": "入力欄を畳む",
+    "fullscreen": "全画面で書く",
+    "exitFullscreen": "全画面を閉じる"
   },
   "traceSidebar": {
     "navigation": "このスレッド",

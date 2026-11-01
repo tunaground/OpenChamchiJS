@@ -429,11 +429,8 @@ const Dock = styled.div`
   background: ${(props) => props.theme.pane};
   border-top: 1px solid ${(props) => props.theme.line};
 
-  /* On mobile the composer floats over the screen; the dock only holds its spacer */
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 0;
-    border-top: none;
-    background: transparent;
+    padding: 0.8rem;
   }
 `;
 

@@ -5,7 +5,7 @@ import { flushSync } from "react-dom";
 import { signOutWithPush } from "@/lib/push/client";
 import styled, { useTheme } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowsRotate, faChevronDown } from "@fortawesome/free-solid-svg-icons";
+import { faArrowsRotate, faChevronDown, faCompress, faExpand } from "@fortawesome/free-solid-svg-icons";
 import { iconButtonCss } from "@/components/layout/iconButton";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
 import { ImageUpload } from "@/components/response/ImageUpload";
@@ -17,10 +17,9 @@ import type { ResponseOptions } from "@/lib/store/responseOptions";
 const ResponseForm = styled.form``;
 
 /*
- * Folded, the composer is just a bar of options, refresh and "write". On
- * mobile the bar floats over the bottom of the screen and a spacer after the
- * responses keeps it from covering the last one; unfolded, the composer takes
- * the whole screen.
+ * Desktop: folded, the composer is just a bar of options, refresh and
+ * "write". Mobile: the composer always sits open after the responses, and a
+ * button opens it over the whole screen.
  */
 const ComposeBar = styled.div<{ $hidden: boolean }>`
   display: ${(props) => (props.$hidden ? "none" : "flex")};
@@ -32,25 +31,7 @@ const ComposeBar = styled.div<{ $hidden: boolean }>`
   background: ${(props) => props.theme.paneSunken};
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    position: fixed;
-    left: 0.8rem;
-    right: 0.8rem;
-    bottom: calc(0.8rem + env(safe-area-inset-bottom));
-    /* Under the toolbar (50) and the sidebar drawer (90) */
-    z-index: 40;
-    background: ${(props) => props.theme.paneRaised};
-    border-color: ${(props) => props.theme.lineStrong};
-    box-shadow: ${(props) => props.theme.paneShadow};
-  }
-`;
-
-/* Many options on a narrow phone scroll sideways rather than squeeze the buttons */
-const BarOptions = styled.div`
-  min-width: 0;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    overflow-x: auto;
-    scrollbar-width: none;
+    display: none;
   }
 `;
 
@@ -62,17 +43,7 @@ const BarActions = styled.div`
   margin-left: auto;
 `;
 
-/* Room for the floating bar (its height plus its gap above the screen edge) */
-const BarSpacer = styled.div<{ $hidden: boolean }>`
-  display: none;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    display: ${(props) => (props.$hidden ? "none" : "block")};
-    height: calc(6.4rem + env(safe-area-inset-bottom));
-  }
-`;
-
-const IconButton = styled.button<{ $active?: boolean }>`
+const IconButton = styled.button<{ $active?: boolean; $only?: "desktop" | "mobile" }>`
   ${iconButtonCss}
   width: 3rem;
   height: 3rem;
@@ -81,16 +52,26 @@ const IconButton = styled.button<{ $active?: boolean }>`
     width: 1.5rem;
     height: 1.5rem;
   }
+
+  ${(props) => props.$only === "mobile" && "display: none;"}
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: ${(props) => (props.$only === "desktop" ? "none" : "flex")};
+  }
 `;
 
-/* Mobile: --vv-top/--vv-height follow the visual viewport, so the screen-wide
+/* Mobile full screen: --vv-top/--vv-height follow the visual viewport, so the
    composer ends at the on-screen keyboard instead of under it */
-const Inner = styled.div<{ $hidden: boolean }>`
+const Inner = styled.div<{ $hidden: boolean; $fullscreen: boolean }>`
   display: ${(props) => (props.$hidden ? "none" : "flex")};
   flex-direction: column;
   gap: 0.8rem;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
+    display: flex;
+  }
+
+  ${(props) => props.$fullscreen && `@media (max-width: ${props.theme.breakpoint}) {
     position: fixed;
     top: var(--vv-top, 0);
     left: 0;
@@ -98,12 +79,21 @@ const Inner = styled.div<{ $hidden: boolean }>`
     height: var(--vv-height, 100dvh);
     z-index: 100;
     padding: 0.8rem 0.8rem calc(0.8rem + env(safe-area-inset-bottom));
-    background: ${(props) => props.theme.pane};
+    background: ${props.theme.pane};
     /* Opaque screen around the composer: Safari shows the page between the
        visual viewport and its keyboard accessory bar */
-    box-shadow: 0 0 0 100vmax ${(props) => props.theme.pane};
+    box-shadow: 0 0 0 100vmax ${props.theme.pane};
     overscroll-behavior: contain;
-  }
+
+    > * {
+      flex-shrink: 0;
+    }
+
+    > :last-child {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+  }`}
 `;
 
 /** Options, name, body and submit framed together as one editor */
@@ -117,11 +107,6 @@ const Editor = styled.div`
 
   &:focus-within {
     border-color: ${(props) => props.theme.accent};
-  }
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    flex: 1;
-    min-height: 0;
   }
 `;
 
@@ -217,8 +202,10 @@ const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
   overflow-y: auto;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    /* Fills the screen-wide composer and scrolls inside instead of growing */
-    flex: 1;
+    /* Fixed height that scrolls inside instead of growing; fills the
+       composer when it is full screen */
+    flex: 1 1 auto;
+    height: 12rem;
     min-height: 0;
     max-height: none;
 
@@ -319,12 +306,7 @@ const EndedNotice = styled.div`
   justify-content: center;
   gap: 1.2rem;
   font-size: 1.4rem;
-  color: ${(props) => props.theme.textSecondary};
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 1.2rem 0.8rem;
-    border-top: 1px solid ${(props) => props.theme.line};
-  }
-`;
+  color: ${(props) => props.theme.textSecondary};`;
 
 interface FormLabels {
   usernamePlaceholder: string;
@@ -391,9 +373,12 @@ export function ResponseFormSection({
   const [content, setContent] = useState("");
   const [attachmentFile, setAttachmentFile] = useState<File | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  // Folded when the thread opens; stays open until folded again
+  // Desktop: folded when the thread opens; stays open until folded again
   const [expanded, setExpanded] = useState(false);
+  // Mobile: the composer over the whole screen, until closed or posted
+  const [fullscreen, setFullscreen] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
   const innerRef = useRef<HTMLDivElement>(null);
   const theme = useTheme();
 
@@ -414,10 +399,37 @@ export function ResponseFormSection({
     setExpanded(false);
   };
 
-  // The screen-wide mobile composer follows the visual viewport (it shrinks
+  const openFullscreen = () => {
+    flushSync(() => setFullscreen(true));
+    textareaRef.current?.focus();
+  };
+
+  const closeFullscreen = () => {
+    textareaRef.current?.blur();
+    setFullscreen(false);
+  };
+
+  // When the on-screen keyboard opens, iOS scrolls only far enough to show the
+  // caret, leaving the rest of the inline form (and the post button) under the
+  // keyboard. Scroll the whole form into the visible area instead
+  useEffect(() => {
+    if (fullscreen) return;
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      const form = formRef.current;
+      if (!form || !form.contains(document.activeElement)) return;
+      const overlap = form.getBoundingClientRect().bottom - (vv.offsetTop + vv.height);
+      if (overlap > 0) window.scrollBy({ top: overlap, behavior: "instant" });
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, [fullscreen]);
+
+  // The full-screen mobile composer follows the visual viewport (it shrinks
   // and shifts when the keyboard opens) and keeps the page behind it still
   useEffect(() => {
-    if (!expanded || !isMobile()) return;
+    if (!fullscreen || !isMobile()) return;
     const inner = innerRef.current;
     const vv = window.visualViewport;
     const update = () => {
@@ -436,12 +448,12 @@ export function ResponseFormSection({
       vv?.removeEventListener("scroll", update);
       root.style.overflow = prevOverflow;
     };
-  }, [expanded, isMobile]);
+  }, [fullscreen, isMobile]);
 
   const tThread = useTranslations("threadDetail");
   const maxSizeLabel = tThread("maxSize", { size: formatBytes(uploadMaxSize) });
 
-  // Desktop only: on mobile the textarea fills the composer and scrolls inside
+  // Desktop only: on mobile the textarea keeps its height and scrolls inside
   const autoResize = useCallback(() => {
     const textarea = textareaRef.current;
     if (!textarea || textarea.offsetParent === null) return;
@@ -523,8 +535,8 @@ export function ResponseFormSection({
         }
         setContent("");
         setAttachmentFile(null);
-        // Back to the responses to see the new one; desktop stays open
-        if (isMobile()) collapse();
+        // Back to the responses to see the new one; the inline form stays
+        if (fullscreen) closeFullscreen();
         if (!responseOptions.chatMode) {
           onSubmitSuccess();
         }
@@ -623,9 +635,9 @@ export function ResponseFormSection({
         : null;
 
   return (
-    <ResponseForm onSubmit={handleSubmit}>
+    <ResponseForm ref={formRef} onSubmit={handleSubmit}>
       <ComposeBar $hidden={expanded}>
-        <BarOptions>{optionButtons}</BarOptions>
+        {optionButtons}
         <BarActions>
           {refreshIconButton}
           <SubmitButton type="button" onClick={expand}>
@@ -633,8 +645,7 @@ export function ResponseFormSection({
           </SubmitButton>
         </BarActions>
       </ComposeBar>
-      <BarSpacer $hidden={expanded} />
-      <Inner ref={innerRef} $hidden={!expanded}>
+      <Inner ref={innerRef} $hidden={!expanded} $fullscreen={fullscreen}>
       {responseOptions.previewMode && (
         <PreviewArea>
           <ResponsePreview
@@ -667,11 +678,21 @@ export function ResponseFormSection({
             {refreshIconButton}
             <IconButton
               type="button"
+              $only="desktop"
               onClick={collapse}
               title={tThread("collapseComposer")}
               aria-label={tThread("collapseComposer")}
             >
               <FontAwesomeIcon icon={faChevronDown} />
+            </IconButton>
+            <IconButton
+              type="button"
+              $only="mobile"
+              onClick={fullscreen ? closeFullscreen : openFullscreen}
+              title={tThread(fullscreen ? "exitFullscreen" : "fullscreen")}
+              aria-label={tThread(fullscreen ? "exitFullscreen" : "fullscreen")}
+            >
+              <FontAwesomeIcon icon={fullscreen ? faCompress : faExpand} />
             </IconButton>
           </NameRow>
         </EditorHead>
