@@ -260,13 +260,11 @@ export function ArchiveBoardContent({ boardId, baseUrl }: ArchiveBoardContentPro
     return () => clearTimeout(timer);
   }, [search, currentPage, updateUrl, loading]);
 
-  // Reset to page 1 when search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search]);
-
+  // Reset to page 1 when the user edits the search (not on mount, which
+  // would drop ?page= from a direct link)
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
+    setCurrentPage(1);
   };
 
   const handlePageChange = (page: number) => {
