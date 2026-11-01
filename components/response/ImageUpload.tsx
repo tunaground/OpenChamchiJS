@@ -17,7 +17,7 @@ const HiddenInput = styled.input`
 const UploadButton = styled.button`
   display: inline-flex;
   align-items: center;
-  height: 3rem;
+  height: 3.6rem;
   padding: 0 1rem;
   background: transparent;
   border: 1px solid ${(props) => props.theme.lineStrong};
@@ -42,7 +42,7 @@ const Preview = styled.img`
 `;
 
 const RemoveButton = styled.button`
-  height: 3rem;
+  height: 3.6rem;
   padding: 0 1rem;
   background: transparent;
   border: 1px solid ${(props) => props.theme.error || "#dc2626"};

@@ -25,6 +25,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The sidebar toggle sits on the same spot whether the sidebar is open (at the start of the sidebar head, replacing the site mark) or closed (at the start of the toolbar), so clicking the same place opens and closes it
 - The sidebar lists the threads you get alerts for (logged-in users)
 - Thread pages have two refresh buttons: the one right of the name field in the reply form loads new responses in place, and the one at the top right reloads the whole page (asking first if the reply form has unsent text)
+- The image select and remove buttons match the post button's height
 - Manual covers web push notifications (shown only when the feature is enabled), the refresh and reload buttons and the thread sidebar alert toggle
 - Docker images build arm64 on a native GitHub arm64 runner instead of QEMU emulation, reuse a per-arch layer cache, and every build job times out after 20 minutes (arm64 `npm ci` under emulation sometimes crashed and hung a build for up to 6 hours)
 
