@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Themes are light, grey and dark; grey is redone as a softer middle (no white or black) for readers who find light too bright and dark too dark. The theme button steps light → grey → dark, Settings adds a theme choice that can also follow the system (light/dark), and the saved mode applies before the page draws
 - Light mode is tinted blue instead of near-white (background, panes, lines and text), and its sidebar is deep sea blue with light text
 - Toasts appear at the top of the window
+- The page title in the toolbar is in the accent color, and the toolbar ends with an accent line
 - Each response starts with a tinted header band (name, ID, time; the first post's band uses the accent tint) with a line along its bottom edge that runs on under the response number, instead of a dividing line between responses, with more space between responses, in live and archive threads, and the load-more row under the first response is a row of solid buttons sharing the width evenly
 - The sidebar toggle sits on the same spot whether the sidebar is open (at the start of the sidebar head, replacing the site mark) or closed (at the start of the toolbar), so clicking the same place opens and closes it
 - The sidebar lists the threads you get alerts for (logged-in users)

@@ -14,14 +14,15 @@ const Bar = styled.header`
   align-items: center;
   gap: 0.8rem;
   min-height: ${(props) => props.theme.toolbarHeight};
-  padding: 0.8rem 1rem 0.8rem 0.6rem;
+  padding: 0.8rem 1.6rem 0.8rem 1.2rem;
   flex-shrink: 0;
   background: ${(props) => props.theme.pane};
-  border-bottom: 1px solid ${(props) => props.theme.line};
+  /* Accent rule (with the accent title) marks where you are and where the bar ends */
+  border-bottom: 2px solid ${(props) => props.theme.accent};
 
   /* Mobile scrolls the window, so the bar sticks over the content */
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    padding: 0.6rem 0.8rem 0.6rem 0.4rem;
+    padding: 0.6rem 1.2rem 0.6rem 0.8rem;
     backdrop-filter: saturate(160%) blur(24px);
     -webkit-backdrop-filter: saturate(160%) blur(24px);
   }
@@ -112,7 +113,7 @@ const TitleText = styled.div<{ $animate: boolean }>`
   font-size: 1.7rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  color: ${(props) => props.theme.textPrimary};
+  color: ${(props) => props.theme.accent};
   white-space: nowrap;
   will-change: transform;
 

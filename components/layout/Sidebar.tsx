@@ -54,12 +54,12 @@ const Head = styled.div`
   align-items: center;
   gap: 0.6rem;
   min-height: ${(props) => props.theme.toolbarHeight};
-  padding: 0.8rem 1rem 0.8rem 0.6rem;
+  padding: 0.8rem 1rem 0.8rem 1.2rem;
 
   /* The drawer starts a gap in from the screen's corner, the toolbar right at it */
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     min-height: 3.6rem;
-    padding: 0.2rem 1rem 0.2rem 0;
+    padding: 0.2rem 1rem 0.2rem 0.4rem;
   }
 `;
 
