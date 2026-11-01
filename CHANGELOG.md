@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Manual covers web push notifications (shown only when the feature is enabled), the refresh button and the thread sidebar alert toggle
+- Docker images build arm64 on a native GitHub arm64 runner instead of QEMU emulation, reuse a per-arch layer cache, and every build job times out after 20 minutes (arm64 `npm ci` under emulation sometimes crashed and hung a build for up to 6 hours)
 
 ### Fixed
 
