@@ -11,6 +11,8 @@ interface ResponsePreviewProps {
   username?: string;
   defaultUsername?: string;
   tripcodeSalt?: string;
+  attachment?: string | null;
+  attachmentRenderer?: (attachment: string) => React.ReactNode;
 }
 
 export function ResponsePreview({
@@ -22,6 +24,8 @@ export function ResponsePreview({
   username,
   defaultUsername,
   tripcodeSalt,
+  attachment,
+  attachmentRenderer,
 }: ResponsePreviewProps) {
   return (
     <TomPreview
@@ -35,6 +39,8 @@ export function ResponsePreview({
       defaultUsername={defaultUsername}
       tripcodeSalt={tripcodeSalt}
       emptyLabel="미리보기"
+      attachment={attachment}
+      attachmentRenderer={attachmentRenderer}
     />
   );
 }

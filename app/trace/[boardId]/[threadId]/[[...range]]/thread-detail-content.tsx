@@ -453,6 +453,7 @@ export function ThreadDetailContent({
   );
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const pageEndRef = useRef<HTMLDivElement>(null);
+  const [previewSlot, setPreviewSlot] = useState<HTMLDivElement | null>(null);
   const isAtBottomRef = useRef(true);
   const wasAtBottomRef = useRef(false);
   const initialScrollDone = useRef(false);
@@ -1225,6 +1226,7 @@ export function ThreadDetailContent({
             onSubmitSuccess={fetchNewResponses}
             onRefresh={handleRefresh}
             refreshing={isRefreshing}
+            previewSlot={previewSlot}
           />
         </ComposerDock>
       }
@@ -1338,6 +1340,9 @@ export function ThreadDetailContent({
           })
         )}
       </ResponsesSection>
+
+      {/* The composer's live preview, as the response it will become */}
+      <div ref={setPreviewSlot} />
 
       </Container>
 

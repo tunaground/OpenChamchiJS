@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { signOutWithPush } from "@/lib/push/client";
 import styled, { useTheme } from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,9 +9,11 @@ import { faArrowsRotate, faCompress, faExpand } from "@fortawesome/free-solid-sv
 import { iconButtonCss } from "@/components/layout/iconButton";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
 import { ImageUpload } from "@/components/response/ImageUpload";
+import { ImageAttachment } from "@/components/response/ImageAttachment";
 import { useTranslations } from "next-intl";
 import { formatBytes } from "@/lib/utils/format-bytes";
 import { applyShortcuts } from "@/lib/utils/shortcuts";
+import { getPageScroller, onPageScroll } from "@/lib/utils/page-scroll";
 import type { ResponseOptions } from "@/lib/store/responseOptions";
 
 const ResponseForm = styled.form``;
@@ -235,6 +237,7 @@ const SubmitButton = styled.button`
   }
 `;
 
+/* Only in the full-screen mobile composer, where the responses are covered */
 const PreviewArea = styled.div`
   flex-shrink: 0;
   max-height: 30vh;
@@ -315,6 +318,8 @@ interface ResponseFormSectionProps {
   onSubmitSuccess: () => void;
   onRefresh: () => void;
   refreshing: boolean;
+  /** Where the next response will appear: the live preview renders there as that response */
+  previewSlot?: HTMLElement | null;
 }
 
 export function ResponseFormSection({
@@ -338,6 +343,7 @@ export function ResponseFormSection({
   onSubmitSuccess,
   onRefresh,
   refreshing,
+  previewSlot,
 }: ResponseFormSectionProps) {
   const [username, setUsername] = useState("");
   const [content, setContent] = useState("");
@@ -407,6 +413,42 @@ export function ResponseFormSection({
       root.style.overflow = prevOverflow;
     };
   }, [fullscreen, isMobile]);
+
+  // The chosen image, shown in the preview as it will be once posted
+  const [attachmentUrl, setAttachmentUrl] = useState<string | null>(null);
+  useEffect(() => {
+    if (!attachmentFile) {
+      setAttachmentUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(attachmentFile);
+    setAttachmentUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [attachmentFile]);
+
+  // The preview sits above the form, so as it grows while typing it would push
+  // the form (and the caret) down. Keep the form where it was on screen
+  useEffect(() => {
+    const form = formRef.current;
+    if (!previewSlot || !form) return;
+    let lastTop = form.getBoundingClientRect().top;
+    const remember = () => {
+      lastTop = form.getBoundingClientRect().top;
+    };
+    const stopScroll = onPageScroll(remember);
+    const observer = new ResizeObserver(() => {
+      const shift = form.getBoundingClientRect().top - lastTop;
+      if (shift !== 0 && form.contains(document.activeElement)) {
+        (getPageScroller() ?? window).scrollBy({ top: shift, behavior: "instant" });
+      }
+      remember();
+    });
+    observer.observe(previewSlot);
+    return () => {
+      stopScroll();
+      observer.disconnect();
+    };
+  }, [previewSlot]);
 
   const tThread = useTranslations("threadDetail");
   const maxSizeLabel = tThread("maxSize", { size: formatBytes(uploadMaxSize) });
@@ -592,23 +634,26 @@ export function ResponseFormSection({
         ? "Shift+Enter"
         : null;
 
+  const preview = responseOptions.previewMode ? (
+    <ResponsePreview
+      content={content}
+      boardId={thread.boardId}
+      threadId={thread.id}
+      lastSeq={currentLastSeq}
+      aaMode={responseOptions.aaMode}
+      username={username}
+      defaultUsername={defaultUsername}
+      tripcodeSalt={tripcodeSalt}
+      attachment={attachmentUrl}
+      attachmentRenderer={(src) => <ImageAttachment src={src} />}
+    />
+  ) : null;
+
   return (
     <ResponseForm ref={formRef} onSubmit={handleSubmit}>
+      {preview && previewSlot && !fullscreen && createPortal(preview, previewSlot)}
       <Inner ref={innerRef} $fullscreen={fullscreen}>
-      {responseOptions.previewMode && (
-        <PreviewArea>
-          <ResponsePreview
-            content={content}
-            boardId={thread.boardId}
-            threadId={thread.id}
-            lastSeq={currentLastSeq}
-            aaMode={responseOptions.aaMode}
-            username={username}
-            defaultUsername={defaultUsername}
-            tripcodeSalt={tripcodeSalt}
-          />
-        </PreviewArea>
-      )}
+      {preview && (!previewSlot || fullscreen) && <PreviewArea>{preview}</PreviewArea>}
       <Editor>
         <EditorHead>
           {optionButtons}

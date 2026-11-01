@@ -9,8 +9,8 @@ import { DEFAULT_TRIPCODE_SALT } from "@/lib/utils/tripcode";
 import { AnchorPreview, useAnchorStack } from "./AnchorPreview";
 import { ResponseCard } from "./ResponseCard";
 
-const PreviewWrapper = styled.div`
-  margin-top: 1.6rem;
+const PreviewWrapper = styled.div<{ $spaced: boolean }>`
+  margin-top: ${(props) => (props.$spaced ? "1.6rem" : "0")};
 `;
 
 const EmptyPreview = styled.div`
@@ -39,6 +39,9 @@ export interface TomPreviewProps {
   tripcodeSalt?: string;
   /** Label to show when content is empty */
   emptyLabel?: string;
+  /** Attachment URL shown like a posted response's (e.g. an object URL of the chosen file) */
+  attachment?: string | null;
+  attachmentRenderer?: (attachment: string) => React.ReactNode;
 }
 
 export function TomPreview({
@@ -52,6 +55,8 @@ export function TomPreview({
   defaultUsername,
   tripcodeSalt,
   emptyLabel = "미리보기",
+  attachment,
+  attachmentRenderer,
 }: TomPreviewProps) {
   const t = useTranslations();
   const [displayUsername, setDisplayUsername] = useState("");
@@ -70,7 +75,7 @@ export function TomPreview({
   useEffect(() => {
     async function calculateTripcode() {
       // Replace ◆ with <> to prevent spoofing (same as server)
-      let name = rawUsername.replace(/◆/g, "<>");
+      const name = rawUsername.replace(/◆/g, "<>");
 
       const parts = name.split("#");
       if (parts.length >= 2) {
@@ -132,13 +137,14 @@ export function TomPreview({
       username: displayUsername || defaultUsername || "Anonymous",
       authorId: "PREVIEW",
       content: content,
+      attachment,
       createdAt: now,
     }),
-    [lastSeq, displayUsername, defaultUsername, content, now]
+    [lastSeq, displayUsername, defaultUsername, content, attachment, now]
   );
 
   return (
-    <PreviewWrapper>
+    <PreviewWrapper $spaced={variant === "content"}>
       {/* AnchorPreview above the card, same as regular responses */}
       <AnchorPreview
         anchorStack={anchorStack}
@@ -152,6 +158,7 @@ export function TomPreview({
         boardId={boardId}
         threadId={threadId}
         prerenderedContent={rendered || <EmptyPreview>{emptyLabel}</EmptyPreview>}
+        attachmentRenderer={attachmentRenderer}
         variant="main"
       />
     </PreviewWrapper>
