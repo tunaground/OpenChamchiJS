@@ -8,13 +8,7 @@ import {
   PUSH_PENDING_CLEAR,
   PUSH_PENDING_REQUEST,
 } from "@/lib/push/navigation";
-
-// Reply and new-thread textareas carry data-draft
-function hasDraft(): boolean {
-  return Array.from(document.querySelectorAll<HTMLTextAreaElement>("textarea[data-draft]")).some(
-    (textarea) => textarea.value.trim() !== ""
-  );
-}
+import { hasDraft } from "@/lib/utils/draft";
 
 /**
  * Follows notification clicks the service worker could not open itself

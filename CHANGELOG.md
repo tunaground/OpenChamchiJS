@@ -10,11 +10,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - New look across the site: the sidebar and the content area float as panes on a quiet background, with IBM Plex Sans KR type and squarer corners
-- The top bar is gone: theme, settings, alerts, admin and login sit at the bottom of the sidebar, and each page has its own toolbar (thread pages: refresh, alerts, response management)
+- The top bar is gone: theme, settings, alerts, admin and login sit at the bottom of the sidebar, and each page has its own toolbar (thread pages: reload, alerts, response management)
 - Thread pages read as one continuous list with the response number in the left margin (click to copy the anchor, as before), using the full width with minimal side margins so AA and other wide posts have room (archive threads too)
 - The reply form is one always-open editor box after the last response: options and name on top, the body, and image, shortcut hint and the post button below. The live preview shows at the end of the responses as the response it will become (next number, name with tripcode, time, attached image); in the full-screen mobile form it sits above the editor. On desktop the body grows with what you type, up to nearly the full pane, so long AA stays visible while you write; if you are at the bottom, the page follows it. On mobile the body has a fixed height and scrolls inside; a full-screen button next to the name opens the form over the whole screen (sized to the space above the keyboard, with the page hidden behind it), and closing it or posting returns to the inline form. Opening the keyboard on the inline form scrolls the whole form (post button included) into view
 - Recent/all and previous/next sit above the responses as well as in the sidebar; scroll to top/bottom sit in the thread sidebar (and in the toolbar on mobile); active name/ID filters show above the responses on every screen size
 - On mobile the thread sidebar no longer stays pinned as an icon strip; it opens as a drawer like on other pages, and the content uses the full width
+- On mobile the thread search on board lists sits right above the thread list, below the notices and the custom HTML slot
 - Board lists show threads as a table with the reply count and how long ago the last reply came; notices and settings use the same row style
 - Every page except thread views shares one centered content width (board list, new thread, settings, notices, manual, archive, admin)
 - Themes are light, grey and dark; grey is redone as a softer middle (no white or black) for readers who find light too bright and dark too dark. The theme button steps light → grey → dark, Settings adds a theme choice that can also follow the system (light/dark), and the saved mode applies before the page draws
@@ -22,7 +23,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Each response starts with a tinted header band (name, ID, time; the first post's band uses the accent tint) instead of a dividing line, with more space between responses, in live and archive threads, and the load-more row under the first response is a row of solid buttons sharing the width evenly
 - The sidebar toggle sits on the same spot whether the sidebar is open (at the start of the sidebar head, replacing the site mark) or closed (at the start of the toolbar), so clicking the same place opens and closes it
 - The sidebar lists the threads you get alerts for (logged-in users)
-- Manual covers web push notifications (shown only when the feature is enabled), the refresh button and the thread sidebar alert toggle
+- Thread pages have two refresh buttons: the one right of the name field in the reply form loads new responses in place, and the one at the top right reloads the whole page (asking first if the reply form has unsent text)
+- Manual covers web push notifications (shown only when the feature is enabled), the refresh and reload buttons and the thread sidebar alert toggle
 - Docker images build arm64 on a native GitHub arm64 runner instead of QEMU emulation, reuse a per-arch layer cache, and every build job times out after 20 minutes (arm64 `npm ci` under emulation sometimes crashed and hung a build for up to 6 hours)
 
 ### Security
@@ -34,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Service unit tests used outdated board/thread fixtures and repository mocks, which Next.js 16.4's build type check rejects
 - On mobile, opening the reply form (or writing a longer reply) at the bottom of a thread covered the last response; the page now moves up with the form when you're at the bottom, and stays put when you're in the middle
 - In iOS Safari the reply form could sit partly under the keyboard; it now stays right above the keyboard and never grows taller than the visible area
+- On phones, scrolling up while the reply form had focus kept pulling the page back down to the form; the form is now lined up only when the keyboard opens
 - Closing an anchor preview (or clicking its anchor again) closed every preview opened after it, even ones from other responses; now only that preview and the ones opened inside it close
 - Thread pages no longer crash when the site is opened over plain HTTP on a local address (e.g. a phone on http://192.168.x.x): the anonymous ID and copy-to-clipboard fall back to methods that work outside HTTPS
 - The home page no longer logs a hydration warning when its admin HTML contains ad scripts (e.g. AdSense)

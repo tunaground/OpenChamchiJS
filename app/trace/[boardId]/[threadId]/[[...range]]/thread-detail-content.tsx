@@ -30,6 +30,7 @@ import { useThreadViewingHeartbeat } from "@/lib/hooks/useThreadViewingHeartbeat
 import { usePushWatchStore } from "@/lib/store/pushWatch";
 import { getAnonId } from "@/lib/utils/anon-id";
 import { isPageNearBottom, onPageScroll } from "@/lib/utils/page-scroll";
+import { hasDraft } from "@/lib/utils/draft";
 import CustomHtml from "@/components/CustomHtml";
 import { iconButtonCss } from "@/components/layout/iconButton";
 import { useThreadWatchToggle } from "@/components/sidebar/ThreadWatchButton";
@@ -361,6 +362,8 @@ interface Labels {
   loadingMore: string;
   refresh: string;
   refreshing: string;
+  reload: string;
+  reloadConfirm: string;
   noNewResponses: string;
   ban: string;
   unban: string;
@@ -579,6 +582,12 @@ export function ThreadDetailContent({
       setIsRefreshing(false);
     }
   }, [isRefreshing, fetchNewResponses, showToast, labels.noNewResponses]);
+
+  // Reload the whole page (the toolbar button); unsent reply text would be lost, so ask first
+  const handleReload = useCallback(() => {
+    if (hasDraft() && !window.confirm(labels.reloadConfirm)) return;
+    window.location.reload();
+  }, [labels.reloadConfirm]);
 
   // Suppress web push for this thread while it is on screen
   const isWatched = usePushWatchStore((state) =>
@@ -1186,12 +1195,11 @@ export function ThreadDetailContent({
       subtitle={lastSeq}
       toolbarActions={
         <ThreadToolbarActions
-          onRefresh={handleRefresh}
-          refreshing={isRefreshing}
+          onReload={handleReload}
           watch={watchToggle}
           onManage={openManageModal}
           labels={{
-            refresh: labels.refresh,
+            reload: labels.reload,
             manage: sidebarLabels.manageThread,
             scrollUp: sidebarLabels.scrollUp,
             scrollDown: sidebarLabels.scrollDown,

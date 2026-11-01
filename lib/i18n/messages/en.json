@@ -241,6 +241,8 @@
     "loadingMore": "Loading...",
     "refresh": "Refresh",
     "refreshing": "Refreshing...",
+    "reload": "Reload",
+    "reloadConfirm": "Your unsent text will be lost. Reload anyway?",
     "noNewResponses": "No new replies.",
     "ban": "Ban",
     "unban": "Unban",
@@ -517,7 +519,7 @@
       "alwaysBottomTitle": "Stay at Bottom",
       "alwaysBottomDescription": "Always scroll to the bottom of the page. Useful for real-time chat. (Global/Per-thread setting)",
       "refreshTitle": "Refresh",
-      "refreshDescription": "The refresh icon next to the thread title (on ended threads, also next to the notice). Loads new replies after the last one on screen, skipping hidden or deleted ones. Handy in the home screen app, which has no reload button."
+      "refreshDescription": "The refresh icon to the right of the name field in the reply form (on ended threads, next to the notice). Loads new replies after the last one on screen, skipping hidden or deleted ones. The reload icon at the top right reloads the whole page, and asks first if you have unsent text."
     },
     "push": {
       "title": "Notifications",

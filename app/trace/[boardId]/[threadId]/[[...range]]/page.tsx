@@ -201,6 +201,8 @@ export default async function ThreadDetailPage({ params, searchParams }: Props) 
           loadingMore: t("loadingMore"),
           refresh: t("refresh"),
           refreshing: t("refreshing"),
+          reload: t("reload"),
+          reloadConfirm: t("reloadConfirm"),
           noNewResponses: t("noNewResponses"),
           ban: t("ban"),
           unban: t("unban"),

@@ -276,9 +276,14 @@ const DesktopOnly = styled.div`
   }
 `;
 
-const MobileOnly = styled.div`
+/* Mobile: the search sits right above the thread list (after notices and the custom HTML slot) */
+const MobileSearch = styled.div`
   display: none;
   margin-bottom: 1.2rem;
+
+  &:not(:first-child) {
+    margin-top: 1.2rem;
+  }
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     display: block;
@@ -478,8 +483,6 @@ export function BoardIndexContent({
       userCount={realtimeEnabled ? boardMemberCount : undefined}
     >
       <Container>
-        <MobileOnly>{searchForm}</MobileOnly>
-
         {notices.length > 0 && (
           <section aria-label={labels.notices}>
             <Notices>
@@ -507,6 +510,8 @@ export function BoardIndexContent({
             <CustomHtml html={indexCustomHtml} />
           </CustomHtmlSlot>
         )}
+
+        <MobileSearch>{searchForm}</MobileSearch>
 
         {threads.length === 0 ? (
           <EmptyState>{initialSearch ? labels.noResults : labels.noThreads}</EmptyState>

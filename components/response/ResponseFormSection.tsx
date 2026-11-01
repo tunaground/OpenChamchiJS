@@ -104,7 +104,7 @@ const HeadDivider = styled.span`
   }
 `;
 
-/* Name, with the full-screen button at its right on mobile; its own line on mobile */
+/* Name, with (on mobile) the full-screen button and then update at its right; its own line on mobile */
 const NameRow = styled.div`
   flex: 1;
   display: flex;
@@ -375,19 +375,37 @@ export function ResponseFormSection({
 
   // When the on-screen keyboard opens, iOS scrolls only far enough to show the
   // caret, leaving the rest of the inline form (and the post button) under the
-  // keyboard. Scroll the whole form into the visible area instead
+  // keyboard. Scroll the whole form into the visible area instead.
+  // Only for the keyboard opening after a focus: the visual viewport also resizes
+  // while the reader drags the page (browser bars), and pulling the form back
+  // then fights their finger. A touch hands control back to them
   useEffect(() => {
     if (fullscreen) return;
     const vv = window.visualViewport;
-    if (!vv) return;
+    const form = formRef.current;
+    if (!vv || !form) return;
+    let pending = false;
+    const onFocusIn = () => {
+      pending = true;
+    };
+    const onRelease = () => {
+      pending = false;
+    };
     const onResize = () => {
-      const form = formRef.current;
-      if (!form || !form.contains(document.activeElement)) return;
+      if (!pending || !form.contains(document.activeElement)) return;
       const overlap = form.getBoundingClientRect().bottom - (vv.offsetTop + vv.height);
       if (overlap > 0) window.scrollBy({ top: overlap, behavior: "instant" });
     };
+    form.addEventListener("focusin", onFocusIn);
+    form.addEventListener("focusout", onRelease);
+    window.addEventListener("touchstart", onRelease, { passive: true });
     vv.addEventListener("resize", onResize);
-    return () => vv.removeEventListener("resize", onResize);
+    return () => {
+      form.removeEventListener("focusin", onFocusIn);
+      form.removeEventListener("focusout", onRelease);
+      window.removeEventListener("touchstart", onRelease);
+      vv.removeEventListener("resize", onResize);
+    };
   }, [fullscreen]);
 
   // The full-screen mobile composer follows the visual viewport (it shrinks
@@ -665,6 +683,15 @@ export function ResponseFormSection({
               aria-label={tThread(fullscreen ? "exitFullscreen" : "fullscreen")}
             >
               <FontAwesomeIcon icon={fullscreen ? faCompress : faExpand} />
+            </IconButton>
+            <IconButton
+              type="button"
+              onClick={onRefresh}
+              disabled={refreshing}
+              title={labels.refresh}
+              aria-label={labels.refresh}
+            >
+              <FontAwesomeIcon icon={faArrowsRotate} spin={refreshing} />
             </IconButton>
           </NameRow>
         </EditorHead>

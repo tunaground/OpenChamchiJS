@@ -252,7 +252,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - Sidebar pane: site name (links home) / page sidebar content / watched threads (logged in) / footer with ThemeToggleButton, SettingsButton, PushBellButton, AdminButton, AuthButton
 - Admin pages: `AdminSidebar` or `AdminBoardSidebar`
 - Index pages: `BoardListSidebar` (exports `BoardsNav`, `CustomLinksNav`)
-- Thread pages: `TraceSidebar` (recent/all, prev/next via `lib/utils/trace-range.ts`, scroll top/bottom; on mobile scroll top/bottom are also in the toolbar); the thread toolbar holds refresh, alert toggle and response management; filters show above the responses
+- Thread pages: `TraceSidebar` (recent/all, prev/next via `lib/utils/trace-range.ts`, scroll top/bottom; on mobile scroll top/bottom are also in the toolbar); the thread toolbar holds reload (whole page, confirms when the reply has unsent text), alert toggle and response management; the update button (new responses in place) sits right of the composer's name field; filters show above the responses
 - Archive pages use `PageLayout` too (`ArchiveLayout`)
 
 ### Caching

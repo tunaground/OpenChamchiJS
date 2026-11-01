@@ -8,7 +8,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faArrowsRotate,
+  faRotateRight,
   faBell,
   faBellSlash,
   faChevronDown,
@@ -400,14 +400,13 @@ const MobileToolButton = styled(ToolButton)`
 `;
 
 interface ThreadToolbarActionsProps {
-  onRefresh: () => void;
-  refreshing: boolean;
+  onReload: () => void;
   watch: { visible: boolean; watched: boolean; label: string; toggle: () => void };
   onManage: () => void;
-  labels: { refresh: string; manage: string; scrollUp: string; scrollDown: string };
+  labels: { reload: string; manage: string; scrollUp: string; scrollDown: string };
 }
 
-export function ThreadToolbarActions({ onRefresh, refreshing, watch, onManage, labels }: ThreadToolbarActionsProps) {
+export function ThreadToolbarActions({ onReload, watch, onManage, labels }: ThreadToolbarActionsProps) {
   return (
     <>
       <MobileToolButton type="button" onClick={() => scrollPageTo("top")} title={labels.scrollUp} aria-label={labels.scrollUp}>
@@ -416,8 +415,8 @@ export function ThreadToolbarActions({ onRefresh, refreshing, watch, onManage, l
       <MobileToolButton type="button" onClick={() => scrollPageTo("bottom")} title={labels.scrollDown} aria-label={labels.scrollDown}>
         <FontAwesomeIcon icon={faChevronDown} />
       </MobileToolButton>
-      <ToolButton type="button" onClick={onRefresh} disabled={refreshing} title={labels.refresh} aria-label={labels.refresh}>
-        <FontAwesomeIcon icon={faArrowsRotate} spin={refreshing} />
+      <ToolButton type="button" onClick={onReload} title={labels.reload} aria-label={labels.reload}>
+        <FontAwesomeIcon icon={faRotateRight} />
       </ToolButton>
       {watch.visible && (
         <ToolButton type="button" $active={watch.watched} onClick={watch.toggle} title={watch.label} aria-label={watch.label}>
