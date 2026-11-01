@@ -10,14 +10,13 @@ import type { ArchiveResponse } from "../_lib/types";
 
 /*
  * Same ledger look as the live thread (components/response/ResponseCard):
- * the seq number sits large in a left gutter, rows split by hairlines.
+ * the seq number sits large in a left gutter, each response opens with a tinted header band.
  */
 
 const Card = styled.article<{ $highlighted?: boolean }>`
   display: grid;
   grid-template-columns: ${(props) => props.theme.ledgerGutter} minmax(0, 1fr);
-  padding: 1.4rem 0 1.6rem;
-  border-bottom: 1px solid ${(props) => props.theme.line};
+  padding: 1.2rem 0;
   scroll-margin-top: 7rem;
 
   ${(props) =>
@@ -32,8 +31,8 @@ const Card = styled.article<{ $highlighted?: boolean }>`
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     grid-template-columns: minmax(0, 1fr);
-    padding-top: 1.2rem;
-    padding-bottom: 1.2rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
 `;
 
@@ -63,11 +62,14 @@ const Main = styled.div`
   min-width: 0;
 `;
 
-const Header = styled.header`
+const Header = styled.header<{ $op?: boolean }>`
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.2rem 1rem;
+  padding: 0.6rem 1rem;
+  border-radius: ${(props) => props.theme.radiusControl};
+  background: ${(props) => (props.$op ? props.theme.accentSoft : props.theme.hover)};
   font-size: 1.4rem;
 `;
 
@@ -110,6 +112,7 @@ const ResponseDate = styled.span`
 
 const Attachment = styled.div`
   margin-top: 0.8rem;
+  padding: 0 1rem;
 `;
 
 const AttachmentImage = styled.img`
@@ -156,7 +159,8 @@ const YoutubeEmbed = styled.div`
 `;
 
 const Content = styled.div`
-  margin-top: 0.6rem;
+  margin-top: 0.8rem;
+  padding: 0 1rem;
   font-size: 1.5rem;
   line-height: 1.75;
   color: ${(props) => props.theme.textPrimary};
@@ -233,7 +237,7 @@ export const ArchiveResponseCard = forwardRef<HTMLDivElement, ArchiveResponseCar
           {response.sequence}
         </Gutter>
         <Main>
-          <Header>
+          <Header $op={isOp}>
             <ResponseSeq prefetch={false} href={seqHref} $op={isOp}>
               #{response.sequence}
             </ResponseSeq>

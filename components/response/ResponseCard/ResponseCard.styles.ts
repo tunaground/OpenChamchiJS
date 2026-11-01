@@ -15,7 +15,8 @@ export function ledgerGutterStyle(maxSeq: number): CSSProperties {
 
 /*
  * Responses read as one continuous ledger: the seq number sits large in a left
- * gutter and rows are split by hairlines rather than boxed into cards.
+ * gutter and each response starts with a tinted header band (no lines between rows).
+ * The band also carries the inline seq on mobile, where the gutter hides.
  * The "anchor" variant (inside anchor previews) is compact with an inline seq.
  */
 
@@ -37,12 +38,10 @@ export const Card = styled.article<{ $variant?: "main" | "anchor"; $op?: boolean
           }
         `
       : css`
-          padding: 1.8rem 0 2rem;
-          /* The stronger line: the faint one vanishes on low-contrast monitors */
-          border-bottom: 1px solid ${props.theme.lineStrong};
+          padding: 1.2rem 0;
 
           @media (max-width: ${props.theme.breakpoint}) {
-            padding: 1.5rem 0;
+            padding: 1rem 0;
           }
         `}
 
@@ -80,12 +79,20 @@ export const Main = styled.div`
   min-width: 0;
 `;
 
-export const Header = styled.div`
+export const Header = styled.div<{ $variant?: "main" | "anchor"; $op?: boolean }>`
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
   gap: 0.2rem 1rem;
   font-size: 1.4rem;
+
+  ${(props) =>
+    props.$variant !== "anchor" &&
+    css`
+      padding: 0.6rem 1rem;
+      border-radius: ${props.theme.radiusControl};
+      background: ${props.$op ? props.theme.accentSoft : props.theme.hover};
+    `}
 `;
 
 /** Inline seq: always in anchor previews, and on mobile where the gutter hides */
@@ -151,6 +158,11 @@ export const Actions = styled.span`
   display: flex;
   gap: 0.2rem;
   margin-left: auto;
+  /* The icon buttons are taller than the text: centre them and let them overhang the
+     header band instead of growing it, so the text sits in the middle and the band is
+     as tall as in the reply preview (which has no actions) */
+  align-self: center;
+  margin-block: -0.4rem;
   opacity: 0;
   transition: opacity 0.12s;
 
@@ -164,8 +176,14 @@ export const Actions = styled.span`
   }
 `;
 
-export const Content = styled.div`
-  margin-top: 0.6rem;
+/** Body and attachment line up with the text inside the header band */
+const bandInset = css<{ $variant?: "main" | "anchor" }>`
+  padding: 0 ${(props) => (props.$variant === "anchor" ? 0 : "1rem")};
+`;
+
+export const Content = styled.div<{ $variant?: "main" | "anchor" }>`
+  ${bandInset}
+  margin-top: 0.8rem;
   font-size: 1.5rem;
   line-height: 1.75;
   color: ${(props) => props.theme.textPrimary};
@@ -185,6 +203,7 @@ export const RawContentDisplay = styled.span`
   font-size: 1.3rem;
 `;
 
-export const Attachment = styled.div`
+export const Attachment = styled.div<{ $variant?: "main" | "anchor" }>`
+  ${bandInset}
   margin-top: 0.8rem;
 `;

@@ -36,7 +36,7 @@ export const ResponseCard = memo(function ResponseCard({
         </S.Gutter>
       )}
       <S.Main>
-        <S.Header>
+        <S.Header $variant={variant} $op={isOp}>
           <S.Seq
             type="button"
             $inline={variant === "anchor" ? "always" : "mobile"}
@@ -66,10 +66,10 @@ export const ResponseCard = memo(function ResponseCard({
         </S.Header>
 
         {response.attachment && attachmentRenderer && (
-          <S.Attachment>{attachmentRenderer(response.attachment)}</S.Attachment>
+          <S.Attachment $variant={variant}>{attachmentRenderer(response.attachment)}</S.Attachment>
         )}
 
-        <S.Content>
+        <S.Content $variant={variant}>
           {showRawContent && rawContent ? (
             <S.RawContentDisplay>{rawContent}</S.RawContentDisplay>
           ) : (
