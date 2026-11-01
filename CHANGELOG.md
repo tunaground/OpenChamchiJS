@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Every page except thread views shares one centered content width (board list, new thread, settings, notices, manual, archive, admin)
 - Themes are light, grey and dark; grey is redone as a softer middle (no white or black) for readers who find light too bright and dark too dark. The theme button steps light → grey → dark, Settings adds a theme choice that can also follow the system (light/dark), and the saved mode applies before the page draws
 - Toasts appear at the top of the window
+- The sidebar toggle sits on the same spot whether the sidebar is open (at the start of the sidebar head, replacing the site mark) or closed (at the start of the toolbar), so clicking the same place opens and closes it
 - The sidebar lists the threads you get alerts for (logged-in users)
 - Manual covers web push notifications (shown only when the feature is enabled), the refresh button and the thread sidebar alert toggle
 - Docker images build arm64 on a native GitHub arm64 runner instead of QEMU emulation, reuse a per-arch layer cache, and every build job times out after 20 minutes (arm64 `npm ci` under emulation sometimes crashed and hung a build for up to 6 hours)

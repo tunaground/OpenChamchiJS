@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import styled, { css, keyframes } from "styled-components";
 import { UserCounter } from "./UserCounter";
-import { iconButtonCss } from "./iconButton";
+import { SidebarToggleButton } from "./SidebarToggleButton";
 
 const Bar = styled.header`
   position: sticky;
@@ -27,8 +27,11 @@ const Bar = styled.header`
   }
 `;
 
-const MenuButton = styled.button<{ $active?: boolean }>`
-  ${iconButtonCss}
+/* While the desktop sidebar is open its own head holds the toggle, on this spot */
+const MenuButton = styled(SidebarToggleButton)<{ $sidebarOpen: boolean }>`
+  @media (min-width: ${(props) => props.theme.breakpoint}) {
+    display: ${(props) => (props.$sidebarOpen ? "none" : "flex")};
+  }
 `;
 
 const Crumb = styled.div`
@@ -197,6 +200,7 @@ interface ToolbarProps {
   actions?: React.ReactNode;
   onMenuClick: () => void;
   menuLabel?: string;
+  sidebarOpen: boolean;
 }
 
 /** Top of the content pane: sidebar toggle, where you are, and page actions */
@@ -209,15 +213,11 @@ export function Toolbar({
   actions,
   onMenuClick,
   menuLabel = "Toggle menu",
+  sidebarOpen,
 }: ToolbarProps) {
   return (
     <Bar>
-      <MenuButton onClick={onMenuClick} aria-label={menuLabel} title={menuLabel}>
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-          <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
-          <path strokeLinecap="round" d="M9.5 4.5v15" />
-        </svg>
-      </MenuButton>
+      <MenuButton onClick={onMenuClick} label={menuLabel} $sidebarOpen={sidebarOpen} />
       <Crumb>
         {parent && (
           <>

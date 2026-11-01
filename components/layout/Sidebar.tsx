@@ -10,6 +10,7 @@ import { SettingsButton } from "./SettingsButton";
 import { PushBellButton } from "./PushBellButton";
 import { AdminButton } from "./AdminButton";
 import { AuthButton } from "./AuthButton";
+import { SidebarToggleButton } from "./SidebarToggleButton";
 
 const Overlay = styled.div<{ $open: boolean }>`
   position: fixed;
@@ -45,28 +46,30 @@ const Pane = styled.aside<{ $open: boolean }>`
   z-index: 95;
 `;
 
-const Head = styled(Link)`
+/* Sized and padded like the toolbar, so the toggle lands where the toolbar's
+   own toggle sits while the sidebar is closed */
+const Head = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: ${(props) => props.theme.toolbarHeight};
+  padding: 0.8rem 1rem 0.8rem 0.6rem;
+
+  /* The drawer starts a gap in from the screen's corner, the toolbar right at it */
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    min-height: 3.6rem;
+    padding: 0.2rem 1rem 0.2rem 0;
+  }
+`;
+
+const Home = styled(Link)`
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1.4rem 1.4rem 1rem;
+  min-width: 0;
   font-size: 1.6rem;
   font-weight: 600;
   letter-spacing: -0.01em;
-  min-width: 0;
-`;
-
-const Mark = styled.span`
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  width: 2.6rem;
-  height: 2.6rem;
-  border-radius: ${(props) => props.theme.radiusControl};
-  background: ${(props) => props.theme.accent};
-  color: ${(props) => props.theme.buttonPrimaryText};
-  font-size: 1.4rem;
-  font-weight: 700;
 `;
 
 const HeadTitle = styled.span`
@@ -97,6 +100,8 @@ const FootEnd = styled.div`
 interface SidebarProps {
   open: boolean;
   onClose: () => void;
+  onToggle: () => void;
+  toggleLabel: string;
   children: React.ReactNode;
   isLoggedIn: boolean;
   canAccessAdmin: boolean;
@@ -108,6 +113,8 @@ interface SidebarProps {
 export function Sidebar({
   open,
   onClose,
+  onToggle,
+  toggleLabel,
   children,
   isLoggedIn,
   canAccessAdmin,
@@ -116,16 +123,16 @@ export function Sidebar({
   isAdminPage,
 }: SidebarProps) {
   const { siteTitle } = useSite();
-  // The first letter of the site name doubles as its mark
-  const mark = Array.from(siteTitle.trim())[0] ?? "";
 
   return (
     <SidebarContext.Provider value={{ onClose }}>
       <Overlay $open={open} onClick={onClose} />
       <Pane $open={open}>
-        <Head prefetch={false} href="/" onClick={onClose}>
-          <Mark aria-hidden>{mark}</Mark>
-          <HeadTitle>{siteTitle}</HeadTitle>
+        <Head>
+          <SidebarToggleButton onClick={onToggle} label={toggleLabel} />
+          <Home prefetch={false} href="/" onClick={onClose}>
+            <HeadTitle>{siteTitle}</HeadTitle>
+          </Home>
         </Head>
         <Scroll>
           {children}

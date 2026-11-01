@@ -224,6 +224,8 @@ export function PageLayout({
         <Sidebar
           open={sidebarOpen}
           onClose={() => setMobileOpen(false)}
+          onToggle={handleMenuClick}
+          toggleLabel={tCommon("toggleSidebar")}
           isLoggedIn={isLoggedIn}
           canAccessAdmin={canAccessAdmin}
           authLabels={authLabels}
@@ -244,6 +246,7 @@ export function PageLayout({
             actions={toolbarActions}
             onMenuClick={handleMenuClick}
             menuLabel={tCommon("toggleSidebar")}
+            sidebarOpen={effectiveDesktopOpen}
           />
           <Scroll id={PAGE_SCROLL_ID}>
             {children}
