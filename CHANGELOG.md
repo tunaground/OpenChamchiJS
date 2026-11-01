@@ -12,8 +12,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Manual covers web push notifications (shown only when the feature is enabled), the refresh button and the thread sidebar alert toggle
 - Docker images build arm64 on a native GitHub arm64 runner instead of QEMU emulation, reuse a per-arch layer cache, and every build job times out after 20 minutes (arm64 `npm ci` under emulation sometimes crashed and hung a build for up to 6 hours)
 
+### Security
+
+- Update dependencies to fix Dependabot alerts: Next.js 16.4.3 (image optimization RCE, middleware/proxy bypass, SSRF, cache poisoning, DoS), next-auth 4.24.15 and `@auth/core` 0.41.3 (pinned through `overrides`), zod 4.6.7, next-intl 4.14.9, mathjs 15.2.0, uuid 13.0.2, ws 8.21.0 in the WebSocket server, and transitive packages (sharp, hono, handlebars, js-yaml, postcss, lodash, brace-expansion and others). Production dependencies now report 0 vulnerabilities in `npm audit`
+
 ### Fixed
 
+- Service unit tests used outdated board/thread fixtures and repository mocks, which Next.js 16.4's build type check rejects
 - Japanese manual was missing the "Response Interaction" section texts
 
 ## [0.4.0] - 2026-10-25

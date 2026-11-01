@@ -20,10 +20,11 @@ function createMockNoticeRepo(): jest.Mocked<NoticeRepository> {
 function createMockBoardRepo(): jest.Mocked<BoardRepository> {
   return {
     findAll: jest.fn(),
+    findAllWithThreadCount: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
-    delete: jest.fn(),
+    updateConfig: jest.fn(),
   };
 }
 
@@ -60,9 +61,13 @@ function createMockBoard(overrides?: Partial<BoardData>): BoardData {
     deleted: false,
     maxResponsesPerThread: 1000,
     blockForeignIp: false,
+    writeLocked: false,
     responsesPerPage: 50,
     showUserCount: false,
     threadsPerPage: 20,
+    uploadMaxSize: 5242880,
+    uploadMimeTypes: "image/png,image/jpeg,image/gif,image/webp",
+    threadCount: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
     ...overrides,

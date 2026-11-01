@@ -19,12 +19,16 @@ describe("ThreadService", () => {
   const mockBoard: BoardData = {
     id: "test-board",
     name: "Test Board",
+    defaultUsername: "noname",
     deleted: false,
     maxResponsesPerThread: 1000,
     blockForeignIp: false,
+    writeLocked: false,
     responsesPerPage: 50,
     showUserCount: false,
     threadsPerPage: 20,
+    uploadMaxSize: 5242880,
+    uploadMimeTypes: "image/png,image/jpeg,image/gif,image/webp",
     threadCount: 10,
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -36,11 +40,14 @@ describe("ThreadService", () => {
     title: "Test Thread",
     password: "hashed_test-password",
     username: "testuser",
+    userId: null,
     ended: false,
     deleted: false,
+    published: true,
     createdAt: new Date(),
     updatedAt: new Date(),
     top: false,
+    responseCount: 1,
   };
 
   const createMockThreadRepo = (): jest.Mocked<ThreadRepository> => ({
@@ -57,6 +64,7 @@ describe("ThreadService", () => {
 
   const createMockBoardRepo = (): jest.Mocked<BoardRepository> => ({
     findAll: jest.fn(),
+    findAllWithThreadCount: jest.fn(),
     findById: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),

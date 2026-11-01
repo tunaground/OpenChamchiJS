@@ -6,12 +6,17 @@ describe("BoardService", () => {
   const mockBoard: BoardData = {
     id: "test-board",
     name: "Test Board",
+    defaultUsername: "noname",
     deleted: false,
     maxResponsesPerThread: 1000,
     blockForeignIp: false,
+    writeLocked: false,
     responsesPerPage: 50,
     showUserCount: false,
     threadsPerPage: 20,
+    uploadMaxSize: 5242880,
+    uploadMimeTypes: "image/png,image/jpeg,image/gif,image/webp",
+    threadCount: 0,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -102,7 +107,7 @@ describe("BoardService", () => {
   });
 
   describe("create", () => {
-    const createInput = { id: "new-board", name: "New Board" };
+    const createInput = { id: "new-board", name: "New Board", defaultUsername: "noname" };
 
     it("should create board when user is admin", async () => {
       const boardRepository = createMockBoardRepository();
@@ -130,7 +135,7 @@ describe("BoardService", () => {
         }),
       });
 
-      await expect(service.create("u1", { id: "new" })).rejects.toThrow(
+      await expect(service.create("u1", { id: "new", name: "New", defaultUsername: "noname" })).rejects.toThrow(
         "Permission denied"
       );
     });
@@ -147,7 +152,7 @@ describe("BoardService", () => {
       });
 
       await expect(
-        service.create("admin", { id: "test-board", name: "Duplicate" })
+        service.create("admin", { id: "test-board", name: "Duplicate", defaultUsername: "noname" })
       ).rejects.toMatchObject({ code: "CONFLICT" });
     });
   });
