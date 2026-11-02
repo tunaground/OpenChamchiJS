@@ -11,9 +11,9 @@ const layout = {
   // Width cap for every page except thread views (see components/layout/PageContainer)
   contentMaxWidth: "96rem",
   containerPadding: "1.6rem",
-  // Floating panes: gap to the window edge and between panes
+  // Gap above the content pane (and to its left while the sidebar is closed)
   paneGap: "0.8rem",
-  sidebarWidth: "23.2rem",
+  sidebarWidth: "24rem",
   toolbarHeight: "5.2rem",
   radiusPane: "10px",
   radiusControl: "6px",
@@ -39,6 +39,10 @@ const surfaces = {
   accentSoft: "var(--c-accent-soft)",
   paneEdge: "var(--c-edge)",
   paneShadow: "var(--c-shadow)",
+  // Glass edge of the content pane (rim ring and shadow; the face is `pane`)
+  paneGlassRim: "var(--c-glass-rim)",
+  paneGlassShadow: "var(--c-glass-shadow)",
+  paneGlassSides: "var(--c-glass-sides)",
   scrim: "var(--c-scrim)",
 
   // Legacy names mapped onto the pane system
@@ -168,22 +172,22 @@ export const greyTheme = {
   ...layout,
 };
 
-// Light mode's sidebar pane is deep sea blue, so its text and accents need the
-// light-on-dark set (surfaces follow [data-pane="sidebar"] in ThemeProvider)
+// Light mode's sidebar sits on the deep sea blue canvas, so its text and accents
+// need the light-on-dark set (surfaces follow [data-pane="sidebar"] in ThemeProvider)
 const lightSidebarTheme = {
   ...lightTheme,
 
   foreground: "#e6eef7",
   primary: "#7cc0f5",
-  secondary: "#a9bdd3",
+  secondary: "#b8cade",
   accent: "#7cc0f5",
 
   topBarText: "#e6eef7",
   sidebarText: "#e6eef7",
 
   textPrimary: "#e6eef7",
-  textSecondary: "#a9bdd3",
-  textMuted: "#7f97b2",
+  textSecondary: "#b8cade",
+  textMuted: "#8fa8c2",
 
   buttonPrimary: "#7cc0f5",
   buttonPrimaryText: "#0d2236",

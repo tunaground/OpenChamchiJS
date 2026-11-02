@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- The sidebar no longer sits in a pane of its own; it lies right on the background (deep blue in light mode)
+- The whole window scrolls instead of the inside of the content pane. The content pane is a sheet a little in from the window's edges, whose rounded top shows at the top of the page and rounded bottom at the end; its toolbar follows you down and sticks to the top of the window. On desktop the content pane's edge looks like glass: a lit rim and a soft, deeper shadow
+- A response's header band has both top corners rounded
+
 ### Fixed
 
 - Opening an archive board link with a page number (`?page=2`) no longer jumps back to the first page

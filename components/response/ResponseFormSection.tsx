@@ -13,7 +13,7 @@ import { ImageAttachment } from "@/components/response/ImageAttachment";
 import { useTranslations } from "next-intl";
 import { formatBytes } from "@/lib/utils/format-bytes";
 import { applyShortcuts } from "@/lib/utils/shortcuts";
-import { getPageScroller, onPageScroll } from "@/lib/utils/page-scroll";
+import { onPageScroll } from "@/lib/utils/page-scroll";
 import type { ResponseOptions } from "@/lib/store/responseOptions";
 
 const ResponseForm = styled.form``;
@@ -457,7 +457,7 @@ export function ResponseFormSection({
     const observer = new ResizeObserver(() => {
       const shift = form.getBoundingClientRect().top - lastTop;
       if (shift !== 0 && form.contains(document.activeElement)) {
-        (getPageScroller() ?? window).scrollBy({ top: shift, behavior: "instant" });
+        window.scrollBy({ top: shift, behavior: "instant" });
       }
       remember();
     });

@@ -7,67 +7,72 @@ import { Toolbar } from "./Toolbar";
 import { Sidebar } from "./Sidebar";
 import { useSidebarStore } from "@/lib/store/sidebar";
 import { useResponseOptionsStore } from "@/lib/store/responseOptions";
-import { PAGE_SCROLL_ID, getPageScrollMetrics, scrollPageTo } from "@/lib/utils/page-scroll";
+import { getPageScrollMetrics, scrollPageTo } from "@/lib/utils/page-scroll";
 
-/*
- * Desktop pins the content area with insets rather than `height`: ad scripts
- * (AdSense) write `height: auto !important` inline on every ancestor of an ad
- * slot, which would let the pane grow to its content and scroll the window.
- * With top/bottom/left/right all set, `height: auto` still fills the space.
- */
+/* Room for the sidebar, which sits on the canvas without a pane */
 const Main = styled.main<{ $sidebarOpen: boolean }>`
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: ${(props) =>
-    props.$sidebarOpen ? `calc(${props.theme.sidebarWidth} + ${props.theme.paneGap})` : "0"};
-  transition: left 0.2s ease-in-out;
+  padding: ${(props) => props.theme.paneGap};
+  padding-left: ${(props) => (props.$sidebarOpen ? props.theme.sidebarWidth : props.theme.paneGap)};
+  transition: padding-left 0.2s ease-in-out;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    position: static;
+    padding: 0;
   }
 `;
 
 /**
- * The content pane. On desktop it is pinned inside Main and only its middle
- * (Scroll) scrolls, so the toolbar and the pane's edges always show. On mobile
- * the window scrolls and the toolbar sticks. Either way the footer follows the
- * content.
+ * The content pane: a sheet on the canvas, a gap in from every edge, that
+ * scrolls with the window. Its top edge shows at the top of the page and its
+ * bottom edge at the end; between them the toolbar sticks to the top of the
+ * window and the footer follows the content.
+ *
+ * No `overflow` here: it would stop the toolbar from sticking. Heights are
+ * minimums only, since ad scripts (AdSense) write `height: auto !important`
+ * on every ancestor of an ad slot.
  */
 const Pane = styled.div`
-  position: absolute;
-  inset: ${(props) => props.theme.paneGap};
+  position: relative;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  min-height: calc(100vh - ${(props) => props.theme.paneGap} * 2);
+  min-height: calc(100dvh - ${(props) => props.theme.paneGap} * 2);
+  /* A flat face; the edge reads as glass */
   background: ${(props) => props.theme.pane};
-  border: 1px solid ${(props) => props.theme.line};
   border-radius: ${(props) => props.theme.radiusPane};
-  box-shadow: inset 0 1px 0 ${(props) => props.theme.paneEdge}, ${(props) => props.theme.paneShadow};
+  box-shadow: ${(props) => props.theme.paneGlassShadow};
+
+  /* The lit rim: a gradient ring, brightest at the top left. Above the sticky
+     toolbar (z-index 50), which would otherwise cover its sides once stuck */
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 51;
+    padding: 1px;
+    border-radius: inherit;
+    background: ${(props) => props.theme.paneGlassRim};
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    position: static;
     min-height: 100vh;
     min-height: 100dvh;
-    overflow: visible;
-    border: none;
     border-radius: 0;
     box-shadow: none;
+
+    &::before {
+      display: none;
+    }
   }
 `;
 
-const Scroll = styled.div`
+const Content = styled.div`
   flex: 1;
-  min-height: 0;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-
-  @media (max-width: ${(props) => props.theme.breakpoint}) {
-    overflow-y: visible;
-  }
 `;
 
 /* After the content (below the last response); at the bottom when the content is short */
@@ -248,10 +253,10 @@ export function PageLayout({
             menuLabel={tCommon("toggleSidebar")}
             sidebarOpen={effectiveDesktopOpen}
           />
-          <Scroll id={PAGE_SCROLL_ID}>
+          <Content>
             {children}
             {footer && <Footer ref={footerRef}>{footer}</Footer>}
-          </Scroll>
+          </Content>
         </Pane>
       </Main>
     </>

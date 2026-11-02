@@ -92,9 +92,8 @@ export const Header = styled.div<{ $variant?: "main" | "anchor"; $op?: boolean }
     css`
       position: relative;
       padding: 0.6rem 1rem;
-      /* Only the top-right corner is rounded: the left side meets the line coming in
-         from the gutter, and the line runs straight along the bottom */
-      border-radius: 0 ${props.theme.radiusControl} 0 0;
+      /* Top corners rounded; the line runs straight along the bottom */
+      border-radius: ${props.theme.radiusControl} ${props.theme.radiusControl} 0 0;
       background: ${props.$op ? props.theme.accentSoft : props.theme.hover};
 
       /* The line under the band reaches back under the gutter's seq number */

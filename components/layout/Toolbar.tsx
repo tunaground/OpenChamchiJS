@@ -5,8 +5,13 @@ import Link from "next/link";
 import styled, { css, keyframes } from "styled-components";
 import { UserCounter } from "./UserCounter";
 import { SidebarToggleButton } from "./SidebarToggleButton";
+import { onPageScroll } from "@/lib/utils/page-scroll";
 
-const Bar = styled.header`
+const stuckShadow = "0 6px 16px -10px rgba(0, 0, 0, 0.35)";
+
+/* Rides on the top edge of the content pane (sharing its rounded corners) until
+   it reaches the top of the window, then sticks there with square corners */
+const Bar = styled.header<{ $stuck: boolean }>`
   position: sticky;
   top: 0;
   z-index: 50;
@@ -16,13 +21,22 @@ const Bar = styled.header`
   min-height: ${(props) => props.theme.toolbarHeight};
   padding: 0.8rem 1.6rem 0.8rem 1.2rem;
   flex-shrink: 0;
-  background: ${(props) => props.theme.pane};
+  /* See-through while it rides on the pane (so the pane's lit rim shows),
+     solid once content scrolls under it */
+  background: ${(props) => (props.$stuck ? props.theme.pane : "transparent")};
   /* Accent rule (with the accent title) marks where you are and where the bar ends */
   border-bottom: 2px solid ${(props) => props.theme.accent};
+  border-radius: ${(props) => (props.$stuck ? "0" : `${props.theme.radiusPane} ${props.theme.radiusPane} 0 0`)};
+  /* Stuck, it covers the pane's side edges, so it draws them itself */
+  box-shadow: ${(props) =>
+    props.$stuck ? `${props.theme.paneGlassSides}, ${stuckShadow}` : "none"};
+  transition: border-radius 0.15s, box-shadow 0.15s, background 0.15s;
 
-  /* Mobile scrolls the window, so the bar sticks over the content */
+  /* On mobile the pane fills the screen, so the bar starts at its corner */
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     padding: 0.6rem 1.2rem 0.6rem 0.8rem;
+    border-radius: 0;
+    box-shadow: ${(props) => (props.$stuck ? stuckShadow : "none")};
     backdrop-filter: saturate(160%) blur(24px);
     -webkit-backdrop-filter: saturate(160%) blur(24px);
   }
@@ -216,8 +230,20 @@ export function Toolbar({
   menuLabel = "Toggle menu",
   sidebarOpen,
 }: ToolbarProps) {
+  const barRef = useRef<HTMLElement>(null);
+  const [stuck, setStuck] = useState(false);
+
+  useEffect(() => {
+    const update = () => {
+      const bar = barRef.current;
+      setStuck(!!bar && window.scrollY > 0 && bar.getBoundingClientRect().top <= 0);
+    };
+    update();
+    return onPageScroll(update);
+  }, []);
+
   return (
-    <Bar>
+    <Bar ref={barRef} $stuck={stuck}>
       <MenuButton onClick={onMenuClick} label={menuLabel} $sidebarOpen={sidebarOpen} />
       <Crumb>
         {parent && (
