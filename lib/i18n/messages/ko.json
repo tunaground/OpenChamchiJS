@@ -627,7 +627,8 @@
     "deviceSubscribeFailed": "이 기기에서 알림 구독에 실패했어요. 잠시 후 다시 시도해 주세요.",
     "imageLabel": "(이미지)",
     "navigateConfirm": "작성 중인 내용이 있어요. 새 답글이 있는 스레드로 이동할까요?",
-    "sidebarTitle": "알림 받는 스레드"
+    "sidebarTitle": "알림 받는 스레드",
+    "sidebarNew": "새 응답 있음"
   },
   "theme": {
     "toggle": "테마 바꾸기",

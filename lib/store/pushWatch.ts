@@ -5,11 +5,14 @@ import type { ThreadWatchListItem } from "@/lib/repositories/interfaces/thread-w
 
 interface PushWatchState {
   loaded: boolean;
+  loadedAt: number;
   items: ThreadWatchListItem[];
   limit: number;
   pushEnabled: boolean;
   load: () => Promise<void>;
   ensureLoaded: () => Promise<void>;
+  refreshIfStale: (maxAgeMs: number) => Promise<void>;
+  setHasNew: (threadId: number, hasNew: boolean) => void;
   watch: (threadId: number) => Promise<"ok" | "limit">;
   unwatchThread: (threadId: number) => Promise<void>;
   remove: (watchId: string) => Promise<void>;
@@ -47,6 +50,7 @@ export const usePushWatchStore = create<PushWatchState>((set, get) => {
 
   return {
     loaded: false,
+    loadedAt: 0,
     items: [],
     limit: 0,
     pushEnabled: true,
@@ -56,7 +60,13 @@ export const usePushWatchStore = create<PushWatchState>((set, get) => {
         const res = await fetch("/api/push/watches");
         if (!res.ok) return;
         const data = await res.json();
-        set({ loaded: true, items: data.items, limit: data.limit, pushEnabled: data.pushEnabled });
+        set({
+          loaded: true,
+          loadedAt: Date.now(),
+          items: data.items,
+          limit: data.limit,
+          pushEnabled: data.pushEnabled,
+        });
       } catch (error) {
         console.error("Failed to load push watches:", error);
       }
@@ -68,6 +78,21 @@ export const usePushWatchStore = create<PushWatchState>((set, get) => {
         loadPromise = null;
       });
       await loadPromise;
+    },
+
+    async refreshIfStale(maxAgeMs) {
+      if (!get().loaded || loadPromise || Date.now() - get().loadedAt < maxAgeMs) return;
+      loadPromise = get().load().finally(() => {
+        loadPromise = null;
+      });
+      await loadPromise;
+    },
+
+    // Local only: the server derives hasNew from lastViewingAt on the next load
+    setHasNew(threadId, hasNew) {
+      const items = get().items;
+      if (!items.some((i) => i.threadId === threadId && i.hasNew !== hasNew)) return;
+      set({ items: items.map((i) => (i.threadId === threadId ? { ...i, hasNew } : i)) });
     },
 
     async watch(threadId) {

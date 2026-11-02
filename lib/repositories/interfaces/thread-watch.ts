@@ -5,6 +5,7 @@ export interface ThreadWatchListItem {
   title: string;
   threadDeleted: boolean;
   enabled: boolean;
+  hasNew: boolean; // A response by someone else since the user last viewed it
 }
 
 export interface PushRecipient {
@@ -31,7 +32,7 @@ export interface ThreadWatchRepository {
   setEnabled(id: string, enabled: boolean): Promise<void>;
   delete(id: string): Promise<void>;
   deleteByUserAndThread(userId: string, threadId: number): Promise<void>;
-  setViewing(userId: string, threadId: number, at: Date | null): Promise<void>;
+  setViewing(userId: string, threadId: number, at: Date): Promise<void>;
   getUserPushEnabled(userId: string): Promise<boolean>;
   setUserPushEnabled(userId: string, enabled: boolean): Promise<void>;
   claimRecipients(

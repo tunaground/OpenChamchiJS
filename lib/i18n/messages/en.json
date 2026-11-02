@@ -627,7 +627,8 @@
     "deviceSubscribeFailed": "Could not subscribe this device to alerts. Please try again later.",
     "imageLabel": "(image)",
     "navigateConfirm": "You have unsent text. Go to the thread with the new reply?",
-    "sidebarTitle": "Threads with alerts"
+    "sidebarTitle": "Threads with alerts",
+    "sidebarNew": "New responses"
   },
   "theme": {
     "toggle": "Change theme",
