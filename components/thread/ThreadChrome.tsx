@@ -435,7 +435,7 @@ export function ThreadToolbarActions({ onReload, watch, onManage, labels }: Thre
 const Dock = styled.div`
   position: relative;
   padding: 1rem 1.2rem 1.2rem;
-  background: ${(props) => props.theme.pane};
+  /* No background: the pane's surface (and its rounded bottom) shows through */
   border-top: 1px solid ${(props) => props.theme.line};
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {

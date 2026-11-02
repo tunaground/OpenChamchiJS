@@ -11,8 +11,13 @@ const Container = styled.div`
   padding: 1.6rem;
 `;
 
+/* A pane of its own: in light mode the canvas is deep blue */
 const Card = styled.div`
   text-align: center;
+  padding: 4rem 4.8rem;
+  background: ${(props) => props.theme.pane};
+  border-radius: ${(props) => props.theme.radiusPane};
+  box-shadow: ${(props) => props.theme.paneShadow};
 `;
 
 const Code = styled.h1`

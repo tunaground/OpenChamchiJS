@@ -27,39 +27,42 @@ const Overlay = styled.div<{ $open: boolean }>`
   }
 `;
 
+/* No pane on desktop: the sidebar sits right on the canvas. On mobile it is a
+   drawer over the page, so it takes the canvas color with it */
 const Pane = styled.aside<{ $open: boolean }>`
   position: fixed;
-  top: ${(props) => props.theme.paneGap};
-  bottom: ${(props) => props.theme.paneGap};
-  left: ${(props) => props.theme.paneGap};
+  top: 0;
+  bottom: 0;
+  left: 0;
   width: ${(props) => props.theme.sidebarWidth};
   display: flex;
   flex-direction: column;
-  background: ${(props) => props.theme.pane};
-  border: 1px solid ${(props) => props.theme.line};
-  border-radius: ${(props) => props.theme.radiusPane};
-  box-shadow: inset 0 1px 0 ${(props) => props.theme.paneEdge}, ${(props) => props.theme.paneShadow};
   color: ${(props) => props.theme.textPrimary};
-  transform: translateX(
-    ${(props) => (props.$open ? "0" : `calc(-100% - ${props.theme.paneGap} * 2)`)}
-  );
+  transform: translateX(${(props) => (props.$open ? "0" : "-100%")});
   transition: transform 0.2s ease-in-out;
   z-index: 95;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    background: ${(props) => props.theme.canvas};
+    box-shadow: ${(props) => props.theme.paneShadow};
+  }
 `;
 
-/* Sized and padded like the toolbar, so the toggle lands where the toolbar's
-   own toggle sits while the sidebar is closed */
+/* Sized and placed like the toolbar (which starts a gap below the window's top
+   and, with the sidebar closed, a gap in from its left), so the toggle lands
+   where the toolbar's own toggle sits while the sidebar is closed */
 const Head = styled.div`
   display: flex;
   align-items: center;
   gap: 0.6rem;
   min-height: ${(props) => props.theme.toolbarHeight};
-  padding: 0.8rem 1rem 0.8rem 1.2rem;
+  margin-top: ${(props) => props.theme.paneGap};
+  padding: 0.8rem 1rem 0.8rem calc(${(props) => props.theme.paneGap} + 1.2rem);
 
-  /* The drawer starts a gap in from the screen's corner, the toolbar right at it */
+  /* The toolbar starts right at the screen's corner on mobile */
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    min-height: 3.6rem;
-    padding: 0.2rem 1rem 0.2rem 0.4rem;
+    margin-top: 0;
+    padding: 0.6rem 1rem 0.6rem 0.8rem;
   }
 `;
 
@@ -83,15 +86,24 @@ const Scroll = styled.div`
   flex: 1;
   min-height: 0;
   overflow-y: auto;
-  padding: 0.4rem 0.8rem 1.2rem;
+  padding: 0.4rem 0.8rem 1.2rem 1.6rem;
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    padding-left: 0.8rem;
+  }
 `;
 
 const Foot = styled.div`
   display: flex;
   align-items: center;
   gap: 0.2rem;
-  padding: 0.8rem;
+  margin: 0 0.8rem 0 1.6rem;
+  padding: 0.8rem 0;
   border-top: 1px solid ${(props) => props.theme.line};
+
+  @media (max-width: ${(props) => props.theme.breakpoint}) {
+    margin-left: 0.8rem;
+  }
 `;
 
 const FootEnd = styled.div`

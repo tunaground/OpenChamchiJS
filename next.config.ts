@@ -5,6 +5,9 @@ const withNextIntl = createNextIntlPlugin("./lib/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  // Dev server only: let phones/tablets on the local network (192.168.x.x) load
+  // the dev client, which Next blocks for non-localhost origins by default
+  allowedDevOrigins: ["192.168.*.*"],
   compiler: {
     styledComponents: true,
   },
