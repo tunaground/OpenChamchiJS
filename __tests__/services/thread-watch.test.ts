@@ -3,6 +3,7 @@ import { ThreadWatchRepository } from "@/lib/repositories/interfaces/thread-watc
 import { ThreadRepository, ThreadData } from "@/lib/repositories/interfaces/thread";
 import { GlobalSettingsService } from "@/lib/services/global-settings";
 import { GlobalSettingsData } from "@/lib/repositories/interfaces/global-settings";
+import { VIEWING_WINDOW_SECONDS } from "@/lib/push/viewing";
 
 describe("ThreadWatchService", () => {
   const enabledSettings = {
@@ -152,7 +153,7 @@ describe("ThreadWatchService", () => {
     it("returns items, limit and pushEnabled even when count exceeds limit", async () => {
       const { service, threadWatchRepository } = setup({ pushWatchLimit: 2 });
       const items = [1, 2, 3].map((n) => ({
-        id: `w${n}`, threadId: n, boardId: "free", title: `t${n}`, threadDeleted: false, enabled: true,
+        id: `w${n}`, threadId: n, boardId: "free", title: `t${n}`, threadDeleted: false, enabled: true, hasNew: false,
       }));
       threadWatchRepository.findActiveByUser.mockResolvedValue(items);
       threadWatchRepository.getUserPushEnabled.mockResolvedValue(false);
@@ -172,10 +173,14 @@ describe("ThreadWatchService", () => {
       expect(threadWatchRepository.setViewing).toHaveBeenCalledWith("u1", 1, expect.any(Date));
     });
 
-    it("sets null when not viewing", async () => {
+    it("sets the viewing window into the past when leaving", async () => {
       const { service, threadWatchRepository } = setup();
+      const before = Date.now();
       await service.reportViewing("u1", 1, false);
-      expect(threadWatchRepository.setViewing).toHaveBeenCalledWith("u1", 1, null);
+      const at = threadWatchRepository.setViewing.mock.calls[0][2] as Date;
+      // Pushes resume at once, and at + window is the moment the user left
+      expect(at.getTime()).toBeLessThanOrEqual(Date.now() - VIEWING_WINDOW_SECONDS * 1000);
+      expect(at.getTime()).toBeGreaterThanOrEqual(before - VIEWING_WINDOW_SECONDS * 1000);
     });
 
     it("is a silent no-op when feature disabled", async () => {

@@ -6,22 +6,34 @@ import {
   CreateWatchResult,
   PushRecipient,
 } from "@/lib/repositories/interfaces/thread-watch";
+import { VIEWING_WINDOW_SECONDS } from "@/lib/push/viewing";
 
 export const threadWatchRepository: ThreadWatchRepository = {
   async findActiveByUser(userId: string): Promise<ThreadWatchListItem[]> {
-    const watches = await prisma.threadWatch.findMany({
-      where: { userId },
-      orderBy: { createdAt: "asc" },
-      include: { thread: { select: { boardId: true, title: true, deleted: true } } },
-    });
-    return watches.map((w) => ({
-      id: w.id,
-      threadId: w.threadId,
-      boardId: w.thread.boardId,
-      title: w.thread.title,
-      threadDeleted: w.thread.deleted,
-      enabled: w.enabled,
-    }));
+    // hasNew: the latest live response by someone else is newer than the moment
+    // the user last left (lastViewingAt + window, see lib/push/viewing.ts).
+    // The LATERAL lookup reads one row per watch off the (threadId, deleted,
+    // visible, seq) index. A watch never viewed (null) has nothing new.
+    return prisma.$queryRaw<ThreadWatchListItem[]>`
+      SELECT w.id, w."threadId", t."boardId", t.title, t.deleted AS "threadDeleted", w.enabled,
+        COALESCE(
+          latest."createdAt" > w."lastViewingAt" + make_interval(secs => ${VIEWING_WINDOW_SECONDS}),
+          false
+        ) AS "hasNew"
+      FROM "ThreadWatch" w
+      JOIN "Thread" t ON t.id = w."threadId"
+      LEFT JOIN LATERAL (
+        SELECT r."createdAt" FROM "Response" r
+        WHERE r."threadId" = w."threadId"
+          AND r.deleted = false
+          AND r.visible = true
+          AND r."userId" IS DISTINCT FROM w."userId"
+        ORDER BY r.seq DESC
+        LIMIT 1
+      ) latest ON true
+      WHERE w."userId" = ${userId}
+      ORDER BY w."createdAt" ASC
+    `;
   },
 
   async findByUserAndThread(userId: string, threadId: number) {
@@ -88,7 +100,7 @@ export const threadWatchRepository: ThreadWatchRepository = {
     await prisma.threadWatch.deleteMany({ where: { userId, threadId } });
   },
 
-  async setViewing(userId: string, threadId: number, at: Date | null): Promise<void> {
+  async setViewing(userId: string, threadId: number, at: Date): Promise<void> {
     await prisma.threadWatch.updateMany({
       where: { userId, threadId },
       data: { lastViewingAt: at },
@@ -125,7 +137,7 @@ export const threadWatchRepository: ThreadWatchRepository = {
         AND NOT t.deleted
         AND (${excludeUserId}::text IS NULL OR w."userId" <> ${excludeUserId}::text)
         AND (w."lastPushedAt" IS NULL OR w."lastPushedAt" < (now() AT TIME ZONE 'UTC') - make_interval(secs => ${cooldownSeconds}))
-        AND (w."lastViewingAt" IS NULL OR w."lastViewingAt" < (now() AT TIME ZONE 'UTC') - interval '45 seconds')
+        AND (w."lastViewingAt" IS NULL OR w."lastViewingAt" < (now() AT TIME ZONE 'UTC') - make_interval(secs => ${VIEWING_WINDOW_SECONDS}))
       RETURNING w."userId" AS "userId", t.title AS title, t."boardId" AS "boardId"
     `;
   },

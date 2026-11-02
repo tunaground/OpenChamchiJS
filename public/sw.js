@@ -19,20 +19,30 @@ self.addEventListener("push", (event) => {
   }
 
   event.waitUntil(
-    // Called synchronously: Safari treats a notification shown after an awaited
-    // step as "no notification" and may revoke the subscription
-    self.registration.showNotification(payload.title, {
-      body: payload.body,
-      tag: payload.tag,
-      renotify: true,
-      // Safari on macOS plays the alert sound only when this is explicit,
-      // even though false is the spec default (verified by A/B on Safari)
-      silent: false,
-      icon: "/web-app-manifest-192x192.png",
-      data: { url: payload.url },
-    })
+    Promise.all([
+      // Called synchronously, before anything else: Safari treats a notification
+      // shown after an awaited step as "no notification" and may revoke the subscription
+      self.registration.showNotification(payload.title, {
+        body: payload.body,
+        tag: payload.tag,
+        renotify: true,
+        // Safari on macOS plays the alert sound only when this is explicit,
+        // even though false is the spec default (verified by A/B on Safari)
+        silent: false,
+        icon: "/web-app-manifest-192x192.png",
+        data: { url: payload.url },
+      }),
+      announcePush(payload.threadId),
+    ])
   );
 });
+
+// Open pages mark the thread in the sidebar's watched list (lib/hooks/useWatchedThreadsSync.ts)
+async function announcePush(threadId) {
+  if (typeof threadId !== "number") return;
+  const windows = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+  for (const w of windows) w.postMessage({ type: "push-received", threadId });
+}
 
 // "/trace/{board}/{thread}/recent" -> "/trace/{board}/{thread}"
 function threadPath(pathname) {

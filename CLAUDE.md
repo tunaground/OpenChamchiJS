@@ -235,6 +235,8 @@ npx prisma studio      # Open Prisma Studio GUI
 - 전체 on/off(`User.pushEnabled`)와 개별 on/off(`ThreadWatch.enabled`)는 독립
 - 답글 생성 시 `after()`로 `pushNotifier.notifyThread` 실행: SQL 한 문장으로 쿨다운(사용자×스레드, `GlobalSettings.pushCooldownSeconds`, 기본 60초)·보는 중(하트비트 45초)·토글 필터 후 선점
 - 보는 중 = 페이지가 보이고(`visible`) 창이 포커스를 가진 상태(`document.hasFocus()`). 화면에 띄워 두고 다른 앱을 쓰면 푸시 발송 (듀얼 모니터에서도 동일)
+- 떠날 때(비콘) `lastViewingAt`은 비우지 않고 `now − 45초`로 기록 (`lib/push/viewing.ts`): 푸시는 바로 재개되고 `lastViewingAt + 45초`가 떠난 시각이 됨
+- 사이드바 새 응답 표시(`hasNew`): 남이 쓴 최신 응답(삭제·숨김 제외)이 `lastViewingAt + 45초`보다 늦으면 표시, `null`이면 표시 안 함. 푸시·개별 on/off와 무관. 열린 페이지는 SW의 `push-received` 메시지로 즉시 표시(`useWatchedThreadsSync`), 돌아왔을 때 5분(전체 알림 off면 1분) 지났으면 목록 재조회, 그 스레드를 열면 지움
 - 서비스 워커 `public/sw.js`. 알림 본문은 `작성자: 본문 발췌`(TOM 마크업 제거, 스포일러 가림, 100자, `lib/push/plain-text.ts`)
 - 404/410/401/403 응답 구독은 삭제, 로그아웃 시 `signOutWithPush`로 이 기기 구독 해제
 - 알림 태그는 서버가 `{PushSubscription.id}:r-{responseId}`로 생성해 답글마다 따로 쌓임 (같은 태그로 교체하면 macOS Chrome이 배너를 띄우지 않고 클릭도 끊김). SW `push` 핸들러는 await 없이 `showNotification`을 바로 호출해야 함 (Safari는 지연 시 미표시 처리 후 구독 해지 가능)

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Threads with alerts in the sidebar show an exclamation mark when someone else has responded since you last looked at them, even with alerts turned off for that thread or entirely. An arriving alert marks the thread right away; coming back to the site after a while refreshes the list
+
 ### Changed
 
 - The sidebar no longer sits in a pane of its own; it lies right on the background (deep blue in light mode)

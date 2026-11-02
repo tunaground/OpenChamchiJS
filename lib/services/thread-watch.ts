@@ -11,6 +11,7 @@ import {
 } from "@/lib/services/global-settings";
 import { ServiceError, ServiceErrorCode } from "@/lib/services/errors";
 import { isPushFeatureEnabled } from "@/lib/push/feature";
+import { leftViewingAt } from "@/lib/push/viewing";
 
 export class ThreadWatchServiceError extends ServiceError {
   constructor(message: string, code: ServiceErrorCode) {
@@ -115,7 +116,8 @@ export function createThreadWatchService(
     async reportViewing(userId: string, threadId: number, viewing: boolean): Promise<void> {
       const settings = await globalSettingsService.get();
       if (!isPushFeatureEnabled(settings)) return;
-      await threadWatchRepository.setViewing(userId, threadId, viewing ? new Date() : null);
+      const now = new Date();
+      await threadWatchRepository.setViewing(userId, threadId, viewing ? now : leftViewingAt(now));
     },
   };
 }

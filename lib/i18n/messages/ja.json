@@ -627,7 +627,8 @@
     "deviceSubscribeFailed": "この端末で通知の登録に失敗しました。しばらくしてから再度お試しください。",
     "imageLabel": "(画像)",
     "navigateConfirm": "入力中の内容があります。新しいレスのあるスレッドへ移動しますか？",
-    "sidebarTitle": "通知中のスレッド"
+    "sidebarTitle": "通知中のスレッド",
+    "sidebarNew": "新しいレスあり"
   },
   "theme": {
     "toggle": "テーマ切り替え",
