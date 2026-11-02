@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Opening an archive board link with a page number (`?page=2`) no longer jumps back to the first page
+
 ## [0.5.0] - 2026-11-01
 
 ### Changed
