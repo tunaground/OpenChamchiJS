@@ -61,10 +61,17 @@ const MaxSizeHint = styled.span`
   color: ${(props) => props.theme.textSecondary};
 `;
 
+const NoticeHint = styled.span`
+  font-size: 1.2rem;
+  color: ${(props) => props.theme.error || "#dc2626"};
+`;
+
 interface ImageUploadProps {
   onFileSelect: (file: File | null) => void;
   currentFile: File | null;
   maxSizeLabel: string;
+  /** A passing message (e.g. about a dropped file), shown in place of the size hint */
+  notice?: string | null;
   disabled?: boolean;
   labels: {
     selectImage: string;
@@ -76,6 +83,7 @@ export function ImageUpload({
   onFileSelect,
   currentFile,
   maxSizeLabel,
+  notice,
   disabled,
   labels,
 }: ImageUploadProps) {
@@ -122,8 +130,10 @@ export function ImageUpload({
       >
         {labels.selectImage}
       </UploadButton>
-      {!currentFile && (
-        <MaxSizeHint>({maxSizeLabel})</MaxSizeHint>
+      {notice ? (
+        <NoticeHint role="status">{notice}</NoticeHint>
+      ) : (
+        !currentFile && <MaxSizeHint>({maxSizeLabel})</MaxSizeHint>
       )}
 
       {previewUrl && (
