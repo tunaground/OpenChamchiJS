@@ -10,6 +10,8 @@ import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
 import { ImageUpload } from "@/components/response/ImageUpload";
 import { CreateThreadOptionButtons, CreateThreadOptions } from "@/components/response/CreateThreadOptionButtons";
 import { ContentPreview } from "@/components/response/ContentPreview";
+import { DropOverlay } from "@/components/response/DropOverlay";
+import { useImageDrop } from "@/lib/hooks/useImageDrop";
 import { formatBytes } from "@/lib/utils/format-bytes";
 import { applyShortcuts } from "@/lib/utils/shortcuts";
 import { PageContainer } from "@/components/layout/PageContainer";
@@ -57,6 +59,7 @@ const Input = styled.input<{ $large?: boolean }>`
 
 /** Toolbar + textarea framed together like one editor */
 const Editor = styled.div`
+  position: relative;
   border: 1px solid ${(props) => props.theme.line};
   border-radius: ${(props) => props.theme.radiusControl};
   background: ${(props) => props.theme.paneSunken};
@@ -282,6 +285,12 @@ export function CreateThreadContent({
 
   const t = useTranslations("createThread");
   const maxSizeLabel = t("maxSize", { size: formatBytes(uploadMaxSize) });
+  const tDrop = useTranslations("imageDrop");
+  const imageDrop = useImageDrop({
+    enabled: storageEnabled && !loading,
+    maxSize: uploadMaxSize,
+    onFile: setAttachmentFile,
+  });
 
   const sidebar = <BoardListSidebar boards={boards} title={boardsTitle} manualLabel={manualLabel} />;
 
@@ -446,7 +455,8 @@ export function CreateThreadContent({
 
           <FormGroup>
             <Label>{labels.content}</Label>
-            <Editor>
+            <Editor {...imageDrop.dropZoneProps}>
+              {imageDrop.isDragging && <DropOverlay>{tDrop("dropHere")}</DropOverlay>}
               <EditorBar>
                 <CreateThreadOptionButtons
                   options={options}
@@ -490,6 +500,10 @@ export function CreateThreadContent({
                 onFileSelect={setAttachmentFile}
                 currentFile={attachmentFile}
                 maxSizeLabel={maxSizeLabel}
+                notice={
+                  imageDrop.notice &&
+                  tDrop(imageDrop.notice, { size: formatBytes(uploadMaxSize) })
+                }
                 disabled={loading}
                 labels={{
                   selectImage: labels.selectImage,

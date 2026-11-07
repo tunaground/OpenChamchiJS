@@ -10,6 +10,8 @@ import { iconButtonCss } from "@/components/layout/iconButton";
 import { ResponseOptionButtons, ResponsePreview } from "@/components/response";
 import { ImageUpload } from "@/components/response/ImageUpload";
 import { ImageAttachment } from "@/components/response/ImageAttachment";
+import { DropOverlay } from "@/components/response/DropOverlay";
+import { useImageDrop } from "@/lib/hooks/useImageDrop";
 import { useTranslations } from "next-intl";
 import { formatBytes } from "@/lib/utils/format-bytes";
 import { applyShortcuts } from "@/lib/utils/shortcuts";
@@ -70,6 +72,7 @@ const Inner = styled.div<{ $fullscreen: boolean }>`
 
 /** Options, name, body and submit framed together as one editor */
 const Editor = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   border: 1px solid ${(props) => props.theme.line};
@@ -469,7 +472,13 @@ export function ResponseFormSection({
   }, [previewSlot]);
 
   const tThread = useTranslations("threadDetail");
+  const tDrop = useTranslations("imageDrop");
   const maxSizeLabel = tThread("maxSize", { size: formatBytes(uploadMaxSize) });
+  const imageDrop = useImageDrop({
+    enabled: storageEnabled && !submitting,
+    maxSize: uploadMaxSize,
+    onFile: setAttachmentFile,
+  });
 
   // Desktop only: on mobile the textarea keeps its height and scrolls inside
   const autoResize = useCallback(() => {
@@ -660,7 +669,8 @@ export function ResponseFormSection({
       {preview && previewSlot && !fullscreen && createPortal(preview, previewSlot)}
       <Inner ref={innerRef} $fullscreen={fullscreen}>
       {preview && (!previewSlot || fullscreen) && <PreviewArea>{preview}</PreviewArea>}
-      <Editor>
+      <Editor {...imageDrop.dropZoneProps}>
+        {imageDrop.isDragging && <DropOverlay>{tDrop("dropHere")}</DropOverlay>}
         <EditorHead>
           {optionButtons}
           <HeadDivider />
@@ -713,6 +723,10 @@ export function ResponseFormSection({
               onFileSelect={setAttachmentFile}
               currentFile={attachmentFile}
               maxSizeLabel={maxSizeLabel}
+              notice={
+                imageDrop.notice &&
+                tDrop(imageDrop.notice, { size: formatBytes(uploadMaxSize) })
+              }
               disabled={submitting}
               labels={{
                 selectImage: labels.selectImage,

@@ -635,5 +635,11 @@
     "switchToDark": "Switch to dark mode",
     "switchToLight": "Switch to light mode",
     "switchToGrey": "Switch to grey mode"
+  },
+  "imageDrop": {
+    "dropHere": "Drop here to attach the image",
+    "multiple": "Only one image is attached",
+    "notImage": "Only image files can be attached",
+    "tooLarge": "Too large (max {size})"
   }
 }

@@ -635,5 +635,11 @@
     "switchToDark": "ダークモードへ",
     "switchToLight": "ライトモードへ",
     "switchToGrey": "グレーモードへ"
+  },
+  "imageDrop": {
+    "dropHere": "ここにドロップして画像を添付",
+    "multiple": "画像は1枚のみ添付されます",
+    "notImage": "画像ファイルのみ添付できます",
+    "tooLarge": "容量超過（最大 {size}）"
   }
 }
