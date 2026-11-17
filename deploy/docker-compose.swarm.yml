@@ -32,10 +32,14 @@ services:
       rollback_config:
         order: start-first
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://localhost:3000').then(r=>{if(!r.ok)throw r;process.exit(0)}).catch(()=>process.exit(1))"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
+      # Liveness only: /api/health answers without the database, so a slow query or
+      # a busy event loop does not get a working container killed. busybox wget keeps
+      # the probe cheap (no second Node process); 127.0.0.1 because the server listens on IPv4 only.
+      test: ["CMD", "wget", "-q", "-T", "8", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
 
   ws:
     image: ghcr.io/tunaground/openchamchijs-ws-server:${WS_VERSION:-latest}

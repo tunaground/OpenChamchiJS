@@ -18,6 +18,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - The whole window scrolls instead of the inside of the content pane. The content pane is a sheet a little in from the window's edges, whose rounded top shows at the top of the page and rounded bottom at the end; its toolbar follows you down and sticks to the top of the window. On desktop the content pane's edge looks like glass: a lit rim and a soft, deeper shadow
 - A response's header band has both top corners rounded
 
+- The Swarm healthcheck for the web container asks a new `/api/health` endpoint, which answers without the database, instead of rendering the home page, and waits longer before giving up (15s interval, 10s timeout, 5 tries, 30s start period). A slow database or a busy moment no longer gets a working container killed and restarted. Deploy the new compose file together with an image that has the endpoint: an older image answers 404 and is marked unhealthy
+
 ### Fixed
 
 - Opening an archive board link with a page number (`?page=2`) no longer jumps back to the first page

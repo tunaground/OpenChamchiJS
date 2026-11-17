@@ -126,6 +126,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - `GET/POST /api/auth/[...nextauth]` - NextAuth 핸들러
 - `GET/PUT /api/settings` - 전역 설정 조회/수정
 - `GET /api/realtime/token` - Realtime 토큰 발급
+- `GET /api/health` - 컨테이너 헬스체크용 liveness (DB 미사용, Swarm `web` 헬스체크가 호출)
 
 #### Boards
 - `GET/POST /api/boards` - 보드 목록/생성
