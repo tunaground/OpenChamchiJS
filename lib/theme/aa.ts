@@ -7,8 +7,13 @@
 export const AA_FONT_SIZE = "1.5rem";
 /** Desktop line height */
 export const AA_LINE_HEIGHT = "1.6rem";
-/** Font size below the mobile breakpoint */
-export const AA_MOBILE_FONT_SIZE = "1.2rem";
+/**
+ * Font size below the mobile breakpoint. A fraction of a pixel (11.25px) on
+ * purpose: it makes the line height a whole 12px. A fractional line height
+ * gets snapped to the pixel grid line by line, which leaves uneven gaps
+ * between rows; a fractional font size only scales the glyphs.
+ */
+export const AA_MOBILE_FONT_SIZE = "1.125rem";
 
 const rem = (value: string) => parseFloat(value);
 

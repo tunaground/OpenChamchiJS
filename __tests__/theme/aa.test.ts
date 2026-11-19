@@ -18,11 +18,11 @@ describe("AA text metrics", () => {
   });
 
   it("shrinks the font on mobile", () => {
-    expect(AA_MOBILE_FONT_SIZE).toBe("1.2rem");
+    expect(AA_MOBILE_FONT_SIZE).toBe("1.125rem");
   });
 
-  it("uses the desktop line-height ratio on mobile", () => {
-    expect(AA_MOBILE_LINE_HEIGHT).toBe("1.28rem");
+  it("uses the desktop line-height ratio on mobile, on a whole-pixel line height", () => {
+    expect(AA_MOBILE_LINE_HEIGHT).toBe("1.2rem");
     expect(rem(AA_MOBILE_LINE_HEIGHT) / rem(AA_MOBILE_FONT_SIZE)).toBeCloseTo(
       rem(AA_LINE_HEIGHT) / rem(AA_FONT_SIZE),
       6
@@ -31,7 +31,7 @@ describe("AA text metrics", () => {
 
   it("scales any desktop line height by the same factor", () => {
     // The archive draws AA at 1.8rem on desktop
-    expect(aaMobileLineHeight("1.8rem")).toBe("1.44rem");
+    expect(aaMobileLineHeight("1.8rem")).toBe("1.35rem");
     expect(aaMobileLineHeight(AA_LINE_HEIGHT)).toBe(AA_MOBILE_LINE_HEIGHT);
   });
 });
