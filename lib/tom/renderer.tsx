@@ -23,6 +23,7 @@ import {
   TomCalcResult,
 } from "./prerenderer";
 import { copyText } from "@/lib/utils/clipboard";
+import { AA_LINE_HEIGHT, AA_MOBILE_FONT_SIZE, AA_MOBILE_LINE_HEIGHT } from "@/lib/theme/aa";
 
 // CSS color validation to prevent injection attacks
 const CSS_COLOR_REGEX =
@@ -84,14 +85,15 @@ const AA = styled.div.attrs({
   width: 100%;
   /* AA always draws on paper so coloured art keeps its look in dark mode */
   background: rgba(255, 255, 255);
-  line-height: 1.6rem;
+  line-height: ${AA_LINE_HEIGHT};
   padding: 0.8rem 1rem;
   border: 1px solid ${(props) => props.theme.line};
   border-radius: ${(props) => props.theme.radiusControl};
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
-    font-size: 1.2rem;
-    line-height: 1.4rem;
+    /* Same line-height ratio as desktop (lib/theme/aa.ts), or the art changes shape */
+    font-size: ${AA_MOBILE_FONT_SIZE};
+    line-height: ${AA_MOBILE_LINE_HEIGHT};
   }
 `;
 
