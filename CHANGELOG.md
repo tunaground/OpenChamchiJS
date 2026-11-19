@@ -24,6 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Opening an archive board link with a page number (`?page=2`) no longer jumps back to the first page
 
+### Security
+
+- Next.js is upgraded from 16.4.3 to 16.4.6, which takes in the 16.4.5 security release (GHSA-mfr8-8qww-v76h, GHSA-vc7v-qv4w-wrv8, GHSA-vvgp-ww4w-46vf, GHSA-rhh4-g77r-r9qj, GHSA-pc58-hwjq-p385, GHSA-7qx7-33qx-rqx2, GHSA-f3mh-rxg3-f5g2). The cache advisories need `'use cache'` or Cache Components, which this project does not use; the upgrade also lets `npm run build` finish without stopping on a security error. Lint tooling (typescript-eslint) is updated for a minimatch advisory (GHSA-g3hv-75wg-m249)
+
 ## [0.5.0] - 2026-11-01
 
 ### Changed
