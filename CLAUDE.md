@@ -45,7 +45,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - `lib/api/` - API utilities (auth, csrf, foreign-ip-check, write-lock-check, error-handler)
 - `lib/tom/` - TOM (Tunaground Object Markup) parser/renderer
 - `lib/theme/` - Theme definitions (light, dark) and global styles
-- `lib/store/` - Zustand stores (theme, sidebar, responseOptions, threadResponseOptions)
+- `lib/store/` - Zustand stores (theme, font, sidebar, responseOptions, threadResponseOptions)
 - `lib/hooks/` - Client hooks (useChatMode, usePresence, useResponseOptions)
 - `lib/i18n/messages/` - Translation files (ko.json, en.json, ja.json)
 - `lib/storage/` - File upload with Ports/Adapters pattern (Supabase, S3 adapters)
@@ -102,7 +102,7 @@ npx prisma studio      # Open Prisma Studio GUI
 - Radii: `radiusPane` 10px, `radiusControl` 6px, `radiusChip` 4px. Shared icon button style: `components/layout/iconButton.ts`
 - Light mode tints surfaces blue; its canvas is a solid deep blue, dark enough for light text, so the sidebar on it needs light-on-dark: `[data-pane="sidebar"]` overrides the surface variables (light only) and `components/layout/Sidebar` wraps it in `sidebarThemes[mode]`. Pages outside `PageLayout` (login, setup, 404) put their content on a pane
 - `ThemeToggleButton` (sidebar footer) steps light → grey → dark; Settings offers System/Light/Grey/Dark
-- Fonts: IBM Plex Sans KR (UI/body, Google Fonts link in `app/layout.tsx`), AAFont (HeadKasen + Nanum Gothic Coding) for AA, Google Sans Code for dice/calc
+- Fonts: the UI/body font is the user's pick (Settings) from `lib/theme/fonts.ts` — gothic/serif/mono/system, default IBM Plex Sans KR — kept in `lib/store/font.ts` (localStorage). `theme.fontSans` is `var(--font-sans)`, keyed by `html[data-font]`; a script in `app/layout.tsx` (`fontBootScript`) sets it before paint and loads only that font's stylesheet, and `applyFont` does the same on a live page. AA size and line height live in `lib/theme/aa.ts`: mobile shrinks the font and derives its line height from the desktop ratio, so use those constants instead of new rem values. Fixed fonts: AAFont (HeadKasen + Nanum Gothic Coding) for AA, Google Sans Code for dice/calc
 - Responsive breakpoint: `props.theme.breakpoint` (768px)
 - Content max width: `props.theme.contentMaxWidth` (96rem) via `components/layout/PageContainer` (centered) for every page except thread views, which use the full width
 

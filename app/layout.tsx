@@ -6,6 +6,7 @@ import {Providers} from "./providers";
 import StyledComponentsRegistry from "@/lib/registry";
 import {globalSettingsService} from "@/lib/services/global-settings";
 import {isPushFeatureEnabled} from "@/lib/push/feature";
+import {DEFAULT_FONT, fontBootScript, resolveFont} from "@/lib/theme/fonts";
 
 export async function generateMetadata(): Promise<Metadata> {
   const settings = await globalSettingsService.get();
@@ -35,20 +36,26 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <head>
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap"
-        />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap"
-        />
         {/* Apply the saved color mode before first paint so dark mode doesn't flash light */}
         <script dangerouslySetInnerHTML={{ __html:
           `try{var m=(JSON.parse(localStorage.getItem("theme")||"{}").state||{}).mode;` +
           `if(m==="system")m=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";` +
           `document.documentElement.dataset.mode=m==="dark"||m==="grey"?m:"light"}catch(e){}`
         }} />
+        {/* Apply the saved body font before first paint and load only its stylesheet (lib/theme/fonts.ts).
+            These scripts come before any stylesheet: a script waits for the stylesheets above it,
+            which would hold back the font request */}
+        <script dangerouslySetInnerHTML={{ __html: fontBootScript() }} />
+        <noscript>
+          <link rel="stylesheet" href={resolveFont(DEFAULT_FONT).stylesheet ?? undefined} />
+        </noscript>
+        {/* The body font's stylesheet is added by the script above, where the browser can't find it early */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Google+Sans+Code:ital,wght@0,300..800;1,300..800&display=swap"
+        />
       </head>
       <body>
         <script dangerouslySetInnerHTML={{ __html:

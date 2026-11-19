@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Choose the font for text and menus in Settings: three sans-serif fonts (IBM Plex Sans KR as before, Pretendard, Noto Sans KR), three serif fonts (Noto Serif KR, Nanum Myeongjo, Gowun Batang), two monospace fonts (Nanum Gothic Coding, D2Coding) or your device's own font. The choice is kept on the device and only the chosen font is downloaded. AA and dice/calc results keep their own fonts
 - Drag an image onto the response or new-thread editor to attach it, replacing any image already attached. Only the first image of several is taken, and files that are not images or are over the board's size limit are turned away with a short note by the image button. Dropping a file elsewhere on the page no longer opens it in place of what you were writing
 - Threads with alerts in the sidebar show an exclamation mark when someone else has responded since you last looked at them, even with alerts turned off for that thread or entirely. An arriving alert marks the thread right away; coming back to the site after a while refreshes the list
 
@@ -22,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- AA keeps the same shape on phones as on desktop. Phones shrink the AA font, and the line height now shrinks by the same factor (it used to be a little taller in proportion); AA on phones is a touch smaller than before (11.25px on a 12px line, from 12px on 14px). This applies in responses, in the editors' AA mode and in the archive, whose AA now has the same size and line height as on the board (on desktop its lines were 18px tall, now 16px)
 - Opening an archive board link with a page number (`?page=2`) no longer jumps back to the first page
 
 ## [0.5.0] - 2026-11-01

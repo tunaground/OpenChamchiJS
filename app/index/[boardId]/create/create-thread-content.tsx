@@ -15,6 +15,7 @@ import { useImageDrop } from "@/lib/hooks/useImageDrop";
 import { formatBytes } from "@/lib/utils/format-bytes";
 import { applyShortcuts } from "@/lib/utils/shortcuts";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { AA_LINE_HEIGHT, AA_MOBILE_FONT_SIZE, AA_MOBILE_LINE_HEIGHT } from "@/lib/theme/aa";
 
 const Container = PageContainer;
 
@@ -91,15 +92,15 @@ const Textarea = styled.textarea<{ $aaMode?: boolean }>`
   min-height: 24rem;
   resize: none;
   font-family: ${(props) => (props.$aaMode ? props.theme.fontAA : "inherit")};
-  line-height: ${(props) => (props.$aaMode ? "1.6rem" : "1.7")};
+  line-height: ${(props) => (props.$aaMode ? AA_LINE_HEIGHT : "1.7")};
   white-space: ${(props) => (props.$aaMode ? "pre" : "pre-wrap")};
   overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
   overflow-y: hidden;
 
   @media (max-width: ${(props) => props.theme.breakpoint}) {
     ${(props) => props.$aaMode && `
-      font-size: 1.2rem;
-      line-height: 1.4rem;
+      font-size: ${AA_MOBILE_FONT_SIZE};
+      line-height: ${AA_MOBILE_LINE_HEIGHT};
     `}
   }
 

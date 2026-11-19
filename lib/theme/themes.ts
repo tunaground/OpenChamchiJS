@@ -4,6 +4,9 @@
 // keyed by html[data-mode]) so the mode applies before React mounts. Text and
 // button colors stay hex because some components append a hex alpha suffix to
 // them (e.g. `theme.textSecondary + "60"`).
+//
+// The body font is a CSS variable too: html[data-font] picks one of the fonts
+// in ./fonts.ts (the user's choice in Settings), also applied before mount.
 
 // Layout constants (shared across all themes)
 const layout = {
@@ -22,7 +25,7 @@ const layout = {
   // default) and the minimal side padding (AA and wide text need the room)
   ledgerGutter: "var(--ledger-gutter, 5.6rem)",
   ledgerPadding: "1.2rem",
-  fontSans: '"IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif',
+  fontSans: "var(--font-sans)",
   fontMono: '"Google Sans Code", ui-monospace, monospace',
   fontAA: '"AAFont", "HeadKasen", "Saitamaar", sans-serif',
 };

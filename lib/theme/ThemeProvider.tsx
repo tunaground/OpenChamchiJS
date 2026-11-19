@@ -3,7 +3,10 @@
 import { useEffect, useState, ReactNode, useSyncExternalStore } from "react";
 import { ThemeProvider as StyledThemeProvider, createGlobalStyle } from "styled-components";
 import { useThemeStore } from "@/lib/store/theme";
+import { useFontStore } from "@/lib/store/font";
 import { themes, ThemeMode } from "./themes";
+import { fontVariablesCss } from "./fonts";
+import { applyFont } from "./apply-font";
 
 const GlobalStyle = createGlobalStyle`
   @font-face {
@@ -20,6 +23,27 @@ const GlobalStyle = createGlobalStyle`
     src: url(//cdn.jsdelivr.net/font-nanum/1.0/nanumgothiccoding/v2/NanumGothicCoding-Regular.eot?#iefix) format('embedded-opentype'), url(//cdn.jsdelivr.net/font-nanum/1.0/nanumgothiccoding/v2/NanumGothicCoding-Regular.woff) format('woff'), url(//cdn.jsdelivr.net/font-nanum/1.0/nanumgothiccoding/v2/NanumGothicCoding-Regular.ttf) format('truetype');
     unicode-range: U+AC00-D7A3, U+3130-318F;
   }
+
+  /* D2Coding (a body font choice, see ./fonts.ts). No subset build exists, so the
+     whole file is declared here; it downloads only while the font is in use */
+  @font-face {
+    font-family: "D2Coding";
+    font-style: normal;
+    font-weight: 400;
+    src: local("D2Coding"), url("https://cdn.jsdelivr.net/gh/joungkyun/font-d2coding@1.3.2/D2Coding.woff2") format("woff2");
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "D2Coding";
+    font-style: normal;
+    font-weight: 700;
+    src: local("D2Coding Bold"), url("https://cdn.jsdelivr.net/gh/joungkyun/font-d2coding@1.3.2/D2CodingBold.woff2") format("woff2");
+    font-display: swap;
+  }
+
+  /* --font-sans per html[data-font], set before paint (see app/layout.tsx) */
+  ${fontVariablesCss()}
 
   /* Surface palette per mode. data-mode is set before paint (see app/layout.tsx) */
   :root {
@@ -188,6 +212,7 @@ interface Props {
 
 export function ThemeProvider({ children }: Props) {
   const resolved = useResolvedThemeMode();
+  const font = useFontStore((state) => state.font);
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -201,6 +226,11 @@ export function ThemeProvider({ children }: Props) {
   useEffect(() => {
     if (mounted) document.documentElement.dataset.mode = resolved;
   }, [mounted, resolved]);
+
+  // Same for the body font when it is changed in Settings
+  useEffect(() => {
+    if (mounted) applyFont(font);
+  }, [mounted, font]);
 
   return (
     <StyledThemeProvider theme={theme}>

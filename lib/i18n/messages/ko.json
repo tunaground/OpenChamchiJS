@@ -469,7 +469,14 @@
     "themeSystem": "시스템",
     "themeLight": "라이트",
     "themeDark": "다크",
-    "themeGrey": "그레이"
+    "themeGrey": "그레이",
+    "font": "글꼴",
+    "fontDescription": "본문과 메뉴에 쓰는 글꼴을 고릅니다. AA와 다이스·계산 결과는 바뀌지 않습니다.",
+    "fontGroupGothic": "고딕",
+    "fontGroupSerif": "명조",
+    "fontGroupMono": "고정폭",
+    "fontGroupSystem": "시스템",
+    "fontSystem": "시스템 기본"
   },
   "manual": {
     "title": "사용 매뉴얼",

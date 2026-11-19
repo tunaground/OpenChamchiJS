@@ -17,6 +17,7 @@ import { formatBytes } from "@/lib/utils/format-bytes";
 import { applyShortcuts } from "@/lib/utils/shortcuts";
 import { onPageScroll } from "@/lib/utils/page-scroll";
 import type { ResponseOptions } from "@/lib/store/responseOptions";
+import { AA_LINE_HEIGHT, AA_MOBILE_FONT_SIZE, AA_MOBILE_LINE_HEIGHT } from "@/lib/theme/aa";
 
 const ResponseForm = styled.form``;
 
@@ -171,7 +172,7 @@ const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
   color: ${(props) => (props.$aaMode ? "black" : props.theme.textPrimary)};
   resize: none;
   font-family: ${(props) => (props.$aaMode ? props.theme.fontAA : "inherit")};
-  line-height: ${(props) => (props.$aaMode ? "1.6rem" : "1.5")};
+  line-height: ${(props) => (props.$aaMode ? AA_LINE_HEIGHT : "1.5")};
   white-space: ${(props) => (props.$aaMode ? "pre" : "pre-wrap")};
   overflow-x: ${(props) => (props.$aaMode ? "auto" : "hidden")};
   overflow-y: auto;
@@ -185,8 +186,8 @@ const FormTextarea = styled.textarea<{ $aaMode?: boolean }>`
     max-height: none;
 
     ${(props) => props.$aaMode && `
-      font-size: 1.2rem;
-      line-height: 1.4rem;
+      font-size: ${AA_MOBILE_FONT_SIZE};
+      line-height: ${AA_MOBILE_LINE_HEIGHT};
     `}
   }
 
