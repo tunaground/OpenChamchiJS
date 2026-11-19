@@ -23,7 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- AA keeps the same shape on phones as on desktop. Phones shrink the AA font, and the line height now shrinks by the same factor (it used to be a little taller in proportion); AA on phones is a touch smaller than before (11.25px on a 12px line, from 12px on 14px). This applies in responses, in the editors' AA mode and in the archive
+- AA keeps the same shape on phones as on desktop. Phones shrink the AA font, and the line height now shrinks by the same factor (it used to be a little taller in proportion); AA on phones is a touch smaller than before (11.25px on a 12px line, from 12px on 14px). This applies in responses, in the editors' AA mode and in the archive, whose AA now has the same size and line height as on the board (on desktop its lines were 18px tall, now 16px)
 - Opening an archive board link with a page number (`?page=2`) no longer jumps back to the first page
 
 ## [0.5.0] - 2026-11-01

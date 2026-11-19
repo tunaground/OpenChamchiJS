@@ -30,8 +30,7 @@ describe("AA text metrics", () => {
   });
 
   it("scales any desktop line height by the same factor", () => {
-    // The archive draws AA at 1.8rem on desktop
-    expect(aaMobileLineHeight("1.8rem")).toBe("1.35rem");
+    expect(aaMobileLineHeight("2rem")).toBe("1.5rem");
     expect(aaMobileLineHeight(AA_LINE_HEIGHT)).toBe(AA_MOBILE_LINE_HEIGHT);
   });
 });

@@ -7,7 +7,7 @@ import styled, { css } from "styled-components";
 import { extractYoutubeId, formatDate } from "../_lib/utils";
 import { getAttachmentUrl } from "../_lib/api";
 import type { ArchiveResponse } from "../_lib/types";
-import { AA_MOBILE_FONT_SIZE, aaMobileLineHeight } from "@/lib/theme/aa";
+import { AA_LINE_HEIGHT, AA_MOBILE_FONT_SIZE, AA_MOBILE_LINE_HEIGHT } from "@/lib/theme/aa";
 
 /*
  * Same ledger look as the live thread (components/response/ResponseCard):
@@ -215,15 +215,15 @@ const Content = styled.div`
     color: black;
     width: 100%;
     background: white;
-    line-height: 1.8rem;
+    /* Same metrics as AA on the board (lib/theme/aa.ts) */
+    line-height: ${AA_LINE_HEIGHT};
     padding: 0.8rem 1rem;
     border: 1px solid ${(props) => props.theme.line};
     border-radius: ${(props) => props.theme.radiusControl};
 
     @media (max-width: ${(props) => props.theme.breakpoint}) {
-      /* Same line-height ratio as desktop (lib/theme/aa.ts) */
       font-size: ${AA_MOBILE_FONT_SIZE};
-      line-height: ${aaMobileLineHeight("1.8rem")};
+      line-height: ${AA_MOBILE_LINE_HEIGHT};
     }
   }
 `;
