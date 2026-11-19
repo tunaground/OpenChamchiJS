@@ -9,12 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Choose the font for text and menus in Settings: three sans-serif fonts (IBM Plex Sans KR as before, Pretendard, Noto Sans KR), three serif fonts (Noto Serif KR, Nanum Myeongjo, Gowun Batang), two monospace fonts (Nanum Gothic Coding, D2Coding) or your device's own font. The choice is kept on the device and only the chosen font is downloaded. AA and dice/calc results keep their own fonts
+- Choose the font for text and menus in Settings: three sans-serif fonts (Pretendard, IBM Plex Sans KR, Noto Sans KR), three serif fonts (Noto Serif KR, Nanum Myeongjo, Gowun Batang), two monospace fonts (Nanum Gothic Coding, D2Coding) or your device's own font. The choice is kept on the device and only the chosen font is downloaded. AA and dice/calc results keep their own fonts
 - Drag an image onto the response or new-thread editor to attach it, replacing any image already attached. Only the first image of several is taken, and files that are not images or are over the board's size limit are turned away with a short note by the image button. Dropping a file elsewhere on the page no longer opens it in place of what you were writing
 - Threads with alerts in the sidebar show an exclamation mark when someone else has responded since you last looked at them, even with alerts turned off for that thread or entirely. An arriving alert marks the thread right away; coming back to the site after a while refreshes the list
 
 ### Changed
 
+- Text and menus are set in Pretendard unless you have picked a font in Settings. IBM Plex Sans KR, the font until now, is still there to choose
 - The sidebar no longer sits in a pane of its own; it lies right on the background (deep blue in light mode)
 - The whole window scrolls instead of the inside of the content pane. The content pane is a sheet a little in from the window's edges, whose rounded top shows at the top of the page and rounded bottom at the end; its toolbar follows you down and sticks to the top of the window. On desktop the content pane's edge looks like glass: a lit rim and a soft, deeper shadow
 - A response's header band has both top corners rounded

@@ -5,6 +5,7 @@
 
 > **구현 중 변경 (2026-11-19)**
 > - Pretendard는 가변 글꼴 판(v1.3.9, 스타일시트 53KB)을 쓴다. 일반 판은 스타일시트만 550KB다.
+> - 기본값을 Pretendard로 바꿨다 (2026-11-19, 사용자 결정). 글꼴을 고른 적 없는 사용자는 Pretendard로 보이고, IBM Plex Sans KR은 후보로 남는다. 아래 본문의 "기본값 IBM Plex Sans KR"과 "기본값 사용자는 지금과 같은 요청만 보낸다"는 이 변경으로 대체된다.
 > - D2Coding은 jsDelivr에 조각난 판이 없어 스타일시트 대신 전역 스타일의 `@font-face`로 선언한다 (굵기당 약 1.5MB, 쓰일 때만 받고 `font-display: swap`).
 
 ## 1. 의도

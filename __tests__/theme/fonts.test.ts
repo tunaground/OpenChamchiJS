@@ -30,7 +30,14 @@ describe("FONTS", () => {
     expect(FONTS[0].key).toBe(DEFAULT_FONT);
   });
 
-  it("keeps the current stack for the default", () => {
+  it("defaults to Pretendard", () => {
+    expect(DEFAULT_FONT).toBe("pretendard");
+    expect(resolveFont(DEFAULT_FONT).stack).toBe(
+      '"Pretendard Variable", Pretendard, system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif'
+    );
+  });
+
+  it("still offers IBM Plex Sans KR, the default before", () => {
     expect(resolveFont("plex").stack).toBe(
       '"IBM Plex Sans KR", system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif'
     );
@@ -46,7 +53,7 @@ describe("resolveFont", () => {
   it.each([undefined, null, 3, "", "comic-sans"])(
     "falls back to the default for %p",
     (key) => {
-      expect(resolveFont(key).key).toBe("plex");
+      expect(resolveFont(key).key).toBe("pretendard");
     }
   );
 
@@ -58,7 +65,7 @@ describe("resolveFont", () => {
 describe("fontVariablesCss", () => {
   it("declares the default on :root and one rule per font", () => {
     const css = fontVariablesCss();
-    expect(css).toContain(":root{--font-sans:" + resolveFont("plex").stack);
+    expect(css).toContain(":root{--font-sans:" + resolveFont("pretendard").stack);
     for (const f of FONTS) {
       expect(css).toContain(`html[data-font="${f.key}"]{--font-sans:${f.stack}`);
     }
@@ -74,6 +81,12 @@ describe("fontBootScript", () => {
     expect(r.written[0]).toContain('data-font-link="noto-serif"');
   });
 
+  it("keeps a saved choice of the old default", () => {
+    const r = run(JSON.stringify({ state: { font: "plex" }, version: 0 }));
+    expect(r.font).toBe("plex");
+    expect(r.written[0]).toContain("family=IBM+Plex+Sans+KR");
+  });
+
   it("writes no stylesheet for system", () => {
     const r = run(JSON.stringify({ state: { font: "system" } }));
     expect(r.font).toBe("system");
@@ -84,21 +97,21 @@ describe("fontBootScript", () => {
     "uses the default with its stylesheet when storage holds %p",
     (stored) => {
       const r = run(stored);
-      expect(r.font).toBe("plex");
+      expect(r.font).toBe("pretendard");
       expect(r.written).toHaveLength(1);
-      expect(r.written[0]).toContain("family=IBM+Plex+Sans+KR");
+      expect(r.written[0]).toContain("pretendardvariable-dynamic-subset");
     }
   );
 
   it("uses the default with its stylesheet when localStorage throws", () => {
     const r = runWithThrowingStorage();
-    expect(r.font).toBe("plex");
-    expect(r.written[0]).toContain("family=IBM+Plex+Sans+KR");
+    expect(r.font).toBe("pretendard");
+    expect(r.written[0]).toContain("pretendardvariable-dynamic-subset");
   });
 
   it("is not tripped by a key that is an Object.prototype member", () => {
     const r = run(JSON.stringify({ state: { font: "constructor" } }));
-    expect(r.font).toBe("plex");
+    expect(r.font).toBe("pretendard");
     expect(r.written).toHaveLength(1);
   });
 });

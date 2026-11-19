@@ -21,7 +21,8 @@ export interface FontOption {
   stylesheet: string | null;
 }
 
-export const DEFAULT_FONT = "plex";
+/** Used until the user picks one. IBM Plex Sans KR ("plex") was the default before */
+export const DEFAULT_FONT = "pretendard";
 
 /** localStorage key of the persisted font store */
 export const FONT_STORAGE_KEY = "font";
@@ -48,10 +49,10 @@ function font(
 }
 
 export const FONTS: readonly FontOption[] = [
-  font("plex", "gothic", "IBM Plex Sans KR", '"IBM Plex Sans KR"',
-    googleFont("IBM+Plex+Sans+KR", "300;400;500;600;700")),
   font("pretendard", "gothic", "Pretendard", '"Pretendard Variable", Pretendard',
     "https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"),
+  font("plex", "gothic", "IBM Plex Sans KR", '"IBM Plex Sans KR"',
+    googleFont("IBM+Plex+Sans+KR", "300;400;500;600;700")),
   font("noto-sans", "gothic", "Noto Sans KR", '"Noto Sans KR"',
     googleFont("Noto+Sans+KR", "300;400;500;600;700")),
   font("noto-serif", "serif", "Noto Serif KR", '"Noto Serif KR"',
