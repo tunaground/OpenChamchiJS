@@ -469,7 +469,14 @@
     "themeSystem": "System",
     "themeLight": "Light",
     "themeDark": "Dark",
-    "themeGrey": "Grey"
+    "themeGrey": "Grey",
+    "font": "Font",
+    "fontDescription": "Choose the font for text and menus. AA and dice/calc results keep their own fonts.",
+    "fontGroupGothic": "Sans-serif",
+    "fontGroupSerif": "Serif",
+    "fontGroupMono": "Monospace",
+    "fontGroupSystem": "System",
+    "fontSystem": "System default"
   },
   "manual": {
     "title": "User Manual",

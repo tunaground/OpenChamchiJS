@@ -469,7 +469,14 @@
     "themeSystem": "システム",
     "themeLight": "ライト",
     "themeDark": "ダーク",
-    "themeGrey": "グレー"
+    "themeGrey": "グレー",
+    "font": "フォント",
+    "fontDescription": "本文とメニューのフォントを選びます。AAとダイス・計算結果は変わりません。",
+    "fontGroupGothic": "ゴシック",
+    "fontGroupSerif": "明朝",
+    "fontGroupMono": "等幅",
+    "fontGroupSystem": "システム",
+    "fontSystem": "システム標準"
   },
   "manual": {
     "title": "ユーザーマニュアル",

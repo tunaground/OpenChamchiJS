@@ -15,6 +15,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { useTranslations } from "next-intl";
 import { useThemeStore, type ThemePreference } from "@/lib/store/theme";
+import { useFontStore } from "@/lib/store/font";
+import { DEFAULT_FONT, FONTS, resolveFont, type FontCategory } from "@/lib/theme/fonts";
 import { PageLayout } from "@/components/layout";
 import { PageContainer } from "@/components/layout/PageContainer";
 import { BoardListSidebar } from "@/components/sidebar/BoardListSidebar";
@@ -221,6 +223,28 @@ const Segmented = styled.div`
   border: 1px solid ${(props) => props.theme.line};
 `;
 
+const FontSelect = styled.select`
+  flex-shrink: 0;
+  max-width: 100%;
+  height: 3.2rem;
+  padding: 0 0.8rem;
+  border: 1px solid ${(props) => props.theme.line};
+  border-radius: 7px;
+  background: ${(props) => props.theme.paneRaised};
+  color: ${(props) => props.theme.textPrimary};
+  font-family: inherit;
+  font-size: 1.3rem;
+  cursor: pointer;
+`;
+
+/** Order of the groups in the font dropdown, with each group's label key */
+const fontGroups: { category: FontCategory; labelKey: string }[] = [
+  { category: "gothic", labelKey: "fontGroupGothic" },
+  { category: "serif", labelKey: "fontGroupSerif" },
+  { category: "mono", labelKey: "fontGroupMono" },
+  { category: "system", labelKey: "fontGroupSystem" },
+];
+
 const SegmentOption = styled.button<{ $active: boolean }>`
   padding: 0.4rem 1rem;
   border: none;
@@ -314,6 +338,8 @@ export function SettingsContent({
   const t = useTranslations("settings");
   const themePreference = useThemeStore((state) => state.mode);
   const setThemePreference = useThemeStore((state) => state.setMode);
+  const font = useFontStore((state) => state.font);
+  const setFont = useFontStore((state) => state.setFont);
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -476,6 +502,27 @@ export function SettingsContent({
                 mounted ? themePreference : "light",
                 setThemePreference
               )}
+            </OptionItem>
+            <OptionItem>
+              <OptionContent>
+                <OptionLabel>{t("font")}</OptionLabel>
+                <OptionDescription>{t("fontDescription")}</OptionDescription>
+              </OptionContent>
+              <FontSelect
+                aria-label={t("font")}
+                value={mounted ? resolveFont(font).key : DEFAULT_FONT}
+                onChange={(event) => setFont(event.target.value)}
+              >
+                {fontGroups.map((group) => (
+                  <optgroup key={group.category} label={t(group.labelKey)}>
+                    {FONTS.filter((option) => option.category === group.category).map((option) => (
+                      <option key={option.key} value={option.key}>
+                        {option.name ?? t("fontSystem")}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </FontSelect>
             </OptionItem>
             <OptionItem>
               <OptionContent>
