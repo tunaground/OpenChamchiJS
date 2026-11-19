@@ -50,7 +50,7 @@ describe("applyFont", () => {
   it("falls back to the default for an unknown key", () => {
     const { doc, dataset, appended } = fakeDocument();
     applyFont("comic-sans", doc);
-    expect(dataset.font).toBe("plex");
-    expect(appended[0].href).toContain("family=IBM+Plex+Sans+KR");
+    expect(dataset.font).toBe("pretendard");
+    expect(appended[0].href).toContain("pretendardvariable-dynamic-subset");
   });
 });

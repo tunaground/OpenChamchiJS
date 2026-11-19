@@ -50,6 +50,7 @@ export default async function RootLayout({
           <link rel="stylesheet" href={resolveFont(DEFAULT_FONT).stylesheet ?? undefined} />
         </noscript>
         {/* The body font's stylesheet is added by the script above, where the browser can't find it early */}
+        <link rel="preconnect" href="https://cdn.jsdelivr.net" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
